@@ -1,0 +1,36 @@
+// Currencies list with symbol, flag, and name for Spendly
+export const CURRENCIES = [
+  { code: 'USD', symbol: '$', name: 'US Dollar', flag: '🇺🇸' },
+  { code: 'EUR', symbol: '€', name: 'Euro', flag: '🇪🇺' },
+  { code: 'GBP', symbol: '£', name: 'British Pound', flag: '🇬🇧' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', flag: '🇨🇦' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', flag: '🇯🇵' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', flag: '🇨🇳' },
+  { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc', flag: '🇨🇭' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar', flag: '🇸🇬' },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', flag: '🇦🇪' },
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', flag: '🇸🇦' },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real', flag: '🇧🇷' },
+  { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso', flag: '🇲🇽' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand', flag: '🇿🇦' },
+  { code: 'KRW', symbol: '₩', name: 'South Korean Won', flag: '🇰🇷' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', flag: '🇳🇿' },
+  { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar', flag: '🇭🇰' },
+  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone', flag: '🇳🇴' },
+  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona', flag: '🇸🇪' },
+  { code: 'DKK', symbol: 'kr', name: 'Danish Krone', flag: '🇩🇰' },
+  { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', flag: '🇵🇱' },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht', flag: '🇹🇭' },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit', flag: '🇲🇾' },
+  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', flag: '🇮🇩' },
+  { code: 'PHP', symbol: '₱', name: 'Philippine Peso', flag: '🇵🇭' },
+  { code: 'VND', symbol: '₫', name: 'Vietnamese Dong', flag: '🇻🇳' },
+  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee', flag: '🇵🇰' },
+  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka', flag: '🇧🇩' },
+  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', flag: '🇳🇬' },
+]
+
+export const getCurrencyByCode = (code) => CURRENCIES.find(c => c.code === code) || CURRENCIES[0]
+export const DEFAULT_CURRENCY = 'USD'

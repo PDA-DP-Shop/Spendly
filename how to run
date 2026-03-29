@@ -1,0 +1,9 @@
+1. Make sure your original npm run dev terminal is running normally.
+
+2. Open a new terminal tab on your Mac and run this exact command:
+bash
+ssh -p 443 -R0:localhost:5173 a.pinggy.io
+
+3. It will instantly spit out a green box with an https://....pinggy.link URL.
+
+4. Type that URL on your phone!

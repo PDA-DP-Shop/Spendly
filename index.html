@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  
+  <!-- PWA meta tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Spendly" />
+  <meta name="application-name" content="Spendly" />
+  <meta name="theme-color" content="#7C3AED" />
+  
+  <!-- SEO meta tags -->
+  <meta name="description" content="Spendly - Your private expense tracker. No accounts. No cloud. Everything stays on your phone." />
+  <meta name="keywords" content="expense tracker, budget, spending, private, offline" />
+  <meta name="author" content="Spendly" />
+  
+  <!-- Open Graph (WhatsApp, Twitter preview) -->
+  <meta property="og:title" content="Spendly - Private Expense Tracker" />
+  <meta property="og:description" content="Track expenses privately. No accounts. Works offline." />
+  <meta property="og:image" content="/og-image.png" />
+  <meta property="og:url" content="https://spendly.pages.dev" />
+  <meta property="og:type" content="website" />
+  
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Spendly" />
+  <meta name="twitter:description" content="Private expense tracker for your phone" />
+  <meta name="twitter:image" content="/og-image.png" />
+  
+  <!-- Apple touch icons -->
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+  
+  <!-- Apple splash screens -->
+  <link rel="apple-touch-startup-image" href="/splash-iphone.png" media="(device-width: 390px)" />
+  <link rel="apple-touch-startup-image" href="/splash-ipad.png" media="(device-width: 768px)" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- Preload fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { 
+      font-family: 'DM Sans', sans-serif; 
+      background-color: #F5F5F5;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    #root { 
+      min-height: 100dvh;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+  </style>
+
+  <title>Spendly - Expense Tracker</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Auto deploy to Cloudflare Pages on every push
+name: Deploy Spendly to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Check for errors
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Check build size
+        run: |
+          echo "Build size:"
+          du -sh dist/
+          echo "Files in dist:"
+          ls -la dist/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: spendly
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

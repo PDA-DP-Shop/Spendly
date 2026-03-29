@@ -1,0 +1,176 @@
+import { useEffect, useState, lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import BottomTabBar from './components/shared/BottomTabBar'
+import AddBottomSheet from './components/shared/AddBottomSheet'
+import DesktopBlockScreen from './screens/DesktopBlockScreen'
+import OnboardingScreen from './screens/OnboardingScreen'
+import LockScreen from './screens/LockScreen'
+import { useSettingsStore } from './store/settingsStore'
+import { useLockStore } from './store/lockStore'
+import { useSessionStore } from './store/sessionStore'
+import { initDatabase } from './services/database'
+import { useExpenseStore } from './store/expenseStore'
+import { useSecurityStore } from './store/securityStore'
+import PWAInstallGuide from './components/pwa/PWAInstallGuide'
+
+const HomeScreen = lazy(() => import('./screens/HomeScreen'))
+const ExpensesScreen = lazy(() => import('./screens/ExpensesScreen'))
+const AddExpenseScreen = lazy(() => import('./screens/AddExpenseScreen'))
+const ReportsScreen = lazy(() => import('./screens/ReportsScreen'))
+const SearchScreen = lazy(() => import('./screens/SearchScreen'))
+const ScansScreen = lazy(() => import('./screens/ScansScreen'))
+const BudgetScreen = lazy(() => import('./screens/BudgetScreen'))
+const SettingsScreen = lazy(() => import('./screens/SettingsScreen'))
+
+
+// Pages that show the bottom tab bar
+const TAB_PATHS = ['/', '/reports', '/search', '/settings', '/expenses', '/budget', '/scans']
+
+function AppWrapper() {
+  const location = useLocation()
+  const showTab = TAB_PATHS.includes(location.pathname)
+  const [showAddSheet, setShowAddSheet] = useState(false)
+
+  return (
+    <>
+      <Suspense fallback={
+        <div className="h-dvh flex items-center justify-center bg-white dark:bg-[#0F0F1A]">
+          <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+        </div>
+      }>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/expenses" element={<ExpensesScreen />} />
+          <Route path="/add" element={<AddExpenseScreen />} />
+          <Route path="/reports" element={<ReportsScreen />} />
+          <Route path="/search" element={<SearchScreen />} />
+          <Route path="/scans" element={<ScansScreen />} />
+          <Route path="/budget" element={<BudgetScreen />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+
+      {showTab && (
+        <>
+          <BottomTabBar onAddPress={() => setShowAddSheet(true)} />
+          <AddBottomSheet show={showAddSheet} onClose={() => setShowAddSheet(false)} />
+        </>
+      )}
+    </>
+  )
+}
+
+export default function App() {
+  const [ready, setReady] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+  const { settings, loadSettings } = useSettingsStore()
+  const { isLocked } = useLockStore()
+  const { loadExpenses } = useExpenseStore()
+  const { isBackgrounded, setBackgrounded } = useSecurityStore()
+  const { clearEncryptionKey } = useSessionStore()
+
+  useEffect(() => {
+    // Block desktop screens
+    const check = () => setIsDesktop(window.innerWidth > 1024)
+    check()
+    window.addEventListener('resize', check)
+
+    // Initialize DB and load settings
+    initDatabase()
+      .then(() => loadSettings())
+      .then(() => useLockStore.getState().loadLockoutState())
+      .then(() => loadExpenses())
+      .then(() => setReady(true))
+
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      const isHidden = document.visibilityState === 'hidden'
+      setBackgrounded(isHidden)
+      if (isHidden) {
+        clearEncryptionKey()
+        navigator.clipboard.writeText('').catch(() => {})
+      }
+    }
+
+    const handleCopy = () => {
+      setTimeout(() => {
+        navigator.clipboard.writeText('').catch(() => {})
+      }, 30000)
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('pagehide', clearEncryptionKey)
+    window.addEventListener('blur', () => {
+      // Small delay to allow for OS-level task switching visuals
+      setTimeout(() => {
+        if (document.hidden || !document.hasFocus()) {
+          clearEncryptionKey()
+          setBackgrounded(true)
+        }
+      }, 1000)
+    })
+    document.addEventListener('copy', handleCopy)
+    
+    // Attack 9 Requirement: Auto-lock after 60s idle
+    const resetIdle = () => useLockStore.getState().resetAutoLockTimer(60)
+    window.addEventListener('mousemove', resetIdle)
+    window.addEventListener('keydown', resetIdle)
+    window.addEventListener('touchstart', resetIdle)
+    window.addEventListener('click', resetIdle)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('pagehide', clearEncryptionKey)
+      document.removeEventListener('copy', handleCopy)
+      window.removeEventListener('mousemove', resetIdle)
+      window.removeEventListener('keydown', resetIdle)
+      window.removeEventListener('touchstart', resetIdle)
+      window.removeEventListener('click', resetIdle)
+    }
+  }, [setBackgrounded, clearEncryptionKey])
+
+  if (!ready) {
+    return (
+      <div className="h-dvh flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-3xl"
+            style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)', boxShadow: '0 6px 24px rgba(124,58,237,0.3)' }}>
+            💸
+          </div>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+            className="w-8 h-8 border-3 border-purple-200 border-t-purple-600 rounded-full" style={{ borderWidth: 3 }} />
+          <p className="text-purple-600 font-medium text-sm">Loading Spendly...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isDesktop) return <DesktopBlockScreen />
+  if (!settings?.onboardingDone) return <OnboardingScreen />
+  if (isBackgrounded || (isLocked && settings?.lockType !== 'none')) {
+    return (
+      <div className="fixed inset-0 z-[999] bg-white dark:bg-[#0F0F1A] flex items-center justify-center">
+        {isLocked && settings?.lockType !== 'none' ? (
+          <LockScreen />
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-20 h-20 bg-purple-600 rounded-3xl flex items-center justify-center text-4xl shadow-2xl">💸</div>
+            <p className="text-purple-900 dark:text-purple-200 font-sora font-bold text-xl">Spendly is Locked</p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative">
+      <AppWrapper />
+      <PWAInstallGuide />
+    </div>
+  )
+}
