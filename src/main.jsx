@@ -1,3 +1,4 @@
+alert('🚀 Spendly DEBUG: Script is running!')
 console.log('🚀 Spendly: Initializing Application...')
 // Spendly app entry point — sets up React + BrowserRouter + dark mode init
 import { StrictMode } from 'react'
@@ -19,7 +20,26 @@ if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-s
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      {/* Basic Error Boundary for Production Debug */}
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>
 )
+
+function ErrorBoundary({ children }) {
+  const [error, setError] = React.useState(null)
+  React.useEffect(() => {
+    const handleError = (e) => {
+      console.error('CRITICAL ERROR:', e)
+      setError(e.message)
+      alert('CRITICAL ERROR: ' + e.message)
+    }
+    window.addEventListener('error', handleError)
+    return () => window.removeEventListener('error', handleError)
+  }, [])
+
+  if (error) return <div style={{color:'red', padding: 20}}><h1>App Crash</h1><p>{error}</p></div>
+  return children
+}
