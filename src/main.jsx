@@ -1,3 +1,4 @@
+console.log('🚀 Spendly: Initializing Application...')
 // Spendly app entry point — sets up React + BrowserRouter + dark mode init
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
