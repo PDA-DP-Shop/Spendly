@@ -126,10 +126,22 @@ export default function AddExpenseScreen() {
       </div>
 
       {/* Giant Native Input */}
-      <div className="text-center mb-5 px-4 mt-6">
-        <div className={`flex justify-center items-center font-sora font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-200 ${amountStr.length > 8 ? 'text-[36px]' : amountStr.length > 6 ? 'text-[46px]' : 'text-[56px]'}`}>
-           <span className={`${type === 'spent' ? 'text-orange-500' : 'text-purple-500'} font-black mr-1 flex-shrink-0`}>{type === 'spent' ? '-' : '+'}</span>
-           <span className={`${amountStr.length > 8 ? 'text-[28px]' : amountStr.length > 6 ? 'text-[32px]' : 'text-[40px]'} text-gray-300 dark:text-gray-600 flex-shrink-0 transition-all`}>{currObj.symbol}</span>
+      <div className="text-center mb-5 px-4 mt-8 flex flex-col items-center">
+        <div className={`flex items-center justify-center font-sora font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ${
+          amountStr.length > 10 ? 'text-[32px]' : 
+          amountStr.length > 8 ? 'text-[40px]' : 
+          amountStr.length > 6 ? 'text-[48px]' : 'text-[58px]'
+        }`}>
+           <span className={`${type === 'spent' ? 'text-orange-500' : 'text-purple-500'} font-black mr-1 flex-shrink-0`}>
+             {type === 'spent' ? '-' : '+'}
+           </span>
+           <span className={`text-gray-300 dark:text-gray-600 flex-shrink-0 transition-all ${
+             amountStr.length > 10 ? 'text-[24px]' : 
+             amountStr.length > 8 ? 'text-[28px]' : 
+             amountStr.length > 6 ? 'text-[32px]' : 'text-[42px]'
+           }`}>
+             {currObj.symbol}
+           </span>
            <input 
              type="number" 
              inputMode="decimal"
@@ -138,8 +150,8 @@ export default function AddExpenseScreen() {
              placeholder="0.00"
              autoFocus
              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-             style={{ width: `${amountStr === '0' || !amountStr ? 4.2 : amountStr.length + 0.5}ch` }}
-             className="bg-transparent outline-none text-left ml-2 placeholder-gray-200 dark:placeholder-gray-700 max-w-[80vw]"
+             style={{ width: `${Math.max(4, amountStr.length || 0) + 1}ch` }}
+             className="bg-transparent outline-none text-center placeholder-gray-200 dark:placeholder-gray-700 max-w-[80vw] transition-all ml-0"
            />
         </div>
         {/* Category tag */}
