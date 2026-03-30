@@ -1,5 +1,5 @@
 // Add expense screen — three modes: Type It In, Scan Product, Scan Bill
-import { useState, useRef } from 'react'
+import { useState, useRef, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronDown, RotateCcw } from 'lucide-react'
