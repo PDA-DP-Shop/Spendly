@@ -1,5 +1,5 @@
 // useAppLock hook — handles lock/unlock, wrong PIN attempts, and auto-lock
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { useLockStore } from '../store/lockStore'
 import { useSessionStore } from '../store/sessionStore'
 import { settingsService } from '../services/database'
