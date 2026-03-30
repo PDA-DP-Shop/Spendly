@@ -41,7 +41,10 @@ export default function AddExpenseScreen() {
 
   useEffect(() => {
     if (editId && expenses.length > 0) {
-      const exp = expenses.find(e => e.id === editId)
+      // IndexedDB uses integer IDs, but URL params are strings
+      const numericId = parseInt(editId)
+      const exp = expenses.find(e => e.id === numericId || e.id === editId)
+      
       if (exp) {
         setType(exp.type)
         setAmountStr(exp.amount.toString())
