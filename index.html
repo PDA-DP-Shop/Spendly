@@ -70,16 +70,20 @@
 </head>
 <body>
   <div id="root">
-    <!-- Premium Solid App Splash Screen -->
+    <!-- Ultra Premium Splash Screen -->
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #F5F5F5; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
       <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-        <img src="/icon-192.png" alt="Spendly" style="width: 120px; height: 120px; border-radius: 26px; animation: elite-pulse 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
+        <!-- Glowing spinning aura -->
+        <div style="position: absolute; width: 130px; height: 130px; border-radius: 35px; background: conic-gradient(from 0deg, #7C3AED, #F97316, #3B82F6, #7C3AED); animation: aura-spin 2s linear infinite; filter: blur(15px); opacity: 0.65;"></div>
+        <!-- Floating Logo -->
+        <img src="/icon-192.png" alt="Spendly" style="position: relative; z-index: 10; width: 120px; height: 120px; border-radius: 26px; animation: logo-float 3s ease-in-out infinite; box-shadow: 0 8px 30px rgba(0,0,0,0.15);" />
       </div>
     </div>
     <style>
-      @keyframes elite-pulse {
-        0%, 100% { transform: scale(0.96); opacity: 0.95; }
-        50% { transform: scale(1.04); opacity: 1; }
+      @keyframes aura-spin { 100% { transform: rotate(360deg); } }
+      @keyframes logo-float {
+        0%, 100% { transform: translateY(0px) scale(0.98); }
+        50% { transform: translateY(-10px) scale(1.04); }
       }
       @media (prefers-color-scheme: dark) {
         #splash-screen { background: #0F0F1A !important; }

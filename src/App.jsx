@@ -137,8 +137,9 @@ export default function App() {
   if (!ready) {
     return (
       <div className="h-dvh flex items-center justify-center bg-[#F5F5F5] dark:bg-[#0F0F1A]">
-        <div className="relative flex items-center justify-center" style={{ animation: 'pulse 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1)' }}>
-          <img src="/icon-192.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[26px]" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+        <div className="relative flex items-center justify-center">
+          <div className="absolute w-[130px] h-[130px] rounded-[35px] opacity-65 blur-[15px] animate-[spin_2s_linear_infinite]" style={{ background: 'conic-gradient(from 0deg, #7C3AED, #F97316, #3B82F6, #7C3AED)' }}></div>
+          <img src="/icon-192.png" alt="Spendly" className="relative z-10 w-[120px] h-[120px] rounded-[26px] drop-shadow-xl" style={{ animation: 'logo-float 3s ease-in-out infinite' }} />
         </div>
       </div>
     )
