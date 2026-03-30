@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Moon, Sun, Monitor, Lock, Bell, Download, Upload, Trash2, Info, X, Wallet, CreditCard, Target, Plane, Trophy, ShieldCheck, Laptop, Globe, Calculator } from 'lucide-react'
+import { ChevronRight, Moon, Sun, Monitor, Lock, Bell, Download, Upload, Trash2, Info, X, Wallet, CreditCard, Target, Plane, Trophy, ShieldCheck, Laptop, Globe, Calculator, Gift, Shield } from 'lucide-react'
 import TopHeader from '../components/shared/TopHeader'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'

@@ -1,5 +1,5 @@
 // Reports screen — spending analytics with charts, filter chips, and stats grid
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
 import SpendingDonutChart from '../components/charts/SpendingDonutChart'

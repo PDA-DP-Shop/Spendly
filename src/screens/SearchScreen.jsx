@@ -58,7 +58,7 @@ export default function SearchScreen() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search expenses..."
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
             className="flex-1 bg-transparent text-[15px] text-gray-900 dark:text-white outline-none placeholder-gray-400"
           />
           {query.length > 0 && (
