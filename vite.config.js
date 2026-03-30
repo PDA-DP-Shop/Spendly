@@ -83,34 +83,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: [
-          'console.log',
-          'console.info',
-          'console.debug'
-        ]
-      }
-    },
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'vendor'
-            if (id.includes('recharts')) return 'charts'
-            if (id.includes('framer-motion')) return 'animation'
-            if (id.includes('dexie')) return 'storage'
-            if (id.includes('@zxing/library')) return 'scanner'
-            if (id.includes('zustand')) return 'state'
-            return 'utils'
-          }
-        }
-      }
-    },
     chunkSizeWarningLimit: 1000
   },
   optimizeDeps: {
