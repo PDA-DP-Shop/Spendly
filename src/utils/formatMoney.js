@@ -8,13 +8,17 @@ export const formatMoney = (amount, currencyCode = 'USD', showSign = false) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
-  const sign = showSign ? (amount < 0 ? '- ' : '+ ') : ''
+  // Always show '-' for negative values; optionally show '+' for positive when showSign=true
+  if (amount < 0) return `-${currency.symbol}${formatted}`
+  const sign = showSign ? '+ ' : ''
   return `${sign}${currency.symbol}${formatted}`
 }
 
 export const formatMoneyCompact = (amount, currencyCode = 'USD') => {
   const currency = getCurrencyByCode(currencyCode)
-  if (amount >= 1000000) return `${currency.symbol}${(amount / 1000000).toFixed(1)}M`
-  if (amount >= 1000) return `${currency.symbol}${(amount / 1000).toFixed(1)}K`
-  return `${currency.symbol}${amount.toFixed(2)}`
+  const abs = Math.abs(amount)
+  const prefix = amount < 0 ? '-' : ''
+  if (abs >= 1000000) return `${prefix}${currency.symbol}${(abs / 1000000).toFixed(1)}M`
+  if (abs >= 1000) return `${prefix}${currency.symbol}${(abs / 1000).toFixed(1)}K`
+  return `${prefix}${currency.symbol}${abs.toFixed(2)}`
 }

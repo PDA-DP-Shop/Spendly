@@ -23,6 +23,14 @@ const ScansScreen = lazy(() => import('./screens/ScansScreen'))
 const BudgetScreen = lazy(() => import('./screens/BudgetScreen'))
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'))
 
+// Phase 2 New Screens
+const WalletsScreen = lazy(() => import('./screens/WalletsScreen'))
+const EMIScreen = lazy(() => import('./screens/EMIScreen'))
+const GoalsScreen = lazy(() => import('./screens/GoalsScreen'))
+const TripsScreen = lazy(() => import('./screens/TripsScreen'))
+const BadgesScreen = lazy(() => import('./screens/BadgesScreen'))
+const FestivalsScreen = lazy(() => import('./screens/FestivalsScreen'))
+
 
 // Pages that show the bottom tab bar
 const TAB_PATHS = ['/', '/reports', '/search', '/settings', '/expenses', '/budget', '/scans']
@@ -48,6 +56,13 @@ function AppWrapper() {
           <Route path="/scans" element={<ScansScreen />} />
           <Route path="/budget" element={<BudgetScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          {/* Phase 2 */}
+          <Route path="/wallets" element={<WalletsScreen />} />
+          <Route path="/emis" element={<EMIScreen />} />
+          <Route path="/goals" element={<GoalsScreen />} />
+          <Route path="/trips" element={<TripsScreen />} />
+          <Route path="/badges" element={<BadgesScreen />} />
+          <Route path="/festivals" element={<FestivalsScreen />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -145,8 +160,8 @@ export default function App() {
     return (
       <div className="h-dvh flex items-center justify-center bg-[#F5F5F5] dark:bg-[#0F0F1A]">
         <div className="relative flex items-center justify-center">
-          <div className="absolute w-[130px] h-[130px] rounded-[35px] opacity-65 blur-[15px] animate-[spin_2s_linear_infinite]" style={{ background: 'conic-gradient(from 0deg, #7C3AED, #F97316, #3B82F6, #7C3AED)' }}></div>
-          <img src="/icon-192.png" alt="Spendly" className="relative z-10 w-[120px] h-[120px] rounded-[26px] drop-shadow-xl" style={{ animation: 'logo-float 3s ease-in-out infinite' }} />
+          <div className="absolute w-[130px] h-[130px] rounded-[35px] opacity-65 blur-[15px] animate-[spin_2s_linear_infinite]" style={{ background: 'conic-gradient(from 0deg, #8BC34A, #00C853, #00BCD4, #2196F3, #8BC34A)' }}></div>
+          <img src="/spendly-logo.png" alt="Spendly" className="relative z-10 w-[120px] h-[120px] rounded-[26px] drop-shadow-xl" style={{ animation: 'logo-float 3s ease-in-out infinite' }} />
         </div>
       </div>
     )
@@ -161,7 +176,7 @@ export default function App() {
           <LockScreen />
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <img src="/icon-192.png" className="w-[100px] h-[100px] rounded-[24px]" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} alt="Spendly" />
+            <img src="/spendly-logo.png" className="w-[100px] h-[100px] rounded-[24px]" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} alt="Spendly" />
             <p className="text-purple-900 dark:text-purple-200 font-sora font-bold text-xl">Spendly is Locked</p>
           </div>
         )}

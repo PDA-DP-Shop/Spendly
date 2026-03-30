@@ -34,3 +34,7 @@ npm-debug.log*
 
 # Testing
 coverage/
+
+# Generated product database (run `npm run build:db` to regenerate)
+public/data/top-50000-products.json.gz
+public/data/_off_products.csv.gz

@@ -25,6 +25,13 @@ export const useAppLock = () => {
   // Verify PIN against saved settings
   const verifyPin = useCallback(async (enteredPin) => {
     const settings = await settingsService.get()
+    
+    // Check Decoy PIN first
+    if (settings?.decoyPin && settings.decoyPin === enteredPin) {
+      useLockStore.getState().unlockDecoy()
+      return true
+    }
+
     if (!settings?.lockSalt || !settings?.lockPinHash) {
       // No PIN set (should not happen if app is locked, but handled for safety)
       unlock()

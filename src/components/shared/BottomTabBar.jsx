@@ -2,20 +2,22 @@
 import { motion } from 'framer-motion'
 import { Home, BarChart2, Plus, Search, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-
-const tabsLeft = [
-  { path: '/', icon: Home, label: 'Home' },
-  { path: '/reports', icon: BarChart2, label: 'Analytics' },
-]
-
-const tabsRight = [
-  { path: '/search', icon: Search, label: 'Search' },
-  { path: '/settings', icon: Settings, label: 'Account' },
-]
+import { useTranslation } from '../../hooks/useTranslation'
 
 export default function BottomTabBar({ onAddPress }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const t = useTranslation()
+
+  const tabsLeft = [
+    { path: '/', icon: Home, label: t.home },
+    { path: '/reports', icon: BarChart2, label: t.reports },
+  ]
+
+  const tabsRight = [
+    { path: '/search', icon: Search, label: t.search },
+    { path: '/settings', icon: Settings, label: t.settings },
+  ]
 
   const TabItem = ({ tab }) => {
     const isActive = location.pathname === tab.path

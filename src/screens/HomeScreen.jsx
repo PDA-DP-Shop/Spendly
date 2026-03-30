@@ -1,7 +1,7 @@
 // Home screen — main dashboard with balance, analytics, and recent transactions
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import BalanceCard from '../components/cards/BalanceCard'
 import SalaryExpenseCards from '../components/cards/SalaryExpenseCards'
@@ -21,9 +21,12 @@ import { groupByMonth } from '../utils/groupByCategory'
 import { format, subMonths } from 'date-fns'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { useSecurityStore } from '../store/securityStore'
+import SpendingScore from '../components/gamification/SpendingScore'
+import { calculateScore } from '../utils/scoreCalculator'
 
 export default function HomeScreen() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { expenses, deleteExpense, restoreExpense, getThisMonth, getRecent, isLoading } = useExpenses()
   const { settings } = useSettingsStore()
   const { overallBudget, loadBudgets } = useBudgetStore()
@@ -38,6 +41,13 @@ export default function HomeScreen() {
 
   useEffect(() => { loadBudgets() }, [])
 
+  // PWA Shortcut Quick Add logic
+  useEffect(() => {
+    if (searchParams.get('action') === 'add') {
+      navigate('/add', { replace: true })
+    }
+  }, [searchParams, navigate])
+
   const thisMonth = getThisMonth()
   const spent = calculateSpent(thisMonth)
   const received = calculateReceived(thisMonth)
@@ -50,6 +60,8 @@ export default function HomeScreen() {
     const month = groupByMonth(expenses)[key] || []
     return calculateSpent(month)
   })
+
+  const scoreData = calculateScore(expenses, overallBudget, spent)
 
   const recentExpenses = getRecent(8).filter(e =>
     selectedCategory === 'all' || e.category === selectedCategory
@@ -148,6 +160,11 @@ export default function HomeScreen() {
           onClose={() => setAlertDismissed(true)}
         />
       )}
+
+      {/* Spending Score */}
+      <div className="px-4 mt-4">
+        <SpendingScore scoreData={scoreData} />
+      </div>
 
       {/* Category chips */}
       <div className="mt-4">

@@ -1,6 +1,7 @@
 // Expense state store using Zustand — loads and caches expenses from IndexedDB
 import { create } from 'zustand'
 import { expenseService } from '../services/database'
+import { useLockStore } from './lockStore'
 
 export const useExpenseStore = create((set, get) => ({
   expenses: [],
@@ -9,6 +10,10 @@ export const useExpenseStore = create((set, get) => ({
 
   // Load all expenses from DB
   loadExpenses: async () => {
+    if (useLockStore.getState().isDecoy) {
+      set({ expenses: [], isLoading: false })
+      return
+    }
     set({ isLoading: true })
     try {
       const expenses = await expenseService.getAll()
@@ -20,6 +25,11 @@ export const useExpenseStore = create((set, get) => ({
 
   // Add a new expense
   addExpense: async (expense) => {
+    if (useLockStore.getState().isDecoy) {
+      const fakeId = Date.now()
+      set(s => ({ expenses: [{ ...expense, id: fakeId }, ...s.expenses] }))
+      return fakeId
+    }
     const id = await expenseService.add(expense)
     const newExpense = { ...expense, id }
     set(s => ({ expenses: [newExpense, ...s.expenses], lastSaved: new Date() }))
@@ -28,10 +38,12 @@ export const useExpenseStore = create((set, get) => ({
 
   // Update existing expense
   updateExpense: async (id, changes) => {
-    await expenseService.update(id, changes)
-    set(s => ({
-      expenses: s.expenses.map(e => e.id === id ? { ...e, ...changes } : e)
-    }))
+    // URL params are strings — Dexie needs the numeric primary key
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    await expenseService.update(numId, changes)
+    // Reload all expenses so in-memory state matches the re-encrypted DB record
+    const expenses = await expenseService.getAll()
+    set({ expenses, lastSaved: new Date() })
   },
 
   // Delete expense (with undo support — returns the deleted expense)

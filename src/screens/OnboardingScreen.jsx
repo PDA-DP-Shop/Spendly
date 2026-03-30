@@ -74,19 +74,19 @@ export default function OnboardingScreen() {
     // Step 0: Welcome
     <motion.div key="0" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
       className="flex flex-col items-center justify-center h-full px-8 text-center"
-      style={{ background: 'linear-gradient(160deg, #7C3AED, #6D28D9)' }}>
-      <img src="/icon-192.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[30px] shadow-2xl mb-8" />
+      style={{ background: 'linear-gradient(160deg, #00C853, #00897B, #0277BD)' }}>
+      <img src="/spendly-logo.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[30px] shadow-2xl mb-8" />
       <h1 className="text-[40px] font-sora font-bold text-white mb-3">Spendly</h1>
       <p className="text-[26px] font-sora font-semibold text-white mb-4">Track your money<br />easily 💸</p>
-      <p className="text-[16px] text-purple-200 mb-8 leading-relaxed">Everything stays private on your phone.<br />No cloud. No account. Ever.</p>
+      <p className="text-[16px] text-green-100 mb-8 leading-relaxed">Everything stays private on your phone.<br />No cloud. No account. Ever.</p>
       
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-10 border border-white/20 max-w-[300px]">
         <p className="text-white text-sm font-medium mb-1">🔒 Your Privacy Promise</p>
-        <p className="text-purple-100 text-[12px] leading-snug">We use AES-256-GCM encryption. Even we can't see your data.</p>
+        <p className="text-green-100 text-[12px] leading-snug">We use AES-256-GCM encryption. Even we can't see your data.</p>
       </div>
 
       <motion.button whileTap={{ scale: 0.95 }} onClick={() => setStep(1)}
-        className="w-full max-w-[260px] py-4 bg-white rounded-[20px] text-purple-700 text-[16px] font-semibold shadow-xl">
+        className="w-full max-w-[260px] py-4 bg-white rounded-[20px] text-green-700 text-[16px] font-semibold shadow-xl">
         Let's Start 🚀
       </motion.button>
     </motion.div>,

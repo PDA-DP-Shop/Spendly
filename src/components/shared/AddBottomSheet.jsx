@@ -1,6 +1,6 @@
 // Bottom sheet for FAB — shows Type, Scan Product, Scan Bill options
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pencil, Package, FileText, X } from 'lucide-react'
+import { Pencil, Package, FileText, X, Mic } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const options = [
@@ -27,6 +27,14 @@ const options = [
     color: '#22C55E',
     bg: '#F0FDF4',
     path: '/add?mode=scan-bill',
+  },
+  {
+    icon: Mic,
+    label: 'Voice Note',
+    desc: 'Just say what you spent',
+    color: '#3B82F6',
+    bg: '#EFF6FF',
+    path: '/add?mode=voice',
   },
 ]
 

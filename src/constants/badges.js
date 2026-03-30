@@ -1,0 +1,200 @@
+// All badge definitions — Features 9 (No-Spend) and 18 (Achievements)
+// condition: function receives (expenses, settings, goals, noSpendDays, badgesEarned) → boolean
+export const BADGES = [
+  // 🌱 Getting Started
+  {
+    id: 'first_expense',
+    emoji: '🌱', title: 'First Step',
+    desc: 'Added your first expense',
+    category: 'Getting Started',
+    color: '#22C55E',
+    check: ({ expenses }) => expenses.length >= 1,
+  },
+  {
+    id: 'first_week',
+    emoji: '📅', title: 'One Week Strong',
+    desc: 'Used Spendly for 7 days in a row',
+    category: 'Getting Started',
+    color: '#22C55E',
+    check: ({ streakDays }) => (streakDays || 0) >= 7,
+  },
+  {
+    id: 'first_budget',
+    emoji: '🎯', title: 'Budget Setter',
+    desc: 'Set your first monthly budget',
+    category: 'Getting Started',
+    color: '#22C55E',
+    check: ({ settings }) => (settings?.monthlyBudget || 0) > 0,
+  },
+  {
+    id: 'first_goal',
+    emoji: '🌟', title: 'Goal Getter',
+    desc: 'Created your first savings goal',
+    category: 'Getting Started',
+    color: '#22C55E',
+    check: ({ goals }) => (goals || []).length >= 1,
+  },
+
+  // 💰 Saving Hero
+  {
+    id: 'under_budget_1',
+    emoji: '💰', title: 'Budget Hero',
+    desc: 'Stayed under budget for 1 month',
+    category: 'Saving Hero',
+    color: '#7C3AED',
+    check: ({ underBudgetMonths }) => (underBudgetMonths || 0) >= 1,
+  },
+  {
+    id: 'under_budget_3',
+    emoji: '🏆', title: 'Thrifty Streak',
+    desc: 'Under budget 3 months in a row',
+    category: 'Saving Hero',
+    color: '#7C3AED',
+    check: ({ underBudgetMonths }) => (underBudgetMonths || 0) >= 3,
+  },
+  {
+    id: 'saved_1000',
+    emoji: '💎', title: 'First Thousand',
+    desc: 'Saved your first ₹1,000',
+    category: 'Saving Hero',
+    color: '#7C3AED',
+    check: ({ totalSaved }) => (totalSaved || 0) >= 1000,
+  },
+  {
+    id: 'saved_10000',
+    emoji: '👑', title: 'Ten K Club',
+    desc: 'Saved ₹10,000 total',
+    category: 'Saving Hero',
+    color: '#7C3AED',
+    check: ({ totalSaved }) => (totalSaved || 0) >= 10000,
+  },
+  {
+    id: 'goal_complete',
+    emoji: '🎉', title: 'Dream Achieved',
+    desc: 'Completed your first savings goal',
+    category: 'Saving Hero',
+    color: '#7C3AED',
+    check: ({ goals }) => (goals || []).some(g => g.isComplete),
+  },
+
+  // 🔥 Streaks
+  {
+    id: 'no_spend_5',
+    emoji: '🥉', title: 'Bronze Saver',
+    desc: '5 no-spend days this month',
+    category: 'Streaks',
+    color: '#CD7F32',
+    check: ({ noSpendDays }) => (noSpendDays || 0) >= 5,
+  },
+  {
+    id: 'no_spend_8',
+    emoji: '🥈', title: 'Silver Saver',
+    desc: '8 no-spend days this month',
+    category: 'Streaks',
+    color: '#C0C0C0',
+    check: ({ noSpendDays }) => (noSpendDays || 0) >= 8,
+  },
+  {
+    id: 'no_spend_10',
+    emoji: '🥇', title: 'Gold Saver',
+    desc: '10 no-spend days this month',
+    category: 'Streaks',
+    color: '#F59E0B',
+    check: ({ noSpendDays }) => (noSpendDays || 0) >= 10,
+  },
+  {
+    id: 'no_spend_15',
+    emoji: '💎', title: 'Diamond Saver',
+    desc: '15 no-spend days this month',
+    category: 'Streaks',
+    color: '#06B6D4',
+    check: ({ noSpendDays }) => (noSpendDays || 0) >= 15,
+  },
+  {
+    id: 'streak_7',
+    emoji: '🔥', title: 'Week Warrior',
+    desc: 'Logged expenses 7 days in a row',
+    category: 'Streaks',
+    color: '#F97316',
+    check: ({ streakDays }) => (streakDays || 0) >= 7,
+  },
+  {
+    id: 'streak_30',
+    emoji: '🌊', title: 'Month Master',
+    desc: 'Logged expenses 30 days in a row',
+    category: 'Streaks',
+    color: '#F97316',
+    check: ({ streakDays }) => (streakDays || 0) >= 30,
+  },
+
+  // 🔍 Explorer
+  {
+    id: 'barcode_scan',
+    emoji: '📷', title: 'Scanner',
+    desc: 'Used barcode scan for the first time',
+    category: 'Explorer',
+    color: '#3B82F6',
+    check: ({ usedFeatures }) => (usedFeatures || []).includes('barcode'),
+  },
+  {
+    id: 'bill_scan',
+    emoji: '🧾', title: 'Bill Buster',
+    desc: 'Used bill scan for the first time',
+    category: 'Explorer',
+    color: '#3B82F6',
+    check: ({ usedFeatures }) => (usedFeatures || []).includes('bill_scan'),
+  },
+  {
+    id: 'voice_add',
+    emoji: '🎤', title: 'Voice Maestro',
+    desc: 'Used voice add for the first time',
+    category: 'Explorer',
+    color: '#3B82F6',
+    check: ({ usedFeatures }) => (usedFeatures || []).includes('voice'),
+  },
+  {
+    id: 'first_trip',
+    emoji: '✈️', title: 'Traveller',
+    desc: 'Created your first trip budget',
+    category: 'Explorer',
+    color: '#3B82F6',
+    check: ({ trips }) => (trips || []).length >= 1,
+  },
+  {
+    id: 'all_budgets',
+    emoji: '📊', title: 'Budget Master',
+    desc: 'Set budgets for all categories',
+    category: 'Explorer',
+    color: '#3B82F6',
+    check: ({ categoryBudgetCount }) => (categoryBudgetCount || 0) >= 5,
+  },
+
+  // 📊 Data Nerd
+  {
+    id: 'expenses_100',
+    emoji: '💯', title: 'Century',
+    desc: 'Added 100 expenses',
+    category: 'Data Nerd',
+    color: '#EC4899',
+    check: ({ expenses }) => expenses.length >= 100,
+  },
+  {
+    id: 'expenses_500',
+    emoji: '🚀', title: 'Power User',
+    desc: 'Added 500 expenses',
+    category: 'Data Nerd',
+    color: '#EC4899',
+    check: ({ expenses }) => expenses.length >= 500,
+  },
+  {
+    id: 'expenses_1000',
+    emoji: '🌌', title: 'Legendary',
+    desc: 'Added 1,000 expenses',
+    category: 'Data Nerd',
+    color: '#EC4899',
+    check: ({ expenses }) => expenses.length >= 1000,
+  },
+]
+
+export const BADGE_IDS = BADGES.map(b => b.id)
+export const getBadgeById = (id) => BADGES.find(b => b.id === id)

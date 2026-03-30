@@ -13,11 +13,22 @@ import { groupByCategory, groupByMonth } from '../utils/groupByCategory'
 import { formatMoney } from '../utils/formatMoney'
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, parseISO, isWithinInterval } from 'date-fns'
 import { format } from 'date-fns'
+import SpendingHeatmap from '../components/heatmap/SpendingHeatmap'
+import YearComparisonChart from '../components/charts/YearComparisonChart'
+import WeekdayChart from '../components/charts/WeekdayChart'
+import PaymentMethodChart from '../components/charts/PaymentMethodChart'
+import { PdfReportTemplate } from '../components/shared/PdfReportTemplate'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { Download, Loader2 } from 'lucide-react'
 
 const FILTERS = ['This Week', 'This Month', '3 Months', 'All Time']
 
 export default function ReportsScreen() {
   const [filter, setFilter] = useState('This Month')
+  const [exporting, setExporting] = useState(false)
+  const reportRef = useRef(null)
+  
   const { expenses } = useExpenses()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
@@ -57,14 +68,57 @@ export default function ReportsScreen() {
     return calculateSpent(monthExps)
   })
 
+  // Full year vs last year (for YearComparisonChart)
+  const currentYearTotals = Array.from({ length: 12 }, (_, i) => {
+    const key = format(new Date(now.getFullYear(), i, 1), 'yyyy-MM')
+    return calculateSpent(expenses.filter(e => e.date?.startsWith(key)))
+  })
+  
+  const prevYearTotals = Array.from({ length: 12 }, (_, i) => {
+    const key = format(new Date(now.getFullYear() - 1, i, 1), 'yyyy-MM')
+    return calculateSpent(expenses.filter(e => e.date?.startsWith(key)))
+  })
+
   // Stats
   const topCategory = grouped[0]
   const biggestPurchase = filtered.filter(e => e.type === 'spent').sort((a, b) => b.amount - a.amount)[0]
   const dailyAvg = filtered.length > 0 ? spent / 30 : 0
 
+  const handleExportPdf = async () => {
+    if (!reportRef.current) return
+    setExporting(true)
+
+    try {
+      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true })
+      const imgData = canvas.toDataURL('image/png')
+      
+      // A4 dimensions: 210 x 297 mm
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(`Spendly_Report_${filter.replace(' ', '_')}.pdf`)
+    } catch (e) {
+      console.error("PDF Export failed:", e)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
-      <TopHeader title="Reports" />
+      <div className="flex items-center justify-between pr-4">
+        <TopHeader title="Reports" />
+        <motion.button whileTap={{ scale: 0.9 }} onClick={handleExportPdf} disabled={exporting}
+          className="w-10 h-10 mt-1 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-sm">
+          {exporting ? (
+            <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
+          ) : (
+            <Download className="w-5 h-5 text-purple-600" />
+          )}
+        </motion.button>
+      </div>
 
       {/* Filter chips */}
       <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
@@ -97,6 +151,8 @@ export default function ReportsScreen() {
       ) : (
         <>
           <SpendingDonutChart groupedData={grouped} currency={currency} />
+          <PaymentMethodChart expenses={filtered} />
+          
           <div className="mt-4">
             <AnalyticsBarChart data={monthlyData} currency={currency} />
           </div>
@@ -105,7 +161,7 @@ export default function ReportsScreen() {
           </div>
 
           {/* Stats grid */}
-          <div className="mx-4 mt-4 mb-2 grid grid-cols-2 gap-3">
+          <div className="mx-4 mt-6 mb-4 grid grid-cols-2 gap-3">
             {[
               { label: '🏆 Top Category', value: topCategory ? topCategory.category : 'None' },
               { label: '💸 Biggest Buy', value: biggestPurchase ? biggestPurchase.shopName : 'None' },
@@ -118,8 +174,32 @@ export default function ReportsScreen() {
               </div>
             ))}
           </div>
+
+          <div className="mx-4 mt-2 flex flex-col gap-4">
+            <SpendingHeatmap expenses={filtered} currency={currency} />
+            <YearComparisonChart currentYearTotals={currentYearTotals} prevYearTotals={prevYearTotals} currency={currency} />
+            <WeekdayChart rawExpenses={filtered} currency={currency} />
+          </div>
         </>
       )}
+
+      {/* Hidden PDF Template */}
+      <PdfReportTemplate 
+        ref={reportRef} 
+        currency={currency} 
+        data={{
+          filterName: filter,
+          spent,
+          received,
+          saved,
+          savingsRate,
+          topCategory: topCategory ? topCategory.category : 'None',
+          biggestPurchase: biggestPurchase ? biggestPurchase.shopName : 'None',
+          dailyAvg,
+          expenses: filtered,
+          grouped
+        }} 
+      />
     </div>
   )
 }

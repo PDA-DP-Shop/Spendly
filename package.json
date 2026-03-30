@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint src --ext js,jsx",
     "deploy": "npm run build",
-    "analyze": "npx vite-bundle-analyzer dist/stats.json"
+    "analyze": "npx vite-bundle-analyzer dist/stats.json",
+    "build:db": "node scripts/build-product-db.mjs",
+    "generate:icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -20,6 +22,8 @@
     "dexie": "^4.4.1",
     "dompurify": "^3.3.3",
     "framer-motion": "^12.38.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -24,7 +24,32 @@ export default function BarcodeScanner({ onProductFound, onClose }) {
 
     // Immediate haptic feedback that the camera caught the barcode
     if (navigator.vibrate) navigator.vibrate(200)
+
+    // UPI QR Code check
+    if (result.text.toLowerCase().startsWith('upi://pay')) {
+      try {
+        const urlParams = new URL(result.text.toLowerCase().replace('upi://pay', 'http://localhost'))
+        const pa = urlParams.searchParams.get('pa')
+        const pn = urlParams.searchParams.get('pn')
+        const am = urlParams.searchParams.get('am')
+        
+        const merchantName = pn ? pn.replace(/%20/g, ' ') : (pa ? pa.split('@')[0] : 'UPI Payment')
+        
+        onProductFound({ 
+          name: merchantName, 
+          brand: '', 
+          categoryTags: [], 
+          rawValue: result.text,
+          scannedAmount: am, // pass back parsed amount
+          paymentMethod: 'UPI' // default to UPI since it's a UPI QR
+        })
+        return
+      } catch (e) {
+        console.error("UPI parse error", e)
+      }
+    }
     
+    // Normal Product Barcode
     const product = await lookupBarcode(result.text)
     if (product) {
       onProductFound({ ...product, rawValue: result.text })
@@ -91,7 +116,7 @@ export default function BarcodeScanner({ onProductFound, onClose }) {
       className="fixed inset-0 z-[100] bg-black flex flex-col">
       <div className="flex items-center justify-between px-4 py-4 safe-top bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 text-white">
         <h2 className="font-sora font-semibold text-[18px] flex items-center gap-2">
-          <Camera className="w-5 h-5" /> Scan Product
+          <Camera className="w-5 h-5" /> Scan Barcode / QR
         </h2>
         <button onClick={onClose} className="p-2 bg-white/10 rounded-full backdrop-blur-md">
           <X className="w-6 h-6" />

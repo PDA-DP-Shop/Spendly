@@ -1,12 +1,13 @@
 // Settings screen — profile, appearance, security, notifications, data, about
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Moon, Sun, Monitor, Lock, Bell, Download, Upload, Trash2, Info, X } from 'lucide-react'
+import { ChevronRight, Moon, Sun, Monitor, Lock, Bell, Download, Upload, Trash2, Info, X, Wallet, CreditCard, Target, Plane, Trophy, ShieldCheck, Laptop, Globe, Calculator } from 'lucide-react'
 import TopHeader from '../components/shared/TopHeader'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
+import GSTCalculator from '../components/forms/GSTCalculator'
 import { useSettingsStore } from '../store/settingsStore'
 import { useSecurityStore } from '../store/securityStore'
 import { useAppLock } from '../hooks/useAppLock'
@@ -14,7 +15,6 @@ import { CURRENCIES } from '../constants/currencies'
 import { exportAllData } from '../services/exportData'
 import { importBackupFile } from '../services/importData'
 import { db, settingsService, secureWipe } from '../services/database'
-import { ShieldCheck } from 'lucide-react'
 
 const EMOJIS = ['😊','😎','🤩','🥳','🐻','🦁','🐼','🦊','🐸','🦋','🌟','💎','🚀','🎯','💪','🔥']
 const THEMES = [{ id: 'light', label: 'Light', Icon: Sun }, { id: 'dark', label: 'Dark', Icon: Moon }, { id: 'auto', label: 'Auto', Icon: Monitor }]
@@ -55,17 +55,62 @@ export default function SettingsScreen() {
   const [showImportInput, setShowImportInput] = useState(false)
   const [importFile, setImportFile] = useState(null)
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
-  const [currencySearch, setCurrencySearch] = useState('')
-  const [lockSetupType, setLockSetupType] = useState(null)
-  const [showLockPicker, setShowLockPicker] = useState(false)
-
+  const EMOJIS = ['😊', '😎', '🤑', '💎', '🚀', '👑', '✌️', '✨']
+  const THEMES = [
+    { id: 'light', label: 'Light', Icon: Sun },
+    { id: 'dark', label: 'Dark', Icon: Moon },
+    { id: 'system', label: 'System', Icon: Laptop }
+  ]
   const LOCK_OPTIONS = [
     { id: 'none', label: 'None', emoji: '🔓' },
-    { id: 'pin4', label: '4 Digit PIN', emoji: '🔢' },
-    { id: 'pin6', label: '6 Digit PIN', emoji: '🔢' },
-    { id: 'pattern', label: 'Pattern', emoji: '⬛' },
+    { id: 'pin4', label: '4-Digit PIN', emoji: '🔢' },
+    { id: 'pin6', label: '6-Digit PIN', emoji: '🔐' },
+    { id: 'pattern', label: 'Pattern', emoji: '🔣' },
     { id: 'biometric', label: 'Biometric', emoji: '👆' },
   ]
+  const LANGUAGE_OPTIONS = [
+    { id: 'en', label: 'English', emoji: '🇺🇸' },
+    { id: 'hi', label: 'हिंदी (Hindi)', emoji: '🇮🇳' },
+    { id: 'gu', label: 'ગુજરાતી (Gujarati)', emoji: '🇮🇳' },
+  ]
+
+  const [showPinSetup, setShowPinSetup] = useState(false)
+  const [showDecoySetup, setShowDecoySetup] = useState(false)
+  const [showPatternSetup, setShowPatternSetup] = useState(false)
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false)
+  const [showGST, setShowGST] = useState(false)
+
+  const handleLanguageSelect = async (lang) => {
+    setShowLanguagePicker(false)
+    await updateSetting('language', lang)
+    window.location.reload() // Reload to apply translations globally easily
+  }
+
+  const handleSetLockType = useCallback(async (type) => {
+    if (type === 'none') {
+      await updateSetting('lockType', 'none')
+    } else if (type === 'pin4' || type === 'pin6') {
+      setShowPinSetup(type)
+    } else if (type === 'pattern') {
+      setShowPatternSetup(true)
+    } else if (type === 'biometric') {
+      if (!window.PublicKeyCredential) {
+        alert('Biometric not supported or allowed on this device.')
+        return
+      }
+      const success = await setupBiometric()
+      if (success) {
+        await updateSetting('lockType', 'biometric')
+      } else {
+        alert('Biometric setup failed')
+      }
+    }
+  }, [updateSetting, setupBiometric])
+
+  const handleDecoySetup = async (pin) => {
+    await updateSetting('decoyPin', pin)
+    setShowDecoySetup(false)
+  }
 
   const handleLockTypeSelect = async (type) => {
     setShowLockPicker(false)
@@ -166,12 +211,24 @@ export default function SettingsScreen() {
 
       {/* App Look */}
       <div className="mx-4 mb-4 bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 shadow-sm">
-        <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-3">🎨 App Look</p>
+        <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-3">🎨 App Look & Feel</p>
+        
+        <div className="bg-gray-50 dark:bg-[#242438] rounded-[16px] mb-4">
+          <SettingRow 
+            icon={Globe} 
+            label="App Language" 
+            value={LANGUAGE_OPTIONS.find(o => o.id === (settings?.language || 'en'))?.label} 
+            onClick={() => setShowLanguagePicker(true)} 
+            color="#3B82F6" 
+            border={false}
+          />
+        </div>
+
         <div className="flex gap-2">
           {THEMES.map(({ id, label, Icon }) => (
             <button key={id} onClick={() => updateSetting('theme', id)}
               className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 text-[13px] font-medium transition-all ${
-                settings?.theme === id ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 text-gray-500'
+                settings?.theme === id ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 dark:border-gray-800 text-gray-500'
               }`}>
               <Icon className="w-5 h-5" />
               {label}
@@ -180,10 +237,25 @@ export default function SettingsScreen() {
         </div>
       </div>
 
+      {/* Quick Links for New Features */}
+      <SectionCard title="🚀 Features">
+        <SettingRow icon={Wallet} label="My Wallets" onClick={() => navigate('/wallets')} color="#22C55E" />
+        <SettingRow icon={CreditCard} label="My EMIs & Loans" onClick={() => navigate('/emis')} color="#F59E0B" />
+        <SettingRow icon={Target} label="Goals & Challenges" onClick={() => navigate('/goals')} color="#EC4899" />
+        <SettingRow icon={Plane} label="Trip Budgets" onClick={() => navigate('/trips')} color="#06B6D4" />
+        <SettingRow icon={Gift} label="Festival Budgets" onClick={() => navigate('/festivals')} color="#EC4899" />
+        <SettingRow icon={Trophy} label="Achievements" onClick={() => navigate('/badges')} color="#F97316" />
+      </SectionCard>
+
       {/* Currency */}
       <SectionCard title="💰 Money">
         <SettingRow icon={ChevronRight} label="Currency" value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} color="#22C55E" />
         <SettingRow icon={ChevronRight} label="Monthly Budget" value={`${currency.symbol}${settings?.monthlyBudget || 2000}`} onClick={() => navigate('/budget')} color="#22C55E" />
+      </SectionCard>
+
+      {/* Tools Section */}
+      <SectionCard title="🔨 Tools">
+        <SettingRow icon={Calculator} label="GST Calculator" onClick={() => setShowGST(true)} color="#3B82F6" />
       </SectionCard>
 
       {/* Security */}
@@ -192,6 +264,7 @@ export default function SettingsScreen() {
         {['pin4', 'pin6', 'pattern'].includes(settings?.lockType) && (
           <SettingRow icon={Lock} label="Change PIN / Pattern" onClick={() => setLockSetupType(settings.lockType)} color="#7C3AED" />
         )}
+        <SettingRow icon={Shield} label="Stealth Mode (Decoy PIN)" value={settings?.decoyPin ? 'Active' : 'Not Set'} onClick={() => setShowDecoySetup(true)} color="#10B981" />
       </SectionCard>
 
       {/* Notifications */}
@@ -363,6 +436,70 @@ export default function SettingsScreen() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLanguagePicker && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-white dark:bg-[#1A1A2E] w-full max-w-md max-h-[80dvh] rounded-t-[30px] sm:rounded-[30px] flex flex-col overflow-hidden pb-safe">
+              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+                <h3 className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Select Language</h3>
+                <button onClick={() => setShowLanguagePicker(false)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="p-4 flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
+                {LANGUAGE_OPTIONS.map(opt => (
+                  <button key={opt.id} onClick={() => handleLanguageSelect(opt.id)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-colors ${settings?.language === opt.id ? 'bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-600' : 'bg-gray-50 border-2 border-transparent dark:bg-[#242438] hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{opt.emoji}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{opt.label}</span>
+                    </div>
+                    {settings?.language === opt.id && <span className="text-purple-600 font-bold">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {showPinSetup && (
+          <PinSetupModal
+            pinLength={showPinSetup === 'pin4' ? 4 : 6}
+            onComplete={async (pin, salt, hash) => {
+              await updateSettings({ lockType: showPinSetup, lockPinHash: hash, lockSalt: salt })
+              setShowPinSetup(false)
+            }}
+            onCancel={() => setShowPinSetup(false)}
+          />
+        )}
+        {showDecoySetup && (
+          <PinSetupModal
+            pinLength={settings?.lockType === 'pin4' ? 4 : 6}
+            title="Set Decoy PIN"
+            onComplete={async (pin) => handleDecoySetup(pin)}
+            onCancel={() => setShowDecoySetup(false)}
+          />
+        )}
+        {showPatternSetup && (
+          <PatternSetupModal
+            onComplete={async (pattern) => {
+              await updateSettings({ lockType: 'pattern', lockPattern: pattern })
+              setShowPatternSetup(false)
+            }}
+            onCancel={() => setShowPatternSetup(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showGST && <GSTCalculator onClose={() => setShowGST(false)} />}
       </AnimatePresence>
 
       {lockSetupType && (

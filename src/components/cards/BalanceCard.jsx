@@ -55,7 +55,7 @@ export default function BalanceCard({ balance, currency = 'USD' }) {
         {hideBalances ? (
           <span className="text-[36px] font-sora font-bold text-white tracking-tight">••••••</span>
         ) : (
-          <span className="text-[36px] font-sora font-bold text-white tracking-tight">
+          <span className={`text-[36px] font-sora font-bold tracking-tight ${balance < 0 ? 'text-red-400' : 'text-white'}`}>
             <AnimatedNumber value={balance} currency={currency} />
           </span>
         )}

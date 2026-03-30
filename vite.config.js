@@ -15,15 +15,29 @@ export default defineConfig({
         'favicon.ico',
         'robots.txt',
         'icon-*.png',
-        'splash.png'
+        'splash.png',
+        'data/top-50000-products.json.gz'
       ],
       manifest: false,
       workbox: {
         globPatterns: [
           '**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'
         ],
-        maximumFileSizeToCacheInBytes: 15000000,
+        maximumFileSizeToCacheInBytes: 8000000,  // 8 MB — covers our ~5 MB product DB
         runtimeCaching: [
+          // ── Local product database ────────────────────────────────────
+          {
+            urlPattern: /\/data\/top-50000-products\.json\.gz$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'product-db-cache',
+              expiration: {
+                maxEntries: 1,
+                maxAgeSeconds: 60 * 60 * 24 * 30  // 30 days
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            }
+          },
           {
             urlPattern: /^https:\/\/world\.openfoodfacts\.org\/.*/i,
             handler: 'CacheFirst',

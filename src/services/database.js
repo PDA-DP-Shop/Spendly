@@ -16,6 +16,32 @@ class SpendlyDB extends Dexie {
       scans: '++id, expenseId, addedAt',
       categories: '++id',
     })
+    // Version 2: add permanent barcode → product cache (no expiry, offline-first)
+    this.version(2).stores({
+      expenses: '++id, type, category, date, addedAt, shopName',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+    })
+    // Version 3: Feature expansion — wallets, EMIs, trips, goals, splits, badges, reports, score
+    this.version(3).stores({
+      expenses: '++id, type, category, date, addedAt, shopName',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+    })
   }
 }
 
@@ -113,7 +139,16 @@ export const expenseService = {
     return await db.expenses.add(encrypted)
   },
   async update(id, changes) {
-    return await db.expenses.update(id, changes)
+    // Must decrypt existing record, merge with changes, re-encrypt, then replace.
+    // Dexie auto-increment id is always a number — coerce to be safe.
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.expenses.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    if (!decrypted) return
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.expenses.put({ ...encrypted, id: numId })
   },
   async remove(id) {
     return await db.expenses.delete(id)
@@ -232,9 +267,203 @@ export const categoryService = {
   }
 }
 
+// Product barcode cache — API results stored permanently in IndexedDB
+// These are NOT encrypted (they're public product names) and never expire.
+export const productCacheService = {
+  async get(barcode) {
+    return await db.productCache.get(barcode) || null
+  },
+  async put(barcode, product) {
+    await db.productCache.put({ barcode, ...product, cachedAt: new Date().toISOString() })
+  },
+}
+
+// ── New Feature Services (all encrypted) ────────────────────────────────────
+
+export const walletService = {
+  async getAll() {
+    const all = await db.wallets.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+  },
+  async add(wallet) {
+    const encrypted = await encryptRecord({ ...wallet, createdAt: new Date().toISOString() })
+    return await db.wallets.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.wallets.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.wallets.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.wallets.delete(numId)
+  },
+}
+
+export const emiService = {
+  async getAll() {
+    const all = await db.emis.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+  },
+  async add(emi) {
+    const encrypted = await encryptRecord({ ...emi, createdAt: new Date().toISOString() })
+    return await db.emis.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.emis.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.emis.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.emis.delete(numId)
+  },
+}
+
+export const tripService = {
+  async getAll() {
+    const all = await db.trips.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+  async add(trip) {
+    const encrypted = await encryptRecord({ ...trip, createdAt: new Date().toISOString() })
+    return await db.trips.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.trips.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.trips.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.trips.delete(numId)
+  },
+}
+
+export const goalService = {
+  async getAll() {
+    const all = await db.goals.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+  async add(goal) {
+    const encrypted = await encryptRecord({ ...goal, createdAt: new Date().toISOString() })
+    return await db.goals.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.goals.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.goals.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.goals.delete(numId)
+  },
+}
+
+export const splitService = {
+  async getAll() {
+    const all = await db.splits.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+  async getUnsettled() {
+    const all = await this.getAll()
+    return all.filter(s => !s.isSettled)
+  },
+  async add(split) {
+    const encrypted = await encryptRecord({ ...split, createdAt: new Date().toISOString() })
+    return await db.splits.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.splits.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes }
+    const encrypted = await encryptRecord(merged)
+    await db.splits.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.splits.delete(numId)
+  },
+}
+
+export const badgeService = {
+  async getAll() {
+    const all = await db.badges.toArray()
+    return all  // badges store { badgeId, earnedAt, isNew } — NOT encrypted (not personal data)
+  },
+  async earn(badgeId) {
+    const existing = await db.badges.where('badgeId').equals(badgeId).first()
+    if (existing) return  // already earned
+    await db.badges.add({ badgeId, earnedAt: new Date().toISOString(), isNew: true })
+  },
+  async markSeen(badgeId) {
+    const existing = await db.badges.where('badgeId').equals(badgeId).first()
+    if (existing) await db.badges.update(existing.id, { isNew: false })
+  },
+  async hasEarned(badgeId) {
+    const existing = await db.badges.where('badgeId').equals(badgeId).first()
+    return !!existing
+  },
+}
+
+export const scoreService = {
+  async getByMonth(month, year) {
+    const all = await db.spendingScore.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.find(s => s && s.month === month && s.year === year) || null
+  },
+  async getHistory(count = 6) {
+    const all = await db.spendingScore.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year
+      return b.month - a.month
+    }).slice(0, count)
+  },
+  async upsert(month, year, score, breakdown, tips) {
+    const all = await db.spendingScore.toArray()
+    const decrypted = await Promise.all(all.map(async r => ({ ...await decryptRecord(r), _id: r.id })))
+    const existing = decrypted.find(s => s && s.month === month && s.year === year)
+    const data = { month, year, score, breakdown, tips, updatedAt: new Date().toISOString() }
+    const encrypted = await encryptRecord(data)
+    if (existing) {
+      await db.spendingScore.put({ ...encrypted, id: existing._id })
+    } else {
+      await db.spendingScore.add(encrypted)
+    }
+  },
+}
+
 // Secure Data Wipe — Zero Knowledge forensic deletion
 export const secureWipe = async () => {
-  const tables = [db.expenses, db.budgets, db.settings, db.scans, db.categories]
+  const tables = [
+    db.expenses, db.budgets, db.settings, db.scans, db.categories, db.productCache,
+    db.wallets, db.emis, db.trips, db.goals, db.splits, db.badges,
+    db.monthlyReports, db.spendingScore,
+  ]
   
   // 1. Forensic Overwrite
   for (const table of tables) {

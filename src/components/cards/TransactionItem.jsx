@@ -91,7 +91,23 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
 
         <div className="flex-1 min-w-0">
           <p className="text-[15px] font-semibold text-gray-900 dark:text-white truncate">{expense.shopName || category.name}</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">{formatDate(expense.date)} · {expense.paymentMethod || 'Cash'}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <p className="text-[12px] text-gray-400">{formatDate(expense.date)}</p>
+            {expense.paymentMethod && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{expense.paymentMethod}</span>
+              </>
+            )}
+            {expense.isSplit && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                <div className="flex items-center gap-0.5 text-purple-500 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide">
+                  1/{expense.splitPeople}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="text-right flex-shrink-0">

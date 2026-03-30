@@ -3,6 +3,7 @@ import { settingsService } from '../services/database'
 
 export const useLockStore = create((set, get) => ({
   isLocked: true,
+  isDecoy: false,
   wrongAttempts: 0,
   lockoutUntil: null,
   autoLockTimer: null,
@@ -20,7 +21,7 @@ export const useLockStore = create((set, get) => ({
 
   // Lock the app
   lock: () => {
-    set({ isLocked: true })
+    set({ isLocked: true, isDecoy: false })
   },
 
   // Unlock with correct credential
@@ -29,7 +30,13 @@ export const useLockStore = create((set, get) => ({
       wrongAttempts: 0, 
       lockoutUntil: null 
     })
-    set({ isLocked: false, wrongAttempts: 0, lockoutUntil: null })
+    set({ isLocked: false, isDecoy: false, wrongAttempts: 0, lockoutUntil: null })
+    get().startAutoLockTimer()
+  },
+
+  // Unlock in Stealth Mode
+  unlockDecoy: () => {
+    set({ isLocked: false, isDecoy: true, wrongAttempts: 0 })
     get().startAutoLockTimer()
   },
 
