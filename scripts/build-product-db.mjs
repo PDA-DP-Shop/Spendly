@@ -177,9 +177,45 @@ async function main() {
   //
   // To save RAM we keep only up to 60k items in Pass 1.
 
-  console.log('🔍 Pass 1 — scanning and ranking …')
+  // ── Pass 1: fixed-capacity min-heap (memory-safe) ────────────────────────
+  // We keep at most (TARGET_COUNT + 1) entries in RAM at any time.
+  // A binary min-heap lets us evict the lowest-scored entry in O(log N).
+  console.log('🔍 Pass 1 — scanning and ranking with bounded heap …')
 
-  const topScores = []   // [{code, score}]
+  // ── Tiny binary min-heap ──────────────────────────────────────────────────
+  const heap = []   // [{code, s}] — min at index 0
+
+  function heapPush(item) {
+    heap.push(item)
+    let i = heap.length - 1
+    while (i > 0) {
+      const parent = (i - 1) >> 1
+      if (heap[parent].s <= heap[i].s) break
+      ;[heap[parent], heap[i]] = [heap[i], heap[parent]]
+      i = parent
+    }
+  }
+
+  function heapPop() {
+    const top = heap[0]
+    const last = heap.pop()
+    if (heap.length > 0) {
+      heap[0] = last
+      let i = 0
+      while (true) {
+        let smallest = i
+        const l = 2 * i + 1, r = 2 * i + 2
+        if (l < heap.length && heap[l].s < heap[smallest].s) smallest = l
+        if (r < heap.length && heap[r].s < heap[smallest].s) smallest = r
+        if (smallest === i) break
+        ;[heap[i], heap[smallest]] = [heap[smallest], heap[i]]
+        i = smallest
+      }
+    }
+    return top
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   let lineNum = 0
   let headers = null
 
@@ -197,78 +233,90 @@ async function main() {
       if (lineNum % CHUNK_LOG === 0) process.stdout.write(`   ${(lineNum / 1e6).toFixed(2)}M rows\r`)
       const row = line.split('\t')
       if (row.length < 5) continue
-      await onRow(row, headers)
+      onRow(row, headers)
     }
     process.stdout.write('\n')
   }
 
-  lineNum = 0
-  const codeCol = () => headers.indexOf('code')
-  const nameCol = () => headers.indexOf('product_name')
+  const codeIdx = () => headers.indexOf('code')
+  const nameIdx = () => headers.indexOf('product_name')
 
+  lineNum = 0
   await streamPass((row, hdrs) => {
-    const code = (row[codeCol()] || '').trim()
-    const name = (row[nameCol()] || '').trim()
+    const code = (row[codeIdx()] || '').trim()
+    const name = (row[nameIdx()] || '').trim()
     if (!code || !name) return
+
     const s = score(row, hdrs)
-    topScores.push({ code, s })
+
+    if (heap.length < TARGET_COUNT) {
+      heapPush({ code, s })
+    } else if (s > heap[0].s) {
+      // Replace the smallest entry with this better one
+      heap[0] = { code, s }
+      // Sift down
+      let i = 0
+      while (true) {
+        let smallest = i
+        const l = 2 * i + 1, r = 2 * i + 2
+        if (l < heap.length && heap[l].s < heap[smallest].s) smallest = l
+        if (r < heap.length && heap[r].s < heap[smallest].s) smallest = r
+        if (smallest === i) break
+        ;[heap[i], heap[smallest]] = [heap[smallest], heap[i]]
+        i = smallest
+      }
+    }
   })
 
   console.log(`   Total rows parsed: ${lineNum.toLocaleString()}`)
 
-  // Sort descending and find the threshold score
-  topScores.sort((a, b) => b.s - a.s)
-  const threshold = topScores.length > TARGET_COUNT
-    ? topScores[TARGET_COUNT - 1].s
-    : 0
-
-  const topCodes = new Set(topScores.slice(0, TARGET_COUNT).map(x => x.code))
+  // The heap now contains the top TARGET_COUNT (barcode, score) pairs.
+  const topCodes = new Set(heap.map(x => x.code))
+  const threshold = heap.length > 0 ? heap[0].s : 0
   console.log(`✅ Threshold score: ${threshold} | Top codes: ${topCodes.size.toLocaleString()}\n`)
 
-  // ── Pass 2: collect product data ──────────────────────────────────────────
-  console.log('📦 Pass 2 — collecting product data …')
-  const products = []
+  // Free the heap from memory before Pass 2
+  heap.length = 0
+
+  // ── Pass 2: stream product records directly to gzipped JSON ──────────────
+  // We write the JSON array incrementally to avoid holding all products in RAM.
+  console.log('📦 Pass 2 — streaming product data to gzip …')
   lineNum = 0
   headers = null
+
+  fs.mkdirSync(OUT_DIR, { recursive: true })
+  const gzStream = zlib.createGzip({ level: 9 })
+  const gzFile   = createWriteStream(OUT_GZ)
+  gzStream.pipe(gzFile)
+
+  let productCount = 0
+  gzStream.write('[')
 
   await streamPass((row, hdrs) => {
     const code = (row[hdrs.indexOf('code')] || '').trim()
     if (!topCodes.has(code)) return
 
-    const name  = clean(row[hdrs.indexOf('product_name')])
-    const brand = clean(row[hdrs.indexOf('brands')])
+    const name    = clean(row[hdrs.indexOf('product_name')])
+    const brand   = clean(row[hdrs.indexOf('brands')])
     const catTags = row[hdrs.indexOf('categories_en')] || row[hdrs.indexOf('categories')] || ''
-    const cat   = mapCategory(catTags)
-
+    const cat     = mapCategory(catTags)
     if (!name) return
 
-    products.push({ barcode: code, name, brand, category: cat })
+    const entry = JSON.stringify({ barcode: code, name, brand, category: cat })
+    gzStream.write(productCount === 0 ? entry : ',' + entry)
+    productCount++
   })
 
-  console.log(`✅ Collected ${products.length.toLocaleString()} products\n`)
+  gzStream.write(']')
+  gzStream.end()
+  await new Promise((res, rej) => gzFile.on('finish', res).on('error', rej))
 
-  // ── Step 3: Write JSON ────────────────────────────────────────────────────
-  console.log('💾 Writing JSON …')
-  // Index by barcode for O(1) lookup — the app will convert to Map on load
-  const json = JSON.stringify(products, null, 0)
-  fs.writeFileSync(OUT_JSON, json, 'utf8')
-  const jsonSize = fs.statSync(OUT_JSON).size
-  console.log(`   Raw JSON: ${(jsonSize / 1e6).toFixed(2)} MB`)
+  console.log(`✅ Collected ${productCount.toLocaleString()} products\n`)
 
-  // ── Step 4: Gzip compress ─────────────────────────────────────────────────
-  console.log('🗜  Compressing …')
-  await pipeline(
-    createReadStream(OUT_JSON),
-    zlib.createGzip({ level: 9 }),
-    createWriteStream(OUT_GZ)
-  )
   const gzSize = fs.statSync(OUT_GZ).size
-  console.log(`   Compressed: ${(gzSize / 1e6).toFixed(2)} MB  (${Math.round((1 - gzSize / jsonSize) * 100)}% reduction)`)
+  console.log(`🗜  Compressed size: ${(gzSize / 1e6).toFixed(2)} MB`)
 
-  // Remove uncompressed JSON
-  fs.unlinkSync(OUT_JSON)
-
-  // ── Step 5: Cleanup temp file ─────────────────────────────────────────────
+  // ── Cleanup temp CSV ──────────────────────────────────────────────────────
   fs.unlinkSync(TMP_CSV)
   console.log('\n🎉 Done!  Output:', OUT_GZ)
   console.log(`   Final size: ${(gzSize / 1e6).toFixed(2)} MB`)
