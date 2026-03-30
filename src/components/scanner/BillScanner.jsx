@@ -10,7 +10,7 @@ export default function BillScanner({ onBillScanned, onClose }) {
   const [loading, setLoading] = useState(false)
   const [stream, setStream] = useState(null)
 
-  const startCamera = async () => {
+  const startCamera = async (isMounted) => {
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         video: { 
@@ -19,22 +19,31 @@ export default function BillScanner({ onBillScanned, onClose }) {
           height: { ideal: 1440 }
         }
       })
+      if (!isMounted) {
+        s.getTracks().forEach(track => track.stop())
+        return
+      }
       setStream(s)
       if (videoRef.current) {
         videoRef.current.srcObject = s
         videoRef.current.play()
       }
     } catch (e) {
-      setError('Camera access denied or unavailable.')
+      if (isMounted) setError('Camera access denied or unavailable.')
     }
   }
 
   useEffect(() => {
+    let isMounted = true
     useSecurityStore.getState().setPauseSecurity(true)
-    startCamera()
+    startCamera(isMounted)
     return () => {
+      isMounted = false
       useSecurityStore.getState().setPauseSecurity(false)
-      if (stream) stream.getTracks().forEach(track => track.stop())
+      setStream(s => {
+        if (s) s.getTracks().forEach(track => track.stop())
+        return null
+      })
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

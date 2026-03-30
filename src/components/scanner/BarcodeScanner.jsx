@@ -44,40 +44,47 @@ export default function BarcodeScanner({ onProductFound, onClose }) {
   )
 
   useEffect(() => {
+    let isMounted = true
     const codeReader = new BrowserMultiFormatReader()
-    let stream = null
+    let activeStream = null
 
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             facingMode: 'environment',
             width: { ideal: 1920 },
             height: { ideal: 1080 }
           }
         })
+        if (!isMounted) {
+          stream.getTracks().forEach(track => track.stop())
+          return
+        }
+        activeStream = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           videoRef.current.play()
           
           codeReader.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
-            if (result) throttledScan(result)
+            if (result && isMounted) throttledScan(result)
           })
         }
       } catch (e) {
-        setError('Camera access denied or unavailable. Please enable permissions.')
+        if (isMounted) setError('Camera access denied or unavailable. Please enable permissions.')
       }
     }
 
     startCamera()
 
     return () => {
+      isMounted = false
       codeReader.reset()
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop())
       }
     }
-  }, [handleScan])
+  }, [handleScan, throttledScan])
 
   return (
     <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
