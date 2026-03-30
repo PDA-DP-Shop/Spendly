@@ -58,10 +58,11 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         whileTap={{ scale: 0.98 }}
         style={{ x }}
         onDragEnd={handleDragEnd}
-        onClick={() => {
-          if (x.get() === 0) onEdit?.(expense)
+        onTap={() => {
+          // Only trigger if we didn't actually drag significantly
+          if (Math.abs(x.get()) < 10) onEdit?.(expense)
         }}
-        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing z-10"
+        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-pointer active:cursor-grabbing z-10"
       >
         {/* Category icon */}
         <div
