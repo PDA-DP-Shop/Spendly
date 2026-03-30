@@ -82,12 +82,32 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
           </p>
         </div>
 
-        {/* Amount */}
-        <div className="text-right flex-shrink-0">
-          <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
-            {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
-          </p>
-          <p className="text-[11px] text-gray-400">{formatTime(expense.date)}</p>
+        {/* Amount & Actions */}
+        <div className="flex items-center gap-3">
+          <div className="text-right flex-shrink-0">
+            <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
+              {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
+            </p>
+            <p className="text-[11px] text-gray-400">{formatTime(expense.date)}</p>
+          </div>
+          
+          {/* Explicit Action Buttons */}
+          <div className="flex gap-1">
+            <motion.button 
+               whileTap={{ scale: 0.9 }}
+               onClick={(e) => { e.stopPropagation(); onEdit?.(expense); }}
+               className="p-2 bg-gray-50 dark:bg-[#242438] rounded-xl text-blue-500 shadow-sm border border-gray-100 dark:border-[#2a2a44]"
+            >
+               <Edit2 className="w-4 h-4" />
+            </motion.button>
+            <motion.button 
+               whileTap={{ scale: 0.9 }}
+               onClick={(e) => { e.stopPropagation(); onDelete?.(expense.id); }}
+               className="p-2 bg-gray-50 dark:bg-[#242438] rounded-xl text-red-500 shadow-sm border border-gray-100 dark:border-[#2a2a44]"
+            >
+               <Trash2 className="w-4 h-4" />
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
