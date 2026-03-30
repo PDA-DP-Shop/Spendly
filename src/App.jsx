@@ -91,6 +91,7 @@ export default function App() {
 
   useEffect(() => {
     const handleVisibility = () => {
+      if (useSecurityStore.getState().pauseSecurity) return // Native dialog exception
       const isHidden = document.visibilityState === 'hidden'
       setBackgrounded(isHidden)
       if (isHidden) {
@@ -106,11 +107,15 @@ export default function App() {
     }
 
     document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('pagehide', clearEncryptionKey)
+    window.addEventListener('pagehide', () => {
+      if (!useSecurityStore.getState().pauseSecurity) clearEncryptionKey()
+    })
+    
     window.addEventListener('blur', () => {
+      if (useSecurityStore.getState().pauseSecurity) return // Native dialog exception
       // Small delay to allow for OS-level task switching visuals
       setTimeout(() => {
-        if (document.hidden || !document.hasFocus()) {
+        if (!useSecurityStore.getState().pauseSecurity && (document.hidden || !document.hasFocus())) {
           clearEncryptionKey()
           setBackgrounded(true)
         }

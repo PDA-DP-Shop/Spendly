@@ -8,6 +8,7 @@ import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
 import { useSettingsStore } from '../store/settingsStore'
+import { useSecurityStore } from '../store/securityStore'
 import { useAppLock } from '../hooks/useAppLock'
 import { CURRENCIES } from '../constants/currencies'
 import { exportAllData } from '../services/exportData'
@@ -227,7 +228,15 @@ export default function SettingsScreen() {
         
         {showImportInput ? (
           <div className="px-4 py-3 flex flex-col gap-3 border-t border-gray-50 dark:border-gray-800">
-            <input type="file" accept=".spendly" onChange={e => setImportFile(e.target.files[0])}
+            <input type="file" accept=".spendly" 
+              onClick={() => {
+                useSecurityStore.getState().setPauseSecurity(true)
+                window.addEventListener('focus', function unpause() {
+                  useSecurityStore.getState().setPauseSecurity(false)
+                  window.removeEventListener('focus', unpause)
+                }, { once: true })
+              }}
+              onChange={e => setImportFile(e.target.files[0])}
               className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
             <div className="flex gap-2">
               <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Backup password..."

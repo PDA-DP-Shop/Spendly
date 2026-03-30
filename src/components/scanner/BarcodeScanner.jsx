@@ -4,12 +4,18 @@ import { X, Camera } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { lookupBarcode } from '../../services/productLookup'
 import { throttle } from '../../utils/security'
+import { useSecurityStore } from '../../store/securityStore'
 
 export default function BarcodeScanner({ onProductFound, onClose }) {
   const videoRef = useRef(null)
   const [error, setError] = useState(null)
   const [scanning, setScanning] = useState(true)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    useSecurityStore.getState().setPauseSecurity(true)
+    return () => useSecurityStore.getState().setPauseSecurity(false)
+  }, [])
 
   const handleScan = useCallback(async (result) => {
     if (!result || !scanning || loading) return

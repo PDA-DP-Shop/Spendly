@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { X, Camera } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Tesseract from 'tesseract.js'
+import { useSecurityStore } from '../../store/securityStore'
 
 export default function BillScanner({ onBillScanned, onClose }) {
   const videoRef = useRef(null)
@@ -29,8 +30,10 @@ export default function BillScanner({ onBillScanned, onClose }) {
   }
 
   useEffect(() => {
+    useSecurityStore.getState().setPauseSecurity(true)
     startCamera()
     return () => {
+      useSecurityStore.getState().setPauseSecurity(false)
       if (stream) stream.getTracks().forEach(track => track.stop())
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
