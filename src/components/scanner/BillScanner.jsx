@@ -103,17 +103,39 @@ export default function BillScanner({ onBillScanned, onClose }) {
          // If we have a date and found a time, try to merge them or just trust the string
       }
 
-      // 3. EXTRACT AMOUNT
-      const normalizedText = rawText.replace(/\n| /g, ' ').toUpperCase()
-      const rawAmounts = normalizedText.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
-      let validAmounts = rawAmounts.map(a => {
-        let clean = a.replace(/[^\d.,]/g, '')
-        let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
-        if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
-        return parseFloat(clean)
-      }).filter(n => !isNaN(n) && n > 0 && n < 20000)
+      // 3. EXTRACT TOTAL AMOUNT (Advanced Keyword-Distance Logic)
+      let detectedAmount = 0
+      const totalKeywords = ['TOTAL', 'GRAND TOTAL', 'AMOUNT DUE', 'NET TOTAL', 'BALANCE', 'DUE']
       
-      const maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
+      // First pass: look for keywords and pick the sum on that line or next line
+      for (let i = 0; i < lines.length; i++) {
+         const line = lines[i].toUpperCase()
+         if (totalKeywords.some(k => line.includes(k))) {
+            // Find the first decimal number in this line or the next
+            const combinedText = line + ' ' + (lines[i+1] || '')
+            const matches = combinedText.match(/\d+[.,]\d{2}(?!\d)/g)
+            if (matches) {
+               let clean = matches[0].replace(/[^\d.,]/g, '')
+               let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
+               if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
+               detectedAmount = parseFloat(clean)
+               if (detectedAmount > 0) break 
+            }
+         }
+      }
+
+      // Second pass: if no keyword match, fall back to smartest max logic
+      if (detectedAmount === 0) {
+         const normalizedText = rawText.replace(/\n| /g, ' ').toUpperCase()
+         const rawAmounts = normalizedText.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
+         let validAmounts = rawAmounts.map(a => {
+           let clean = a.replace(/[^\d.,]/g, '')
+           let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
+           if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
+           return parseFloat(clean)
+         }).filter(n => !isNaN(n) && n > 0 && n < 15000)
+         detectedAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
+      }
 
       // 4. CLEAN NOTES (Filter out junk, keep items)
       const cleanedNotes = lines
@@ -125,7 +147,7 @@ export default function BillScanner({ onBillScanned, onClose }) {
 
       onBillScanned({ 
          name: shopName, 
-         amount: maxAmount, 
+         amount: detectedAmount, 
          date: detectedDate,
          notes: cleanedNotes,
          fullText: rawText 
