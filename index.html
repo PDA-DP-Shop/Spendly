@@ -69,7 +69,21 @@
   <title>Spendly - Expense Tracker</title>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Instant App Splash Screen -->
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #F5F5F5; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
+      <img src="/icon-192.png" alt="Spendly Logo" style="width: 110px; height: 110px; border-radius: 28px; animation: app-pulse 2s infinite ease-in-out; box-shadow: 0 15px 30px -5px rgba(124, 58, 237, 0.4);" />
+    </div>
+    <style>
+      @keyframes app-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 15px 30px -5px rgba(124, 58, 237, 0.4); }
+        50% { transform: scale(1.05); opacity: 0.85; box-shadow: 0 20px 40px -5px rgba(124, 58, 237, 0.5); }
+      }
+      @media (prefers-color-scheme: dark) {
+        #splash-screen { background: #0F0F1A !important; }
+      }
+    </style>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
