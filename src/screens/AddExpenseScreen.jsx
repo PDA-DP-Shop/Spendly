@@ -100,16 +100,6 @@ export default function AddExpenseScreen() {
   const amount = parseFloat(amountStr) || 0
   const maxDate = format(new Date(), "yyyy-MM-dd'T'HH:mm")
 
-  const amountInputRef = useRef(null)
-
-  const handleAmountChange = (val) => {
-    // Only allow numbers and one decimal
-    const clean = val.replace(/[^0-9.]/g, '')
-    // Prevent multiple dots
-    if ((clean.match(/\./g) || []).length > 1) return
-    setAmountStr(clean)
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F5F5] dark:bg-[#0F0F1A]">
       {/* Header */}
@@ -136,20 +126,16 @@ export default function AddExpenseScreen() {
       </div>
 
       {/* Giant Native Input */}
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        onClick={() => amountInputRef.current?.focus()}
-        className="text-center mb-5 px-4 mt-8 flex flex-col items-center cursor-text">
+      <div className="text-center mb-5 px-4 mt-8 flex flex-col items-center">
         <div className={`flex items-center justify-center font-sora font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ${
           amountStr.length > 10 ? 'text-[32px]' : 
           amountStr.length > 8 ? 'text-[40px]' : 
           amountStr.length > 6 ? 'text-[48px]' : 'text-[58px]'
         }`}>
-           <span className={`${type === 'spent' ? 'text-orange-500' : 'text-purple-500'} font-black mr-1 flex-shrink-0 select-none`}>
+           <span className={`${type === 'spent' ? 'text-orange-500' : 'text-purple-500'} font-black mr-1 flex-shrink-0`}>
              {type === 'spent' ? '-' : '+'}
            </span>
-           <span className={`text-gray-300 dark:text-gray-600 flex-shrink-0 transition-all select-none ${
+           <span className={`text-gray-300 dark:text-gray-600 flex-shrink-0 transition-all ${
              amountStr.length > 10 ? 'text-[24px]' : 
              amountStr.length > 8 ? 'text-[28px]' : 
              amountStr.length > 6 ? 'text-[32px]' : 'text-[42px]'
@@ -157,16 +143,15 @@ export default function AddExpenseScreen() {
              {currObj.symbol}
            </span>
            <input 
-             ref={amountInputRef}
-             type="text" 
+             type="number" 
              inputMode="decimal"
              value={amountStr === '0' ? '' : amountStr}
-             onChange={e => handleAmountChange(e.target.value)}
+             onChange={e => setAmountStr(e.target.value)}
              placeholder="0.00"
              autoFocus
              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
              style={{ width: `${Math.max(4, amountStr.length || 0) + 1}ch` }}
-             className="bg-transparent outline-none text-center placeholder-gray-200 dark:placeholder-gray-700 max-w-[80vw] transition-all ml-0 caret-purple-500"
+             className="bg-transparent outline-none text-center placeholder-gray-200 dark:placeholder-gray-700 max-w-[80vw] transition-all ml-0"
            />
         </div>
         {/* Category tag */}
@@ -177,7 +162,7 @@ export default function AddExpenseScreen() {
           <span className="text-[16px] font-bold" style={{ color: selectedCat.color }}>{selectedCat.name}</span>
           <ChevronDown className="w-5 h-5 ml-1" style={{ color: selectedCat.color }} />
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* Category grid (expandable) */}
       <AnimatePresence>
