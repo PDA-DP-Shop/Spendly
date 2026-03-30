@@ -3,4 +3,4 @@ Allow: /
 Disallow: /src/
 Disallow: /node_modules/
 
-Sitemap: https://spendly.pages.dev/sitemap.xml
+Sitemap: https://spendly-24hrs.pages.dev/sitemap.xml
