@@ -2,7 +2,7 @@
 import { useState, useRef, lazy, Suspense, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronDown, RotateCcw, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronDown, RotateCcw, Calendar, Receipt, ScanBarcode } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -174,16 +174,16 @@ export default function AddExpenseScreen() {
 
       {/* Simple Inputs */}
       <div className="flex flex-col gap-3 mx-4 mb-4">
-        <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] shadow-sm p-1 flex flex-col">
+        <div className="bg-white dark:bg-[#1A1A2E] rounded-[24px] shadow-sm p-1 flex flex-col border border-transparent focus-within:border-purple-400/30 focus-within:ring-4 focus-within:ring-purple-500/5 transition-all duration-300">
           <input
             value={shopName}
             onChange={e => handleShopChange(e.target.value)}
             placeholder="Name of shop or person..."
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            className="w-full px-4 py-4 bg-transparent text-[16px] font-medium text-gray-900 dark:text-white placeholder-gray-400 border-b border-gray-100 dark:border-[#242438] outline-none"
+            className="w-full px-5 py-4 bg-transparent text-[17px] font-semibold text-gray-900 dark:text-white placeholder-gray-400 border-b border-gray-100 dark:border-[#242438] outline-none"
           />
-          <div className="flex items-center border-b border-gray-100 dark:border-[#242438] px-4 relative group hover:bg-gray-50 dark:hover:bg-[#1f1f33] transition-colors cursor-pointer">
-            <Calendar className="w-5 h-5 text-gray-400 mr-3" />
+          <div className="flex items-center border-b border-gray-100 dark:border-[#242438] px-5 relative group hover:bg-gray-50 dark:hover:bg-[#1f1f33] transition-colors cursor-pointer">
+            <Calendar className="w-5 h-5 text-gray-400 mr-3 group-hover:text-purple-500 transition-colors" />
             <input
               type="datetime-local"
               value={dateStr}
@@ -199,18 +199,24 @@ export default function AddExpenseScreen() {
             placeholder="Add an optional note or receipt details..."
             rows={3}
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            className="w-full px-4 py-4 bg-transparent text-[15px] text-gray-600 dark:text-gray-300 placeholder-gray-400 outline-none resize-none"
+            className="w-full px-5 py-4 bg-transparent text-[15px] text-gray-600 dark:text-gray-300 placeholder-gray-400 outline-none resize-none"
           />
         </div>
         
         {/* Quick Rescan Buttons */}
-        <div className="flex gap-2">
-          <button onClick={() => navigate('/add?mode=scan-bill')} className="flex-1 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-semibold text-sm rounded-xl">
-             📷 Scan Receipt Again
-          </button>
-          <button onClick={() => navigate('/add?mode=scan-product')} className="flex-1 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-semibold text-sm rounded-xl">
-             🔍 Scan Barcode
-          </button>
+        <div className="flex gap-3 mt-1">
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/add?mode=scan-bill')} 
+            className="flex-1 py-3.5 bg-white dark:bg-[#1A1A2E] border border-gray-100 dark:border-[#242438] text-gray-700 dark:text-gray-300 font-bold text-[13px] rounded-2xl flex items-center justify-center gap-2 shadow-sm">
+             <Receipt className="w-4 h-4 text-purple-500" /> Rescan Bill
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/add?mode=scan-product')} 
+            className="flex-1 py-3.5 bg-white dark:bg-[#1A1A2E] border border-gray-100 dark:border-[#242438] text-gray-700 dark:text-gray-300 font-bold text-[13px] rounded-2xl flex items-center justify-center gap-2 shadow-sm">
+             <ScanBarcode className="w-4 h-4 text-purple-500" /> Scan Barcode
+          </motion.button>
         </div>
       </div>
 
