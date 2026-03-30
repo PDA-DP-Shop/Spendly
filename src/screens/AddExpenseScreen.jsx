@@ -40,7 +40,7 @@ export default function AddExpenseScreen() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    if (editId) {
+    if (editId && expenses.length > 0) {
       const exp = expenses.find(e => e.id === editId)
       if (exp) {
         setType(exp.type)
@@ -51,7 +51,7 @@ export default function AddExpenseScreen() {
         setDateStr(format(new Date(exp.date), "yyyy-MM-dd'T'HH:mm"))
       }
     }
-  }, [editId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editId, expenses])
 
   const currObj = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0]
 
