@@ -150,9 +150,15 @@ export default function SettingsScreen() {
               </button>
             ))}
           </div>
-          <div className="text-center">
-            <p className="text-[20px] font-sora font-bold text-gray-900 dark:text-white">{settings?.name || 'Friend'}</p>
-            <p className="text-[13px] text-gray-400">{currency.flag} {currency.name}</p>
+          <div className="text-center w-full px-4">
+            <input 
+              value={settings?.name || ''} 
+              onChange={e => updateSetting('name', e.target.value)}
+              placeholder="What's your name?"
+              className="text-[20px] font-sora font-bold text-gray-900 dark:text-white text-center bg-transparent outline-none w-full placeholder:text-gray-300 dark:placeholder:text-gray-600 truncate"
+              spellCheck="false"
+            />
+            <p className="text-[13px] text-gray-400 mt-1">{currency.flag} {currency.name}</p>
           </div>
         </div>
       </div>
