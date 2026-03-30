@@ -69,29 +69,7 @@
   <title>Spendly - Expense Tracker</title>
 </head>
 <body>
-  <div id="root">
-    <!-- Visual fallback while JS is loading -->
-    <div style="display: flex; height: 100dvh; width: 100vw; align-items: center; justify-content: center; background: #F5F5F5; font-family: sans-serif; color: #7C3AED;">
-      <div style="text-align: center;">
-        <div style="width: 40px; height: 40px; border: 4px solid #7C3AED; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-        <p style="font-weight: 600;">Loading Spendly...</p>
-      </div>
-    </div>
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-  </div>
-
-  <script>
-    // Emergency cache buster: Unregister stuck service workers on old deployments
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        for(let reg of regs) {
-          // If the registration is older than our fix, unregister it
-          // Or just unregister ALL to be safe for this debug phase
-          reg.unregister();
-        }
-      }).catch(err => console.log('SW clear error:', err));
-    }
-  </script>
+  <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
