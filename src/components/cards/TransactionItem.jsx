@@ -15,15 +15,18 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
 
   const [isOpen, setIsOpen] = useState(false)
   
+  // Dynamic transforms for background buttons
+  const rightRevealScale = useTransform(x, [0, 100], [0, 1])
+  const leftRevealScale = useTransform(x, [0, -100], [0, 1])
+  const rightRevealOpacity = useTransform(x, [0, 40], [0, 1])
+  const leftRevealOpacity = useTransform(x, [0, -40], [0, 1])
+
   const handleDragEnd = (_, info) => {
     const offset = info.offset.x
-    // Swipe Right to reveal
     if (offset > 40) {
       animate(x, 140)
       setIsOpen(true)
-    } 
-    // Swipe Left to close or delete if already open?
-    else if (offset < -40) {
+    } else if (offset < -40) {
       if (isOpen) {
         animate(x, 0)
         setIsOpen(false)
@@ -42,44 +45,44 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
   }
 
   return (
-    <motion.div className="relative mx-4 mb-3 overflow-hidden rounded-2xl group">
+    <motion.div className="relative mx-4 mb-3 overflow-hidden rounded-2xl">
       {/* Background Actions (Behind card) */}
-      <div className="absolute inset-0 flex items-center justify-between px-2 bg-gray-100 dark:bg-[#1A1A2E] rounded-2xl pointer-events-none">
+      <div className="absolute inset-0 flex items-center justify-between px-2 bg-gray-100 dark:bg-[#1A1A2E] rounded-2xl">
         {/* Left Side (Revealed when sliding right) */}
-        <div className="flex gap-2">
+        <motion.div style={{ scale: rightRevealScale, opacity: rightRevealOpacity }} className="flex gap-2">
           <motion.button 
-            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className={`flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() > 20 ? 'scale-100' : 'scale-0'}`}
+            className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg border border-white/20"
           >
             <Edit2 className="w-5 h-5" />
           </motion.button>
           <motion.button 
-            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className={`flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() > 20 ? 'scale-100' : 'scale-0'}`}
+            className="flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg border border-white/20"
           >
             <Trash2 className="w-5 h-5" />
           </motion.button>
-        </div>
+        </motion.div>
 
         {/* Right Side (Revealed when sliding left) */}
-        <div className="flex gap-2">
+        <motion.div style={{ scale: leftRevealScale, opacity: leftRevealOpacity }} className="flex gap-2">
           <motion.button 
-            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className={`flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() < -20 ? 'scale-100' : 'scale-0'}`}
+            className="flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg border border-white/20"
           >
             <Trash2 className="w-5 h-5" />
           </motion.button>
           <motion.button 
-            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className={`flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() < -20 ? 'scale-100' : 'scale-0'}`}
+            className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg border border-white/20"
           >
             <Edit2 className="w-5 h-5" />
           </motion.button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Main card */}
