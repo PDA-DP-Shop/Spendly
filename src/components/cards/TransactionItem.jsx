@@ -13,101 +13,103 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
   const isSpent = expense.type === 'spent'
   const x = useMotionValue(0)
 
-  // Show red bg on swipe left, blue on swipe right
-  const deleteOpacity = useTransform(x, [-100, -20], [1, 0])
-  const editOpacity = useTransform(x, [20, 100], [0, 1])
-
+  const [isOpen, setIsOpen] = useState(false)
+  
   const handleDragEnd = (_, info) => {
-    if (info.offset.x < -40) {
-      // Delete
-      animate(x, -120, { onComplete: () => onDelete?.(expense.id) })
-    } else if (info.offset.x > 40) {
-      // Edit
-      onEdit?.(expense)
-      animate(x, 0)
+    const offset = info.offset.x
+    // Swipe Right to reveal
+    if (offset > 40) {
+      animate(x, 140)
+      setIsOpen(true)
+    } 
+    // Swipe Left to close or delete if already open?
+    else if (offset < -40) {
+      if (isOpen) {
+        animate(x, 0)
+        setIsOpen(false)
+      } else {
+        animate(x, -140)
+        setIsOpen(true)
+      }
     } else {
-      animate(x, 0)
+      animate(x, (isOpen ? (x.get() > 0 ? 140 : -140) : 0))
     }
   }
 
+  const closeActions = () => {
+    animate(x, 0)
+    setIsOpen(false)
+  }
+
   return (
-    <motion.div
-      className="relative mx-4 mb-3 overflow-hidden rounded-2xl"
-    >
-      {/* Red delete bg */}
-      <motion.div
-        style={{ opacity: deleteOpacity }}
-        className="absolute inset-0 bg-red-500 rounded-2xl flex items-center justify-end pr-5"
-      >
-        <Trash2 className="w-5 h-5 text-white" />
-      </motion.div>
-      
-      {/* Blue edit bg */}
-      <motion.div
-        style={{ opacity: editOpacity }}
-        className="absolute inset-0 bg-blue-500 rounded-2xl flex items-center justify-start pl-5 transition-colors"
-      >
-        <Edit2 className="w-5 h-5 text-white" />
-      </motion.div>
+    <motion.div className="relative mx-4 mb-3 overflow-hidden rounded-2xl group">
+      {/* Background Actions (Behind card) */}
+      <div className="absolute inset-0 flex items-center justify-between px-2 bg-gray-100 dark:bg-[#1A1A2E] rounded-2xl pointer-events-none">
+        {/* Left Side (Revealed when sliding right) */}
+        <div className="flex gap-2">
+          <motion.button 
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
+            className={`flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() > 20 ? 'scale-100' : 'scale-0'}`}
+          >
+            <Edit2 className="w-5 h-5" />
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
+            className={`flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() > 20 ? 'scale-100' : 'scale-0'}`}
+          >
+            <Trash2 className="w-5 h-5" />
+          </motion.button>
+        </div>
+
+        {/* Right Side (Revealed when sliding left) */}
+        <div className="flex gap-2">
+          <motion.button 
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
+            className={`flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() < -20 ? 'scale-100' : 'scale-0'}`}
+          >
+            <Trash2 className="w-5 h-5" />
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
+            className={`flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg pointer-events-auto transition-transform ${x.get() < -20 ? 'scale-100' : 'scale-0'}`}
+          >
+            <Edit2 className="w-5 h-5" />
+          </motion.button>
+        </div>
+      </div>
 
       {/* Main card */}
       <motion.div
         drag="x"
-        dragConstraints={{ left: -120, right: 120 }}
+        dragConstraints={{ left: -140, right: 140 }}
         dragElastic={0.1}
         whileTap={{ scale: 0.98 }}
         style={{ x }}
         onDragEnd={handleDragEnd}
         onTap={() => {
-          // Only trigger if we didn't actually drag significantly
-          if (Math.abs(x.get()) < 10) onEdit?.(expense)
+          if (isOpen) closeActions()
+          else if (Math.abs(x.get()) < 10) onEdit?.(expense)
         }}
-        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-pointer active:cursor-grabbing z-10"
+        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing z-10 border border-gray-100/50 dark:border-white/5"
       >
-        {/* Category icon */}
-        <div
-          className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0"
-          style={{ backgroundColor: category.bgColor }}
-        >
+        <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0" style={{ backgroundColor: category.bgColor }}>
           {category.emoji}
         </div>
 
-        {/* Details */}
         <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-semibold text-gray-900 dark:text-white truncate">
-            {expense.shopName || category.name}
-          </p>
-          <p className="text-[12px] text-gray-400 mt-0.5">
-            {formatDate(expense.date)} · {expense.paymentMethod || 'Cash'}
-          </p>
+          <p className="text-[15px] font-semibold text-gray-900 dark:text-white truncate">{expense.shopName || category.name}</p>
+          <p className="text-[12px] text-gray-400 mt-0.5">{formatDate(expense.date)} · {expense.paymentMethod || 'Cash'}</p>
         </div>
 
-        {/* Amount & Actions */}
-        <div className="flex items-center gap-3">
-          <div className="text-right flex-shrink-0">
-            <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
-              {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
-            </p>
-            <p className="text-[11px] text-gray-400">{formatTime(expense.date)}</p>
-          </div>
-          
-          {/* Explicit Action Buttons */}
-          <div className="flex gap-1">
-            <motion.button 
-               whileTap={{ scale: 0.9 }}
-               onClick={(e) => { e.stopPropagation(); onEdit?.(expense); }}
-               className="p-2 bg-gray-50 dark:bg-[#242438] rounded-xl text-blue-500 shadow-sm border border-gray-100 dark:border-[#2a2a44]"
-            >
-               <Edit2 className="w-4 h-4" />
-            </motion.button>
-            <motion.button 
-               whileTap={{ scale: 0.9 }}
-               onClick={(e) => { e.stopPropagation(); onDelete?.(expense.id); }}
-               className="p-2 bg-gray-50 dark:bg-[#242438] rounded-xl text-red-500 shadow-sm border border-gray-100 dark:border-[#2a2a44]"
-            >
-               <Trash2 className="w-4 h-4" />
-            </motion.button>
-          </div>
+        <div className="text-right flex-shrink-0">
+          <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
+            {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
+          </p>
+          <p className="text-[11px] text-gray-400">{formatTime(expense.date)}</p>
         </div>
       </motion.div>
     </motion.div>
