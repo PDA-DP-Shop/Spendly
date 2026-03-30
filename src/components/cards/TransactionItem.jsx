@@ -18,10 +18,10 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
   const editOpacity = useTransform(x, [20, 100], [0, 1])
 
   const handleDragEnd = (_, info) => {
-    if (info.offset.x < -60) {
+    if (info.offset.x < -40) {
       // Delete
       animate(x, -120, { onComplete: () => onDelete?.(expense.id) })
-    } else if (info.offset.x > 60) {
+    } else if (info.offset.x > 40) {
       // Edit
       onEdit?.(expense)
       animate(x, 0)
@@ -41,11 +41,11 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
       >
         <Trash2 className="w-5 h-5 text-white" />
       </motion.div>
-
+      
       {/* Blue edit bg */}
       <motion.div
         style={{ opacity: editOpacity }}
-        className="absolute inset-0 bg-blue-500 rounded-2xl flex items-center justify-start pl-5"
+        className="absolute inset-0 bg-blue-500 rounded-2xl flex items-center justify-start pl-5 transition-colors"
       >
         <Edit2 className="w-5 h-5 text-white" />
       </motion.div>
@@ -55,10 +55,13 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         drag="x"
         dragConstraints={{ left: -120, right: 120 }}
         dragElastic={0.1}
+        whileTap={{ scale: 0.98 }}
         style={{ x }}
         onDragEnd={handleDragEnd}
-        onClick={() => onEdit?.(expense)}
-        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing"
+        onClick={() => {
+          if (x.get() === 0) onEdit?.(expense)
+        }}
+        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing z-10"
       >
         {/* Category icon */}
         <div
