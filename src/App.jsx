@@ -65,11 +65,13 @@ function AppWrapper() {
 export default function App() {
   const [ready, setReady] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
-  const { settings, loadSettings } = useSettingsStore()
-  const { isLocked } = useLockStore()
-  const { loadExpenses } = useExpenseStore()
-  const { isBackgrounded, setBackgrounded } = useSecurityStore()
-  const { clearEncryptionKey } = useSessionStore()
+  const settings = useSettingsStore(state => state.settings)
+  const loadSettings = useSettingsStore(state => state.loadSettings)
+  const isLocked = useLockStore(state => state.isLocked)
+  const loadExpenses = useExpenseStore(state => state.loadExpenses)
+  const isBackgrounded = useSecurityStore(state => state.isBackgrounded)
+  const setBackgrounded = useSecurityStore(state => state.setBackgrounded)
+  const clearEncryptionKey = useSessionStore(state => state.clearEncryptionKey)
 
   useEffect(() => {
     // Block desktop screens

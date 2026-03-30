@@ -25,7 +25,7 @@ export default function BottomTabBar({ onAddPress }) {
       <button 
         key={tab.path} 
         onClick={() => navigate(tab.path)}
-        className="flex flex-col items-center justify-center w-16 h-full active:scale-95 transition-transform pointer-events-auto"
+        className="flex flex-col items-center justify-center w-16 h-full active:scale-95 transition-transform"
       >
         <Icon 
           className={`w-[24px] h-[24px] mb-1.5 transition-colors duration-200 ${isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} 
@@ -39,7 +39,7 @@ export default function BottomTabBar({ onAddPress }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none w-full" style={{ filter: 'drop-shadow(0px -4px 20px rgba(0,0,0,0.06))' }}>
+    <div className="fixed bottom-0 left-0 right-0 z-50 w-full" style={{ filter: 'drop-shadow(0px -4px 20px rgba(0,0,0,0.06))' }}>
       
       {/* Background with perfect semi-circle cutout */}
       <div 
@@ -53,7 +53,7 @@ export default function BottomTabBar({ onAddPress }) {
 
       {/* Content wrapper */}
       <div 
-        className="relative flex items-center justify-between w-full h-[75px] px-2 pointer-events-none"
+        className="relative flex items-center justify-between w-full h-[75px] px-2"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex-1 flex justify-around items-center h-full pt-1">
@@ -61,7 +61,7 @@ export default function BottomTabBar({ onAddPress }) {
         </div>
 
         {/* Center FAB positioned exactly in the cutout */}
-        <div className="relative flex justify-center items-start w-[80px] h-full pointer-events-auto">
+        <div className="relative flex justify-center items-start w-[80px] h-full">
           <motion.button 
             whileTap={{ scale: 0.9 }} 
             onClick={onAddPress}
