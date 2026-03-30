@@ -64,6 +64,14 @@ export default function AddExpenseScreen() {
   const handleSave = async () => {
     const amount = parseFloat(amountStr)
     if (!amount || amount <= 0) return
+    
+    // Block future dates
+    const selectedDate = new Date(dateStr)
+    if (selectedDate > new Date()) {
+       alert("You cannot add an expense in the future!")
+       return
+    }
+
     setSaving(true)
     const expense = {
       type,
@@ -72,7 +80,7 @@ export default function AddExpenseScreen() {
       category,
       shopName: shopName || getCategoryById(category).name,
       note,
-      date: new Date(dateStr || new Date()).toISOString(),
+      date: selectedDate.toISOString(),
       isRepeating: false,
       repeatEvery: null,
       tags: [],
@@ -90,6 +98,7 @@ export default function AddExpenseScreen() {
 
   const selectedCat = getCategoryById(category)
   const amount = parseFloat(amountStr) || 0
+  const maxDate = format(new Date(), "yyyy-MM-dd'T'HH:mm")
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F5F5] dark:bg-[#0F0F1A]">
@@ -178,6 +187,7 @@ export default function AddExpenseScreen() {
             <input
               type="datetime-local"
               value={dateStr}
+              max={maxDate}
               onChange={e => setDateStr(e.target.value)}
               className="flex-1 py-4 bg-transparent text-[15px] font-medium text-gray-700 dark:text-gray-300 outline-none w-full styling-date-input cursor-pointer"
               style={{ colorScheme: 'dark light' }}
