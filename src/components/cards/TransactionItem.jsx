@@ -9,17 +9,16 @@ import { useSecurityStore } from '../../store/securityStore'
 
 export default function TransactionItem({ expense, currency = 'USD', onDelete, onEdit, index = 0 }) {
   const { hideBalances } = useSecurityStore()
-  const category = getCategoryById(expense.category)
+  const category = getCategoryById(expense.category) || CATEGORIES[0]
   const isSpent = expense.type === 'spent'
   const x = useMotionValue(0)
-
   const [isOpen, setIsOpen] = useState(false)
   
   // Dynamic transforms for background buttons
-  const rightRevealScale = useTransform(x, [0, 100], [0, 1])
-  const leftRevealScale = useTransform(x, [0, -100], [0, 1])
-  const rightRevealOpacity = useTransform(x, [0, 40], [0, 1])
-  const leftRevealOpacity = useTransform(x, [0, -40], [0, 1])
+  const rightScale = useTransform(x, [0, 80], [0, 1])
+  const leftScale = useTransform(x, [0, -80], [0, 1])
+  const rightOpacity = useTransform(x, [0, 40], [0, 1])
+  const leftOpacity = useTransform(x, [0, -40], [0, 1])
 
   const handleDragEnd = (_, info) => {
     const offset = info.offset.x
@@ -45,41 +44,29 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
   }
 
   return (
-    <motion.div className="relative mx-4 mb-3 overflow-hidden rounded-2xl">
-      {/* Background Actions (Behind card) */}
-      <div className="absolute inset-0 flex items-center justify-between px-2 bg-gray-100 dark:bg-[#1A1A2E] rounded-2xl">
-        {/* Left Side (Revealed when sliding right) */}
-        <motion.div style={{ scale: rightRevealScale, opacity: rightRevealOpacity }} className="flex gap-2">
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg border border-white/20"
-          >
+    <motion.div className="relative mx-4 mb-3 rounded-2xl overflow-hidden bg-gray-50 dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-white/5">
+      {/* Background Actions */}
+      <div className="absolute inset-0 flex items-center justify-between px-3">
+        {/* Left revealed items */}
+        <motion.div style={{ scale: rightScale, opacity: rightOpacity }} className="flex gap-2">
+          <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
+            className="w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg flex items-center justify-center">
             <Edit2 className="w-5 h-5" />
           </motion.button>
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className="flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg border border-white/20"
-          >
+          <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
+            className="w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center">
             <Trash2 className="w-5 h-5" />
           </motion.button>
         </motion.div>
 
-        {/* Right Side (Revealed when sliding left) */}
-        <motion.div style={{ scale: leftRevealScale, opacity: leftRevealOpacity }} className="flex gap-2">
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className="flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg border border-white/20"
-          >
+        {/* Right revealed items */}
+        <motion.div style={{ scale: leftScale, opacity: leftOpacity }} className="flex gap-2">
+          <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
+            className="w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center">
             <Trash2 className="w-5 h-5" />
           </motion.button>
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg border border-white/20"
-          >
+          <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
+            className="w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg flex items-center justify-center">
             <Edit2 className="w-5 h-5" />
           </motion.button>
         </motion.div>
@@ -90,14 +77,13 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         drag="x"
         dragConstraints={{ left: -140, right: 140 }}
         dragElastic={0.1}
-        whileTap={{ scale: 0.98 }}
         style={{ x }}
         onDragEnd={handleDragEnd}
         onTap={() => {
           if (isOpen) closeActions()
           else if (Math.abs(x.get()) < 10) onEdit?.(expense)
         }}
-        className="flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing z-10 border border-gray-100/50 dark:border-white/5"
+        className="relative z-10 flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing"
       >
         <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0" style={{ backgroundColor: category.bgColor }}>
           {category.emoji}
@@ -112,7 +98,7 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
           <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
             {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
           </p>
-          <p className="text-[11px] text-gray-400">{formatTime(expense.date)}</p>
+          <p className="text-[11px] text-gray-400 text-center">{formatTime(expense.date)}</p>
         </div>
       </motion.div>
     </motion.div>
