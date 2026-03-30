@@ -1,5 +1,5 @@
 // Add expense screen — three modes: Type It In, Scan Product, Scan Bill
-import { useState, useRef, lazy, Suspense } from 'react'
+import { useState, useRef, lazy, Suspense, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronDown, RotateCcw } from 'lucide-react'
@@ -22,8 +22,9 @@ import { CURRENCIES } from '../constants/currencies'
 export default function AddExpenseScreen() {
   const [searchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'type'
+  const editId = searchParams.get('edit')
   const navigate = useNavigate()
-  const { addExpense } = useExpenseStore()
+  const { addExpense, updateExpense, expenses } = useExpenseStore()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
 
@@ -33,9 +34,24 @@ export default function AddExpenseScreen() {
   const [category, setCategory] = useState('food')
   const [shopName, setShopName] = useState('')
   const [note, setNote] = useState('')
+  const [dateStr, setDateStr] = useState(format(new Date(), "yyyy-MM-dd'T'HH:mm"))
   const [showCategories, setShowCategories] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (editId) {
+      const exp = expenses.find(e => e.id === editId)
+      if (exp) {
+        setType(exp.type)
+        setAmountStr(exp.amount.toString())
+        setCategory(exp.category)
+        setShopName(exp.shopName)
+        setNote(exp.note)
+        setDateStr(format(new Date(exp.date), "yyyy-MM-dd'T'HH:mm"))
+      }
+    }
+  }, [editId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const currObj = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0]
 
@@ -56,14 +72,20 @@ export default function AddExpenseScreen() {
       category,
       shopName: shopName || getCategoryById(category).name,
       note,
-      date: new Date().toISOString(),
+      date: new Date(dateStr || new Date()).toISOString(),
       isRepeating: false,
       repeatEvery: null,
       tags: [],
     }
-    await addExpense(expense)
+    
+    if (editId) {
+      await updateExpense(editId, expense)
+    } else {
+      await addExpense(expense)
+    }
+    
     setSaved(true)
-    setTimeout(() => navigate('/'), 700)
+    setTimeout(() => navigate(-1), 700)
   }
 
   const selectedCat = getCategoryById(category)
@@ -77,7 +99,9 @@ export default function AddExpenseScreen() {
           className="w-10 h-10 rounded-full bg-white dark:bg-[#1A1A2E] flex items-center justify-center shadow-sm">
           <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-white" />
         </motion.button>
-        <h1 className="text-[20px] font-sora font-bold text-gray-900 dark:text-white">Add Expense</h1>
+        <h1 className="text-[20px] font-sora font-bold text-gray-900 dark:text-white">
+          {editId ? 'Edit Expense' : 'Add Expense'}
+        </h1>
       </div>
 
       {/* Type toggle */}
@@ -149,6 +173,12 @@ export default function AddExpenseScreen() {
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             className="w-full px-4 py-4 bg-transparent text-[16px] font-medium text-gray-900 dark:text-white placeholder-gray-400 border-b border-gray-100 dark:border-[#242438] outline-none"
           />
+          <input
+            type="datetime-local"
+            value={dateStr}
+            onChange={e => setDateStr(e.target.value)}
+            className="w-full px-4 py-3.5 bg-transparent text-[15px] font-medium text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-[#242438] outline-none"
+          />
           <textarea
             value={note}
             onChange={e => setNote(e.target.value)}
@@ -158,6 +188,16 @@ export default function AddExpenseScreen() {
             className="w-full px-4 py-4 bg-transparent text-[15px] text-gray-600 dark:text-gray-300 placeholder-gray-400 outline-none resize-none"
           />
         </div>
+        
+        {/* Quick Rescan Buttons */}
+        <div className="flex gap-2">
+          <button onClick={() => navigate('/add?mode=scan-bill')} className="flex-1 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-semibold text-sm rounded-xl">
+             📷 Scan Receipt Again
+          </button>
+          <button onClick={() => navigate('/add?mode=scan-product')} className="flex-1 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 font-semibold text-sm rounded-xl">
+             🔍 Scan Barcode
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col justify-end px-4 pb-8 pt-3">
@@ -165,7 +205,7 @@ export default function AddExpenseScreen() {
           disabled={saving}
           className={`w-full py-4 rounded-[20px] text-white text-[16px] font-semibold transition-all ${saved ? 'bg-green-500' : 'bg-purple-600'}`}
           style={{ boxShadow: '0 4px 20px rgba(124,58,237,0.35)' }}>
-          {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Expense'}
+          {saved ? '✓ Saved!' : saving ? 'Saving...' : editId ? 'Update Expense' : 'Save Expense'}
         </motion.button>
       </div>
 
