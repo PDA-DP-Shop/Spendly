@@ -299,7 +299,7 @@ export default function SettingsScreen() {
                 </button>
               </div>
               <div className="p-4 border-b border-gray-50 dark:border-gray-800/50">
-                <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder="Search currency..."
+                <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (Currently: ${currency.code})`}
                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                   className="w-full py-3.5 px-4 rounded-xl bg-gray-50 dark:bg-[#242438] outline-none text-[15px] dark:text-white" />
               </div>

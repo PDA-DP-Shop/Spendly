@@ -119,7 +119,7 @@ export default function OnboardingScreen() {
 
         {/* Currency */}
         <p className="text-sm font-semibold text-gray-600 mb-2">Your currency</p>
-        <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder="Search currency..."
+        <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (Currently selected: ${currency})`}
           className="w-full py-3 px-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none text-sm mb-2"
         />
         <div className="max-h-36 overflow-y-auto rounded-2xl border border-gray-100 mb-6">
