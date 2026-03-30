@@ -252,20 +252,10 @@ export default function AddExpenseScreen() {
             <BillScanner
               onBillScanned={(data) => {
                 if (data.amount > 0) setAmountStr(data.amount.toString())
-                // Analyze the bill: filter out headers, footers, tax, and garbage totals
-                const junkWords = ['tax', 'total', 'subtotal', 'cash', 'change due', 'visa', 'mastercard', 'amex', 'card', 'thank you', 'welcome', 'tel', 'phone', 'www.', '.com', 'http', 'date', 'time', 'invoice', 'receipt']
-                
-                const cleanLines = data.text
-                  .split('\n')
-                  .map(l => l.trim().replace(/\s+/g, ' ')) // normalize double spaces
-                  .filter(l => l.length > 5) // Ignore tiny artifacts ('l', '.', '12')
-                  .filter(l => !junkWords.some(j => l.toLowerCase().includes(j))) // Strip out obvious junk
-                
-                const importantNote = cleanLines.length > 0 
-                  ? `Scanned Items:\n${cleanLines.join('\n')}`
-                  : "Receipt scanned, but item details couldn't be extracted clearly."
+                if (data.name) setShopName(DOMPurify.sanitize(data.name))
+                if (data.notes) setNote(DOMPurify.sanitize(data.notes))
+                if (data.date) setDateStr(format(data.date, "yyyy-MM-dd'T'HH:mm"))
                   
-                setNote(DOMPurify.sanitize(importantNote))
                 navigate('/add?mode=type', { replace: true })
               }}
               onClose={() => navigate(-1)}

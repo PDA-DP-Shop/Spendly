@@ -74,36 +74,62 @@ export default function BillScanner({ onBillScanned, onClose }) {
 
     try {
       const result = await Tesseract.recognize(canvas, 'eng')
-      let text = result.data.text
+      const rawText = result.data.text
+      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 2)
       
-      // Cleanup OCR artifacts
-      text = text.replace(/\n| /g, ' ').toUpperCase()
-      
-      // Find all currency-like patterns: 12.99, 12,99, 12 99, 1.234,99
-      const rawAmounts = text.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
-      
-      let validAmounts = rawAmounts.map(a => {
-        // Normalize to standard float
-        let clean = a.replace(/[^\d.,]/g, '')
-        if (clean.length === 0) return 0
-        // Replace last comma or dot to decimal
-        let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
-        if(lastSep > -1) {
-           clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
-        }
-        return parseFloat(clean)
-      }).filter(n => !isNaN(n) && n > 0 && n < 20000) // Ignore barcodes/phone numbers
-      
-      let maxAmount = 0
-      
-      // If we see "TOTAL", "AMOUNT", "DUE", heavily prioritize values
-      if (text.includes('TOTAL') || text.includes('DUE') || text.includes('AMOUNT')) {
-         maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
-      } else {
-         maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
+      // 1. EXTRACT SHOP NAME (Usually the first few clear non-numeric lines)
+      const junkWords = ['TAX', 'TOTAL', 'SUBTOTAL', 'CASH', 'VISA', 'DATE', 'TIME', 'RECEIPT', 'INVOICE', 'TEL', 'PHONE', 'WWW', 'WELCOME', 'THANK', 'ITEMS', 'REGISTER', 'STORE']
+      let shopName = ''
+      for (let line of lines) {
+         const cleanLine = line.toUpperCase()
+         if (!junkWords.some(j => cleanLine.includes(j)) && !/\d{5,}/.test(line) && !/^\d+[.,]\d{2}$/.test(line)) {
+            shopName = line
+            break
+         }
       }
+
+      // 2. EXTRACT DATE & TIME
+      // Regex for common date formats: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD
+      const dateMatch = rawText.match(/(\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4})/g)
+      const timeMatch = rawText.match(/(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)/gi)
       
-      onBillScanned({ text: result.data.text, amount: maxAmount })
+      let detectedDate = null
+      if (dateMatch) {
+         // Attempt to parse the first date found
+         const d = new Date(dateMatch[0].replace(/\//g, '-'))
+         if (!isNaN(d.getTime())) detectedDate = d
+      }
+      if (timeMatch && detectedDate) {
+         // If we have a date and found a time, try to merge them or just trust the string
+      }
+
+      // 3. EXTRACT AMOUNT
+      const normalizedText = rawText.replace(/\n| /g, ' ').toUpperCase()
+      const rawAmounts = normalizedText.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
+      let validAmounts = rawAmounts.map(a => {
+        let clean = a.replace(/[^\d.,]/g, '')
+        let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
+        if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
+        return parseFloat(clean)
+      }).filter(n => !isNaN(n) && n > 0 && n < 20000)
+      
+      const maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
+
+      // 4. CLEAN NOTES (Filter out junk, keep items)
+      const cleanedNotes = lines
+         .filter(l => l.length > 4)
+         .filter(l => !junkWords.some(j => l.toUpperCase().includes(j)))
+         .filter(l => !/\d{10,}/.test(l)) // Filter phone numbers / large IDs
+         .slice(1, 6) // Take first few items but skip name
+         .join('\n')
+
+      onBillScanned({ 
+         name: shopName, 
+         amount: maxAmount, 
+         date: detectedDate,
+         notes: cleanedNotes,
+         fullText: rawText 
+      })
     } catch (e) {
       setError('Failed to read receipt. Please try again.')
       setLoading(false)
