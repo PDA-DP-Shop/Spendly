@@ -136,15 +136,9 @@ export default function App() {
 
   if (!ready) {
     return (
-      <div className="h-dvh flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-3xl"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)', boxShadow: '0 6px 24px rgba(124,58,237,0.3)' }}>
-            💸
-          </div>
-          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
-            className="w-8 h-8 border-3 border-purple-200 border-t-purple-600 rounded-full" style={{ borderWidth: 3 }} />
-          <p className="text-purple-600 font-medium text-sm">Loading Spendly...</p>
+      <div className="h-dvh flex items-center justify-center bg-[#F5F5F5] dark:bg-[#0F0F1A]">
+        <div className="relative flex items-center justify-center" style={{ animation: 'pulse 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1)' }}>
+          <img src="/icon-192.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[26px]" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
         </div>
       </div>
     )
@@ -159,7 +153,7 @@ export default function App() {
           <LockScreen />
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <div className="w-20 h-20 bg-purple-600 rounded-3xl flex items-center justify-center text-4xl shadow-2xl">💸</div>
+            <img src="/icon-192.png" className="w-[100px] h-[100px] rounded-[24px]" style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} alt="Spendly" />
             <p className="text-purple-900 dark:text-purple-200 font-sora font-bold text-xl">Spendly is Locked</p>
           </div>
         )}

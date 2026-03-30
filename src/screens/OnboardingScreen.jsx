@@ -75,7 +75,7 @@ export default function OnboardingScreen() {
     <motion.div key="0" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
       className="flex flex-col items-center justify-center h-full px-8 text-center"
       style={{ background: 'linear-gradient(160deg, #7C3AED, #6D28D9)' }}>
-      <div className="text-7xl mb-6">💸</div>
+      <img src="/icon-192.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[30px] shadow-2xl mb-8" />
       <h1 className="text-[40px] font-sora font-bold text-white mb-3">Spendly</h1>
       <p className="text-[26px] font-sora font-semibold text-white mb-4">Track your money<br />easily 💸</p>
       <p className="text-[16px] text-purple-200 mb-8 leading-relaxed">Everything stays private on your phone.<br />No cloud. No account. Ever.</p>
