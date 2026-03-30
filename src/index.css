@@ -149,4 +149,41 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Premium Date Input Styling */
+  .styling-date-input::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .styling-date-input::-webkit-datetime-edit-fields-wrapper {
+    display: flex;
+    padding: 0;
+  }
+
+  .styling-date-input::-webkit-datetime-edit-text {
+    padding: 0 4px;
+    color: #9CA3AF;
+  }
+
+  .styling-date-input::-webkit-datetime-edit-month-field,
+  .styling-date-input::-webkit-datetime-edit-day-field,
+  .styling-date-input::-webkit-datetime-edit-year-field,
+  .styling-date-input::-webkit-datetime-edit-hour-field,
+  .styling-date-input::-webkit-datetime-edit-minute-field,
+  .styling-date-input::-webkit-datetime-edit-ampm-field {
+    padding: 0 2px;
+    color: inherit;
+    font-weight: 500;
+  }
 }

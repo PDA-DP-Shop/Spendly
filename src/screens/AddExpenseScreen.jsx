@@ -2,7 +2,7 @@
 import { useState, useRef, lazy, Suspense, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronDown, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronDown, RotateCcw, Calendar } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -173,12 +173,16 @@ export default function AddExpenseScreen() {
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             className="w-full px-4 py-4 bg-transparent text-[16px] font-medium text-gray-900 dark:text-white placeholder-gray-400 border-b border-gray-100 dark:border-[#242438] outline-none"
           />
-          <input
-            type="datetime-local"
-            value={dateStr}
-            onChange={e => setDateStr(e.target.value)}
-            className="w-full px-4 py-3.5 bg-transparent text-[15px] font-medium text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-[#242438] outline-none"
-          />
+          <div className="flex items-center border-b border-gray-100 dark:border-[#242438] px-4 relative group hover:bg-gray-50 dark:hover:bg-[#1f1f33] transition-colors cursor-pointer">
+            <Calendar className="w-5 h-5 text-gray-400 mr-3" />
+            <input
+              type="datetime-local"
+              value={dateStr}
+              onChange={e => setDateStr(e.target.value)}
+              className="flex-1 py-4 bg-transparent text-[15px] font-medium text-gray-700 dark:text-gray-300 outline-none w-full styling-date-input cursor-pointer"
+              style={{ colorScheme: 'dark light' }}
+            />
+          </div>
           <textarea
             value={note}
             onChange={e => setNote(e.target.value)}
