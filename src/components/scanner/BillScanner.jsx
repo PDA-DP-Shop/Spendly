@@ -57,21 +57,53 @@ export default function BillScanner({ onBillScanned, onClose }) {
     const ctx = canvas.getContext('2d')
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
     
+    // OCR Pre-Processing: Grayscale and High Contrast
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const data = imgData.data
+    const contrast = 120 // high contrast
+    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast))
+    for (let i = 0; i < data.length; i += 4) {
+      let grayscale = 0.3 * data[i] + 0.59 * data[i+1] + 0.11 * data[i+2]
+      let c = factor * (grayscale - 128) + 128
+      c = Math.max(0, Math.min(255, c))
+      data[i] = c; data[i+1] = c; data[i+2] = c;
+    }
+    ctx.putImageData(imgData, 0, 0)
+    
     if (stream) stream.getTracks().forEach(t => t.stop())
 
     try {
       const result = await Tesseract.recognize(canvas, 'eng')
-      const text = result.data.text
+      let text = result.data.text
       
-      // Improved regex to catch Tesseract mistakes like 19,99 or 19 99 for receipts
-      const sanitizedText = text.replace(/,| /g, '.')
-      const amounts = sanitizedText.match(/\d+\.\d{2}/g)
+      // Cleanup OCR artifacts
+      text = text.replace(/\n| /g, ' ').toUpperCase()
+      
+      // Find all currency-like patterns: 12.99, 12,99, 12 99, 1.234,99
+      const rawAmounts = text.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
+      
+      let validAmounts = rawAmounts.map(a => {
+        // Normalize to standard float
+        let clean = a.replace(/[^\d.,]/g, '')
+        if (clean.length === 0) return 0
+        // Replace last comma or dot to decimal
+        let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
+        if(lastSep > -1) {
+           clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
+        }
+        return parseFloat(clean)
+      }).filter(n => !isNaN(n) && n > 0 && n < 20000) // Ignore barcodes/phone numbers
+      
       let maxAmount = 0
-      if (amounts) {
-        maxAmount = Math.max(...amounts.map(a => parseFloat(a)))
+      
+      // If we see "TOTAL", "AMOUNT", "DUE", heavily prioritize values
+      if (text.includes('TOTAL') || text.includes('DUE') || text.includes('AMOUNT')) {
+         maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
+      } else {
+         maxAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
       }
       
-      onBillScanned({ text, amount: maxAmount })
+      onBillScanned({ text: result.data.text, amount: maxAmount })
     } catch (e) {
       setError('Failed to read receipt. Please try again.')
       setLoading(false)
