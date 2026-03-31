@@ -8,7 +8,8 @@
 
 <br/>
 
-<img src="https://img.shields.io/badge/💸-Spendly-7C3AED?style=for-the-badge&labelColor=1a1a2e&color=7C3AED" height="40"/>
+
+<div style="font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif; border: 1px solid rgb(224, 224, 224); border-radius: 12px; padding: 20px; max-width: 500px; background: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 8px;"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;"><img alt="Spendly" src="https://ph-files.imgix.net/6cda69a1-09cb-4b29-90ed-1a11e70fa2aa.jpeg?auto=format&amp;fit=crop&amp;w=80&amp;h=80" style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0;"><div style="flex: 1 1 0%; min-width: 0px;"><h3 style="margin: 0px; font-size: 18px; font-weight: 600; color: rgb(26, 26, 26); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Spendly</h3><p style="margin: 4px 0px 0px; font-size: 14px; color: rgb(102, 102, 102); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Privacy-first expense tracker: offline, encrypted, no server</p></div></div><a href="https://www.producthunt.com/products/spendly-4?embed=true&amp;utm_source=embed&amp;utm_medium=post_embed" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; padding: 8px 16px; background: rgb(255, 97, 84); color: rgb(255, 255, 255); text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">Check it out on Product Hunt →</a></div>
 
 <br/><br/>
 
@@ -43,6 +44,10 @@
 <img src="https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white"/>
 <img src="https://img.shields.io/badge/Deployed-Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white"/>
 <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/>
+
+<br/><br/>
+
+<a href="https://www.producthunt.com/products/spendly-4?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-spendly-4" target="_blank" rel="noopener noreferrer"><img alt="Spendly - Privacy-first expense tracker: offline, encrypted, no server | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1112638&amp;theme=light&amp;t=1774983728539"></a>
 
 <br/><br/>
 
