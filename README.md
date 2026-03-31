@@ -188,17 +188,41 @@
 <div align="center">
 
 
-> 📱 *Open on your phone for best experience*
+> 📱 *Real screenshots coming soon — app is live at [spendly-24hr.pages.dev](https://spendly-24hr.pages.dev)*
 
-<!-- Replace these with real screenshots after building -->
+<br/>
 
-|Home Screen                                                               |Add Expense                                                              |Reports                                                                  |
-|:------------------------------------------------------------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------------------------------------:|
-|![Home](https://via.placeholder.com/200x400/7C3AED/white?text=Home+Screen)|![Add](https://via.placeholder.com/200x400/F97316/white?text=Add+Expense)|![Reports](https://via.placeholder.com/200x400/1B2B5E/white?text=Reports)|
+**🏠 Home Screen**
 
-|Scan Product                                                               |Scan Bill                                                               |Settings                                                                   |
-|:-------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
-|![Scan](https://via.placeholder.com/200x400/22C55E/white?text=Scan+Product)|![Bill](https://via.placeholder.com/200x400/EF4444/white?text=Scan+Bill)|![Settings](https://via.placeholder.com/200x400/0F0F1A/white?text=Settings)|
+<img src="https://placehold.co/320x640/7C3AED/FFFFFF?text=🏠+Home+Screen%0A%0A💸+Total+Balance%0A%24+59%2C765.00%0A%0A📊+Analytics%0A%0A🛍+Recent+Expenses" width="220" style="border-radius:20px"/>
+
+<br/><br/>
+
+**➕ Add Expense                  📊 Reports**
+
+<img src="https://placehold.co/320x640/F97316/FFFFFF?text=➕+Add+Expense%0A%0A-+%24734.00%0A%0A🍔+Food+%26+Drink%0A%0A1+2+3%0A4+5+6%0A7+8+9%0A0+.+⌫" width="220"/>
+&nbsp;&nbsp;&nbsp;
+<img src="https://placehold.co/320x640/1B2B5E/FFFFFF?text=📊+Reports%0A%0AThis+Month%0A%0A⬤+Food+45%25%0A⬤+Travel+25%25%0A⬤+Bills+20%25%0A⬤+Other+10%25%0A%0A📈+Trend+Chart" width="220"/>
+
+<br/><br/>
+
+**📦 Scan Product                🧾 Scan Bill**
+
+<img src="https://placehold.co/320x640/22C55E/FFFFFF?text=📦+Scan+Product%0A%0A┌─────────────┐%0A│+Point+at+   │%0A│+Barcode+    │%0A│+            │%0A└─────────────┘%0A%0AScanning...+⏳" width="220"/>
+&nbsp;&nbsp;&nbsp;
+<img src="https://placehold.co/320x640/EF4444/FFFFFF?text=🧾+Scan+Bill%0A%0A┌─────────────┐%0A│+Receipt+    │%0A│+Photo+Here  │%0A│+            │%0A└─────────────┘%0A%0AReading+bill...+⏳" width="220"/>
+
+<br/><br/>
+
+**🔒 Lock Screen                  ⚙️ Settings**
+
+<img src="https://placehold.co/320x640/0F0F1A/FFFFFF?text=🔒+Lock+Screen%0A%0A💸+Spendly%0A%0AWelcome+back!%0A%0A●+●+○+○+○+○%0A%0A1+2+3%0A4+5+6%0A7+8+9%0A*+0+⌫" width="220"/>
+&nbsp;&nbsp;&nbsp;
+<img src="https://placehold.co/320x640/2D2D3A/FFFFFF?text=⚙️+Settings%0A%0A👤+Profile%0A💰+Budget%0A🎨+App+Look%0A🔒+Security%0A🔔+Alerts%0A📂+My+Data%0Aℹ️+About" width="220"/>
+
+<br/><br/>
+
+> 💡 *Replace these placeholders with real screenshots once white screen is fixed*
 
 </div>
 
