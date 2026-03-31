@@ -20,8 +20,8 @@
 
 <!-- Live Demo Button -->
 
-<a href="https://spendly-24hr.pages.dev" target="_blank">
-  <img src="https://img.shields.io/badge/🚀%20Live%20Demo-spendly--24hr.pages.dev-7C3AED?style=for-the-badge&labelColor=0f0f1a&color=7C3AED" height="35"/>
+<a href="https://spendly-24hrs.pages.dev" target="_blank">
+  <img src="https://img.shields.io/badge/🚀%20Live%20Demo-spendly--24hrs.pages.dev-7C3AED?style=for-the-badge&labelColor=0f0f1a&color=7C3AED" height="35"/>
 </a>
 
 <br/><br/>
