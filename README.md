@@ -50,18 +50,6 @@
 
 -----
 
-<!-- Snake Animation -->
-
-<div align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PDA-DP-Shop/PDA-DP-Shop/output/github-contribution-grid-snake-dark.svg"/>
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/PDA-DP-Shop/PDA-DP-Shop/output/github-contribution-grid-snake.svg"/>
-  <img alt="github-snake" src="https://raw.githubusercontent.com/PDA-DP-Shop/PDA-DP-Shop/output/github-contribution-grid-snake.svg"/>
-</picture>
-</div>
-
------
-
 ## <img src="https://media.giphy.com/media/iY8CRBdQXODJSCERIr/giphy.gif" width="30px"> What is Spendly?
 
 <div align="center">
@@ -69,7 +57,7 @@
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║   💸  Spendly is a 100% private expense tracker PWA         ║
+║   💸  Spendly is a 100% private expense tracker PWA          ║
 ║                                                              ║
 ║   ✅  All your data stays on YOUR phone only                 ║
 ║   ✅  No account needed. No sign up. Just open & use         ║
@@ -150,10 +138,10 @@
 <div align="center">
 
 ```
-┌─────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────┐
 │                    SPENDLY TECH STACK                    │
-├─────────────────┬───────────────────────────────────────┤
-│  Frontend       │  React 18 + Vite 5                    │
+├─────────────────┬────────────────────────────────────────┤
+│  Frontend       │  React 18 + Vite 5                     │
 │  Styling        │  Tailwind CSS (mobile first)           │
 │  Animations     │  Framer Motion                         │
 │  State          │  Zustand                               │
@@ -170,7 +158,7 @@
 │  Icons          │  Lucide React                          │
 │  Fonts          │  Sora + DM Sans (Google Fonts)         │
 │  Deploy         │  Cloudflare Pages                      │
-└─────────────────┴───────────────────────────────────────┘
+└─────────────────┴────────────────────────────────────────┘
 ```
 
 </div>
@@ -178,51 +166,6 @@
 <div align="center">
 
 <img src="https://skillicons.dev/icons?i=react,vite,tailwind,js,html,css,cloudflare,github&theme=dark" />
-
-</div>
-
------
-
-## <img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="25px"> App Screenshots
-
-<div align="center">
-
-
-> 📱 *Real screenshots coming soon — app is live at [spendly-24hr.pages.dev](https://spendly-24hr.pages.dev)*
-
-<br/>
-
-**🏠 Home Screen**
-
-<img src="https://placehold.co/320x640/7C3AED/FFFFFF?text=🏠+Home+Screen%0A%0A💸+Total+Balance%0A%24+59%2C765.00%0A%0A📊+Analytics%0A%0A🛍+Recent+Expenses" width="220" style="border-radius:20px"/>
-
-<br/><br/>
-
-**➕ Add Expense                  📊 Reports**
-
-<img src="https://placehold.co/320x640/F97316/FFFFFF?text=➕+Add+Expense%0A%0A-+%24734.00%0A%0A🍔+Food+%26+Drink%0A%0A1+2+3%0A4+5+6%0A7+8+9%0A0+.+⌫" width="220"/>
-&nbsp;&nbsp;&nbsp;
-<img src="https://placehold.co/320x640/1B2B5E/FFFFFF?text=📊+Reports%0A%0AThis+Month%0A%0A⬤+Food+45%25%0A⬤+Travel+25%25%0A⬤+Bills+20%25%0A⬤+Other+10%25%0A%0A📈+Trend+Chart" width="220"/>
-
-<br/><br/>
-
-**📦 Scan Product                🧾 Scan Bill**
-
-<img src="https://placehold.co/320x640/22C55E/FFFFFF?text=📦+Scan+Product%0A%0A┌─────────────┐%0A│+Point+at+   │%0A│+Barcode+    │%0A│+            │%0A└─────────────┘%0A%0AScanning...+⏳" width="220"/>
-&nbsp;&nbsp;&nbsp;
-<img src="https://placehold.co/320x640/EF4444/FFFFFF?text=🧾+Scan+Bill%0A%0A┌─────────────┐%0A│+Receipt+    │%0A│+Photo+Here  │%0A│+            │%0A└─────────────┘%0A%0AReading+bill...+⏳" width="220"/>
-
-<br/><br/>
-
-**🔒 Lock Screen                  ⚙️ Settings**
-
-<img src="https://placehold.co/320x640/0F0F1A/FFFFFF?text=🔒+Lock+Screen%0A%0A💸+Spendly%0A%0AWelcome+back!%0A%0A●+●+○+○+○+○%0A%0A1+2+3%0A4+5+6%0A7+8+9%0A*+0+⌫" width="220"/>
-&nbsp;&nbsp;&nbsp;
-<img src="https://placehold.co/320x640/2D2D3A/FFFFFF?text=⚙️+Settings%0A%0A👤+Profile%0A💰+Budget%0A🎨+App+Look%0A🔒+Security%0A🔔+Alerts%0A📂+My+Data%0Aℹ️+About" width="220"/>
-
-<br/><br/>
-
-> 💡 *Replace these placeholders with real screenshots once white screen is fixed*
 
 </div>
 
@@ -305,10 +248,10 @@ Node version:   18
 <div align="center">
 
 ```
-╔═══════════════════════════════════════════════════════╗
-║               🛡️  SPENDLY PRIVACY PROMISE             ║
-╠═══════════════════════════════════════════════════════╣
-║                                                       ║
+╔══════════════════════════════════════════════════════╗
+║               🛡️  SPENDLY PRIVACY PROMISE            ║
+╠══════════════════════════════════════════════════════╣
+║                                                      ║
 ║  🔐  All data encrypted with AES-256-GCM             ║
 ║  📱  Data stored ONLY on your device                 ║
 ║  🌐  No internet needed after first load             ║
@@ -318,11 +261,11 @@ Node version:   18
 ║  🤖  Google cannot see your data                     ║
 ║  🏛️  No government can access your data              ║
 ║  👨‍💻  Even we (developers) cannot see your data       ║
-║                                                       ║
+║                                                      ║
 ║  "Your money is your business.                       ║
 ║   Nobody else's."                                    ║
-║                                                       ║
-╚═══════════════════════════════════════════════════════╝
+║                                                      ║
+╚══════════════════════════════════════════════════════╝
 ```
 
 </div>
@@ -408,10 +351,7 @@ spendly/
 
 |Member       |Role          |
 |:-----------:|:------------:|
-|Devansh Patel|Lead Developer|
-|Udit Rana    |Developer     |
-|Rudra Modi   |Developer     |
-|Mit Prajapati|Developer     |
+|Devansh Patel|fulls stack Developer|
 
 <br/>
 
@@ -448,7 +388,7 @@ please give it a **⭐ Star** on GitHub!
 
 ```
 MIT License — Free to use, modify, and share
-Copyright (c) 2026 Devansh Patel — Team Codinity
+Copyright (c) 2026 Devansh Patel
 ```
 
 -----
