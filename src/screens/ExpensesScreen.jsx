@@ -42,7 +42,7 @@ export default function ExpensesScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh mb-tab">
+    <div className="flex flex-col min-h-dvh mb-tab bg-white">
       <TopHeader title="Activities" showBell />
 
       {/* Calendar Strip */}
@@ -55,12 +55,12 @@ export default function ExpensesScreen() {
 
       {/* Activities list */}
       <div className="mt-8">
-        <div className="flex items-center justify-between px-6 mb-5">
-          <p className="text-[17px] font-display font-bold text-[#F0F4FF] tracking-tight">
+        <div className="flex items-center justify-between px-5 mb-4">
+          <p className="text-[16px] font-semibold text-[#0F172A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : 'Recent Activity'}
           </p>
           {selectedDate && (
-            <button onClick={() => setSelectedDate(null)} className="text-[13px] font-body font-bold text-cyan-glow">
+            <button onClick={() => setSelectedDate(null)} className="text-[13px] font-semibold text-[#6366F1]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               Clear Filter
             </button>
           )}

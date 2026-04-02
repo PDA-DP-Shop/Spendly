@@ -1,4 +1,4 @@
-// Lock screen — shown before any content when app is locked
+// LockScreen — white premium lock screen with indigo radial glow
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PinLock from '../components/lock/PinLock'
@@ -13,7 +13,6 @@ export default function LockScreen() {
   const lockType = settings?.lockType || 'pin6'
   const [lockoutRemaining, setLockoutRemaining] = useState(0)
 
-  // Update lockout countdown every second
   useEffect(() => {
     const interval = setInterval(() => {
       setLockoutRemaining(getLockoutRemaining())
@@ -29,49 +28,49 @@ export default function LockScreen() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-dvh flex flex-col bg-[#050B18] safe-top relative overflow-hidden"
+      className="h-dvh flex flex-col bg-white safe-top relative overflow-hidden"
     >
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-cyan-glow/10 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-[-5%] left-[-5%] w-[250px] h-[250px] rounded-full bg-blue-glow/10 blur-[60px] pointer-events-none" />
+      {/* Subtle indigo radial glow in center */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)' }} />
 
       {/* Top branding */}
-      <div className="flex flex-col items-center pt-24 pb-8 relative z-10 transition-all duration-700">
-        <motion.div 
+      <div className="flex flex-col items-center pt-20 pb-8 relative z-10">
+        <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring' }}
-          className="w-24 h-24 rounded-[32px] glass-accent border-white/10 flex items-center justify-center shadow-glow mb-8"
+          className="w-20 h-20 rounded-[26px] flex items-center justify-center mb-6"
+          style={{
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            boxShadow: '0 8px 32px rgba(99,102,241,0.3)',
+          }}
         >
-          <img src="/spendly-logo.png" alt="Spendly" className="w-14 h-14 rounded-2xl" />
+          <img src="/spendly-logo.png" alt="Spendly" className="w-12 h-12 rounded-xl" />
         </motion.div>
-        
-        <h1 className="text-[44px] font-display font-bold text-white mb-1 tracking-tighter leading-none">Spendly</h1>
-        <p className="text-[13px] font-display font-bold text-cyan-glow uppercase tracking-[0.25em]">Access Restricted</p>
+
+        <h1 className="text-[38px] font-extrabold text-[#0F172A] tracking-tight leading-none mb-1"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Spendly</h1>
+        <p className="text-[14px] font-semibold text-[#6366F1] tracking-[0.15em] uppercase"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Unlock to continue</p>
       </div>
 
       {/* Lock component */}
       <div className="flex-1 flex flex-col justify-center relative z-10">
         {(lockType === 'pin4' || lockType === 'pin6' || lockType === 'none') && (
-          <PinLock
-            pinLength={lockType === 'pin4' ? 4 : 6}
-            onVerify={verifyPin}
-            onBiometric={handleBiometric}
-            wrongAttempts={wrongAttempts}
-            lockoutRemaining={lockoutRemaining}
-          />
+          <PinLock pinLength={lockType === 'pin4' ? 4 : 6} onVerify={verifyPin}
+            onBiometric={handleBiometric} wrongAttempts={wrongAttempts} lockoutRemaining={lockoutRemaining} />
         )}
-        {lockType === 'pattern' && (
-          <PatternLock onVerify={verifyPattern} />
-        )}
-        {lockType === 'biometric' && (
-          <FingerprintLock onVerify={() => verifyBiometric()} />
-        )}
+        {lockType === 'pattern' && <PatternLock onVerify={verifyPattern} />}
+        {lockType === 'biometric' && <FingerprintLock onVerify={() => verifyBiometric()} />}
       </div>
 
-      {/* Footer info */}
-      <div className="pb-16 text-center relative z-10">
-        <p className="text-[12px] font-body text-[#3D4F70] uppercase tracking-[0.2em]">Secured by AES-256 Vault</p>
+      {/* Footer */}
+      <div className="pb-12 text-center relative z-10">
+        <p className="text-[12px] font-semibold text-[#CBD5E1] uppercase tracking-[0.2em]"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          🔒 AES-256 Encrypted
+        </p>
       </div>
     </motion.div>
   )
