@@ -22,6 +22,7 @@ import { format, subMonths } from 'date-fns'
 import { useSecurityStore } from '../store/securityStore'
 import SpendingScore from '../components/gamification/SpendingScore'
 import { calculateScore } from '../utils/scoreCalculator'
+import { useUIStore } from '../store/uiStore'
 
 export default function HomeScreen() {
   const navigate = useNavigate()
@@ -32,7 +33,7 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [toast, setToast] = useState(null)
   const [alertDismissed, setAlertDismissed] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
+  const { toggleNotifications } = useUIStore()
 
   const currency = settings?.currency || 'USD'
   const name = settings?.name || 'Friend'
@@ -109,7 +110,7 @@ export default function HomeScreen() {
         <div className="flex items-center gap-3">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={toggleNotifications}
             className="relative w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm"
           >
             <Bell className="w-5 h-5 text-[var(--primary)]" />
@@ -117,35 +118,6 @@ export default function HomeScreen() {
               <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#FF7043] border-2 border-white" />
             )}
           </motion.button>
-
-          {/* Simple Notification Dropdown */}
-          <AnimatePresence>
-            {showNotifications && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-[84px] right-6 w-72 bg-white border border-[#F0F0F8] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] z-[100] p-4"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-[14px] font-[800] text-[#0F172A]" style={S}>Notifications</p>
-                  <span className="text-[10px] font-[800] text-[var(--primary)] px-2 py-0.5 bg-[#EEF2FF] rounded-full uppercase">New</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="p-3 bg-[#F8F7FF] rounded-2xl border border-[#F0EEFF]">
-                    <p className="text-[12px] font-[700] text-[#0F172A] mb-1" style={S}>Welcome to Spendly 🚀</p>
-                    <p className="text-[11px] text-[#64748B]" style={S}>Your private data stays 100% on this device.</p>
-                  </div>
-                  {budgetPct >= 80 && (
-                    <div className="p-3 bg-[#FFF7F2] rounded-2xl border border-[#FFEBE4]">
-                      <p className="text-[12px] font-[700] text-[#FF7043] mb-1" style={S}>Budget Alert ⚠️</p>
-                      <p className="text-[11px] text-[#94A3B8]" style={S}>You've used {Math.round(budgetPct)}% of your monthly limit.</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 

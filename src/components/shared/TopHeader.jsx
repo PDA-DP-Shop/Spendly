@@ -1,9 +1,11 @@
 import { m as motion } from 'framer-motion'
 import { ChevronLeft, LayoutGrid, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useUIStore } from '../../store/uiStore'
 
 export default function TopHeader({ title, onBack, showBack = false, showBell = true, rightElement }) {
   const navigate = useNavigate()
+  const { toggleNotifications } = useUIStore()
   const S = { fontFamily: "'Nunito', sans-serif" }
 
   return (
@@ -38,6 +40,7 @@ export default function TopHeader({ title, onBack, showBack = false, showBell = 
         {showBell && (
           <motion.button 
             whileTap={{ scale: 0.9 }}
+            onClick={toggleNotifications}
             className="relative w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm"
           >
             <Bell className="w-5 h-5 text-[var(--primary)]" />

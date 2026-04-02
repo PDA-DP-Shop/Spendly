@@ -15,6 +15,7 @@ import { initDatabase } from './services/database'
 import { useExpenseStore } from './store/expenseStore'
 import { useSecurityStore } from './store/securityStore'
 import PWAInstallGuide from './components/pwa/PWAInstallGuide'
+import NotificationDrawer from './components/shared/NotificationDrawer'
 
 const HomeScreen = lazy(() => import('./screens/HomeScreen'))
 const ExpensesScreen = lazy(() => import('./screens/ExpensesScreen'))
@@ -253,6 +254,7 @@ export default function App() {
         <OfflineBanner />
         <AppWrapper />
         <PWAInstallGuide />
+        <NotificationDrawer />
       </div>
     </LazyMotion>
   )
