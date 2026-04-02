@@ -22,24 +22,58 @@ export const importBackupFile = async (file, password, mode = 'replace') => {
           if (data.categories) for (const cat of data.categories) { const { id, ...rest } = cat; await db.categories.add(rest) }
           if (data.festivals) { localStorage.setItem('spendly_festivals', JSON.stringify(data.festivals)) }
         } else {
-          // Merge mode: Add new festivals to existing festivals array
-          if (data.festivals) {
+          // Merge mode: Add new festivals to existing festivals array, deduplicating them
+          if (data.festivals && data.festivals.length > 0) {
              const existing = JSON.parse(localStorage.getItem('spendly_festivals') || '[]')
-             const merged = [...existing, ...data.festivals]
-             localStorage.setItem('spendly_festivals', JSON.stringify(merged))
+             const sigSet = new Set(existing.map(f => {
+                const temp = { ...f }; delete temp.id; return JSON.stringify(temp)
+             }))
+             
+             const toAdd = []
+             for (const fest of data.festivals) {
+               const { id, ...rest } = fest
+               const sig = JSON.stringify(rest)
+               if (!sigSet.has(sig)) {
+                  toAdd.push(rest)
+                  sigSet.add(sig)
+               }
+             }
+             if (toAdd.length > 0) {
+               localStorage.setItem('spendly_festivals', JSON.stringify([...existing, ...toAdd]))
+             }
           }
         }
 
+        // Bulk Deduplication Helper: checks cryptographic blobs to prevent identical duplicate rows
+        const deduplicateAndAdd = async (store, records) => {
+          if (!records || !records.length) return
+          const existing = await store.toArray()
+          const sigSet = new Set(existing.map(r => {
+            const temp = { ...r }; delete temp.id;
+            return (temp._encrypted && temp.blob) ? JSON.stringify(temp.blob) : JSON.stringify(temp)
+          }))
+          const toAdd = []
+          for (const item of records) {
+            const { id, ...rest } = item
+            const sig = (rest._encrypted && rest.blob) ? JSON.stringify(rest.blob) : JSON.stringify(rest)
+            if (!sigSet.has(sig)) {
+              toAdd.push(rest)
+              sigSet.add(sig)
+            }
+          }
+          if (toAdd.length > 0) await store.bulkAdd(toAdd)
+        }
+
         // Restore list items from backup (strip IDs so Dexie auto-assigns to prevent conflicts)
-        for (const exp of data.expenses) { const { id, ...rest } = exp; await db.expenses.add(rest) }
-        if (data.budgets) for (const budget of data.budgets) { const { id, ...rest } = budget; await db.budgets.add(rest) }
-        if (data.scans) for (const scan of data.scans) { const { id, ...rest } = scan; await db.scans.add(rest) }
-        if (data.wallets) for (const wallet of data.wallets) { const { id, ...rest } = wallet; await db.wallets.add(rest) }
-        if (data.emis) for (const emi of data.emis) { const { id, ...rest } = emi; await db.emis.add(rest) }
-        if (data.trips) for (const trip of data.trips) { const { id, ...rest } = trip; await db.trips.add(rest) }
-        if (data.goals) for (const goal of data.goals) { const { id, ...rest } = goal; await db.goals.add(rest) }
-        if (data.splits) for (const split of data.splits) { const { id, ...rest } = split; await db.splits.add(rest) }
-        if (data.badges) for (const badge of data.badges) { const { id, ...rest } = badge; await db.badges.add(rest) }
+        await deduplicateAndAdd(db.expenses, data.expenses)
+        await deduplicateAndAdd(db.budgets, data.budgets)
+        await deduplicateAndAdd(db.scans, data.scans)
+        await deduplicateAndAdd(db.wallets, data.wallets)
+        await deduplicateAndAdd(db.emis, data.emis)
+        await deduplicateAndAdd(db.trips, data.trips)
+        await deduplicateAndAdd(db.goals, data.goals)
+        await deduplicateAndAdd(db.splits, data.splits)
+        await deduplicateAndAdd(db.badges, data.badges)
 
         resolve(data.expenses.length)
       } catch (err) {
