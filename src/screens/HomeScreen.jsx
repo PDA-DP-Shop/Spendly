@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Bell, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { Bell, TrendingUp, TrendingDown, Wallet, LayoutGrid } from 'lucide-react'
 import BalanceCard from '../components/cards/BalanceCard'
 import BudgetProgressCard from '../components/cards/BudgetProgressCard'
 import InsightCard from '../components/cards/InsightCard'
@@ -36,6 +36,7 @@ export default function HomeScreen() {
   const currency = settings?.currency || 'USD'
   const name = settings?.name || 'Friend'
   const emoji = settings?.emoji || '😊'
+  const S = { fontFamily: "'Nunito', sans-serif" }
 
   useEffect(() => { loadBudgets() }, [])
 
@@ -84,128 +85,102 @@ export default function HomeScreen() {
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 safe-top pt-6 pb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-6 safe-top pt-8 pb-4">
+        <div className="flex items-center gap-4">
           {/* Avatar circle */}
-          <div
-            className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold text-white flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="w-12 h-12 rounded-[20px] flex items-center justify-center text-xl font-bold text-white flex-shrink-0 shadow-lg"
+            style={{ background: 'var(--gradient-primary)' }}
           >
             {emoji}
-          </div>
+          </motion.div>
           <div>
-            <p className="text-[13px] text-[#94A3B8]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p className="text-[14px] font-[700] text-[#94A3B8] uppercase tracking-widest" style={S}>
               Hey, {name} 👋
             </p>
-            <p className="text-[18px] font-bold text-[#0F172A] leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p className="text-[20px] font-[800] text-[#0F172A] tracking-tight leading-tight" style={S}>
               Good Day!
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="relative w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: '#F8F9FF', border: '1px solid #F0F0F8' }}
+            className="relative w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm"
           >
-            <Bell className="w-5 h-5 text-[#64748B]" />
+            <Bell className="w-5 h-5 text-[var(--primary)]" />
             {budgetPct >= 80 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#6366F1]" />
+              <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#FF7043] border-2 border-white" />
             )}
           </motion.button>
         </div>
       </div>
 
       {/* Balance card */}
-      <BalanceCard balance={balance} currency={currency} />
-
-      {/* Income / Spent summary pills */}
-      <div className="grid grid-cols-2 gap-3 px-5 mt-4">
-        <div
-          className="p-4 flex items-center gap-3"
-          style={{ background: '#ECFDF5', borderRadius: '16px', border: '1px solid rgba(16,185,129,0.15)' }}
-        >
-          <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Income
-            </p>
-            <p className="text-[17px] font-bold text-[#0F172A]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {formatMoney(received, currency)}
-            </p>
-          </div>
-        </div>
-        <div
-          className="p-4 flex items-center gap-3"
-          style={{ background: '#FFF1F2', borderRadius: '16px', border: '1px solid rgba(244,63,94,0.15)' }}
-        >
-          <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center">
-            <TrendingDown className="w-4 h-4 text-rose-500" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-700" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Spent
-            </p>
-            <p className="text-[17px] font-bold text-[#0F172A]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {formatMoney(spent, currency)}
-            </p>
-          </div>
-        </div>
-      </div>
+      <BalanceCard balance={balance} income={received} expense={spent} currency={currency} />
 
       {/* Budget card */}
-      <div className="mt-4">
+      <div className="mt-6">
         <BudgetProgressCard label="Monthly Budget" spent={spent} total={overallBudget} currency={currencySymbol} />
       </div>
 
       {/* Alert banner */}
       {!alertDismissed && budgetPct >= 80 && (
-        <AlertBanner
-          type={budgetPct >= 100 ? 'danger' : 'warning'}
-          message={budgetPct >= 100 ? '🚨 You went over budget!' : "⚠️ Careful! You're close to your limit"}
-          onClose={() => setAlertDismissed(true)}
-        />
+        <div className="px-5 mt-4">
+           <AlertBanner
+             type={budgetPct >= 100 ? 'danger' : 'warning'}
+             message={budgetPct >= 100 ? '🚨 You went over budget!' : "⚠️ Careful! You're close to your limit"}
+             onClose={() => setAlertDismissed(true)}
+           />
+        </div>
       )}
 
       {/* Spending Score */}
-      <div className="px-5 mt-5">
+      <div className="px-5 mt-6">
         <SpendingScore scoreData={scoreData} />
       </div>
 
       {/* Category chips */}
-      <div className="mt-5">
+      <div className="mt-6">
+        <div className="px-6 mb-3 flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4 text-[var(--primary)]" />
+            <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>Categories</p>
+        </div>
         <CategoryChips selected={selectedCategory} onSelect={setSelectedCategory} />
       </div>
 
       {/* Analytics chart */}
-      <div className="mt-5">
-        <div className="px-5 mb-3 flex items-center justify-between">
-          <p className="text-[13px] font-semibold uppercase tracking-wider text-[#94A3B8]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Analytics
+      <div className="mt-8">
+        <div className="px-6 mb-4 flex items-center justify-between">
+          <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
+            Monthly Overview
           </p>
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#F8F7FF] rounded-full border border-[#F0F0F8]">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
+              <span className="text-[11px] font-[800] text-[var(--primary)] uppercase tracking-wider" style={S}>12m</span>
+          </div>
         </div>
         <AnalyticsBarChart data={monthlyData} currency={currency} />
       </div>
 
       {/* Recent transactions */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between px-5 mb-4">
-          <p className="text-[13px] font-semibold uppercase tracking-wider text-[#94A3B8]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Recent
+      <div className="mt-8">
+        <div className="flex items-center justify-between px-6 mb-5">
+          <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
+            Recent Activity
           </p>
           <button
             onClick={() => navigate('/expenses')}
-            className="text-[13px] font-bold text-[#6366F1]"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            className="text-[13px] font-[800] text-[var(--primary)] flex items-center gap-1.5"
+            style={S}
           >
-            View all →
+            See all <span className="text-[16px]">→</span>
           </button>
         </div>
         {recentExpenses.length === 0 ? (
-          <EmptyState type="expenses" title="No expenses yet" message="Tap the + button to add your first expense" />
+          <EmptyState type="expenses" title="No activity recorded" message="Tap the purple button to start tracking." />
         ) : (
           <div className="flex flex-col">
             {recentExpenses.map((exp, i) => (
@@ -223,7 +198,7 @@ export default function HomeScreen() {
       </div>
 
       {/* Smart insight */}
-      <div className="mt-5 mb-4">
+      <div className="mt-8 mb-6">
         <InsightCard message={getInsight()} />
       </div>
 

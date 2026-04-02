@@ -13,35 +13,36 @@ const CONFIGS = {
 
 export default function EmptyState({ type = 'default', title, message, action, onAction }) {
   const config = CONFIGS[type] || CONFIGS.default
+  const S = { fontFamily: "'Nunito', sans-serif" }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="flex flex-col items-center justify-center px-8 py-16 text-center"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.1, type: 'spring', damping: 25 }}
+      className="flex flex-col items-center justify-center px-10 py-20 text-center"
     >
       <div
-        className="w-20 h-20 rounded-[24px] flex items-center justify-center text-4xl mb-5"
-        style={{ background: '#EEF2FF', border: '1px solid rgba(99,102,241,0.15)' }}
+        className="w-24 h-24 rounded-[32px] flex items-center justify-center text-4xl mb-6 relative"
+        style={{ background: '#F8F7FF', border: '1px solid #F0F0F8', boxShadow: '0 8px 16px rgba(124,111,247,0.04)' }}
       >
-        {config.emoji}
+        <div className="absolute inset-0 rounded-[32px] opacity-10" style={{ background: 'var(--gradient-primary)' }} />
+        <span className="relative z-10">{config.emoji}</span>
       </div>
-      <h3 className="text-[18px] font-bold text-[#0F172A] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <h3 className="text-[22px] font-[800] text-[#0F172A] mb-2" style={S}>
         {title || config.title}
       </h3>
-      <p className="text-[14px] text-[#64748B] leading-relaxed max-w-[260px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <p className="text-[15px] font-[600] text-[#94A3B8] leading-relaxed max-w-[280px]" style={S}>
         {message || config.message}
       </p>
       {action && (
         <motion.button
-          whileTap={{ scale: 0.97 }}
+          whileTap={{ scale: 0.96 }}
           onClick={onAction}
-          className="mt-6 px-6 py-3 rounded-[14px] text-white text-[14px] font-semibold"
+          className="mt-8 px-8 py-4 rounded-[20px] text-white text-[15px] font-[800] shadow-fab"
           style={{
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
-            fontFamily: "'Plus Jakarta Sans', sans-serif"
+            background: 'var(--gradient-primary)',
+            ...S
           }}
         >
           {action}

@@ -1,7 +1,7 @@
 // SmartCalculator.jsx — Feature 14 & 15: Calculator with Tip/GST/Split logic
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X, Delete, Percent, Users, Receipt, CircleEqual } from 'lucide-react'
+import { X, Delete, Percent, Users, Receipt } from 'lucide-react'
 
 export default function SmartCalculator({ initialValue, onSave, onClose, currency }) {
   const [expression, setExpression] = useState(initialValue?.toString() || '0')
@@ -16,16 +16,10 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
       const cleanExp = expression.replace(/×/g, '*').replace(/÷/g, '/')
       if (cleanExp.match(/[+\-*/]$/)) return // Don't eval if ends with operator
       
-      // Basic safe eval for calculator using Function
       let evaluated = new Function(`return ${cleanExp}`)()
       
-      // Apply GST
       if (gst > 0) evaluated = evaluated * (1 + (gst / 100))
-      
-      // Apply Tip
       if (tip > 0) evaluated = evaluated * (1 + (tip / 100))
-      
-      // Apply Split
       if (split > 1) evaluated = evaluated / split
       
       setResult(Number(evaluated.toFixed(2)).toString())
@@ -75,60 +69,62 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
 
   return (
     <motion.div className="fixed inset-0 z-[100] flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[32px] overflow-hidden flex flex-col"
-        initial={{ y: 400 }} animate={{ y: 0 }} exit={{ y: 400 }} transition={{ type: 'spring', damping: 25 }}>
+      <motion.div className="relative w-full bg-white rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pt-2"
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}>
         
-        <div className="p-5 pb-2">
+        {/* Handle */}
+        <div className="w-12 h-1.5 bg-[#E2E8F0] rounded-full mx-auto mb-2" />
+
+        <div className="p-5 pb-4">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-[14px] font-semibold text-gray-400 mb-1">Smart Calculator</p>
-              <div className="text-[28px] font-sora text-gray-500 break-all">{expression}</div>
+              <p className="text-[14px] font-[700] text-gray-400 mb-1" style={{ fontFamily: 'Nunito' }}>Expression</p>
+              <div className="text-[26px] font-[700] text-gray-400 break-all" style={{ fontFamily: 'Nunito' }}>{expression}</div>
             </div>
-            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X className="w-5 h-5 text-gray-500" /></button>
           </div>
           
-          <div className="flex items-end justify-between border-b 2 border-gray-100 dark:border-gray-800 pb-4">
-            <span className="text-[24px] font-bold text-gray-400">{currency}</span>
-            <span className="text-[42px] font-sora font-bold text-purple-600 dark:text-purple-400 break-all">
+          <div className="flex items-end justify-between border-b-2 border-[#F0F0F8] pb-4">
+            <span className="text-[24px] font-[800] text-gray-400" style={{ fontFamily: 'Nunito' }}>{currency}</span>
+            <span className="text-[44px] font-[800] text-[var(--primary)] break-all leading-none" style={{ fontFamily: 'Nunito' }}>
               {result || expression}
             </span>
           </div>
         </div>
 
         {/* GST, Tip, Split tools row */}
-        <div className="flex gap-2 px-4 py-3 bg-gray-50 dark:bg-[#202035] overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-5 py-3 bg-[#F8F7FF] overflow-x-auto scrollbar-hide">
           {/* Split */}
           <button onClick={() => setSplit(s => s >= 10 ? 1 : s + 1)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors ${split > 1 ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 border-orange-200 dark:border-orange-500/30' : 'bg-white dark:bg-[#1A1A2E] text-gray-500 border-gray-200 dark:border-gray-700'}`}>
+            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-[13px] font-[700] transition-colors ${split > 1 ? 'bg-[#FFDBCF] text-[var(--secondary)] border border-[#FFDBCF]' : 'bg-white text-gray-500 border border-[#F0F0F8]'}`} style={{ fontFamily: 'Nunito' }}>
             <Users className="w-4 h-4" /> 
             {split > 1 ? `Split (${split})` : 'Split'}
           </button>
           
           {/* Tip */}
           <button onClick={() => setTip(t => t === 20 ? 0 : t + 5)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors ${tip > 0 ? 'bg-green-50 dark:bg-green-900/20 text-green-600 border-green-200 dark:border-green-500/30' : 'bg-white dark:bg-[#1A1A2E] text-gray-500 border-gray-200 dark:border-gray-700'}`}>
+            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-[13px] font-[700] transition-colors ${tip > 0 ? 'bg-[#D1FAE5] text-[#059669] border border-[#D1FAE5]' : 'bg-white text-gray-500 border border-[#F0F0F8]'}`} style={{ fontFamily: 'Nunito' }}>
             <Receipt className="w-4 h-4" />
-            {tip > 0 ? `Tip (${tip}%)` : 'Tip %'}
+            {tip > 0 ? `Tip (${tip}%)` : 'Tip'}
           </button>
           
           {/* GST */}
           <button onClick={() => setGst(g => g === 28 ? 0 : g === 0 ? 5 : g === 5 ? 12 : g === 12 ? 18 : 28)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors ${gst > 0 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 border-purple-200 dark:border-purple-500/30' : 'bg-white dark:bg-[#1A1A2E] text-gray-500 border-gray-200 dark:border-gray-700'}`}>
+            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-[13px] font-[700] transition-colors ${gst > 0 ? 'bg-purple-100/50 text-[var(--primary)] border border-purple-100' : 'bg-white text-gray-500 border border-[#F0F0F8]'}`} style={{ fontFamily: 'Nunito' }}>
             <Percent className="w-4 h-4" />
-            {gst > 0 ? `GST (+${gst}%)` : '+ GST'}
+            {gst > 0 ? `+ GST ${gst}%` : '+ GST'}
           </button>
         </div>
 
         {/* Keypad */}
-        <div className="grid grid-cols-4 gap-2 p-4 pb-8 bg-white dark:bg-[#1A1A2E]">
+        <div className="grid grid-cols-4 gap-2 p-5 pb-10 bg-white">
           {buttons.map(btn => {
             const isOperator = ['÷','×','-','+','='].includes(btn)
             const isAction = ['C','⌫','%','DONE'].includes(btn)
             
             return (
-              <motion.button key={btn} whileTap={{ scale: 0.9 }}
+              <motion.button key={btn} whileTap={{ scale: 0.92 }}
                 onClick={() => {
                   if (btn === 'C') { setExpression('0'); setSplit(1); setTip(0); setGst(0); setResult('') }
                   else if (btn === '⌫') handleDelete()
@@ -138,13 +134,16 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
                   }
                   else handlePress(btn)
                 }}
-                className={`py-4 rounded-2xl text-[22px] font-sora font-semibold flex items-center justify-center transition-colors 
-                  ${btn === 'DONE' ? 'col-span-1 bg-purple-600 text-white text-[16px] shadow-sm' : ''}
-                  ${btn === '=' ? 'bg-orange-500 text-white shadow-sm' : ''}
-                  ${isOperator && btn !== '=' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 text-[26px]' : ''}
-                  ${btn === 'C' || btn === '⌫' || btn === '%' ? 'bg-gray-100 dark:bg-gray-800 text-red-500' : ''}
-                  ${!isOperator && !isAction ? 'bg-white dark:bg-[#1A1A2E] text-gray-900 dark:text-white border-2 border-gray-50 dark:border-gray-800' : ''}
-                `}>
+                className={`flex items-center justify-center py-4 rounded-[20px] transition-colors `}
+                style={{
+                  fontFamily: 'Nunito',
+                  fontSize: isOperator || btn === '.' ? '28px' : btn === 'DONE' ? '15px' : '24px',
+                  fontWeight: 800,
+                  color: btn === 'DONE' || btn === '=' ? '#FFFFFF' : isOperator ? 'var(--primary)' : btn === 'C' || btn === '⌫' || btn === '%' ? '#F43F5E' : '#1A1A2E',
+                  background: btn === 'DONE' ? 'var(--primary)' : btn === '=' ? 'var(--gradient-primary)' : isOperator ? '#EEF2FF' : isAction ? '#FFF1F2' : '#F8F9FF',
+                  boxShadow: btn === 'DONE' || btn === '=' ? 'var(--shadow-fab)' : 'none',
+                  gridColumn: btn === 'DONE' ? 'span 1' : undefined
+                }}>
                 {btn === '⌫' ? <Delete className="w-6 h-6" /> : btn}
               </motion.button>
             )

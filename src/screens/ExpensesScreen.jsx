@@ -20,6 +20,7 @@ export default function ExpensesScreen() {
   const currency = settings?.currency || 'USD'
   const [selectedDate, setSelectedDate] = useState(null)
   const [toast, setToast] = useState(null)
+  const S = { fontFamily: "'Nunito', sans-serif" }
 
   // Filter by selected date or show all this month
   const filtered = expenses.filter(e => {
@@ -48,21 +49,26 @@ export default function ExpensesScreen() {
       {/* Calendar Strip */}
       <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
-      {/* Income + Expense cards (using new glass style) */}
+      {/* Income + Expense cards */}
       <div className="mt-4">
         <SalaryExpenseCards income={received} expense={spent} currency={currency} />
       </div>
 
       {/* Activities list */}
       <div className="mt-8">
-        <div className="flex items-center justify-between px-5 mb-4">
-          <p className="text-[16px] font-semibold text-[#0F172A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <div className="flex items-center justify-between px-6 mb-5">
+          <p className="text-[18px] font-[800] text-[#0F172A] tracking-tight" style={S}>
             {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : 'Recent Activity'}
           </p>
           {selectedDate && (
-            <button onClick={() => setSelectedDate(null)} className="text-[13px] font-semibold text-[#6366F1]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedDate(null)} 
+              className="text-[13px] font-[800] text-[var(--primary)] uppercase tracking-wider" 
+              style={S}
+            >
               Clear Filter
-            </button>
+            </motion.button>
           )}
         </div>
 
@@ -75,7 +81,7 @@ export default function ExpensesScreen() {
             actionLabel="Initialize Record" 
           />
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
             {filtered.map((exp, i) => (
               <TransactionItem
                 key={exp.id}

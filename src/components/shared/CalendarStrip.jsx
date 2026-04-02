@@ -1,7 +1,9 @@
 // Scrollable calendar date strip for filtering by day
 import { useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { format, addDays, startOfWeek, isToday } from 'date-fns'
+import { format, addDays, isToday } from 'date-fns'
+
+const S = { fontFamily: "'Nunito', sans-serif" }
 
 export default function CalendarStrip({ selectedDate, onSelectDate }) {
   const scrollRef = useRef(null)
@@ -23,7 +25,7 @@ export default function CalendarStrip({ selectedDate, onSelectDate }) {
   return (
     <div
       ref={scrollRef}
-      className="flex gap-2 px-4 overflow-x-auto scrollbar-hide py-2"
+      className="flex gap-3 px-6 overflow-x-auto scrollbar-hide py-4"
     >
       {days.map(day => {
         const dateStr = format(day, 'yyyy-MM-dd')
@@ -36,21 +38,22 @@ export default function CalendarStrip({ selectedDate, onSelectDate }) {
           <motion.button
             key={dateStr}
             data-today={isTodayDay}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onSelectDate(isSelected ? null : dateStr)}
-            className="flex flex-col items-center gap-1 min-w-[44px] py-2 px-1"
+            className="flex flex-col items-center gap-2 min-w-[54px] py-1"
           >
-            <span className="text-[11px] text-gray-400 font-medium">
+            <span className="text-[11px] text-[#94A3B8] font-[800] uppercase tracking-widest" style={S}>
               {dayLetters[dayLetterIdx]}
             </span>
             <motion.div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-sora font-semibold transition-all ${
+              className={`w-11 h-11 rounded-[16px] flex items-center justify-center text-[16px] font-[800] transition-all border ${
                 isSelected
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[#7C6FF7] border-[#7C6FF7] text-white shadow-lg shadow-[#7C6FF730]'
                   : isTodayDay
-                  ? 'border-2 border-purple-600 text-purple-600'
-                  : 'text-gray-700 dark:text-gray-200'
+                  ? 'border-[#7C6FF7] text-[#7C6FF7] bg-white'
+                  : 'text-[#475569] bg-white border-[#F0F0F8]'
               }`}
+              style={S}
             >
               {dayNum}
             </motion.div>

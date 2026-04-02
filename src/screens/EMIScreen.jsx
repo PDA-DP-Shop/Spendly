@@ -6,10 +6,39 @@ import EmptyState from '../components/shared/EmptyState'
 import { useEMIStore } from '../store/emiStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
-import { Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
-import { format, parseISO, differenceInDays, addDays } from 'date-fns'
+import { Plus, X, CheckCircle, AlertCircle, Trash2, Calendar, Banknote } from 'lucide-react'
+import { format, parseISO, differenceInDays } from 'date-fns'
 
-function AddEMISheet({ onSave, onClose }) {
+const S = { fontFamily: "'Nunito', sans-serif" }
+
+// Premium BottomSheet
+function BottomSheet({ show, onClose, title, children }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(15,23,42,0.4)' }} />
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+            <div className="w-12 h-1.5 bg-[#EEF2FF] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-6 mb-5">
+              <h3 className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h3>
+              <button onClick={onClose} className="w-11 h-11 rounded-full bg-[#F8F9FF] flex items-center justify-center border border-[#F0F0F8]">
+                <X className="w-5 h-5 text-[#64748B]" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-8 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function AddEMISheet({ onSave, onClose, show }) {
   const [form, setForm] = useState({ name: '', lender: '', totalAmount: '', emiAmount: '', startDate: format(new Date(), 'yyyy-MM-dd'), months: '', interestRate: '' })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const handleSave = () => {
@@ -18,40 +47,42 @@ function AddEMISheet({ onSave, onClose }) {
     onClose()
   }
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[28px] p-6 pb-10 max-h-[85vh] overflow-y-auto"
-        initial={{ y: 400 }} animate={{ y: 0 }} exit={{ y: 400 }} transition={{ type: 'spring', damping: 25 }}>
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Add EMI / Loan</p>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+    <BottomSheet show={show} onClose={onClose} title="Add Loan / EMI">
+        <div className="space-y-5 mb-8">
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Service Name</p>
+                <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. iPhone EMI, Home Loan"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+            </div>
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Lender / Bank</p>
+                <input value={form.lender} onChange={e => set('lender', e.target.value)} placeholder="e.g. HDFC, Bajaj Finance"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+            </div>
+            <div className="flex gap-4">
+                <div className="flex-1">
+                    <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Monthly EMI</p>
+                    <input type="number" value={form.emiAmount} onChange={e => set('emiAmount', e.target.value)} placeholder="0"
+                        className="w-full py-4 px-5 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[18px] font-[800] text-[#0F172A]" style={S} />
+                </div>
+                <div className="flex-1">
+                    <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Total Months</p>
+                    <input type="number" value={form.months} onChange={e => set('months', e.target.value)} placeholder="12"
+                        className="w-full py-4 px-5 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[18px] font-[800] text-[#0F172A]" style={S} />
+                </div>
+            </div>
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Commencement Date</p>
+                <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)}
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A]" style={S} />
+            </div>
         </div>
-        {[
-          { label: 'Loan / EMI Name *', key: 'name', placeholder: 'e.g. Phone EMI, Home Loan' },
-          { label: 'Bank / Lender', key: 'lender', placeholder: 'e.g. HDFC Bank, Bajaj Finance' },
-          { label: 'Total Loan Amount', key: 'totalAmount', placeholder: '₹500000', type: 'number' },
-          { label: 'EMI per Month *', key: 'emiAmount', placeholder: '₹5000', type: 'number' },
-          { label: 'Total Months *', key: 'months', placeholder: '24', type: 'number' },
-          { label: 'Interest Rate % (optional)', key: 'interestRate', placeholder: '12', type: 'number' },
-        ].map(f => (
-          <div key={f.key} className="mb-4">
-            <p className="text-[12px] font-semibold text-gray-500 mb-1">{f.label}</p>
-            <input type={f.type || 'text'} value={form[f.key]} onChange={e => set(f.key, e.target.value)}
-              placeholder={f.placeholder}
-              className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[15px] text-gray-900 dark:text-white" />
-          </div>
-        ))}
-        <div className="mb-6">
-          <p className="text-[12px] font-semibold text-gray-500 mb-1">Start Date</p>
-          <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)}
-            className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[15px] text-gray-900 dark:text-white" />
-        </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={handleSave}
-          className="w-full py-4 rounded-[20px] text-white font-semibold" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
-          Add EMI
+        <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave}
+          className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg shadow-[#7C6FF720] flex items-center justify-center gap-2" 
+          style={{ background: 'var(--gradient-primary)', ...S }}>
+          Assign Tracker
         </motion.button>
-      </motion.div>
-    </motion.div>
+    </BottomSheet>
   )
 }
 
@@ -66,46 +97,55 @@ function EMICard({ emi, currency, onMarkPaid, onDelete }) {
   const isDueSoon = daysToNext !== null && daysToNext >= 0 && daysToNext <= 3
 
   return (
-    <motion.div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 shadow-sm"
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <p className="font-sora font-bold text-[16px] text-gray-900 dark:text-white">{emi.name}</p>
-          {emi.lender && <p className="text-[12px] text-gray-400">{emi.lender}</p>}
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm group">
+      
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-[20px] bg-[#F8F7FF] border border-[#F0F0F8] flex items-center justify-center text-[#7C6FF7]">
+            <Banknote className="w-7 h-7" />
+          </div>
+          <div>
+            <h4 className="text-[18px] font-[800] text-[#0F172A] tracking-tight leading-tight" style={S}>{emi.name}</h4>
+            <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>{emi.lender || 'Credit Account'}</p>
+          </div>
         </div>
         <div className="text-right">
-          <p className="text-[20px] font-sora font-bold text-red-500">-{formatMoney(emi.emiAmount, currency)}/mo</p>
-          <p className="text-[11px] text-gray-400">{remaining} months left</p>
+          <p className="text-[20px] font-[800] text-[#F43F5E] tracking-tight" style={S}>-{formatMoney(emi.emiAmount, currency)}</p>
+          <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mt-0.5" style={S}>{remaining} INST. LEFT</p>
         </div>
       </div>
-      {/* Progress bar */}
-      <div className="mb-3">
-        <div className="flex justify-between text-[11px] text-gray-400 mb-1">
-          <span>Paid: {formatMoney(paidAmount, currency)}</span>
-          <span>Left: {formatMoney(remainingAmount, currency)}</span>
+
+      <div className="mb-6">
+        <div className="flex justify-between items-baseline mb-2">
+           <span className="text-[12px] font-[800] text-[#94A3B8]" style={S}>{Math.round(progress)}% Liquidation</span>
+           <span className="text-[12px] font-[800] text-[#0F172A]" style={S}>{formatMoney(remainingAmount, currency)} Unpaid</span>
         </div>
-        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div className="h-full bg-purple-600 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ delay: 0.2 }} />
+        <div className="h-2.5 bg-[#F8F7FF] border border-[#F0F0F8] rounded-full overflow-hidden">
+          <motion.div className="h-full bg-[#7C6FF7] rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8 }} />
         </div>
-        <p className="text-[11px] text-purple-600 mt-1">{Math.round(progress)}% paid</p>
       </div>
-      {/* Due date */}
+
       {emi.nextDueDate && (
-        <div className={`flex items-center gap-1.5 mb-3 text-[12px] font-medium ${isOverdue ? 'text-red-500' : isDueSoon ? 'text-orange-500' : 'text-gray-500'}`}>
-          {isOverdue ? <AlertCircle className="w-3.5 h-3.5" /> : null}
-          Next due: {format(parseISO(emi.nextDueDate), 'dd MMM yyyy')}
-          {isOverdue && ' — OVERDUE'}
-          {isDueSoon && !isOverdue && ` — Due in ${daysToNext} days`}
+        <div className={`flex items-center gap-2 mb-6 p-4 rounded-[20px] border ${isOverdue ? 'bg-[#FFF5F5] border-[#FFE0E0] text-[#F43F5E]' : 'bg-[#F8F7FF] border-[#F0F0F8] text-[#64748B]'}`}>
+           {isOverdue ? <AlertCircle className="w-4 h-4" /> : <Calendar className="w-4 h-4 text-[#94A3B8]" />}
+           <p className="text-[13px] font-[800] tracking-tight" style={S}>
+             Next: {format(parseISO(emi.nextDueDate), 'dd MMM yyyy')}
+             {isOverdue && ' (OVERDUE)'}
+             {isDueSoon && !isOverdue && ` (Due in ${daysToNext} days)`}
+           </p>
         </div>
       )}
-      <div className="flex gap-2">
-        <button onClick={() => onMarkPaid(emi.id)}
-          className="flex-1 py-2.5 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 font-semibold text-[13px] flex items-center justify-center gap-1">
-          <CheckCircle className="w-4 h-4" /> Mark Paid
-        </button>
-        <button onClick={() => onDelete(emi.id)} className="px-4 py-2.5 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 text-[13px]">
-          Remove
-        </button>
+
+      <div className="flex gap-3">
+        <motion.button whileTap={{ scale: 0.96 }} onClick={() => onMarkPaid(emi.id)}
+          className="flex-[2] py-4 rounded-[18px] bg-[#7C6FF7] text-white font-[800] text-[13px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#7C6FF720]">
+          <CheckCircle className="w-4 h-4" strokeWidth={3} /> Log Payment
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.96 }} onClick={() => onDelete(emi.id)} 
+          className="flex-1 py-4 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8] text-[#94A3B8] font-[800] text-[13px] flex items-center justify-center">
+          <Trash2 className="w-5 h-5" />
+        </motion.button>
       </div>
     </motion.div>
   )
@@ -122,37 +162,44 @@ export default function EMIScreen() {
   const monthlyTotal = thisMonthTotal()
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
-      <TopHeader title="My EMIs" />
+    <div className="flex flex-col min-h-dvh bg-[#F8F7FF] pb-24">
+      <TopHeader title="EMI Tracker" />
 
-      {/* Monthly total hero */}
       {emis.length > 0 && (
-        <div className="mx-4 mb-4 rounded-[20px] p-5 text-white" style={{ background: 'linear-gradient(135deg,#EF4444,#DC2626)', boxShadow: '0 8px 32px rgba(239,68,68,0.3)' }}>
-          <p className="text-xs opacity-70 uppercase tracking-wide mb-1">This Month's EMIs</p>
-          <p className="text-[32px] font-sora font-bold">-{formatMoney(monthlyTotal, currency)}</p>
-          <p className="text-sm opacity-70 mt-1">{emis.filter(e => e.isActive).length} active loans</p>
+        <div className="mx-6 mb-8 mt-2 rounded-[36px] p-8 text-white relative overflow-hidden shadow-xl" 
+             style={{ background: 'linear-gradient(135deg, #F43F5E, #FB7185)' }}>
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 -mr-16 -mt-16" />
+          <p className="text-[12px] font-[800] text-white/70 uppercase tracking-[0.25em] mb-2" style={S}>Current Liability</p>
+          <p className="text-[42px] font-[800] leading-none tracking-tighter" style={S}>-{formatMoney(monthlyTotal, currency)}</p>
+          <div className="flex items-center gap-2 mt-6">
+             <div className="px-3 py-1 rounded-full bg-white/20 border border-white/20">
+                <p className="text-[10px] font-[800] text-white uppercase tracking-wider" style={S}>{emis.filter(e => e.isActive).length} Active Loans</p>
+             </div>
+          </div>
         </div>
       )}
 
       {emis.length === 0 ? (
-        <EmptyState type="emis" title="No EMIs added" message="Track your loans and EMIs here" />
+        <EmptyState type="emis" title="No Obligations" message="Your active loan repository is currently vacant. Initialize a tracker to begin." />
       ) : (
-        <div className="px-4 flex flex-col gap-3">
+        <div className="px-6 flex flex-col gap-6 pb-24">
           {emis.map(emi => (
             <EMICard key={emi.id} emi={emi} currency={currency} onMarkPaid={markPaid} onDelete={removeEMI} />
           ))}
         </div>
       )}
 
-      <motion.button whileTap={{ scale: 0.92 }} onClick={() => setShowAdd(true)}
-        className="fixed bottom-24 right-5 w-14 h-14 rounded-full text-white shadow-xl flex items-center justify-center z-40"
-        style={{ background: '#F97316' }}>
-        <Plus className="w-6 h-6" />
+      {/* FAB */}
+      <motion.button 
+        initial={{ scale: 0 }} animate={{ scale: 1 }}
+        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} 
+        onClick={() => setShowAdd(true)}
+        className="fixed bottom-28 right-6 w-16 h-16 rounded-[22px] text-white shadow-xl flex items-center justify-center z-40"
+        style={{ background: 'var(--gradient-primary)' }}>
+        <Plus className="w-8 h-8" strokeWidth={3} />
       </motion.button>
 
-      <AnimatePresence>
-        {showAdd && <AddEMISheet onSave={addEMI} onClose={() => setShowAdd(false)} />}
-      </AnimatePresence>
+      <AddEMISheet show={showAdd} onSave={addEMI} onClose={() => setShowAdd(false)} />
     </div>
   )
 }

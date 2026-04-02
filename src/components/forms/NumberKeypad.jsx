@@ -9,17 +9,20 @@ const keys = [
   '.', '0', 'del',
 ]
 
+const S = { fontFamily: "'Nunito', sans-serif" }
+
 export default function NumberKeypad({ onKey }) {
   return (
-    <div className="grid grid-cols-3 gap-3 px-4">
+    <div className="grid grid-cols-3 gap-4 px-6 mb-4">
       {keys.map(key => (
         <motion.button
           key={key}
-          whileTap={{ scale: 0.88, backgroundColor: '#F3E8FF' }}
+          whileTap={{ scale: 0.9, backgroundColor: '#EEF2FF', borderColor: '#7C6FF740' }}
           onClick={() => onKey(key)}
-          className="flex items-center justify-center h-14 rounded-2xl bg-white dark:bg-[#242438] shadow-sm text-[22px] font-sora font-semibold text-gray-900 dark:text-white"
+          className="flex items-center justify-center h-16 rounded-[24px] bg-white border border-[#F0F0F8] shadow-sm text-[24px] font-[800] text-[#0F172A] active:text-[#7C6FF7] transition-colors"
+          style={S}
         >
-          {key === 'del' ? <Delete className="w-5 h-5" /> : key}
+          {key === 'del' ? <Delete className="w-6 h-6 text-[#64748B]" /> : key}
         </motion.button>
       ))}
     </div>

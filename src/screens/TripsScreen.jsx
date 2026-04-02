@@ -7,12 +7,41 @@ import TopHeader from '../components/shared/TopHeader'
 import EmptyState from '../components/shared/EmptyState'
 import { formatMoney } from '../utils/formatMoney'
 import { format, parseISO, differenceInDays } from 'date-fns'
-import { Plus, X, MapPin, Plane } from 'lucide-react'
+import { Plus, X, MapPin, Plane, Calendar, ChevronRight, Trash2 } from 'lucide-react'
 
-const TRIP_COLORS = ['#7C3AED', '#F97316', '#22C55E', '#06B6D4', '#EC4899', '#EAB308']
+const TRIP_COLORS = ['#7C6FF7', '#FF7043', '#10B981', '#06B6D4', '#EC4899', '#F59E0B']
 const TRIP_EMOJIS = ['✈️','🏖️','🚗','🗼','🗽','🏔️','🏰','🌇','🏕️','🚢']
 
-function AddTripSheet({ onSave, onClose }) {
+const S = { fontFamily: "'Nunito', sans-serif" }
+
+// Premium BottomSheet
+function BottomSheet({ show, onClose, title, children }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(15,23,42,0.4)' }} />
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+            <div className="w-12 h-1.5 bg-[#EEF2FF] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-6 mb-5">
+              <h3 className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h3>
+              <button onClick={onClose} className="w-11 h-11 rounded-full bg-[#F8F9FF] flex items-center justify-center border border-[#F0F0F8]">
+                <X className="w-5 h-5 text-[#64748B]" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-8 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function AddTripSheet({ onSave, onClose, show }) {
   const [form, setForm] = useState({
     name: '', emoji: '✈️', color: TRIP_COLORS[0],
     budget: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: ''
@@ -31,71 +60,46 @@ function AddTripSheet({ onSave, onClose }) {
   }
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[28px] p-6 pb-10 max-h-[85vh] overflow-y-auto"
-        initial={{ y: 400 }} animate={{ y: 0 }} exit={{ y: 400 }} transition={{ type: 'spring', damping: 25 }}>
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Plan New Trip</p>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+    <BottomSheet show={show} onClose={onClose} title="Plan New Adventure">
+        <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-4 ml-1" style={S}>Pick an Emoji</p>
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 mb-6">
+          {TRIP_EMOJIS.map(e => (
+            <button key={e} onClick={() => set('emoji', e)}
+              className={`w-14 h-14 rounded-2xl text-2xl flex-shrink-0 flex items-center justify-center transition-all border ${form.emoji === e ? 'bg-[#F8F7FF] border-[var(--primary)] shadow-sm' : 'bg-white border-[#F0F0F8]'}`}>{e}</button>
+          ))}
         </div>
-        
-        {/* Style picker */}
-        <div className="flex gap-4 mb-4">
-          <div className="flex-1">
-            <p className="text-[12px] font-semibold text-gray-500 mb-2">Emoji</p>
-            <div className="flex gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-2xl overflow-x-auto no-scrollbar">
-              {TRIP_EMOJIS.map(e => (
-                <button key={e} onClick={() => set('emoji', e)}
-                  className={`flex-shrink-0 w-10 h-10 rounded-xl text-xl flex items-center justify-center ${form.emoji === e ? 'bg-white dark:bg-[#0F0F1A] shadow-sm ring-1 ring-gray-200 dark:ring-gray-700' : ''}`}>{e}</button>
-              ))}
+
+        <div className="space-y-5 mb-8">
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Trip Name</p>
+                <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Euro Summer, Goa"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
             </div>
-          </div>
-        </div>
-        <div className="mb-4">
-          <p className="text-[12px] font-semibold text-gray-500 mb-2">Cover Color</p>
-          <div className="flex gap-3">
-            {TRIP_COLORS.map(c => (
-              <button key={c} onClick={() => set('color', c)}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-all" style={{ backgroundColor: c }}>
-                {form.color === c && <div className="w-3 h-3 bg-white rounded-full" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Inputs */}
-        {[
-          { label: 'Trip Name *', key: 'name', placeholder: 'e.g. Euro Trip, Goa' },
-          { label: 'Total Budget *', key: 'budget', placeholder: '₹1,00,000', type: 'number' },
-        ].map(f => (
-          <div key={f.key} className="mb-4">
-            <p className="text-[12px] font-semibold text-gray-500 mb-1">{f.label}</p>
-            <input type={f.type || 'text'} value={form[f.key]} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder}
-              className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[15px] text-gray-900 dark:text-white" />
-          </div>
-        ))}
-        
-        <div className="flex gap-3 mb-6">
-          <div className="flex-1">
-            <p className="text-[12px] font-semibold text-gray-500 mb-1">Start Date</p>
-            <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)}
-              className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[14px] text-gray-900 dark:text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[12px] font-semibold text-gray-500 mb-1">End Date *</p>
-            <input type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} min={form.startDate}
-              className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[14px] text-gray-900 dark:text-white" />
-          </div>
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Total Budget</p>
+                <input type="number" value={form.budget} onChange={e => set('budget', e.target.value)} placeholder="0.00"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[22px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+            </div>
+            <div className="flex gap-4">
+               <div className="flex-1">
+                  <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>From</p>
+                  <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)}
+                    className="w-full py-4 px-4 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[14px] font-[800] text-[#0F172A]" style={S} />
+               </div>
+               <div className="flex-1">
+                  <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>To</p>
+                  <input type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} min={form.startDate}
+                    className="w-full py-4 px-4 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[14px] font-[800] text-[#0F172A]" style={S} />
+               </div>
+            </div>
         </div>
 
-        <motion.button whileTap={{ scale: 0.97 }} onClick={handleSave}
-          className="w-full py-4 rounded-[20px] text-white font-semibold flex items-center justify-center gap-2"
-          style={{ backgroundColor: form.color }}>
-          <Plane className="w-5 h-5" /> Start Planning
+        <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave}
+          className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg shadow-[#7C6FF720] flex items-center justify-center gap-2" 
+          style={{ background: 'var(--gradient-primary)', ...S }}>
+          <Plane className="w-5 h-5" /> Confirm Adventure
         </motion.button>
-      </motion.div>
-    </motion.div>
+    </BottomSheet>
   )
 }
 
@@ -107,64 +111,69 @@ function TripCard({ trip, currency, onDelete, onActivate }) {
   const dailyRemaining = daysLeft > 0 ? remaining / daysLeft : 0
 
   return (
-    <motion.div className="bg-white dark:bg-[#1A1A2E] rounded-[24px] overflow-hidden shadow-sm relative"
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Cover Header */}
-      <div className="p-4 flex items-start justify-between relative" style={{ backgroundColor: trip.color }}>
-        <div className="relative z-10">
-          <span className="text-4xl block mb-2">{trip.emoji}</span>
-          <p className="font-sora font-bold text-white text-[18px] mb-1">{trip.name}</p>
-          {trip.startDate && trip.endDate && (
-            <p className="text-white/80 text-[11px] font-medium flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {format(parseISO(trip.startDate), 'MMM d')} - {format(parseISO(trip.endDate), 'MMM d, yyyy')}
-            </p>
-          )}
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-[#F0F0F8] rounded-[32px] overflow-hidden shadow-sm group">
+      
+      {/* Header Card Style */}
+      <div className="p-6 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${trip.color}, ${trip.color}CC)` }}>
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 -mr-16 -mt-16" />
+        <div className="relative z-10 flex justify-between items-start">
+           <div>
+              <span className="text-4xl block mb-3 drop-shadow-sm">{trip.emoji}</span>
+              <h4 className="text-[20px] font-[800] text-white tracking-tight" style={S}>{trip.name}</h4>
+              <div className="flex items-center gap-1.5 mt-1 text-white/80">
+                 <Calendar className="w-3.5 h-3.5" />
+                 <p className="text-[11px] font-[800] uppercase tracking-wider" style={S}>
+                    {format(parseISO(trip.startDate), 'MMM d')} - {format(parseISO(trip.endDate), 'MMM d, yyyy')}
+                 </p>
+              </div>
+           </div>
+           <motion.button whileTap={{ scale: 0.9 }} onClick={() => onDelete(trip.id)} 
+             className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+             <X className="w-5 h-5" />
+           </motion.button>
         </div>
-        <button onClick={() => onDelete(trip.id)} className="p-2 text-white/50 hover:bg-white/10 rounded-full transition relative z-10"><X className="w-4 h-4" /></button>
-        {/* Decorative circle */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
       </div>
 
-      <div className="p-4">
-        <div className="flex justify-between items-end mb-3">
+      <div className="p-6">
+        <div className="flex justify-between items-end mb-4">
           <div>
-            <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Left to spend</p>
-            <p className="font-sora font-bold text-[22px]" style={{ color: trip.color }}>{formatMoney(remaining, currency)}</p>
+            <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>Budget Left</p>
+            <p className="text-[24px] font-[800] text-[#0F172A] tracking-tight" style={S}>{formatMoney(remaining, currency)}</p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] text-gray-400 font-semibold mb-0.5">Budget</p>
-            <p className="font-semibold text-[15px] dark:text-gray-200">{formatMoney(trip.budget, currency)}</p>
+            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest" style={S}>of {formatMoney(trip.budget, currency)}</p>
           </div>
         </div>
 
-        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
-          <motion.div className="h-full rounded-full" style={{ backgroundColor: trip.color, width: `${progress}%` }} />
+        <div className="h-2.5 bg-[#F8F7FF] rounded-full overflow-hidden border border-[#F0F0F8] mb-6">
+          <motion.div className="h-full rounded-full" style={{ backgroundColor: trip.color, width: `${progress}%` }} 
+            initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8 }} />
         </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
-            <p className="text-[11px] text-gray-400 font-medium mb-1">Daily Budget Left</p>
-            <p className="font-semibold text-[14px] text-gray-900 dark:text-white">
-              {daysLeft > 0 ? formatMoney(dailyRemaining, currency) : '—'}
+        <div className="flex gap-3 mb-6">
+          <div className="flex-1 bg-[#F8F7FF] border border-[#F0F0F8] rounded-[20px] p-3 text-center">
+            <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>Daily Cap</p>
+            <p className="font-[800] text-[14px] text-[#0F172A]" style={S}>
+              {daysLeft > 0 ? formatMoney(dailyRemaining, currency) : 'Reached'}
             </p>
           </div>
-          <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
-            <p className="text-[11px] text-gray-400 font-medium mb-1">Days Remaining</p>
-            <p className="font-semibold text-[14px] text-gray-900 dark:text-white">{daysLeft}</p>
+          <div className="flex-1 bg-[#F8F7FF] border border-[#F0F0F8] rounded-[20px] p-3 text-center">
+            <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>Days Left</p>
+            <p className="font-[800] text-[14px] text-[#0F172A]" style={S}>{daysLeft}</p>
           </div>
         </div>
 
         {trip.isActive ? (
-          <div className="mt-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 font-semibold text-[13px] text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-            Currently Active Trip
+          <div className="py-3.5 rounded-[18px] bg-[#ECFDF5] border border-[#10B98130] text-[#10B981] font-[800] text-[12px] text-center uppercase tracking-widest" style={S}>
+            Targeting Active Adventure
           </div>
         ) : (
-          <button onClick={() => onActivate(trip.id)}
-            className="mt-4 w-full py-2.5 rounded-xl text-white font-semibold text-[13px] transition"
-            style={{ backgroundColor: trip.color }}>
-            Set as Active Trip
-          </button>
+          <motion.button whileTap={{ scale: 0.96 }} onClick={() => onActivate(trip.id)}
+            className="w-full py-4 rounded-[18px] text-white font-[800] text-[13px] uppercase tracking-widest shadow-md"
+            style={{ backgroundColor: trip.color, boxShadow: `0 8px 20px ${trip.color}25`, ...S }}>
+            Activate Tracker
+          </motion.button>
         )}
       </div>
     </motion.div>
@@ -180,7 +189,6 @@ export default function TripsScreen() {
   useEffect(() => { loadTrips() }, [])
 
   const handleActivate = (id) => {
-    // Deactivate all, activate one
     trips.forEach(t => {
       if (t.isActive && t.id !== id) updateTrip(t.id, { isActive: false })
     })
@@ -188,29 +196,30 @@ export default function TripsScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] pb-20">
-      <TopHeader title="My Trips" />
+    <div className="flex flex-col min-h-dvh bg-[#F8F7FF] pb-20">
+      <TopHeader title="Trips" />
 
       {trips.length === 0 ? (
-        <EmptyState type="trips" title="No trips planned" message="Create your first trip budget to start tracking holiday expenses independently." />
+        <EmptyState type="trips" title="No Expeditions" message="Initialize your first trip ledger to begin monitoring holiday expenditure." />
       ) : (
-        <div className="px-4 flex flex-col gap-4 pb-24">
+        <div className="px-6 flex flex-col gap-8 pb-32">
           {trips.map(trip => (
             <TripCard key={trip.id} trip={trip} currency={currency} onDelete={removeTrip} onActivate={handleActivate} />
           ))}
         </div>
       )}
 
-      {/* Hero FAB */}
-      <motion.button whileTap={{ scale: 0.92 }} onClick={() => setShowAdd(true)}
-        className="fixed bottom-24 right-5 w-14 h-14 rounded-full text-white shadow-xl flex items-center justify-center z-40"
-        style={{ background: '#F97316' }}>
-        <Plus className="w-6 h-6" />
+      {/* FAB */}
+      <motion.button 
+        initial={{ scale: 0 }} animate={{ scale: 1 }}
+        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} 
+        onClick={() => setShowAdd(true)}
+        className="fixed bottom-28 right-6 w-16 h-16 rounded-[22px] text-white shadow-xl flex items-center justify-center z-40"
+        style={{ background: 'var(--gradient-primary)' }}>
+        <Plus className="w-8 h-8" strokeWidth={3} />
       </motion.button>
 
-      <AnimatePresence>
-        {showAdd && <AddTripSheet onSave={addTrip} onClose={() => setShowAdd(false)} />}
-      </AnimatePresence>
+      <AddTripSheet show={showAdd} onSave={addTrip} onClose={() => setShowAdd(false)} />
     </div>
   )
 }

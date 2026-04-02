@@ -3,37 +3,32 @@ import { motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { formatMoney } from '../../utils/formatMoney'
 
-function StatCard({ label, amount, currency, isIncome }) {
-  const color = isIncome ? '#10B981' : '#F43F5E'
-  const bg = isIncome ? '#ECFDF5' : '#FFF1F2'
+function StatCard({ label, amount, currency, isIncome, index }) {
+  const color = isIncome ? '#10B981' : '#FF7043'
+  const bg = isIncome ? '#F0FDF4' : '#FFF7ED'
   const Icon = isIncome ? ArrowDownLeft : ArrowUpRight
+  const S = { fontFamily: "'Nunito', sans-serif" }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex-1 p-4"
-      style={{
-        background: '#FFFFFF',
-        border: '1px solid #F0F0F8',
-        borderRadius: '16px',
-        boxShadow: '0 2px 12px rgba(99,102,241,0.06)',
-      }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
+      className="flex-1 p-5 bg-white border border-[#F0F0F8] rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: bg }}>
-          <Icon className="w-4 h-4" style={{ color }} />
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-9 h-9 rounded-[12px] flex items-center justify-center shadow-sm" style={{ background: bg, border: `1px solid ${color}15` }}>
+          <Icon className="w-5 h-5" style={{ color }} />
         </div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#94A3B8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <p className="text-[11px] font-[800] uppercase tracking-[0.1em] text-[#94A3B8]" style={S}>
           {label}
         </p>
       </div>
-      <p className="text-[20px] font-bold" style={{ color: '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <p className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>
         {formatMoney(amount, currency)}
       </p>
-      <div className="flex items-center gap-1.5 mt-1">
-        <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-        <p className="text-[11px] text-[#94A3B8]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>This month</p>
+      <div className="flex items-center gap-1.5 mt-2">
+        <p className="text-[11px] font-[700] text-[#CBD5E1] uppercase tracking-wider" style={S}>This Month</p>
       </div>
     </motion.div>
   )
@@ -41,9 +36,9 @@ function StatCard({ label, amount, currency, isIncome }) {
 
 export default function SalaryExpenseCards({ income, expense, currency = 'USD' }) {
   return (
-    <div className="flex gap-3 px-5">
-      <StatCard label="Income" amount={income} currency={currency} isIncome={true} />
-      <StatCard label="Spent" amount={expense} currency={currency} isIncome={false} />
+    <div className="flex gap-4 px-5">
+      <StatCard label="Income" amount={income} currency={currency} isIncome={true} index={0} />
+      <StatCard label="Spent" amount={expense} currency={currency} isIncome={false} index={1} />
     </div>
   )
 }

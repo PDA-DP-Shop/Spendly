@@ -115,7 +115,7 @@ export default function BarcodeScanner({ onProductFound, onClose }) {
     <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="fixed inset-0 z-[100] bg-black flex flex-col">
       <div className="flex items-center justify-between px-4 py-4 safe-top bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 text-white">
-        <h2 className="font-sora font-semibold text-[18px] flex items-center gap-2">
+        <h2 className="font-sans font-semibold text-[18px] flex items-center gap-2">
           <Camera className="w-5 h-5" /> Scan Barcode / QR
         </h2>
         <button onClick={onClose} className="p-2 bg-white/10 rounded-full backdrop-blur-md">

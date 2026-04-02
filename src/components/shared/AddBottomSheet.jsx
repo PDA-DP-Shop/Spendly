@@ -68,7 +68,7 @@ export default function AddBottomSheet({ show, onClose }) {
             </div>
 
             <div className="flex items-center justify-between px-5 pb-4">
-              <p className="text-[18px] font-bold text-[#0F172A]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <p className="text-[18px] font-bold text-[#0F172A]" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 Add Transaction
               </p>
               <button onClick={onClose} className="w-9 h-9 rounded-full bg-[#F8F9FF] flex items-center justify-center">
@@ -94,10 +94,10 @@ export default function AddBottomSheet({ show, onClose }) {
                       <Icon className="w-6 h-6" style={{ color: opt.color }} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-[16px] font-semibold text-[#0F172A]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      <p className="text-[16px] font-semibold text-[#0F172A]" style={{ fontFamily: "'Nunito', sans-serif" }}>
                         {opt.title}
                       </p>
-                      <p className="text-[13px] text-[#64748B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      <p className="text-[13px] text-[#64748B]" style={{ fontFamily: "'Nunito', sans-serif" }}>
                         {opt.subtitle}
                       </p>
                     </div>

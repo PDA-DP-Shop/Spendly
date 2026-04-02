@@ -33,17 +33,17 @@ export default function ConfirmDialog({ show, title, message, confirmText = 'Yes
                 <AlertTriangle className="w-7 h-7 text-[#F43F5E]" />
               </div>
             )}
-            <h3 className="text-[18px] font-bold text-[#0F172A] text-center mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h3 className="text-[18px] font-bold text-[#0F172A] text-center mb-2" style={{ fontFamily: "'Nunito', sans-serif" }}>
               {title}
             </h3>
-            <p className="text-[14px] text-[#64748B] text-center mb-6 leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p className="text-[14px] text-[#64748B] text-center mb-6 leading-relaxed" style={{ fontFamily: "'Nunito', sans-serif" }}>
               {message}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={onCancel}
                 className="flex-1 py-3.5 rounded-[14px] text-[15px] font-semibold"
-                style={{ background: '#F8F9FF', color: '#64748B', border: '1px solid #E2E8F0', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                style={{ background: '#F8F9FF', color: '#64748B', border: '1px solid #E2E8F0', fontFamily: "'Nunito', sans-serif" }}
               >
                 {cancelText}
               </button>
@@ -52,7 +52,7 @@ export default function ConfirmDialog({ show, title, message, confirmText = 'Yes
                 className="flex-1 py-3.5 rounded-[14px] text-white text-[15px] font-semibold"
                 style={{
                   background: isDestructive ? '#F43F5E' : 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif"
+                  fontFamily: "'Nunito', sans-serif"
                 }}
               >
                 {confirmText}

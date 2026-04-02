@@ -1,10 +1,11 @@
 // Fingerprint / Face ID biometric lock component
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Fingerprint } from 'lucide-react'
+import { Fingerprint, CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function FingerprintLock({ onVerify }) {
   const [state, setState] = useState('idle') // idle | scanning | success | fail
+  const S = { fontFamily: "'Nunito', sans-serif" }
 
   const scan = async () => {
     setState('scanning')
@@ -13,7 +14,7 @@ export default function FingerprintLock({ onVerify }) {
         const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
         if (available) {
           setState('success')
-          setTimeout(() => onVerify(), 500)
+          setTimeout(() => onVerify(), 600)
           return
         }
       }
@@ -24,31 +25,57 @@ export default function FingerprintLock({ onVerify }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8">
+    <div className="flex flex-col items-center gap-10 py-12">
       <motion.button
-        whileTap={{ scale: 0.9 }}
+        whileTap={{ scale: 0.95 }}
         onClick={scan}
-        animate={state === 'scanning' ? { scale: [1, 1.05, 1] } : {}}
-        transition={{ repeat: state === 'scanning' ? Infinity : 0, duration: 1 }}
+        className="relative"
       >
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-colors ${
-          state === 'success' ? 'bg-green-100' :
-          state === 'fail' ? 'bg-red-100' :
-          'bg-purple-50 dark:bg-purple-900/20'
-        }`}>
-          <Fingerprint className={`w-14 h-14 ${
-            state === 'success' ? 'text-green-500' :
-            state === 'fail' ? 'text-red-500' :
-            'text-purple-600'
-          }`} />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className={`w-32 h-32 rounded-[40px] flex items-center justify-center transition-all shadow-xl ${
+              state === 'success' ? 'bg-[#ECFDF5] border border-[#10B981]' :
+              state === 'fail' ? 'bg-[#FEF2F2] border border-[#EF4444]' :
+              'bg-white border border-[#F0F0F8]'
+            }`}
+          >
+            {state === 'success' ? (
+              <CheckCircle2 className="w-16 h-16 text-[#10B981]" />
+            ) : state === 'fail' ? (
+              <AlertCircle className="w-16 h-16 text-[#EF4444]" />
+            ) : (
+                <Fingerprint className={`w-16 h-16 ${state === 'scanning' ? 'text-[var(--primary)] animate-pulse' : 'text-[var(--primary)]'}`} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+        
+        {state === 'scanning' && (
+          <motion.div 
+            animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute inset-0 bg-[var(--primary)] rounded-[40px] -z-10"
+          />
+        )}
       </motion.button>
-      <p className="text-[15px] font-medium text-gray-600 dark:text-gray-300">
-        {state === 'idle' && 'Tap to use Face ID or Fingerprint'}
-        {state === 'scanning' && 'Scanning...'}
-        {state === 'success' && '✓ Verified!'}
-        {state === 'fail' && 'Not available on this device'}
-      </p>
+
+      <div className="flex flex-col items-center gap-2">
+          <p className="text-[16px] font-[800] text-[#0F172A]" style={S}>
+            {state === 'idle' && 'Biometric Access'}
+            {state === 'scanning' && 'Scanning...'}
+            {state === 'success' && 'Verified'}
+            {state === 'fail' && 'Device Busy'}
+          </p>
+          <p className="text-[13px] font-[700] text-[#94A3B8] uppercase tracking-widest text-center" style={S}>
+            {state === 'idle' && 'Tap to unlock Spendly'}
+            {state === 'scanning' && 'Keep your finger steady'}
+            {state === 'success' && 'Redirecting you home'}
+            {state === 'fail' && 'Try again or use PIN'}
+          </p>
+      </div>
     </div>
   )
 }

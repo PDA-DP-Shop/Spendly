@@ -2,7 +2,7 @@ import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatMoneyCompact } from '../../utils/formatMoney'
 
 export default function WeekdayChart({ rawExpenses, currency }) {
-  // rawExpenses -> all time or current month ? Usually filtered by ReportsScreen
+  const S = { fontFamily: 'Nunito' }
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const totals = [0,0,0,0,0,0,0]
   const counts = [0,0,0,0,0,0,0]
@@ -14,10 +14,9 @@ export default function WeekdayChart({ rawExpenses, currency }) {
     counts[d]++
   })
 
-  // Start with Monday using modulo logic
+  // Start with Monday
   const orderedDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const data = orderedDays.map((name, i) => {
-    // Map back to JS getDay() index: Mon=1, Tue=2, ..., Sun=0
     const jsIndex = i === 6 ? 0 : i + 1
     const avg = counts[jsIndex] > 0 ? totals[jsIndex] / counts[jsIndex] : 0
     return { name, avg, total: totals[jsIndex], isWeekend: name === 'Sat' || name === 'Sun' }
@@ -27,9 +26,9 @@ export default function WeekdayChart({ rawExpenses, currency }) {
     if (active && payload && payload.length) {
       const d = payload[0].payload
       return (
-        <div className="bg-gray-900 text-white p-3 rounded-xl shadow-xl border border-gray-800 text-center">
-          <p className="text-xs text-gray-400 mb-1">{d.name} Average</p>
-          <p className="font-sora font-bold text-lg" style={{ color: d.isWeekend ? '#F97316' : '#7C3AED' }}>
+        <div className="bg-white px-4 py-2.5 rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>{d.name} Average</p>
+          <p className="text-[16px] font-[800]" style={{ color: d.isWeekend ? 'var(--secondary)' : 'var(--primary)', ...S }}>
             {formatMoneyCompact(d.avg, currency)}
           </p>
         </div>
@@ -44,28 +43,35 @@ export default function WeekdayChart({ rawExpenses, currency }) {
   const weekendPct = total > 0 ? Math.round((weekendTotal / total) * 100) : 0
 
   return (
-    <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <p className="font-sora font-bold text-[15px] text-gray-900 dark:text-white">Daily Averages</p>
-        <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 px-3 py-1 rounded-full text-[11px] font-bold">
-          {weekendPct}% on Weekends
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col">
+            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-0.5" style={S}>Daily Load</p>
+            <h4 className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>Averages</h4>
+          </div>
+        <div className="bg-[#FFF7F2] border border-[#FFEBE4] text-[var(--secondary)] px-4 py-2 rounded-full text-[11px] font-[800] uppercase tracking-wider" style={S}>
+          {weekendPct}% Weekend
         </div>
       </div>
-      <div className="h-[180px] w-full">
+
+      <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-            <Bar dataKey="avg" radius={[6, 6, 6, 6]} barSize={32}>
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124, 111, 247, 0.02)' }} />
+            <Bar dataKey="avg" radius={[12, 12, 12, 12]} barSize={36} animationDuration={1500}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.isWeekend ? '#F97316' : '#7C3AED'} />
+                <Cell key={`cell-${index}`} fill={entry.isWeekend ? 'var(--secondary)' : 'var(--primary)'} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex justify-between px-2 mt-2">
+
+      <div className="flex justify-between px-2 mt-5">
         {data.map(d => (
-          <p key={d.name} className={`text-[10px] font-bold ${d.isWeekend ? 'text-orange-500' : 'text-gray-400'}`}>{d.name}</p>
+          <p key={d.name} className="text-[11px] font-[800] uppercase tracking-widest" style={{ color: d.isWeekend ? 'var(--secondary)' : '#CBD5E1', ...S }}>
+            {d.name.charAt(0)}
+          </p>
         ))}
       </div>
     </div>

@@ -1,21 +1,21 @@
 // White premium theme color system for Spendly
+// Based on Purple (#7C6FF7) and Orange (#FF7043) brand palette
 
 export const COLORS = {
-
   // Page backgrounds
   bgPage:        '#FFFFFF',
-  bgSection:     '#F8F9FF',
+  bgSection:     '#F8F7FF',
   bgCard:        '#FFFFFF',
-  bgCardHover:   '#F8F9FF',
+  bgCardHover:   '#F8F7FF',
 
-  // Primary — Indigo
-  primary:       '#6366F1',
+  // Primary — Purple
+  primary:       '#7C6FF7',
   primaryLight:  '#EEF2FF',
-  primaryGrad:   'linear-gradient(135deg, #6366F1, #8B5CF6)',
+  primaryGrad:   'linear-gradient(135deg, #9B6FE4, #C56BB0)',
 
-  // Secondary — Cyan
-  secondary:     '#06B6D4',
-  secondaryGrad: 'linear-gradient(135deg, #06B6D4, #3B82F6)',
+  // Secondary — Orange
+  secondary:     '#FF7043',
+  secondaryGrad: 'linear-gradient(135deg, #FF7043, #FF8A65)',
 
   // Semantic
   income:        '#10B981',
@@ -34,29 +34,29 @@ export const COLORS = {
   textOnPrimary: '#FFFFFF',
 
   // Borders
-  borderDefault: '#E2E8F0',
-  borderFocus:   '#6366F1',
-  borderLight:   '#F0F0F8',
+  borderDefault: '#F0F0F8',
+  borderFocus:   '#7C6FF7',
+  borderLight:   '#F8F9FF',
 
-  // Legacy aliases (used in many components)
-  cyan:          '#6366F1',
-  blue:          '#8B5CF6',
-  cyanDim:       'rgba(99,102,241,0.1)',
-  blueDim:       'rgba(139,92,246,0.1)',
-  gradientMain:  'linear-gradient(135deg, #6366F1, #8B5CF6)',
+  // Legacy aliases
+  cyan:          '#7C6FF7',
+  blue:          '#FF7043',
+  cyanDim:       'rgba(124, 111, 247, 0.1)',
+  blueDim:       'rgba(255, 112, 67, 0.1)',
+  gradientMain:  'linear-gradient(135deg, #9B6FE4, #C56BB0)',
 
   bgBase:        '#FFFFFF',
-  bgSecondary:   '#F8F9FF',
-  bgElevated:    '#F0F2FF',
+  bgSecondary:   '#F8F7FF',
+  bgElevated:    '#F8F7FF',
 
-  // Category colors (gradient pairs) — keep same for icon circles
+  // Category colors (gradient pairs)
   categories: {
     food:        ['#F43F5E', '#FB7185'],
-    travel:      ['#06B6D4', '#22D3EE'],
+    travel:      ['#7C6FF7', '#9B6FE4'],
     shopping:    ['#8B5CF6', '#A78BFA'],
     bills:       ['#F59E0B', '#FCD34D'],
     health:      ['#10B981', '#34D399'],
-    fun:         ['#6366F1', '#818CF8'],
+    fun:         ['#FF7043', '#FF8A65'],
     education:   ['#8B5CF6', '#6D28D9'],
     coffee:      ['#92400E', '#B45309'],
     rent:        ['#3B82F6', '#60A5FA'],
@@ -64,14 +64,14 @@ export const COLORS = {
     gifts:       ['#F43F5E', '#E11D48'],
     gym:         ['#84CC16', '#65A30D'],
     pets:        ['#FB923C', '#FDBA74'],
-    holiday:     ['#06B6D4', '#0E7490'],
-    tech:        ['#6366F1', '#4338CA'],
+    holiday:     ['#7C6FF7', '#0E7490'],
+    tech:        ['#7C6FF7', '#4338CA'],
     other:       ['#94A3B8', '#64748B'],
   },
 }
 
 export const CHART_COLORS = [
-  '#6366F1', '#8B5CF6', '#06B6D4', '#10B981', '#F43F5E',
+  '#7C6FF7', '#FF7043', '#8B5CF6', '#10B981', '#F43F5E',
   '#F59E0B', '#3B82F6', '#EC4899', '#84CC16', '#FB923C',
   '#22D3EE', '#A78BFA',
 ]

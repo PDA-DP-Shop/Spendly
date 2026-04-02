@@ -25,7 +25,7 @@ export const PdfReportTemplate = forwardRef(({ data, currency }, ref) => {
 
   return (
     <div className="fixed top-[-9999px] left-[-9999px]">
-      <div ref={ref} className="w-[800px] bg-white p-12 text-gray-900 font-sora">
+      <div ref={ref} className="w-[800px] bg-white p-12 text-gray-900 font-sans">
         {/* Header */}
         <div className="flex justify-between items-end border-b-2 border-purple-600 pb-6 mb-8">
           <div>

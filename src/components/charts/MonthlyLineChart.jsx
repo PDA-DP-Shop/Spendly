@@ -8,12 +8,14 @@ export default function MonthlyLineChart({ monthlyTotals, currency = 'USD' }) {
     amount: monthlyTotals?.[i] || 0
   }))
 
+  const S = { fontFamily: 'Nunito' }
+
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="glass-elevated border-white/10 p-3 rounded-xl shadow-glowSmall">
-          <p className="text-[10px] font-display font-bold text-[#7B8DB0] uppercase tracking-wider mb-1">{payload[0].payload.month}</p>
-          <p className="text-[14px] font-display font-bold text-cyan-glow">{formatMoneyCompact(payload[0].value, currency)}</p>
+        <div className="bg-white px-4 py-2.5 rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>{payload[0].payload.month}</p>
+          <p className="text-[16px] font-[800] text-[var(--primary)]" style={S}>{formatMoneyCompact(payload[0].value, currency)}</p>
         </div>
       )
     }
@@ -22,40 +24,44 @@ export default function MonthlyLineChart({ monthlyTotals, currency = 'USD' }) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h4 className="text-[14px] font-display font-bold text-[#F0F4FF] tracking-tight">Liquidity Flow</h4>
-        <div className="flex items-center gap-1.5 self-center">
-          <div className="w-2 h-2 rounded-full bg-cyan-glow shadow-glowSmall" />
-          <p className="text-[11px] font-body font-bold text-[#7B8DB0]">Growth Rate</p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-0.5" style={S}>Trajectory</p>
+          <h4 className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>Balance Flow</h4>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F8F7FF] rounded-full border border-[#F0F0F8]">
+          <div className="w-2 h-2 rounded-full bg-[var(--primary)] shadow-sm" />
+          <p className="text-[11px] font-[800] text-[var(--primary)] uppercase" style={S}>Monthly</p>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={180}>
+      
+      <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="lineColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#00D4FF" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#00D4FF" stopOpacity={0} />
+              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis 
             dataKey="month" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fontSize: 10, fill: '#3D4F70', fontFamily: 'Satoshi, sans-serif', fontWeight: 700 }} 
-            dy={10}
+            tick={{ fontSize: 11, fill: '#CBD5E1', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }} 
+            dy={15}
           />
           <YAxis hide domain={['auto', 'auto']} />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3D4F70', strokeWidth: 1, strokeDasharray: '4 4' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F1F5F9', strokeWidth: 2 }} />
           <Area
             type="monotone"
             dataKey="amount"
-            stroke="#00D4FF"
-            strokeWidth={3}
+            stroke="var(--primary)"
+            strokeWidth={4}
             fillOpacity={1}
             fill="url(#lineColor)"
-            animationBegin={300}
-            animationDuration={2000}
-            activeDot={{ r: 6, fill: '#00D4FF', stroke: '#050B18', strokeWidth: 3, shadow: '0 0 10px #00D4FF' }}
+            animationBegin={0}
+            animationDuration={1500}
+            activeDot={{ r: 6, fill: 'var(--primary)', stroke: '#FFFFFF', strokeWidth: 3, shadow: '0 4px 12px rgba(124,111,247,0.3)' }}
           />
         </AreaChart>
       </ResponsiveContainer>

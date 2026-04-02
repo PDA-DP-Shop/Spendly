@@ -1,7 +1,7 @@
 // Festivals Screen — Feature 21 Seasonal Budgeting
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, Calendar, Gift, ShoppingBag, Utensils, Music, Tag } from 'lucide-react'
+import { Plus, X, Calendar, Gift, ShoppingBag, Utensils, Music, Tag, ChevronRight, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useFestivalStore } from '../store/festivalStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -10,11 +10,40 @@ import { formatMoney } from '../utils/formatMoney'
 import { format, differenceInDays } from 'date-fns'
 
 const FESTIVAL_TEMPLATES = [
-  { id: 'diwali', name: 'Diwali', icon: '🪔', color: '#F59E0B', defaultBudget: 15000, categories: ['Sweets & Food', 'Gifts', 'Crackers', 'Decorations', 'Clothes'] },
-  { id: 'navratri', name: 'Navratri', icon: '💃', color: '#EC4899', defaultBudget: 8000, categories: ['Passes', 'Clothes', 'Props', 'Food'] },
-  { id: 'christmas', name: 'Christmas', icon: '🎄', color: '#10B981', defaultBudget: 10000, categories: ['Gifts', 'Feast', 'Decorations', 'Travel'] },
-  { id: 'eid', name: 'Eid', icon: '🌙', color: '#3B82F6', defaultBudget: 12000, categories: ['Eidi (Gifts)', 'Clothes', 'Feast', 'Charity'] },
+  { id: 'diwali', name: 'Diwali', icon: '🪔', color: '#FF7043', defaultBudget: 15000, categories: ['Food', 'Gifts', 'Decor', 'Clothes'] },
+  { id: 'navratri', name: 'Navratri', icon: '💃', color: '#7C6FF7', defaultBudget: 8000, categories: ['Passes', 'Clothes', 'Props', 'Food'] },
+  { id: 'christmas', name: 'Christmas', icon: '🎄', color: '#10B981', defaultBudget: 10000, categories: ['Gifts', 'Feast', 'Decor', 'Travel'] },
+  { id: 'eid', name: 'Eid', icon: '🌙', color: '#06B6D4', defaultBudget: 12000, categories: ['Gifts', 'Clothes', 'Feast', 'Charity'] },
 ]
+
+const S = { fontFamily: "'Nunito', sans-serif" }
+
+// Premium BottomSheet
+function BottomSheet({ show, onClose, title, children }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(15,23,42,0.4)' }} />
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '95dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+            <div className="w-12 h-1.5 bg-[#EEF2FF] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-6 mb-5">
+              <h3 className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h3>
+              <button onClick={onClose} className="w-11 h-11 rounded-full bg-[#F8F9FF] flex items-center justify-center border border-[#F0F0F8]">
+                <X className="w-5 h-5 text-[#64748B]" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-8 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
 
 export default function FestivalsScreen() {
   const navigate = useNavigate()
@@ -48,57 +77,63 @@ export default function FestivalsScreen() {
   }
 
   return (
-    <div className="flex flex-col h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A]">
-      <TopHeader title="Festival Budgets" />
+    <div className="flex flex-col min-h-dvh bg-[#F8F7FF] pb-24">
+      <TopHeader title="Festivals" />
       
-      <div className="flex-1 overflow-y-auto p-4 mb-tab">
+      <div className="flex-1 px-6 mt-4">
         {festivals.length === 0 ? (
-          <div className="h-[60vh] flex flex-col items-center justify-center text-center opacity-60">
-            <span className="text-6xl mb-4">🪔</span>
-            <p className="text-gray-500 font-medium">No festival budgets yet.<br/>Plan your seasonal spending!</p>
-          </div>
+          <EmptyState type="festivals" title="Festivity Hub" message="Initialize your first seasonal budget to monitor celebratory expenditure." />
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-6">
             {festivals.sort((a,b) => new Date(a.date) - new Date(b.date)).map(fest => {
               const daysLeft = differenceInDays(new Date(fest.date), new Date())
               const progress = Math.min((fest.spent / fest.budget) * 100, 100)
               
               return (
-                <motion.div key={fest.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white dark:bg-[#1A1A2E] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-800">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: `${fest.color}20` }}>
+                <motion.div key={fest.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-[40px] opacity-5" style={{ backgroundColor: fest.color }} />
+                  
+                  <div className="flex justify-between items-start mb-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-[#F0F0F8]" style={{ backgroundColor: `${fest.color}15`, color: fest.color }}>
                         {fest.icon}
                       </div>
                       <div>
-                        <h3 className="font-sora font-bold text-gray-900 dark:text-white leading-tight">{fest.name}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{format(new Date(fest.date), 'MMM dd, yyyy')} • {daysLeft >= 0 ? `${daysLeft} days left` : 'Passed'}</p>
+                        <h3 className="text-[17px] font-[800] text-[#0F172A] tracking-tight" style={S}>{fest.name}</h3>
+                        <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mt-0.5" style={S}>
+                           {format(new Date(fest.date), 'MMM dd')} • {daysLeft >= 0 ? `${daysLeft} days to go` : 'Completed'}
+                        </p>
                       </div>
                     </div>
-                    <button onClick={() => deleteFestival(fest.id)} className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center">
-                      <X className="w-4 h-4" />
-                    </button>
+                    <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteFestival(fest.id)} 
+                      className="w-10 h-10 rounded-[14px] bg-[#FFF5F5] border border-[#FFE0E0] text-[#F43F5E] flex items-center justify-center">
+                      <Trash2 className="w-4.5 h-4.5" />
+                    </motion.button>
                   </div>
                   
-                  <div className="mt-4">
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="text-xs font-semibold text-gray-400 uppercase">Spent</span>
-                      <span className="font-sora font-bold text-lg dark:text-white">
-                        {formatMoney(fest.spent, '')} <span className="text-sm text-gray-400 font-medium">/ {formatMoney(fest.budget, '')}</span>
-                      </span>
+                  <div className="mb-4">
+                    <div className="flex justify-between items-baseline mb-2">
+                      <span className="text-[13px] font-[800] text-[#0F172A]" style={S}>{formatMoney(fest.spent, currency)}</span>
+                      <span className="text-[12px] font-[800] text-[#94A3B8]" style={S}>of {formatMoney(fest.budget, currency)}</span>
                     </div>
-                    <div className="h-2.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: fest.color }} />
+                    <div className="h-2.5 rounded-full bg-[#F8F7FF] border border-[#F0F0F8] overflow-hidden">
+                      <motion.div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: fest.color }}
+                        initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8 }} />
                     </div>
                   </div>
                   
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {fest.categories.map(c => (
-                      <span key={c} className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {fest.categories.slice(0, 3).map(c => (
+                      <span key={c} className="text-[9px] font-[800] uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#F8F7FF] border border-[#F0F0F8] text-[#94A3B8]" style={S}>
                         {c}
                       </span>
                     ))}
+                    {fest.categories.length > 3 && (
+                        <span className="text-[9px] font-[800] uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#F8F7FF] border border-[#F0F0F8] text-[#94A3B8]" style={S}>
+                            +{fest.categories.length - 3}
+                        </span>
+                    )}
                   </div>
                 </motion.div>
               )
@@ -107,60 +142,54 @@ export default function FestivalsScreen() {
         )}
       </div>
 
-      <AnimatePresence>
-        {showAdd && (
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-50 bg-[#F5F5F5] dark:bg-[#0F0F1A] flex flex-col p-4 pb-0">
-            <div className="flex items-center justify-between py-4 safe-top">
-              <h2 className="font-sora font-semibold text-[18px] dark:text-white">Create Festival Budget</h2>
-              <button onClick={() => setShowAdd(false)} className="p-2 bg-gray-200 dark:bg-gray-800 rounded-full">
-                <X className="w-5 h-5 dark:text-gray-300" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto space-y-6">
+      <BottomSheet show={showAdd} onClose={() => setShowAdd(false)} title="New Festival Budget">
+            <div className="space-y-6">
               <div>
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3 block">Select Template</label>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-4 ml-1" style={S}>Occasion Template</p>
                 <div className="grid grid-cols-2 gap-3">
                   {FESTIVAL_TEMPLATES.map(t => (
                     <button key={t.id} onClick={() => { setSelectedTemplate(t.id); setBudget(t.defaultBudget.toString()) }}
-                      className={`p-4 rounded-2xl flex flex-col items-center gap-2 border-2 transition-all ${selectedTemplate === t.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1A1A2E]'}`}>
-                      <span className="text-3xl mb-1">{t.icon}</span>
-                      <span className="font-semibold text-sm dark:text-white">{t.name}</span>
+                      className={`p-5 rounded-[28px] border transition-all flex items-center gap-4 ${selectedTemplate === t.id ? 'bg-[#F8F7FF] border-[var(--primary)] shadow-sm' : 'bg-white border-[#F0F0F8]'}`}>
+                      <span className="text-3xl">{t.icon}</span>
+                      <span className="text-[11px] font-[800] text-[#0F172A] uppercase tracking-wider" style={S}>{t.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
               
-              <div className="bg-white dark:bg-[#1A1A2E] rounded-3xl p-5 shadow-sm space-y-5 border border-gray-100 dark:border-gray-800">
+              <div className="space-y-5">
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 block">Custom Name (Optional)</label>
-                  <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. My Awesome Diwali"
-                    className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 outline-none text-sm dark:text-white" />
+                  <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Alias / Name</p>
+                  <input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Grandma's Diwali"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 block">Total Budget</label>
+                  <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Allocated Budget</p>
                   <input type="number" inputMode="decimal" value={budget} onChange={e => setBudget(e.target.value)} placeholder="0.00"
-                    className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 outline-none font-sora font-bold text-lg dark:text-white" />
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[22px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 block">Date of Festival</label>
+                  <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Event Date</p>
                   <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 outline-none text-sm font-medium dark:text-white" />
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A]" style={S} />
                 </div>
               </div>
               
-              <button onClick={handleAdd} className="w-full py-4 bg-purple-600 hover:bg-purple-700 active:scale-[0.98] text-white font-sora font-bold rounded-2xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all flex items-center justify-center gap-2 mt-4">
-                <Plus className="w-5 h-5" /> Schedule Festival
-              </button>
+              <motion.button whileTap={{ scale: 0.98 }} onClick={handleAdd}
+                className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg shadow-[#7C6FF720] flex items-center justify-center gap-2" 
+                style={{ background: 'var(--gradient-primary)', ...S }}>
+                <Plus className="w-5 h-5" strokeWidth={3} /> Schedule Event
+              </motion.button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </BottomSheet>
 
-      <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowAdd(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-[20px] bg-purple-600 text-white shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] flex items-center justify-center">
-        <Plus className="w-6 h-6" />
+      <motion.button 
+        initial={{ scale: 0 }} animate={{ scale: 1 }}
+        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} 
+        onClick={() => setShowAdd(true)}
+        className="fixed bottom-28 right-6 w-16 h-16 rounded-[22px] text-white shadow-xl flex items-center justify-center z-40"
+        style={{ background: 'var(--gradient-primary)' }}>
+        <Plus className="w-8 h-8" strokeWidth={3} />
       </motion.button>
     </div>
   )

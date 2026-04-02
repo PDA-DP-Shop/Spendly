@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Share, PlusSquare, X, Smartphone } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 
+const S = { fontFamily: "'Nunito', sans-serif" }
+
 export default function PWAInstallGuide() {
   const { settings, isLoaded } = useSettingsStore()
   const [isVisible, setIsVisible] = useState(false)
@@ -10,16 +12,11 @@ export default function PWAInstallGuide() {
 
   useEffect(() => {
     if (!isLoaded || !settings?.onboardingDone) return
-
-    // 1. Check if already dismissed
     const dismissed = localStorage.getItem('spendly-pwa-dismissed')
     if (dismissed) return
-
-    // 2. Check if already standalone (installed)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
     if (isStandalone) return
 
-    // 3. Detect Platform
     const userAgent = window.navigator.userAgent.toLowerCase()
     const isIOS = /iphone|ipad|ipod/.test(userAgent)
     const isAndroid = /android/.test(userAgent)
@@ -44,101 +41,84 @@ export default function PWAInstallGuide() {
     <AnimatePresence>
       {isVisible && (
         <>
-          {/* iOS Bottom Sheet */}
           {platform === 'ios' && (
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 z-[1000] bg-white dark:bg-[#1A1A2E] rounded-t-[32px] shadow-[0_-8px|40px_rgba(0,0,0,0.15)] px-6 pt-8 pb-10"
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+              className="fixed bottom-0 left-0 right-0 z-[1000] bg-white rounded-t-[40px] shadow-[0_-20px_60px_rgba(15,23,42,0.15)] px-8 pt-8 pb-12"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-[22px] flex items-center justify-center mb-4">
-                  <Smartphone className="w-8 h-8 text-purple-600" />
+                <div className="w-16 h-16 bg-[#EEF2FF] rounded-[24px] flex items-center justify-center mb-6">
+                  <Smartphone className="w-8 h-8 text-[#7C6FF7]" />
                 </div>
-                <h3 className="font-sora font-bold text-xl text-gray-900 dark:text-white mb-2">Use Spendly like an app!</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">Install it on your home screen for the best experience.</p>
+                <h3 className="text-[22px] font-[800] text-[#0F172A] mb-2 tracking-tight" style={S}>Native Experience</h3>
+                <p className="text-[#94A3B8] font-[700] text-[15px] mb-8 leading-relaxed" style={S}>Install Spendly on your home screen for full fintech capabilities.</p>
                 
-                <div className="w-full space-y-6 mb-10">
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242438] flex items-center justify-center shrink-0">
-                      <Share className="w-5 h-5 text-blue-500" />
+                <div className="w-full space-y-6 mb-10 text-left">
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-[14px] bg-[#F8F7FF] border border-[#F0F0F8] flex items-center justify-center shrink-0">
+                      <Share className="w-5 h-5 text-[#3B82F6]" />
                     </div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <span className="text-gray-400 mr-1">Step 1:</span> Tap the <span className="text-blue-500 font-bold">Share</span> button at the bottom of Safari
+                    <p className="text-[14px] font-[800] text-[#475569]" style={S}>
+                      <span className="text-[#94A3B8] mr-1">01.</span> Tap <span className="text-[#3B82F6]">Share</span> in Safari bottom menu
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242438] flex items-center justify-center shrink-0">
-                      <PlusSquare className="w-5 h-5 text-gray-900 dark:text-white" />
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-[14px] bg-[#F8F7FF] border border-[#F0F0F8] flex items-center justify-center shrink-0">
+                      <PlusSquare className="w-5 h-5 text-[#0F172A]" />
                     </div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <span className="text-gray-400 mr-1">Step 2:</span> Scroll down and tap <span className="font-bold">"Add to Home Screen"</span>
+                    <p className="text-[14px] font-[800] text-[#475569]" style={S}>
+                      <span className="text-[#94A3B8] mr-1">02.</span> Scroll & tap <span className="text-[#0F172A]">"Add to Home Screen"</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
-                      <span className="text-purple-600 font-bold text-xs">ADD</span>
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-[14px] bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center shrink-0">
+                      <span className="text-[#7C6FF7] font-[900] text-[10px]">ADD</span>
                     </div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <span className="text-gray-400 mr-1">Step 3:</span> Tap <span className="text-purple-600 font-bold">"Add"</span> in the top right corner
+                    <p className="text-[14px] font-[800] text-[#475569]" style={S}>
+                      <span className="text-[#94A3B8] mr-1">03.</span> Tap <span className="text-[#7C6FF7]">"Add"</span> to finalize setup
                     </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-400 mb-6 italic">Then open Spendly from your home screen like a real app!</p>
-
-                <button
-                  onClick={handleDismiss}
-                  className="w-full py-4 bg-purple-600 text-white rounded-[20px] font-bold text-[16px] shadow-lg shadow-purple-200 dark:shadow-none active:scale-[0.98] transition-all"
-                >
-                  Got It!
+                <button onClick={handleDismiss}
+                  className="w-full py-5 text-white rounded-[22px] font-[800] text-[16px] shadow-lg shadow-[#7C6FF730]"
+                  style={{ background: 'var(--gradient-primary)', ...S }}>
+                  Initialize Application
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* Android Bottom Banner */}
           {platform === 'android' && (
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              className="fixed bottom-4 left-4 right-4 z-[1000] bg-gray-900 text-white rounded-[24px] p-5 shadow-2xl flex flex-col gap-4"
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              className="fixed bottom-6 left-6 right-6 z-[1000] bg-[#0F172A] text-white rounded-[32px] p-6 shadow-2xl flex flex-col gap-5 border border-white/10"
             >
               <div className="flex items-start justify-between">
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center shrink-0 text-xl shadow-lg">📱</div>
+                  <div className="w-12 h-12 bg-[#7C6FF7] rounded-[16px] flex items-center justify-center shrink-0 text-2xl shadow-lg ring-4 ring-[#7C6FF7]/20">📱</div>
                   <div>
-                    <h3 className="font-sora font-bold text-[16px]">Install Spendly on your phone!</h3>
-                    <p className="text-gray-400 text-[13px] mt-1">Tap <span className="text-white font-bold">⋮ menu</span> → <span className="text-white font-bold">"Add to Home Screen"</span> or wait for Chrome prompt.</p>
+                    <h3 className="text-[17px] font-[800] tracking-tight" style={S}>Install Neural Spendly</h3>
+                    <p className="text-[#94A3B8] font-[700] text-[13px] mt-1 leading-snug" style={S}>Tap <span className="text-white">⋮ menu</span> → <span className="text-white">"Add to Home Screen"</span></p>
                   </div>
                 </div>
-                <button onClick={handleDismiss} className="p-1 text-gray-400 hover:text-white transition-colors">
+                <button onClick={handleDismiss} className="p-1 text-[#94A3B8] hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <button
-                onClick={handleDismiss}
-                className="w-full py-3 bg-white text-gray-900 rounded-xl font-bold text-[14px] active:scale-[0.98] transition-all"
-              >
-                Got It!
+              <button onClick={handleDismiss}
+                className="w-full py-4 bg-white text-[#0F172A] rounded-[18px] font-[800] text-[14px] active:scale-[0.98] transition-all" style={S}>
+                Understood
               </button>
             </motion.div>
           )}
 
-          {/* Backdrop for iOS */}
           {platform === 'ios' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleDismiss}
-              className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={handleDismiss} className="fixed inset-0 z-[999] bg-[#0F172A]/40 backdrop-blur-sm" />
           )}
         </>
       )}

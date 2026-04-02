@@ -55,7 +55,7 @@ export default function ToastMessage({ toast, onClose }) {
           <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: type.bg }}>
             <Icon className="w-5 h-5" style={{ color: type.color }} />
           </div>
-          <p className="flex-1 text-[14px] font-medium text-[#0F172A]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p className="flex-1 text-[14px] font-medium text-[#0F172A]" style={{ fontFamily: "'Nunito', sans-serif" }}>
             {toast.message}
           </p>
           {toast.action && (

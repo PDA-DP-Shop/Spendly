@@ -167,7 +167,7 @@ export default function BillScanner({ onBillScanned, onClose }) {
     <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="fixed inset-0 z-[100] bg-black flex flex-col">
       <div className="flex items-center justify-between px-4 py-4 safe-top bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 text-white">
-        <h2 className="font-sora font-semibold text-[18px] flex items-center gap-2">
+        <h2 className="font-sans font-semibold text-[18px] flex items-center gap-2">
           <Camera className="w-5 h-5" /> Scan Receipt
         </h2>
         <button onClick={handleClose} className="p-2 bg-white/10 rounded-full backdrop-blur-md">
@@ -206,7 +206,7 @@ export default function BillScanner({ onBillScanned, onClose }) {
           <div className="flex flex-col items-center justify-center gap-5">
              <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
              <div className="text-center">
-               <p className="text-white font-sora font-bold text-lg mb-1">Reading Receipt...</p>
+               <p className="text-white font-sans font-bold text-lg mb-1">Reading Receipt...</p>
                <p className="text-white/60 text-sm">This might take a few seconds</p>
              </div>
           </div>

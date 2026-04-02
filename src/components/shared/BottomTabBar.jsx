@@ -1,27 +1,26 @@
-// Bottom navigation bar — white premium with indigo active state and animated FAB
+// Bottom navigation bar — white premium with purple active state and animated FAB
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Home, BarChart2, Plus, Search, Settings } from 'lucide-react'
+import { m as motion } from 'framer-motion'
+import { Home, BarChart2, Plus, Receipt, User } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
 
 export default function BottomTabBar({ onAddPress }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const t = useTranslation()
   const [tappedTab, setTappedTab] = useState(null)
 
   const tabsLeft = [
-    { path: '/', icon: Home, label: t.home },
-    { path: '/reports', icon: BarChart2, label: t.reports },
+    { path: '/', icon: Home },
+    { path: '/reports', icon: BarChart2 },
   ]
   const tabsRight = [
-    { path: '/search', icon: Search, label: t.search },
-    { path: '/settings', icon: Settings, label: t.settings },
+    { path: '/expenses', icon: Receipt },
+    { path: '/settings', icon: User },
   ]
 
   const TabItem = ({ tab }) => {
-    const isActive = location.pathname === tab.path
+    const isActive = location.pathname === tab.path || (tab.path === '/expenses' && location.pathname === '/search')
     const Icon = tab.icon
     const isTapping = tappedTab === tab.path
 
@@ -35,62 +34,63 @@ export default function BottomTabBar({ onAddPress }) {
         }}
         className="flex flex-col items-center justify-center w-16 h-full relative"
       >
-        {/* Active indicator pill */}
-        {isActive && (
-          <motion.div
-            layoutId="tab-pill"
-            className="absolute top-2 w-6 h-[3px] rounded-full"
-            style={{ background: '#6366F1' }}
-            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-          />
-        )}
-
         <motion.div
           animate={isTapping ? { scale: [1, 0.8, 1.2, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="mt-2"
+          transition={{ duration: 0.3, type: 'spring', stiffness: 400, damping: 20 }}
+          className="relative flex flex-col items-center justify-center"
         >
+          {/* Active indicator dot */}
+          {isActive && (
+            <motion.div
+              layoutId="tab-dot"
+              className="absolute -top-3 w-1.5 h-1.5 rounded-full"
+              style={{ background: 'var(--primary)' }}
+              transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+            />
+          )}
+
           <Icon
             className="w-6 h-6 transition-colors duration-200"
-            style={{ color: isActive ? '#6366F1' : '#94A3B8' }}
-            strokeWidth={isActive ? 2.5 : 2}
+            style={{ 
+              color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+              fill: isActive ? 'var(--primary)' : 'transparent'
+            }}
+            strokeWidth={isActive ? 0 : 2}
           />
         </motion.div>
-        <span
-          className="text-[11px] font-semibold mt-1 transition-colors duration-200"
-          style={{ color: isActive ? '#6366F1' : '#94A3B8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-        >
-          {tab.label}
-        </span>
       </button>
     )
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none">
       <div
-        className="w-full h-[72px] flex items-center justify-around px-2 relative"
+        className="w-full h-[72px] flex items-center justify-around px-2 relative pointer-events-auto"
         style={{
-          background: '#FFFFFF',
-          borderTop: '1px solid #F1F5F9',
+          background: 'var(--bg-card)',
+          borderTop: '1px solid var(--border)',
         }}
       >
         {tabsLeft.map(tab => <TabItem key={tab.path} tab={tab} />)}
 
         {/* Center FAB */}
-        <div className="relative -top-5">
+        <div className="relative -top-[20px]">
           <motion.button
-            whileTap={{ scale: 0.9 }}
-            animate={{ scale: [1, 1.04, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            whileTap={{ scale: 0.9, rotate: 45 }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ 
+              scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+              rotate: { duration: 0.2, type: 'spring' },
+              whileTap: { duration: 0.15, type: 'spring' }
+            }}
             onClick={onAddPress}
             className="w-[58px] h-[58px] rounded-full flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
+              background: 'var(--primary)',
+              boxShadow: 'var(--shadow-fab)',
             }}
           >
-            <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
+            <Plus className="w-6 h-6 text-white" strokeWidth={3} />
           </motion.button>
         </div>
 

@@ -6,10 +6,11 @@ import { CHART_COLORS } from '../../constants/colors'
 
 const CustomTooltip = ({ active, payload, currency }) => {
   if (active && payload && payload.length) {
+    const S = { fontFamily: 'Nunito' }
     return (
-      <div className="glass-elevated border-white/10 p-3 rounded-xl shadow-glowSmall">
-        <p className="text-[12px] font-display font-bold text-[#F0F4FF] mb-1">{payload[0].name}</p>
-        <p className="text-[14px] font-display font-bold text-cyan-glow">
+      <div className="bg-white px-4 py-2.5 rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
+        <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>{payload[0].name}</p>
+        <p className="text-[16px] font-[800] text-[var(--primary)]" style={S}>
           {formatMoney(payload[0].value, currency)}
         </p>
       </div>
@@ -18,19 +19,9 @@ const CustomTooltip = ({ active, payload, currency }) => {
   return null
 }
 
-const CenterLabel = ({ cx, cy, total, currency }) => (
-  <g>
-    <text x={cx} y={cy - 8} textAnchor="middle" dominantBaseline="middle" className="font-display font-bold" style={{ fontSize: 18, fill: '#F0F4FF' }}>
-      {formatMoney(total, '').split('.')[0]}
-    </text>
-    <text x={cx} y={cy + 16} textAnchor="middle" dominantBaseline="middle" className="font-body font-bold" style={{ fontSize: 10, fill: '#7B8DB0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-      Total Burn
-    </text>
-  </g>
-)
-
 export default function SpendingDonutChart({ groupedData, currency = 'USD' }) {
   const total = groupedData.reduce((s, d) => s + d.total, 0)
+  const S = { fontFamily: 'Nunito' }
 
   const data = groupedData.slice(0, 5).map((item, i) => ({
     name: getCategoryById(item.category)?.name || item.category,
@@ -40,18 +31,19 @@ export default function SpendingDonutChart({ groupedData, currency = 'USD' }) {
 
   return (
     <div className="w-full">
-      <div className="relative h-[220px]">
+      <div className="relative h-[240px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={70}
-              outerRadius={95}
-              paddingAngle={4}
+              innerRadius={75}
+              outerRadius={105}
+              paddingAngle={5}
               dataKey="value"
               stroke="none"
+              animationDuration={1500}
             >
               {data.map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
@@ -60,27 +52,26 @@ export default function SpendingDonutChart({ groupedData, currency = 'USD' }) {
             <Tooltip content={<CustomTooltip currency={currency} />} />
           </PieChart>
         </ResponsiveContainer>
-        {/* Absolute center label */}
+        {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <p className="text-[20px] font-display font-bold text-[#F0F4FF] leading-tight">
-            <span className="text-[12px] opacity-50 mr-1">{currency}</span>
-            {formatMoney(total, '').replace(currency, '').split('.')[0]}
+          <p className="text-[24px] font-[800] text-[#0F172A] leading-tight" style={S}>
+            {formatMoney(total, currency).split('.')[0]}
           </p>
-          <p className="text-[10px] font-display font-bold text-[#3D4F70] uppercase tracking-[0.15em] mt-1">Total Burn</p>
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-[0.15em] mt-1" style={S}>Burn Rate</p>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="grid grid-cols-1 gap-3 mt-4">
+      <div className="grid grid-cols-1 gap-3 mt-6">
         {data.map((item, i) => (
-          <div key={i} className="flex items-center justify-between p-3 rounded-xl glass border-none hover:bg-white/5 transition-colors">
+          <div key={i} className="flex items-center justify-between p-4 rounded-[20px] bg-[#F8F7FF] border border-[#F0F0F8] hover:shadow-sm transition-all">
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full shadow-glowSmall" style={{ backgroundColor: item.color }} />
-              <span className="text-[13px] font-body font-bold text-[#F0F4FF]">{item.name}</span>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="text-[14px] font-[700] text-[#475569]" style={S}>{item.name}</span>
             </div>
             <div className="text-right">
-              <span className="text-[13px] font-display font-bold text-[#7B8DB0]">{formatMoney(item.value, currency)}</span>
-              <p className="text-[10px] font-body text-[#3D4F70] font-bold">{((item.value / total) * 100).toFixed(1)}%</p>
+              <span className="text-[14px] font-[800] text-[#0F172A]" style={S}>{formatMoney(item.value, currency)}</span>
+              <p className="text-[11px] font-[700] text-[#94A3B8]" style={S}>{((item.value / total) * 100).toFixed(1)}%</p>
             </div>
           </div>
         ))}

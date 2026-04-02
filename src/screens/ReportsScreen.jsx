@@ -20,16 +20,19 @@ import PaymentMethodChart from '../components/charts/PaymentMethodChart'
 import { PdfReportTemplate } from '../components/shared/PdfReportTemplate'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { Download, Loader2 } from 'lucide-react'
+import { Download, Loader2, Sparkles } from 'lucide-react'
 
 const FILTERS = ['This Week', 'This Month', '3 Months', 'All Time']
-const S = { fontFamily: "'Plus Jakarta Sans', sans-serif" }
+const S = { fontFamily: "'Nunito', sans-serif" }
 
 function WhiteCard({ title, children }) {
   return (
-    <div className="mx-5 mb-4 p-5" style={{ background: '#FFFFFF', border: '1px solid #F0F0F8', borderRadius: '20px', boxShadow: '0 2px 16px rgba(99,102,241,0.07)' }}>
+    <div className="mx-5 mb-5 p-6 bg-white border border-[#F0F0F8] rounded-[28px] shadow-[0_4px_24px_rgba(124,111,247,0.04)]">
       {title && (
-        <p className="text-[12px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-4" style={S}>{title}</p>
+        <div className="flex items-center justify-between mb-5">
+          <p className="text-[13px] font-[800] uppercase tracking-wider text-[#94A3B8]" style={S}>{title}</p>
+          <div className="w-1.5 h-1.5 rounded-full bg-[#E2E8F0]" />
+        </div>
       )}
       {children}
     </div>
@@ -38,6 +41,7 @@ function WhiteCard({ title, children }) {
 
 export default function ReportsScreen() {
   const [filter, setFilter] = useState('This Month')
+  const [chartMode, setChartMode] = useState('expense') // 'income' | 'expense'
   const [exporting, setExporting] = useState(false)
   const reportRef = useRef(null)
 
@@ -69,6 +73,11 @@ export default function ReportsScreen() {
   const monthlyData = Array.from({ length: 12 }, (_, i) => {
     const key = format(subMonths(now, 11 - i), 'yyyy-MM')
     return calculateSpent(expenses.filter(e => e.date?.startsWith(key)))
+  })
+  
+  const incomeData = Array.from({ length: 12 }, (_, i) => {
+    const key = format(subMonths(now, 11 - i), 'yyyy-MM')
+    return calculateReceived(expenses.filter(e => e.date?.startsWith(key)))
   })
   const sixMonthData = Array.from({ length: 6 }, (_, i) => {
     const key = format(subMonths(now, 5 - i), 'yyyy-MM')
@@ -103,28 +112,28 @@ export default function ReportsScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh mb-tab bg-[#F8F9FF]">
+    <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between pr-5 bg-white" style={{ borderBottom: '1px solid #F0F0F8' }}>
+      <div className="flex items-center justify-between pr-5 bg-white border-b border-[#F0F0F8]">
         <TopHeader title="Analytics" onBack={null} />
         <motion.button whileTap={{ scale: 0.9 }} onClick={handleExportPdf} disabled={exporting}
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: '#EEF2FF', border: '1px solid rgba(99,102,241,0.2)' }}>
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8]">
           {exporting
-            ? <Loader2 className="w-5 h-5 text-[#6366F1] animate-spin" />
-            : <Download className="w-5 h-5 text-[#6366F1]" />}
+            ? <Loader2 className="w-5 h-5 text-[var(--primary)] animate-spin" />
+            : <Download className="w-5 h-5 text-[var(--primary)]" />}
         </motion.button>
       </div>
 
       {/* Filter chips */}
-      <div className="flex gap-2.5 px-5 py-4 overflow-x-auto scrollbar-hide bg-white border-b border-[#F0F0F8]">
+      <div className="flex gap-3 px-5 py-5 overflow-x-auto scrollbar-hide bg-white border-b border-[#F0F0F8]">
         {FILTERS.map(f => (
           <motion.button key={f} whileTap={{ scale: 0.95 }} onClick={() => setFilter(f)}
-            className="px-5 py-2.5 rounded-full text-[13px] font-semibold whitespace-nowrap flex-shrink-0 transition-all"
+            className="px-6 py-2.5 rounded-full text-[13px] font-[800] whitespace-nowrap flex-shrink-0 transition-all border"
             style={{
-              background: filter === f ? '#6366F1' : '#FFFFFF',
-              color: filter === f ? '#FFFFFF' : '#64748B',
-              border: `1px solid ${filter === f ? '#6366F1' : '#E2E8F0'}`,
+              background: filter === f ? '#EEF2FF' : '#FFFFFF',
+              color: filter === f ? 'var(--primary)' : '#94A3B8',
+              borderColor: filter === f ? 'var(--primary)' : '#F0F0F8',
+              boxShadow: filter === f ? '0 4px 12px rgba(124,111,247,0.15)' : 'none',
               ...S
             }}>
             {f}
@@ -133,50 +142,97 @@ export default function ReportsScreen() {
       </div>
 
       {/* Stats row */}
-      <div className="flex gap-3 px-5 pt-5 pb-2">
-        {[
-          { label: 'Spent', value: spent, color: '#F43F5E', bg: '#FFF1F2' },
-          { label: 'Income', value: received, color: '#10B981', bg: '#ECFDF5' },
-          { label: 'Saved', value: Math.max(saved, 0), color: '#6366F1', bg: '#EEF2FF' },
-        ].map(item => (
-          <div key={item.label} className="flex-1 p-4 rounded-[16px] text-center"
-            style={{ background: item.bg, border: `1px solid ${item.color}20` }}>
-            <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: item.color, ...S }}>{item.label}</p>
-            <p className="text-[15px] font-bold" style={{ color: '#0F172A', ...S }}>{formatMoney(item.value, currency)}</p>
+      <div className="flex gap-4 px-5 pt-6 pb-2">
+        <div className="flex-1 p-5 rounded-[28px] flex flex-col justify-between border border-[#F0F0F8]" style={{ background: '#F8F7FF' }}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-white shadow-sm border border-[#F1F5F9]">
+              <span className="text-[14px] text-[var(--primary)] font-bold">↓</span>
+            </div>
+            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>
+              Income
+            </p>
           </div>
-        ))}
+          <p className="text-[22px] font-[800] text-[#0F172A]" style={S}>
+            {formatMoney(received, currency)}
+          </p>
+        </div>
+
+        <div className="flex-1 p-5 rounded-[28px] flex flex-col justify-between border border-[#FFF1EE]" style={{ background: '#FFF7F2' }}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-white shadow-sm border border-[#FFEBE4]">
+              <span className="text-[14px] text-[var(--secondary)] font-bold">↑</span>
+            </div>
+            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>
+              Expenses
+            </p>
+          </div>
+          <p className="text-[22px] font-[800] text-[#0F172A]" style={S}>
+            {formatMoney(spent, currency)}
+          </p>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState type="reports" title="No data yet" message="Add expenses to see your analytics." />
+        <div className="flex-1 flex items-center justify-center">
+            <EmptyState type="reports" title="No analytics yet" message="Add some expenses to see your financial health report." />
+        </div>
       ) : (
-        <div className="pb-4 mt-4">
+        <div className="pb-8 mt-5">
           <WhiteCard title="Spending by Category">
             <SpendingDonutChart groupedData={grouped} currency={currency} />
           </WhiteCard>
+
           <WhiteCard title="Payment Methods">
             <PaymentMethodChart expenses={filtered} />
           </WhiteCard>
-          <WhiteCard title="Monthly Spending">
-            <AnalyticsBarChart data={monthlyData} currency={currency} />
+
+          <WhiteCard title="Financial Trend">
+            <div className="flex bg-[#F8F7FF] border border-[#F0F0F8] p-1.5 rounded-[16px] mb-5">
+              <button
+                className="flex-1 py-2 text-[13px] font-[800] rounded-[12px] transition-all"
+                style={{
+                  background: chartMode === 'expense' ? '#FFFFFF' : 'transparent',
+                  color: chartMode === 'expense' ? 'var(--secondary)' : '#94A3B8',
+                  boxShadow: chartMode === 'expense' ? '0 4px 12px rgba(255,112,67,0.1)' : 'none',
+                  ...S
+                }}
+                onClick={() => setChartMode('expense')}
+              >
+                Expenses
+              </button>
+              <button
+                className="flex-1 py-2 text-[13px] font-[800] rounded-[12px] transition-all"
+                style={{
+                  background: chartMode === 'income' ? '#FFFFFF' : 'transparent',
+                  color: chartMode === 'income' ? 'var(--primary)' : '#94A3B8',
+                  boxShadow: chartMode === 'income' ? '0 4px 12px rgba(124,111,247,0.1)' : 'none',
+                  ...S
+                }}
+                onClick={() => setChartMode('income')}
+              >
+                Income
+              </button>
+            </div>
+            <AnalyticsBarChart data={chartMode === 'expense' ? monthlyData : incomeData} currency={currency} chartMode={chartMode} />
           </WhiteCard>
-          <WhiteCard title="6-Month Trend">
+
+          <WhiteCard title="6-Month Evolution">
             <MonthlyLineChart monthlyTotals={sixMonthData} currency={currency} />
           </WhiteCard>
 
           {/* Stats grid */}
-          <div className="mx-5 grid grid-cols-2 gap-3 mb-4">
+          <div className="mx-5 grid grid-cols-2 gap-4 mb-5">
             {[
-              { label: 'Top Category', value: topCategory ? topCategory.category : 'N/A', icon: '🏆', color: '#6366F1', bg: '#EEF2FF' },
-              { label: 'Biggest Buy', value: biggestPurchase ? biggestPurchase.shopName : 'N/A', icon: '💎', color: '#F43F5E', bg: '#FFF1F2' },
-              { label: 'Daily Average', value: formatMoney(dailyAvg, currency), icon: '🔥', color: '#F59E0B', bg: '#FFFBEB' },
-              { label: 'Savings Rate', value: `${savingsRate}%`, icon: '📈', color: '#10B981', bg: '#ECFDF5' },
+              { label: 'Top Category', value: topCategory ? topCategory.category : 'N/A', icon: '🏆', color: 'var(--primary)', bg: '#F8F7FF', border: '#F0F0F8' },
+              { label: 'Biggest Buy', value: biggestPurchase ? biggestPurchase.shopName : 'N/A', icon: '💎', color: 'var(--secondary)', bg: '#FFF7F2', border: '#FFEBE4' },
+              { label: 'Daily Average', value: formatMoney(dailyAvg, currency), icon: '🔥', color: '#F59E0B', bg: '#FFFBEB', border: '#FEF3C7' },
+              { label: 'Savings Rate', value: `${savingsRate}%`, icon: '📈', color: '#10B981', bg: '#ECFDF5', border: '#D1FAE5' },
             ].map(stat => (
-              <div key={stat.label} className="p-4 rounded-[16px]"
-                style={{ background: '#FFFFFF', border: '1px solid #F0F0F8', boxShadow: '0 2px 12px rgba(99,102,241,0.05)' }}>
-                <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg mb-3" style={{ background: stat.bg }}>{stat.icon}</div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1" style={S}>{stat.label}</p>
-                <p className="text-[15px] font-bold capitalize truncate" style={{ color: stat.color, ...S }}>{stat.value}</p>
+              <div key={stat.label} className="p-5 rounded-[24px] border shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+                style={{ background: '#FFFFFF', borderColor: stat.border }}>
+                <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-xl mb-4 shadow-sm" style={{ background: stat.bg }}>{stat.icon}</div>
+                <p className="text-[11px] font-[800] uppercase tracking-wider text-[#94A3B8] mb-1.5" style={S}>{stat.label}</p>
+                <p className="text-[16px] font-[800] capitalize truncate transition-colors" style={{ color: stat.color, ...S }}>{stat.value}</p>
               </div>
             ))}
           </div>
@@ -184,10 +240,12 @@ export default function ReportsScreen() {
           <WhiteCard title="Spending Heatmap">
             <SpendingHeatmap expenses={filtered} currency={currency} />
           </WhiteCard>
-          <WhiteCard title="Year vs Last Year">
+          
+          <WhiteCard title="Year vs Year Growth">
             <YearComparisonChart currentYearTotals={currentYearTotals} prevYearTotals={prevYearTotals} currency={currency} />
           </WhiteCard>
-          <WhiteCard title="Day of Week">
+          
+          <WhiteCard title="Spending by Day">
             <WeekdayChart rawExpenses={filtered} currency={currency} />
           </WhiteCard>
         </div>

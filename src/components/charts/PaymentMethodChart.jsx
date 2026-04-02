@@ -1,15 +1,15 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { PAYMENT_METHODS } from '../../constants/paymentMethods'
-
-const COLORS = ['#7C3AED', '#F97316', '#22C55E', '#06B6D4', '#EC4899', '#EAB308']
+import { CHART_COLORS } from '../../constants/colors'
 
 export default function PaymentMethodChart({ expenses }) {
   const methodTotals = {}
   let total = 0
+  const S = { fontFamily: 'Nunito' }
 
   expenses.forEach(e => {
     if (e.type !== 'spent') return
-    const method = e.paymentMethod || 'UPI' // Fallback for old data
+    const method = e.paymentMethod || 'UPI' // Fallback
     methodTotals[method] = (methodTotals[method] || 0) + e.amount
     total += e.amount
   })
@@ -22,36 +22,37 @@ export default function PaymentMethodChart({ expenses }) {
       name: pmInfo ? pmInfo.label : key,
       value: methodTotals[key],
       icon: pmInfo ? pmInfo.icon : '💳',
-      color: COLORS[index % COLORS.length]
+      color: CHART_COLORS[index % CHART_COLORS.length]
     }
   }).sort((a, b) => b.value - a.value)
 
   return (
-    <div className="bg-white dark:bg-[#1A1A2E] rounded-[24px] p-5 shadow-sm mt-4">
-      <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-4">How I Pay</p>
-      
-      <div className="flex items-center gap-4">
-        <div className="w-[120px] h-[120px]">
+    <div className="w-full">
+      <div className="flex items-center gap-6">
+        <div className="w-[140px] h-[140px] flex-shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} cx="50%" cy="50%" innerRadius={35} outerRadius={55} paddingAngle={2} dataKey="value" stroke="none">
+              <Pie data={data} cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={4} dataKey="value" stroke="none">
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(val) => Math.round((val/total)*100) + '%'} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+              <Tooltip 
+                formatter={(val) => Math.round((val/total)*100) + '%'} 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', fontFamily: 'Nunito', fontWeight: 800 }} 
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
         
-        <div className="flex-1 flex flex-col justify-center gap-2">
-          {data.map((entry, i) => (
-            <div key={i} className="flex items-center justify-between text-[13px]">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-gray-600 dark:text-gray-300 font-medium">{entry.icon} {entry.name}</span>
+        <div className="flex-1 space-y-3">
+          {data.slice(0, 4).map((entry, i) => (
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                <span className="text-[13px] font-[700] text-[#475569] truncate" style={S}>{entry.icon} {entry.name}</span>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">
+              <span className="text-[14px] font-[800] text-[#0F172A] ml-2" style={S}>
                 {Math.round((entry.value / total) * 100)}%
               </span>
             </div>

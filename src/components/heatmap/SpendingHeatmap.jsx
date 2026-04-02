@@ -6,6 +6,7 @@ import { formatMoneyCompact } from '../../utils/formatMoney'
 
 export default function SpendingHeatmap({ expenses, currency, onDayClick }) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const S = { fontFamily: 'Nunito' }
 
   const handlePrev = () => setCurrentMonth(subMonths(currentMonth, 1))
   const handleNext = () => setCurrentMonth(addMonths(currentMonth, 1))
@@ -25,22 +26,22 @@ export default function SpendingHeatmap({ expenses, currency, onDayClick }) {
     if (dailyTotals[dateKey] > maxSpend) maxSpend = dailyTotals[dateKey]
   })
 
-  // Color intensity logic: 5 levels (0 = no spend, 4 = max spend)
+  // Color intensity logic
   const getLevel = (amount) => {
     if (!amount) return 0
-    if (amount <= maxSpend * 0.15) return 1
-    if (amount <= maxSpend * 0.4) return 2
-    if (amount <= maxSpend * 0.7) return 3
+    if (amount <= maxSpend * 0.2) return 1
+    if (amount <= maxSpend * 0.45) return 2
+    if (amount <= maxSpend * 0.75) return 3
     return 4
   }
 
-  // Tailwind bg classes for standard purple theme
+  // White Premium Heat Colors (Brand Purple)
   const heatColors = [
-    'bg-gray-100 dark:bg-gray-800',           // 0
-    'bg-purple-200 dark:bg-purple-900/40',    // 1
-    'bg-purple-400 dark:bg-purple-700/60',    // 2
-    'bg-purple-600 dark:bg-purple-500',       // 3
-    'bg-purple-800 dark:bg-purple-400',       // 4
+    '#F8F9FA', // 0
+    '#EEF2FF', // 1
+    '#E0E7FF', // 2
+    '#9B6FE4', // 3
+    '#7C6FF7', // 4
   ]
 
   // Stats
@@ -57,30 +58,32 @@ export default function SpendingHeatmap({ expenses, currency, onDayClick }) {
     if (amt > maxDayAmt) { maxDayAmt = amt; maxDayDate = d }
   })
 
-  // Calendar padding
   const startOffset = monthStart.getDay()
 
   return (
-    <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <p className="font-sora font-bold text-[15px] text-gray-900 dark:text-white">Daily Spending</p>
-        <div className="flex items-center gap-3">
-          <button onClick={handlePrev} className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
-            <ChevronLeft className="w-4 h-4 text-gray-500" />
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-0.5" style={S}>Intensity</p>
+          <h4 className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>Burn Map</h4>
+        </div>
+        <div className="flex items-center gap-2 bg-[#F8F7FF] p-1.5 rounded-full border border-[#F0F0F8]">
+          <button onClick={handlePrev} className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#F1F5F9] active:scale-95 transition-transform">
+            <ChevronLeft className="w-4 h-4 text-[var(--primary)]" />
           </button>
-          <p className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 w-24 text-center">
-            {format(currentMonth, 'MMM yyyy')}
+          <p className="text-[12px] font-[800] text-[#475569] w-28 text-center" style={S}>
+            {format(currentMonth, 'MMMM yyyy')}
           </p>
           <button onClick={handleNext} disabled={isSameMonth(currentMonth, new Date())} 
-            className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center disabled:opacity-30">
-            <ChevronRight className="w-4 h-4 text-gray-500" />
+            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#F1F5F9] disabled:opacity-30 active:scale-95 transition-transform">
+            <ChevronRight className="w-4 h-4 text-[var(--primary)]" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-y-2 gap-x-1.5 mb-5">
+      <div className="grid grid-cols-7 gap-1.5 mb-8">
         {['S','M','T','W','T','F','S'].map((d, i) => (
-          <div key={`col-${i}`} className="text-center text-[10px] font-semibold text-gray-400">{d}</div>
+          <div key={`col-${i}`} className="text-center text-[11px] font-[800] text-[#CBD5E1]" style={S}>{d}</div>
         ))}
         {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
         
@@ -91,24 +94,41 @@ export default function SpendingHeatmap({ expenses, currency, onDayClick }) {
           const isToday = dateStr === format(new Date(), 'yyyy-MM-dd')
           
           return (
-            <button key={dateStr} onClick={() => onDayClick?.(dateStr, amt)}
-              className={`aspect-square rounded-[8px] sm:rounded-[10px] transition-transform hover:scale-110 active:scale-90 ${heatColors[level]} ${isToday ? 'ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-[#1A1A2E]' : ''}`}
-              title={`${format(d, 'MMM d')}: ${formatMoneyCompact(amt, currency)}`}
-            />
+            <motion.button 
+              key={dateStr} 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onDayClick?.(dateStr, amt)}
+              className="aspect-square rounded-[10px] transition-all relative group"
+              style={{ background: heatColors[level], border: level === 0 ? '1px solid #F1F5F9' : 'none' }}
+            >
+              {isToday && (
+                <div className="absolute inset-[-3px] rounded-[13px] border-2 border-[var(--secondary)] animate-pulse" />
+              )}
+              {/* Tooltip hint on hover (simple) */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#1A1A2E] text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-20 shadow-xl" style={S}>
+                {format(d, 'MMM d')}: {formatMoneyCompact(amt, currency)}
+              </div>
+            </motion.button>
           )
         })}
       </div>
 
-      {/* Stats Summary */}
-      <div className="flex gap-2">
-        <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-2xl p-3 text-center">
-          <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase">No Spend Days</p>
-          <p className="font-sora font-bold text-[16px] text-green-500">{noSpendDays}</p>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-[#F8F7FF] rounded-[24px] p-5 border border-[#F0F0F8]">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-2" style={S}>No Spend</p>
+          <div className="flex items-end gap-2">
+            <p className="text-[22px] font-[800] text-[var(--primary)]" style={S}>{noSpendDays}</p>
+            <p className="text-[12px] font-[700] text-[#94A3B8] mb-1" style={S}>days</p>
+          </div>
         </div>
-        <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-2xl p-3 text-center">
-          <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase">Highest Day</p>
-          <p className="font-sora font-bold text-[16px] text-red-500">{formatMoneyCompact(maxDayAmt, currency)}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{maxDayDate ? format(maxDayDate, 'MMM d') : '-'}</p>
+        <div className="bg-[#FFF7F2] rounded-[24px] p-5 border border-[#FFEBE4]">
+          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-2" style={S}>Highest Peak</p>
+          <p className="text-[20px] font-[800] text-[var(--secondary)] truncate" style={S}>
+            {formatMoneyCompact(maxDayAmt, currency)}
+          </p>
+          <p className="text-[11px] font-[700] text-[#94A3B8] mt-1" style={S}>
+            {maxDayDate ? format(maxDayDate, 'MMM do') : 'N/A'}
+          </p>
         </div>
       </div>
     </div>

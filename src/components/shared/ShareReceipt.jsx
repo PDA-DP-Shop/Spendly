@@ -27,12 +27,12 @@ export const ShareReceipt = forwardRef(({ expense, currency }, ref) => {
           </div>
 
           <p className="text-white/60 font-semibold uppercase tracking-widest text-[12px] mb-2">{isSpent ? 'Spent At' : 'Received From'}</p>
-          <h2 className="text-white font-sora font-bold text-[28px] leading-tight mb-8 drop-shadow-md">
+          <h2 className="text-white font-sans font-bold text-[28px] leading-tight mb-8 drop-shadow-md">
             {expense.shopName}
           </h2>
 
           <div className="w-full bg-black/20 rounded-2xl p-6 mb-8 border border-white/10">
-            <p className="text-[48px] font-sora font-black tracking-tighter drop-shadow-md" style={{ color: isSpent ? '#F97316' : '#22C55E' }}>
+            <p className="text-[48px] font-sans font-black tracking-tighter drop-shadow-md" style={{ color: isSpent ? '#F97316' : '#22C55E' }}>
               {isSpent ? '-' : '+'}{formatMoney(expense.amount, currency)}
             </p>
           </div>
@@ -56,7 +56,7 @@ export const ShareReceipt = forwardRef(({ expense, currency }, ref) => {
           {/* Branding */}
           <div className="flex items-center gap-2 opacity-80">
             <div className="w-6 h-6 rounded-lg bg-purple-600 flex items-center justify-center text-[10px] text-white font-bold">S</div>
-            <p className="text-white/80 font-sora font-bold tracking-widest text-[12px] uppercase">Spendly Tracked</p>
+            <p className="text-white/80 font-sans font-bold tracking-widest text-[12px] uppercase">Spendly Tracked</p>
           </div>
 
         </div>

@@ -17,14 +17,14 @@ export default function DesktopBlockScreen() {
           💸
         </div>
 
-        <h1 className="text-[32px] font-sora font-bold text-purple-700 mb-3">Spendly</h1>
+        <h1 className="text-[32px] font-sans font-bold text-purple-700 mb-3">Spendly</h1>
         <div className="w-12 h-1 bg-purple-200 rounded-full mx-auto mb-6" />
 
         <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-5">
           <Smartphone className="w-9 h-9 text-purple-400" />
         </div>
 
-        <h2 className="text-[20px] font-sora font-semibold text-gray-800 mb-3">
+        <h2 className="text-[20px] font-sans font-semibold text-gray-800 mb-3">
           📱 Spendly is made for phones and tablets
         </h2>
         <p className="text-[15px] text-gray-400 leading-relaxed">

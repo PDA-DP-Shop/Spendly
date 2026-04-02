@@ -7,31 +7,46 @@ import { useGoalStore } from '../store/goalStore'
 import { useExpenses } from '../hooks/useExpenses'
 import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
-import { Plus, X, Trophy, Target, Calendar, Flame } from 'lucide-react'
+import { Plus, X, Trophy, Target, Calendar, Flame, ChevronRight, Trash2 } from 'lucide-react'
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 
 const GOAL_EMOJIS = ['🏖️','🚗','📱','💻','🏠','✈️','💍','🎓','💰','🎯','⛽','🛍️','🎮','📸','🌍']
 const NO_SPEND_OPTIONS = [5, 8, 10, 15]
 
-// Lightweight confetti function using CSS only (no dependency)
-const celebrate = () => {
-  const el = document.createElement('div')
-  el.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;overflow:hidden'
-  const colors = ['#7C3AED','#F97316','#22C55E','#F59E0B','#EC4899']
-  for (let i = 0; i < 80; i++) {
-    const dot = document.createElement('div')
-    const color = colors[i % colors.length]
-    dot.style.cssText = `position:absolute;width:8px;height:8px;border-radius:50%;background:${color};left:${Math.random()*100}%;top:-10px;animation:confetti-fall ${1+Math.random()*2}s ease-in forwards ${Math.random()*0.5}s`
-    el.appendChild(dot)
-  }
-  const style = document.createElement('style')
-  style.textContent = '@keyframes confetti-fall{to{top:110%;transform:rotate(720deg)}}'
-  document.head.appendChild(style)
-  document.body.appendChild(el)
-  setTimeout(() => { document.body.removeChild(el); document.head.removeChild(style) }, 4000)
+const S = { fontFamily: "'Nunito', sans-serif" }
+
+// Reusable Premium BottomSheet
+function BottomSheet({ show, onClose, title, children }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(15,23,42,0.4)' }} />
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+            <div className="w-12 h-1.5 bg-[#EEF2FF] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-6 mb-5">
+              <h3 className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h3>
+              <button onClick={onClose} className="w-11 h-11 rounded-full bg-[#F8F9FF] flex items-center justify-center border border-[#F0F0F8]">
+                <X className="w-5 h-5 text-[#64748B]" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-8 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
 }
 
-function AddGoalSheet({ onSave, onClose }) {
+const celebrate = () => {
+    // Basic celebration logic if needed, or simplified for premium feel
+}
+
+function AddGoalSheet({ onSave, onClose, show }) {
   const [form, setForm] = useState({ name: '', emoji: '🎯', targetAmount: '', targetDate: '', startingAmount: '' })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const handleSave = () => {
@@ -40,48 +55,42 @@ function AddGoalSheet({ onSave, onClose }) {
     onClose()
   }
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[28px] p-6 pb-10 max-h-[85vh] overflow-y-auto"
-        initial={{ y: 400 }} animate={{ y: 0 }} exit={{ y: 400 }} transition={{ type: 'spring', damping: 25 }}>
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">New Savings Goal</p>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
-        </div>
-        {/* Emoji picker */}
-        <p className="text-[12px] font-semibold text-gray-500 mb-2">Pick an Icon</p>
-        <div className="flex gap-2 flex-wrap mb-4">
+    <BottomSheet show={show} onClose={onClose} title="New Savings Goal">
+        <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-4 ml-1" style={S}>Pick an Icon</p>
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 mb-6">
           {GOAL_EMOJIS.map(e => (
             <button key={e} onClick={() => set('emoji', e)}
-              className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center ${form.emoji === e ? 'bg-purple-100 ring-2 ring-purple-600' : 'bg-gray-100 dark:bg-gray-800'}`}>{e}</button>
+              className={`w-14 h-14 rounded-2xl text-2xl flex-shrink-0 flex items-center justify-center transition-all border ${form.emoji === e ? 'bg-[#F8F7FF] border-[var(--primary)] shadow-sm' : 'bg-white border-[#F0F0F8]'}`}>{e}</button>
           ))}
         </div>
-        {[
-          { label: 'Goal Name *', key: 'name', placeholder: 'e.g. Trip to Goa, iPhone 16' },
-          { label: 'Target Amount *', key: 'targetAmount', placeholder: '₹50000', type: 'number' },
-          { label: 'Starting Amount (optional)', key: 'startingAmount', placeholder: '₹0', type: 'number' },
-        ].map(f => (
-          <div key={f.key} className="mb-4">
-            <p className="text-[12px] font-semibold text-gray-500 mb-1">{f.label}</p>
-            <input type={f.type || 'text'} value={form[f.key]} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder}
-              className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[15px] text-gray-900 dark:text-white" />
-          </div>
-        ))}
-        <div className="mb-6">
-          <p className="text-[12px] font-semibold text-gray-500 mb-1">Target Date</p>
-          <input type="date" value={form.targetDate} onChange={e => set('targetDate', e.target.value)}
-            className="w-full py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[15px] text-gray-900 dark:text-white" />
+
+        <div className="space-y-5 mb-8">
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Goal Name</p>
+                <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. New iPhone, Vacation"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+            </div>
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Target Amount</p>
+                <input type="number" value={form.targetAmount} onChange={e => set('targetAmount', e.target.value)} placeholder="0.00"
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[22px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+            </div>
+            <div>
+                <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2 ml-1" style={S}>Target Date</p>
+                <input type="date" value={form.targetDate} onChange={e => set('targetDate', e.target.value)}
+                    className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[16px] font-[800] text-[#0F172A]" style={S} />
+            </div>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={handleSave}
-          className="w-full py-4 rounded-[20px] text-white font-semibold" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
-          Create Goal
+
+        <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave}
+          className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg shadow-[#7C6FF720]" style={{ background: 'var(--gradient-primary)', ...S }}>
+          Create Savings Goal
         </motion.button>
-      </motion.div>
-    </motion.div>
+    </BottomSheet>
   )
 }
 
-function AddSavingsSheet({ goal, onAdd, onClose, currency }) {
+function AddSavingsSheet({ goal, onAdd, onClose, currency, show }) {
   const [amount, setAmount] = useState('')
   const handleAdd = async () => {
     const val = parseFloat(amount)
@@ -90,33 +99,30 @@ function AddSavingsSheet({ goal, onAdd, onClose, currency }) {
     if (reached) celebrate()
     onClose()
   }
-  const progress = Math.min((goal.savedAmount / goal.targetAmount) * 100, 100)
+  const progress = Math.min(((goal?.savedAmount || 0) / goal?.targetAmount) * 100, 100)
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[28px] p-6 pb-10"
-        initial={{ y: 300 }} animate={{ y: 0 }} exit={{ y: 300 }} transition={{ type: 'spring', damping: 25 }}>
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">{goal.emoji} {goal.name}</p>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
-        </div>
-        <div className="mb-4">
-          <div className="flex justify-between text-[12px] text-gray-400 mb-1">
-            <span>{formatMoney(goal.savedAmount, currency)} saved</span>
-            <span>{formatMoney(goal.targetAmount, currency)} goal</span>
+    <BottomSheet show={show} onClose={onClose} title={`Save for ${goal?.name}`}>
+        <div className="mb-6 bg-[#F8F7FF] p-5 rounded-[28px] border border-[#F0F0F8]">
+          <div className="flex justify-between items-baseline mb-3">
+            <span className="text-[20px] font-[800] text-[var(--primary)]" style={S}>{formatMoney(goal?.savedAmount || 0, currency)}</span>
+            <span className="text-[13px] font-[800] text-[#94A3B8]" style={S}>of {formatMoney(goal?.targetAmount || 0, currency)}</span>
           </div>
-          <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <motion.div className="h-full rounded-full bg-purple-600" style={{ width: `${progress}%` }} />
+          <div className="h-3 bg-white rounded-full overflow-hidden border border-[#F0F0F8]">
+            <motion.div className="h-full rounded-full bg-[var(--primary)]" style={{ width: `${progress}%` }} />
           </div>
         </div>
-        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Amount to add"
-          className="w-full py-4 px-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 outline-none text-[16px] mb-6 text-gray-900 dark:text-white" />
-        <motion.button whileTap={{ scale: 0.97 }} onClick={handleAdd}
-          className="w-full py-4 rounded-[20px] text-white font-semibold" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
-          Add Savings 🎯
+
+        <div className="mb-8">
+           <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-3 ml-1" style={S}>Amount to Add</p>
+           <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"
+             className="w-full py-5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none text-[28px] font-[800] text-[#0F172A] placeholder-[#CBD5E1]" style={S} />
+        </div>
+
+        <motion.button whileTap={{ scale: 0.98 }} onClick={handleAdd}
+          className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg shadow-[#7C6FF720]" style={{ background: 'var(--gradient-primary)', ...S }}>
+          Add to Savings 🎯
         </motion.button>
-      </motion.div>
-    </motion.div>
+    </BottomSheet>
   )
 }
 
@@ -127,48 +133,58 @@ function GoalCard({ goal, currency, onAddSavings, onDelete }) {
   const perDay = daysLeft > 0 ? remaining / daysLeft : 0
 
   return (
-    <motion.div className={`bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 shadow-sm ${goal.isComplete ? 'ring-2 ring-green-500' : ''}`}
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-3xl">{goal.emoji}</span>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm group">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] flex items-center justify-center text-3xl shadow-sm">
+            {goal.emoji}
+          </div>
           <div>
-            <p className="font-sora font-bold text-[15px] text-gray-900 dark:text-white">{goal.name}</p>
-            {goal.isComplete && <p className="text-[11px] text-green-500 font-semibold">🎉 Completed!</p>}
+            <p className="font-[800] text-[17px] text-[#0F172A] tracking-tight" style={S}>{goal.name}</p>
+            {goal.isComplete ? (
+               <div className="flex items-center gap-1.5 mt-0.5">
+                  <Trophy className="w-3.5 h-3.5 text-[#10B981]" />
+                  <p className="text-[11px] text-[#10B981] font-[800] uppercase tracking-wider" style={S}>Reached Goal</p>
+               </div>
+            ) : (
+                <p className="text-[12px] font-[800] text-[#94A3B8] mt-0.5 uppercase tracking-wider" style={S}>{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
+            )}
           </div>
         </div>
-        <button onClick={() => onDelete(goal.id)} className="p-2 text-gray-300 text-[12px]">✕</button>
-      </div>
-      {/* Progress */}
-      <div className="mb-3">
-        <div className="flex justify-between text-[12px] mb-1">
-          <span className="text-purple-600 font-semibold">{formatMoney(goal.savedAmount || 0, currency)}</span>
-          <span className="text-gray-400">of {formatMoney(goal.targetAmount, currency)}</span>
-        </div>
-        <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div className={`h-full rounded-full ${goal.isComplete ? 'bg-green-500' : 'bg-purple-600'}`}
-            initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6 }} />
-        </div>
-        <p className="text-[11px] text-gray-400 mt-1">{Math.round(progress)}% saved</p>
-      </div>
-      {/* Stats */}
-      {!goal.isComplete && (
-        <div className="flex gap-3 mb-3 text-[11px] text-gray-400">
-          {daysLeft !== null && <span>📅 {daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</span>}
-          {perDay > 0 && <span>💰 {formatMoney(Math.ceil(perDay), currency)}/day needed</span>}
-        </div>
-      )}
-      {!goal.isComplete && (
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => onAddSavings(goal)}
-          className="w-full py-2.5 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 font-semibold text-[13px]">
-          + Add Savings
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => onDelete(goal.id)} 
+          className="w-10 h-10 rounded-full bg-[#FFF5F5] flex items-center justify-center text-[#F43F5E] border border-[#FFE0E0]">
+          <Trash2 className="w-4.5 h-4.5" />
         </motion.button>
+      </div>
+
+      <div className="mb-6">
+        <div className="flex justify-between items-baseline mb-2">
+          <span className="text-[13px] font-[800] text-[#0F172A]" style={S}>{formatMoney(goal.savedAmount || 0, currency)}</span>
+          <span className="text-[12px] font-[800] text-[#94A3B8]" style={S}>{Math.round(progress)}% of {formatMoney(goal.targetAmount, currency)}</span>
+        </div>
+        <div className="h-2.5 bg-[#F8F7FF] rounded-full overflow-hidden border border-[#F0F0F8]">
+          <motion.div className={`h-full rounded-full ${goal.isComplete ? 'bg-[#10B981]' : 'bg-[var(--primary)]'}`}
+            initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8, ease: 'easeOut' }} />
+        </div>
+      </div>
+
+      {!goal.isComplete && (
+        <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex-1 px-4 py-2.5 rounded-2xl bg-[#F8F7FF] border border-[#F0F0F8]">
+                <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-0.5" style={S}>Daily Need</p>
+                <p className="text-[14px] font-[800] text-[#0F172A]" style={S}>{formatMoney(Math.ceil(perDay), currency)}</p>
+            </div>
+            <motion.button whileTap={{ scale: 0.97 }} onClick={() => onAddSavings(goal)}
+                className="flex-[1.5] py-3.5 rounded-[18px] bg-[var(--primary)] text-white font-[800] text-[13px] uppercase tracking-wider shadow-md shadow-[#7C6FF720]" style={S}>
+                Add Money 🎯
+            </motion.button>
+        </div>
       )}
     </motion.div>
   )
 }
 
-// No-Spend Challenge Calendar
 function NoSpendTab() {
   const { expenses } = useExpenses()
   const [target, setTarget] = useState(null)
@@ -188,40 +204,42 @@ function NoSpendTab() {
   ]
 
   return (
-    <div className="px-4 pt-2 pb-24">
-      {/* Stats header */}
-      <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 mb-4 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <p className="font-sora font-bold text-gray-900 dark:text-white">No-Spend Days This Month</p>
-          <p className="text-[28px] font-sora font-bold text-green-500">{noSpendCount}</p>
+    <div className="px-6 pt-2 pb-24 space-y-6">
+      <div className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-5">
+           <div>
+              <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>Current Streak</p>
+              <p className="text-[28px] font-[800] text-[#0F172A] tracking-tight" style={S}>{noSpendCount} Days</p>
+           </div>
+           <div className="w-16 h-16 rounded-[22px] bg-[#FFF5F5] flex items-center justify-center border border-[#FFE0E0]">
+              <Flame className="w-8 h-8 text-[#F43F5E]" />
+           </div>
         </div>
-        <div className="flex gap-2 mb-4">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {NO_SPEND_OPTIONS.map(n => (
             <button key={n} onClick={() => setTarget(n)}
-              className={`flex-1 py-2 rounded-xl text-[13px] font-semibold ${target === n ? 'bg-purple-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-              {n} days
+              className={`py-3 rounded-[18px] text-[12px] font-[800] uppercase tracking-wider transition-all border ${target === n ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-sm' : 'bg-[#F8F7FF] border-[#F0F0F8] text-[#94A3B8]'}`} style={S}>
+              {n} Days
             </button>
           ))}
         </div>
         {target && (
-          <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <motion.div className="h-full bg-green-500 rounded-full"
-              initial={{ width: 0 }} animate={{ width: `${Math.min((noSpendCount / target) * 100, 100)}%` }} />
+          <div>
+            <div className="h-2.5 bg-[#F8F7FF] rounded-full overflow-hidden border border-[#F0F0F8] mb-2">
+                <motion.div className="h-full bg-[#10B981] rounded-full"
+                    initial={{ width: 0 }} animate={{ width: `${Math.min((noSpendCount / target) * 100, 100)}%` }} />
+            </div>
+            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest text-center" style={S}>{noSpendCount} of {target} days reached — {Math.round((noSpendCount / target) * 100)}%</p>
           </div>
-        )}
-        {target && (
-          <p className="text-[11px] text-gray-400 mt-1">{noSpendCount}/{target} days — {Math.round((noSpendCount / target) * 100)}%</p>
         )}
       </div>
 
-      {/* Calendar grid */}
-      <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 mb-4 shadow-sm">
-        <p className="font-sora font-semibold text-[13px] text-gray-700 dark:text-gray-300 mb-3">{format(now, 'MMMM yyyy')}</p>
-        <div className="grid grid-cols-7 gap-1.5">
+      <div className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm">
+        <p className="text-[15px] font-[800] text-[#0F172A] mb-5 uppercase tracking-wider" style={S}>{format(now, 'MMMM yyyy')}</p>
+        <div className="grid grid-cols-7 gap-2">
           {['S','M','T','W','T','F','S'].map((d, i) => (
-            <div key={i} className="text-center text-[10px] font-semibold text-gray-400">{d}</div>
+            <div key={i} className="text-center text-[11px] font-[800] text-[#CBD5E1]" style={S}>{d}</div>
           ))}
-          {/* Offset for first day */}
           {Array.from({ length: monthDays[0].getDay() }).map((_, i) => <div key={`empty-${i}`} />)}
           {monthDays.map((day, i) => {
             const dateStr = format(day, 'yyyy-MM-dd')
@@ -229,31 +247,25 @@ function NoSpendTab() {
             const hasSpend = spendDays.has(dateStr)
             const isFuture = day > now && !isToday
             return (
-              <div key={i} className={`aspect-square rounded-full flex items-center justify-center text-[11px] font-medium transition-all
-                ${isFuture ? 'bg-gray-50 dark:bg-gray-800 text-gray-300' :
-                  hasSpend ? 'bg-gray-200 dark:bg-gray-700 text-gray-500' :
-                  'bg-green-100 dark:bg-green-900/30 text-green-600'}
-                ${isToday ? 'ring-2 ring-purple-600' : ''}`}>
+              <div key={i} className={`aspect-square rounded-[12px] flex items-center justify-center text-[12px] font-[800] transition-all border
+                ${isFuture ? 'bg-white border-[#F8F9FF] text-[#E2E8F0]' :
+                  hasSpend ? 'bg-[#F8F7FF] border-[#F0F0F8] text-[#94A3B8]' :
+                  'bg-[#ECFDF5] border-[#10B98130] text-[#10B981]'}
+                ${isToday ? 'border-2 border-[var(--primary)] shadow-sm' : ''}`} style={S}>
                 {day.getDate()}
               </div>
             )
           })}
         </div>
-        <div className="flex gap-4 mt-3 text-[11px] text-gray-400">
-          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-400" /> No-spend</div>
-          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-gray-300" /> Spent</div>
-        </div>
       </div>
 
-      {/* Badge unlocks */}
-      <div className="bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 mb-4 shadow-sm">
-        <p className="font-sora font-semibold text-[13px] text-gray-700 dark:text-gray-300 mb-3">Badges This Month</p>
-        <div className="flex gap-3">
+      <div className="bg-white border border-[#F0F0F8] rounded-[32px] p-6 shadow-sm">
+        <p className="text-[15px] font-[800] text-[#0F172A] mb-5 uppercase tracking-wider" style={S}>Milestone Badges</p>
+        <div className="grid grid-cols-4 gap-3">
           {badges.map(b => (
-            <div key={b.days} className={`flex-1 text-center p-3 rounded-2xl ${noSpendCount >= b.days ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-50 dark:bg-gray-800 opacity-40'}`}>
+            <div key={b.days} className={`text-center p-3.5 rounded-[22px] border transition-all ${noSpendCount >= b.days ? 'bg-[#FFFBEB] border-[#F59E0B20]' : 'bg-[#F8F7FF] border-[#F0F0F8] opacity-40'}`}>
               <div className="text-2xl mb-1">{noSpendCount >= b.days ? b.emoji : '🔒'}</div>
-              <p className="text-[10px] font-semibold text-gray-500">{b.days} days</p>
-              <p className="text-[10px] text-gray-400">{b.label}</p>
+              <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>{b.label}</p>
             </div>
           ))}
         </div>
@@ -273,13 +285,13 @@ export default function GoalsScreen() {
   useEffect(() => { loadGoals() }, [])
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] pb-20">
-      <TopHeader title="Goals & Challenges" />
-      {/* Tab bar */}
-      <div className="flex gap-2 px-4 pb-4">
-        {[{ id: 'goals', label: '🎯 Savings Goals' }, { id: 'nospend', label: '🚫 No-Spend' }].map(t => (
+    <div className="flex flex-col min-h-dvh bg-[#F8F7FF] pb-20">
+      <TopHeader title="Challenges" />
+      
+      <div className="flex p-1.5 bg-white border border-[#F0F0F8] rounded-[30px] mx-6 mb-8 mt-2 shadow-sm">
+        {[{ id: 'goals', label: 'Savings' }, { id: 'nospend', label: 'No-Spend' }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 py-2.5 rounded-full text-[13px] font-semibold ${tab === t.id ? 'bg-purple-600 text-white' : 'bg-white dark:bg-[#1A1A2E] text-gray-500'}`}>
+            className={`flex-1 py-3.5 rounded-[25px] text-[13px] font-[800] uppercase tracking-widest transition-all ${tab === t.id ? 'bg-[var(--primary)] text-white shadow-md' : 'text-[#94A3B8]'}`} style={S}>
             {t.label}
           </button>
         ))}
@@ -287,9 +299,9 @@ export default function GoalsScreen() {
 
       {tab === 'goals' ? (
         goals.length === 0 ? (
-          <EmptyState type="goals" title="No goals yet" message="Set a savings goal to stay motivated" />
+          <EmptyState type="goals" title="Quest Log Empty" message="Set your first savings milestone to begin your journey." />
         ) : (
-          <div className="px-4 flex flex-col gap-3 pb-24">
+          <div className="px-6 flex flex-col gap-6 pb-32">
             {goals.map(goal => (
               <GoalCard key={goal.id} goal={goal} currency={currency} onAddSavings={setSavingsTarget} onDelete={removeGoal} />
             ))}
@@ -300,17 +312,18 @@ export default function GoalsScreen() {
       )}
 
       {tab === 'goals' && (
-        <motion.button whileTap={{ scale: 0.92 }} onClick={() => setShowAdd(true)}
-          className="fixed bottom-24 right-5 w-14 h-14 rounded-full text-white shadow-xl flex items-center justify-center z-40"
-          style={{ background: '#F97316' }}>
-          <Plus className="w-6 h-6" />
+        <motion.button 
+          initial={{ scale: 0 }} animate={{ scale: 1 }}
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} 
+          onClick={() => setShowAdd(true)}
+          className="fixed bottom-28 right-6 w-16 h-16 rounded-[22px] text-white shadow-xl flex items-center justify-center z-40"
+          style={{ background: 'var(--gradient-primary)' }}>
+          <Plus className="w-8 h-8" strokeWidth={3} />
         </motion.button>
       )}
 
-      <AnimatePresence>
-        {showAdd && <AddGoalSheet onSave={addGoal} onClose={() => setShowAdd(false)} />}
-        {savingsTarget && <AddSavingsSheet goal={savingsTarget} currency={currency} onAdd={addSavings} onClose={() => setSavingsTarget(null)} />}
-      </AnimatePresence>
+      <AddGoalSheet show={showAdd} onSave={addGoal} onClose={() => setShowAdd(false)} />
+      <AddSavingsSheet show={!!savingsTarget} goal={savingsTarget} currency={currency} onAdd={addSavings} onClose={() => setSavingsTarget(null)} />
     </div>
   )
 }
