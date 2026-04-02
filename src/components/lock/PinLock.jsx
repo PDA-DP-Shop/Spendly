@@ -39,22 +39,24 @@ export default function PinLock({ onVerify, onBiometric, wrongAttempts, lockoutR
         transition={{ duration: 0.5 }}
         className="flex gap-4"
       >
-        {Array.from({ length: pinLength }).map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              background: i < pin.length ? 'var(--primary)' : 'transparent',
-              borderColor: i < pin.length ? 'var(--primary)' : '#E2E8F0',
-              scale: i < pin.length ? 1.1 : 1,
-            }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className={`w-4 h-4 rounded-full border-2 ${i < pin.length ? 'border-transparent' : 'border-[#E2E8F0]'}`}
-            style={{ 
-                boxShadow: i < pin.length ? '0 4px 12px rgba(124,111,247,0.3)' : 'none',
-                background: i < pin.length ? 'var(--primary)' : 'transparent'
-            }}
-          />
-        ))}
+        {Array.from({ length: pinLength }).map((_, i) => {
+          const filled = i < pin.length
+          return (
+            <motion.div
+              key={i}
+              animate={{
+                scale: filled ? 1.2 : 1,
+                backgroundColor: filled ? 'var(--primary)' : '#F1F5F9',
+                borderColor: filled ? 'var(--primary)' : '#E2E8F0'
+              }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="w-3.5 h-3.5 rounded-full border-[1.5px]"
+              style={{ 
+                  boxShadow: filled ? '0 0 16px rgba(124,111,247,0.4)' : 'none',
+              }}
+            />
+          )
+        })}
       </motion.div>
 
       {/* Lockout timer */}
@@ -70,27 +72,31 @@ export default function PinLock({ onVerify, onBiometric, wrongAttempts, lockoutR
       </AnimatePresence>
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-6 w-full relative">
+      <div className="grid grid-cols-3 gap-x-6 gap-y-5 w-full relative">
         {buttons.map((btn, i) => {
           if (btn === 'del') {
             return (
               <motion.button key={i} whileTap={{ scale: 0.9 }} onClick={backspace}
-                className="w-full aspect-square rounded-full flex items-center justify-center transition-all bg-white border border-[#F0F0F8] shadow-[0_4px_12px_rgba(0,0,0,0.02)] active:bg-[#F1F5F9]/50">
-                <Delete className="w-8 h-8 text-[#94A3B8]" />
+                className="w-full aspect-square rounded-full flex items-center justify-center transition-all group">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] group-active:bg-[#F1F5F9]">
+                  <Delete className="w-7 h-7 text-[#94A3B8]" />
+                </div>
               </motion.button>
             )
           }
           if (btn === 'bio') {
             return (
               <motion.button key={i} whileTap={{ scale: 0.9 }} onClick={onBiometric}
-                className="w-full aspect-square rounded-full flex items-center justify-center transition-all bg-[var(--primary)] shadow-[0_8px_24px_rgba(124,111,247,0.25)] active:scale-95">
-                <Fingerprint className="w-8 h-8 text-white" />
+                className="w-full aspect-square rounded-full flex items-center justify-center transition-all group">
+                 <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#EEF2FF] border border-[#7C6FF7]/10 group-active:bg-[var(--primary)] group-active:text-white text-[var(--primary)]">
+                  <Fingerprint className="w-7 h-7" />
+                </div>
               </motion.button>
             )
           }
           return (
-            <motion.button key={i} whileTap={{ scale: 0.9 }} onClick={() => addDigit(String(btn))} disabled={lockoutRemaining > 0}
-              className="w-full aspect-square rounded-[32px] bg-white flex flex-col items-center justify-center text-[32px] font-[800] text-[#0F172A] shadow-[0_4px_16px_rgba(0,0,0,0.03)] border border-[#F0F0F8] disabled:opacity-30 transition-all active:bg-[#F8F7FF] active:border-[var(--primary)]/20"
+            <motion.button key={i} whileTap={{ scale: 0.92 }} onClick={() => addDigit(String(btn))} disabled={lockoutRemaining > 0}
+              className="w-full aspect-square rounded-[30px] bg-white flex flex-col items-center justify-center text-[30px] font-[800] text-[#0F172A] shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-[#F0F0F8] disabled:opacity-30 transition-all active:bg-[#F8F7FF] active:border-[var(--primary)]/20"
               style={S}>
               {btn}
             </motion.button>
