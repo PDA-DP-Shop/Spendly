@@ -35,17 +35,15 @@ async function loadLocalDb() {
   localDbLoading = true
   localDbLoadPromise = (async () => {
     try {
-      // Try gzip-compressed version first (preferred, ~5x smaller)
       const res = await fetch('/data/top-50000-products.json.gz', {
-        // Tell the browser we accept gzip — it will decompress automatically
-        headers: { 'Accept-Encoding': 'gzip, deflate' },
-        // Use cache: 'force-cache' so SW doesn't re-fetch on every session
         cache: 'force-cache',
       })
 
       if (!res.ok) throw new Error(`Local DB not found (${res.status})`)
 
-      const products = await res.json()
+      const ds = new DecompressionStream('gzip')
+      const decompressedStream = res.body.pipeThrough(ds)
+      const products = await new Response(decompressedStream).json()
       const map = new Map()
       for (const p of products) {
         if (p.barcode) map.set(p.barcode, { name: p.name, brand: p.brand, category: p.category })

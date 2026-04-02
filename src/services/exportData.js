@@ -15,7 +15,7 @@ export const exportAllData = async (password) => {
   const goals = await db.goals.toArray()
   const splits = await db.splits.toArray()
   const badges = await db.badges.toArray()
-  const festivals = await db.festivals.toArray()
+  const festivals = JSON.parse(localStorage.getItem('spendly_festivals') || '[]')
 
   const payload = {
     version: '1.1',

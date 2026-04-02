@@ -30,7 +30,7 @@ export const importBackupFile = async (file, password) => {
         if (data.goals) for (const goal of data.goals) { const { id, ...rest } = goal; await db.goals.add(rest) }
         if (data.splits) for (const split of data.splits) { const { id, ...rest } = split; await db.splits.add(rest) }
         if (data.badges) for (const badge of data.badges) { const { id, ...rest } = badge; await db.badges.add(rest) }
-        if (data.festivals) for (const fest of data.festivals) { const { id, ...rest } = fest; await db.festivals.add(rest) }
+        if (data.festivals) { localStorage.setItem('spendly_festivals', JSON.stringify(data.festivals)) }
 
         resolve(data.expenses.length)
       } catch (err) {
