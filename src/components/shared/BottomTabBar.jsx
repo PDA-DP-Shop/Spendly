@@ -41,44 +41,50 @@ export default function BottomTabBar({ onAddPress }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 w-full" style={{ filter: 'drop-shadow(0px -4px 20px rgba(0,0,0,0.06))' }}>
-      
-      {/* Background with perfect semi-circle cutout */}
-      <div 
-        className="absolute bottom-0 left-0 w-full bg-white dark:bg-[#151523] h-[75px]"
-        style={{
-          WebkitMaskImage: 'radial-gradient(circle at 50% 0px, transparent 36px, black 37px)',
-          maskImage: 'radial-gradient(circle at 50% 0px, transparent 36px, black 37px)',
-          paddingBottom: 'env(safe-area-inset-bottom)'
-        }}
-      />
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-6 pb-6">
+      <div className="w-full max-w-md h-[72px] glass-elevated border-white/5 backdrop-blur-[32px] flex items-center justify-around px-2 relative">
+        {tabsLeft.map(tab => (
+          <button 
+            key={tab.path} 
+            onClick={() => navigate(tab.path)}
+            className="flex flex-col items-center justify-center w-14 h-full relative"
+          >
+            <tab.icon 
+              className={`w-[24px] h-[24px] mb-1 transition-all duration-300 ${location.pathname === tab.path ? 'text-cyan-glow drop-shadow-glow' : 'text-[#3D4F70]'}`} 
+              strokeWidth={location.pathname === tab.path ? 2.5 : 2} 
+            />
+            {location.pathname === tab.path && (
+              <motion.div layoutId="nav-dot" className="w-1 h-1 bg-cyan-glow rounded-full shadow-glow" />
+            )}
+          </button>
+        ))}
 
-      {/* Content wrapper */}
-      <div 
-        className="relative flex items-center justify-between w-full h-[75px] px-2"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="flex-1 flex justify-around items-center h-full pt-1">
-          {tabsLeft.map(tab => <TabItem key={tab.path} tab={tab} />)}
-        </div>
-
-        {/* Center FAB positioned exactly in the cutout */}
-        <div className="relative flex justify-center items-start w-[80px] h-full">
+        {/* Center FAB */}
+        <div className="relative -top-6">
           <motion.button 
             whileTap={{ scale: 0.9 }} 
             onClick={onAddPress}
-            className="absolute -top-[28px] flex items-center justify-center w-[56px] h-[56px] rounded-full bg-[#1C163C] dark:bg-purple-600 shadow-xl"
-            style={{ 
-               boxShadow: '0px 10px 25px rgba(28,22,60,0.5)', 
-            }}
+            className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4FF] shadow-fab flex items-center justify-center animate-glowPulse"
           >
-            <Plus className="w-8 h-8 text-white" strokeWidth={2.5} />
+            <Plus className="w-8 h-8 text-white" strokeWidth={3} />
           </motion.button>
         </div>
 
-        <div className="flex-1 flex justify-around items-center h-full pt-1">
-          {tabsRight.map(tab => <TabItem key={tab.path} tab={tab} />)}
-        </div>
+        {tabsRight.map(tab => (
+          <button 
+            key={tab.path} 
+            onClick={() => navigate(tab.path)}
+            className="flex flex-col items-center justify-center w-14 h-full relative"
+          >
+            <tab.icon 
+              className={`w-[24px] h-[24px] mb-1 transition-all duration-300 ${location.pathname === tab.path ? 'text-cyan-glow drop-shadow-glow' : 'text-[#3D4F70]'}`} 
+              strokeWidth={location.pathname === tab.path ? 2.5 : 2} 
+            />
+            {location.pathname === tab.path && (
+              <motion.div layoutId="nav-dot" className="w-1 h-1 bg-cyan-glow rounded-full shadow-glow" />
+            )}
+          </button>
+        ))}
       </div>
     </div>
   )

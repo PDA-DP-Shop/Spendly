@@ -9,83 +9,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Background
-        'app-bg': '#F5F5F5',
-        'dark-bg': '#0F0F1A',
-        // Cards
-        'card-white': '#FFFFFF',
-        'dark-card': '#1A1A2E',
-        'dark-card-elevated': '#242438',
-        // Balance card gradient stops
-        'balance-dark': '#2D2D3A',
-        'balance-darker': '#1A1A2E',
-        // Purple accent
-        'purple': {
-          DEFAULT: '#7C3AED',
-          light: '#EDE9FE',
-          pale: '#F3E8FF',
-          dark: '#6D28D9',
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          900: '#4C1D95',
+        background: '#050B18',
+        surface: 'rgba(255,255,255,0.04)',
+        border: 'rgba(255,255,255,0.08)',
+        cyan: {
+          glow: '#00D4FF',
+          dim: 'rgba(0,212,255,0.15)',
         },
-        // Orange
-        'orange': {
-          DEFAULT: '#F97316',
-          dark: '#EA580C',
-          darker: '#DC2626',
+        blue: {
+          glow: '#0066FF',
+          dim: 'rgba(0,102,255,0.15)',
         },
-        // Status colors
-        'success': '#22C55E',
-        'danger': '#EF4444',
-        'warning': '#F59E0B',
-        // Text
-        'text-dark': '#111827',
-        'text-grey': '#9CA3AF',
-        'text-light': '#F9FAFB',
-        // Border
-        'border-light': '#F3F4F6',
-        'dark-border': '#2D2D45',
+        income: '#00FF87',
+        expense: '#FF4D6D',
+        textPrimary: '#F0F4FF',
+        textMuted: '#7B8DB0',
       },
       fontFamily: {
-        'sora': ['Sora', 'sans-serif'],
-        'dm': ['DM Sans', 'sans-serif'],
+        display: ['Clash Display', 'sans-serif'],
+        body: ['Satoshi', 'sans-serif'],
+        sora: ['Clash Display', 'sans-serif'], // Remapping sora to display for fallback
+        dm: ['Satoshi', 'sans-serif'], // Remapping dm to body for fallback
       },
-      fontSize: {
-        'balance': '36px',
-        'card-amount': '26px',
-        'title': '22px',
-        'greeting': '26px',
-        'item-name': '15px',
-        'item-detail': '12px',
-        'label': '12px',
-        'btn': '15px',
-      },
-      spacing: {
-        'screen-pad': '24px',
-        'card-pad': '20px',
-        'card-gap': '16px',
-        'item-gap': '12px',
-        'tab-height': '72px',
-      },
-      borderRadius: {
-        'card': '20px',
-        'chip': '100px',
-        'btn': '14px',
+      backdropBlur: {
+        glass: '24px',
+        heavy: '40px',
       },
       boxShadow: {
-        'card': '0 2px 12px rgba(0,0,0,0.06)',
-        'fab': '0 4px 20px rgba(249,115,22,0.4)',
-        'balance': '0 8px 32px rgba(0,0,0,0.15)',
+        glass: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+        glow: '0 0 20px rgba(0,212,255,0.3)',
+        glowLg: '0 0 40px rgba(0,102,255,0.4)',
+        fab: '0 4px 20px rgba(0,212,255,0.5)',
+      },
+      borderRadius: {
+        card: '24px',
+        button: '16px',
+        chip: '100px',
       },
       animation: {
+        glowPulse: 'glowPulse 2s infinite',
+        borderSpin: 'borderSpin 4s linear infinite',
+        countUp: 'countUp 1s ease-out',
         'shimmer': 'shimmer 2s infinite',
         'pulse-glow': 'pulseGlow 2s infinite',
-        'count-up': 'countUp 1s ease-out',
         'shake': 'shake 0.5s ease-in-out',
         'bounce-in': 'bounceIn 0.3s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',

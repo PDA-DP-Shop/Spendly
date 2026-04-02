@@ -29,20 +29,29 @@ export default function LockScreen() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-dvh flex flex-col bg-white dark:bg-[#0F0F1A] safe-top"
+      className="h-dvh flex flex-col bg-[#050B18] safe-top relative overflow-hidden"
     >
+      {/* Background decoration */}
+      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-cyan-glow/10 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-5%] left-[-5%] w-[250px] h-[250px] rounded-full bg-blue-glow/10 blur-[60px] pointer-events-none" />
+
       {/* Top branding */}
-      <div className="flex flex-col items-center pt-16 pb-8">
-        <div className="w-16 h-16 rounded-[20px] mb-4 flex items-center justify-center text-3xl"
-          style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)', boxShadow: '0 6px 24px rgba(124,58,237,0.35)' }}>
-          💸
-        </div>
-        <h1 className="text-[26px] font-sora font-bold text-gray-900 dark:text-white">Spendly</h1>
-        <p className="text-[15px] text-gray-400 mt-1">Welcome back! 👋</p>
+      <div className="flex flex-col items-center pt-24 pb-8 relative z-10 transition-all duration-700">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring' }}
+          className="w-24 h-24 rounded-[32px] glass-accent border-white/10 flex items-center justify-center shadow-glow mb-8"
+        >
+          <img src="/spendly-logo.png" alt="Spendly" className="w-14 h-14 rounded-2xl" />
+        </motion.div>
+        
+        <h1 className="text-[44px] font-display font-bold text-white mb-1 tracking-tighter leading-none">Spendly</h1>
+        <p className="text-[13px] font-display font-bold text-cyan-glow uppercase tracking-[0.25em]">Access Restricted</p>
       </div>
 
       {/* Lock component */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center relative z-10">
         {(lockType === 'pin4' || lockType === 'pin6' || lockType === 'none') && (
           <PinLock
             pinLength={lockType === 'pin4' ? 4 : 6}
@@ -60,9 +69,9 @@ export default function LockScreen() {
         )}
       </div>
 
-      {/* Forgot PIN link */}
-      <div className="pb-12 text-center">
-        <button className="text-sm text-gray-400 underline">Forgot PIN?</button>
+      {/* Footer info */}
+      <div className="pb-16 text-center relative z-10">
+        <p className="text-[12px] font-body text-[#3D4F70] uppercase tracking-[0.2em]">Secured by AES-256 Vault</p>
       </div>
     </motion.div>
   )

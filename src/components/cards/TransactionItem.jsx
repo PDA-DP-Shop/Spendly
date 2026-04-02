@@ -44,30 +44,30 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
   }
 
   return (
-    <motion.div className="relative mx-4 mb-3 rounded-2xl overflow-hidden bg-gray-50 dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-white/5">
-      {/* Background Actions */}
-      <div className="absolute inset-0 flex items-center justify-between px-3">
-        {/* Left revealed items */}
-        <motion.div style={{ scale: rightScale, opacity: rightOpacity }} className="flex gap-2">
+    <motion.div className="relative mx-4 mb-1 rounded-3xl overflow-hidden glass border-none">
+      {/* Background Actions Reveal */}
+      <div className="absolute inset-0 flex items-center justify-between px-4">
+        {/* Left revealed: Edit/Delete */}
+        <motion.div style={{ scale: rightScale, opacity: rightOpacity }} className="flex gap-3">
           <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className="w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg flex items-center justify-center">
-            <Edit2 className="w-5 h-5" />
+            className="w-12 h-12 glass flex items-center justify-center border-cyan-glow/20 shadow-glow">
+            <Edit2 className="w-5 h-5 text-cyan-glow" />
           </motion.button>
           <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className="w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center">
-            <Trash2 className="w-5 h-5" />
+            className="w-12 h-12 glass flex items-center justify-center border-expense/20 shadow-[0_0_20px_rgba(255,77,109,0.2)]">
+            <Trash2 className="w-5 h-5 text-expense" />
           </motion.button>
         </motion.div>
 
-        {/* Right revealed items */}
-        <motion.div style={{ scale: leftScale, opacity: leftOpacity }} className="flex gap-2">
+        {/* Right revealed: Delete/Edit */}
+        <motion.div style={{ scale: leftScale, opacity: leftOpacity }} className="flex gap-3">
           <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
-            className="w-12 h-12 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center">
-            <Trash2 className="w-5 h-5" />
+            className="w-12 h-12 glass flex items-center justify-center border-expense/20 shadow-[0_0_20px_rgba(255,77,109,0.2)]">
+            <Trash2 className="w-5 h-5 text-expense" />
           </motion.button>
           <motion.button onClick={(e) => { e.stopPropagation(); closeActions(); onEdit?.(expense); }}
-            className="w-12 h-12 bg-blue-500 text-white rounded-xl shadow-lg flex items-center justify-center">
-            <Edit2 className="w-5 h-5" />
+            className="w-12 h-12 glass flex items-center justify-center border-cyan-glow/20 shadow-glow">
+            <Edit2 className="w-5 h-5 text-cyan-glow" />
           </motion.button>
         </motion.div>
       </div>
@@ -76,34 +76,35 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
       <motion.div
         drag="x"
         dragConstraints={{ left: -140, right: 140 }}
-        dragElastic={0.1}
+        dragElastic={0.05}
         style={{ x }}
         onDragEnd={handleDragEnd}
         onTap={() => {
           if (isOpen) closeActions()
           else if (Math.abs(x.get()) < 10) onEdit?.(expense)
         }}
-        className="relative z-10 flex items-center gap-3 p-4 bg-white dark:bg-[#1A1A2E] rounded-2xl shadow-sm cursor-grab active:cursor-grabbing"
+        className="relative z-10 flex items-center gap-4 p-4 bg-transparent cursor-grab active:cursor-grabbing backdrop-blur-none"
       >
-        <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0" style={{ backgroundColor: category.bgColor }}>
+        <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0 shadow-lg" 
+             style={{ background: `linear-gradient(135deg, ${category.color}40, ${category.color}10)`, border: `1px solid ${category.color}30` }}>
           {category.emoji}
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-semibold text-gray-900 dark:text-white truncate">{expense.shopName || category.name}</p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <p className="text-[12px] text-gray-400">{formatDate(expense.date)}</p>
+          <p className="text-[15px] font-body font-medium text-[#F0F4FF] truncate">{expense.shopName || category.name}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-[12px] font-body text-[#7B8DB0]">{formatDate(expense.date)}</p>
             {expense.paymentMethod && (
               <>
-                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{expense.paymentMethod}</span>
+                <span className="w-1 h-1 rounded-full bg-[#3D4F70]" />
+                <span className="text-[11px] font-body font-semibold text-[#7B8DB0] uppercase tracking-[0.08em]">{expense.paymentMethod}</span>
               </>
             )}
             {expense.isSplit && (
               <>
-                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                <div className="flex items-center gap-0.5 text-purple-500 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide">
-                  1/{expense.splitPeople}
+                <span className="w-1 h-1 rounded-full bg-[#3D4F70]" />
+                <div className="flex items-center gap-0.5 text-cyan-glow bg-cyan-dim px-2 py-0.5 rounded-full text-[10px] font-body font-bold tracking-wide">
+                  SPLIT · {expense.splitPeople}
                 </div>
               </>
             )}
@@ -111,10 +112,10 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         </div>
 
         <div className="text-right flex-shrink-0">
-          <p className={`text-[15px] font-sora font-bold ${isSpent ? 'text-red-500' : 'text-green-500'}`}>
+          <p className={`text-[16px] font-display font-bold tracking-tight ${isSpent ? 'text-expense' : 'text-income'}`}>
             {hideBalances ? '••••' : (isSpent ? '- ' : '+ ') + formatMoney(expense.amount, currency)}
           </p>
-          <p className="text-[11px] text-gray-400 text-center">{formatTime(expense.date)}</p>
+          <p className="text-[11px] font-body text-[#7B8DB0] mt-0.5">{formatTime(expense.date)}</p>
         </div>
       </motion.div>
     </motion.div>

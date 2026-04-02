@@ -185,7 +185,33 @@ export default function App() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative z-10 w-full min-h-dvh">
+      {/* Background Orbs */}
+      <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden bg-[#050B18]">
+        {/* Orb 1 (top right) */}
+        <div style={{
+          width: '300px', height: '300px',
+          background: 'radial-gradient(circle, rgba(0,102,255,0.15) 0%, transparent 70%)',
+          position: 'absolute', top: '-50px', right: '-50px',
+          filter: 'blur(60px)'
+        }} />
+        {/* Orb 2 (bottom left) */}
+        <div style={{
+          width: '250px', height: '250px',
+          background: 'radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%)',
+          position: 'absolute', bottom: '100px', left: '-30px',
+          filter: 'blur(50px)'
+        }} />
+        {/* Orb 3 (center) */}
+        <div style={{
+          width: '400px', height: '400px',
+          background: 'radial-gradient(circle, rgba(0,40,120,0.2) 0%, transparent 70%)',
+          position: 'absolute', top: '30%', left: '50%',
+          transform: 'translateX(-50%)',
+          filter: 'blur(80px)'
+        }} />
+      </div>
+
       <AppWrapper />
       <PWAInstallGuide />
     </div>

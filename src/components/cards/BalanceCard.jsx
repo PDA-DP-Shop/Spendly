@@ -32,20 +32,19 @@ export default function BalanceCard({ balance, currency = 'USD' }) {
 
   return (
     <motion.div
-      className="mx-4 rounded-[20px] p-5 relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #2D2D3A, #1A1A2E)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.04)',
-      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ stiffness: 300, damping: 30 }}
+      className="mx-4 p-5 relative overflow-hidden glass-accent"
     >
       {/* Decorative circles */}
       <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
-      <div className="absolute -bottom-10 -left-6 w-28 h-28 rounded-full bg-purple-600/15" />
+      <div className="absolute -bottom-10 -left-6 w-28 h-28 rounded-full bg-cyan-glow/15" />
 
       {/* Top row */}
       <div className="flex items-center justify-between mb-6">
-        <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">Total Balance</p>
-        <button onClick={toggleHideBalances} className="text-gray-400 hover:text-white transition-colors">
+        <p className="text-[13px] font-body font-medium tracking-[0.08em] uppercase text-[#7B8DB0]">Total Balance</p>
+        <button onClick={toggleHideBalances} className="w-9 h-9 rounded-full glass border-none flex items-center justify-center text-[#7B8DB0] hover:text-[#F0F4FF] transition-colors">
           {hideBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
@@ -53,9 +52,9 @@ export default function BalanceCard({ balance, currency = 'USD' }) {
       {/* Balance amount */}
       <div className="mb-6">
         {hideBalances ? (
-          <span className="text-[36px] font-sora font-bold text-white tracking-tight">••••••</span>
+          <span className="text-[42px] font-display font-bold text-[#F0F4FF] tracking-[-0.02em]">••••••</span>
         ) : (
-          <span className={`text-[36px] font-sora font-bold tracking-tight ${balance < 0 ? 'text-red-400' : 'text-white'}`}>
+          <span className={`text-[42px] font-display font-bold tracking-[-0.02em] ${balance < 0 ? 'text-expense' : 'text-[#F0F4FF]'}`}>
             <AnimatedNumber value={balance} currency={currency} />
           </span>
         )}
@@ -63,10 +62,10 @@ export default function BalanceCard({ balance, currency = 'USD' }) {
 
       {/* Bottom row — card-style dots + brand */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-500 tracking-[0.15em] font-mono">●●●● ●●●● ●●●● 1965</p>
-        <div className="flex items-center gap-0.5">
-          <div className="w-5 h-5 rounded-full bg-orange-400/80" />
-          <div className="w-5 h-5 rounded-full bg-orange-600/60 -ml-2" />
+        <p className="text-[12px] font-body text-[#7B8DB0] tracking-[0.15em]">●●●● ●●●● ●●●● 1965</p>
+        <div className="flex items-center gap-0.5 opacity-50">
+          <div className="w-5 h-5 rounded-full bg-cyan-glow" />
+          <div className="w-5 h-5 rounded-full bg-blue-glow -ml-2" />
         </div>
       </div>
     </motion.div>

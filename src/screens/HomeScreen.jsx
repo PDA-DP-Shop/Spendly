@@ -86,17 +86,17 @@ export default function HomeScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
+    <div className="flex flex-col min-h-dvh mb-tab">
       {/* Header */}
       <div className="flex items-center justify-between px-6 safe-top pt-4 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-xl shadow-md">
+          <div className="w-12 h-12 rounded-full glass border-none flex items-center justify-center text-2xl shadow-glow">
             {emoji}
           </div>
           <div>
-            <p className="text-[12px] text-gray-400">Good day! 👋</p>
-            <p className="text-[20px] font-sora font-bold text-gray-900 dark:text-white leading-tight">
-              Hello, {name}!
+            <p className="text-[13px] font-body text-[#7B8DB0]">Hey, {name} 👋</p>
+            <p className="text-[28px] font-display font-bold text-[#F0F4FF] leading-tight tracking-[-0.02em]">
+              Good Day!
             </p>
           </div>
         </div>
@@ -104,19 +104,19 @@ export default function HomeScreen() {
           <motion.button 
             whileTap={{ scale: 0.9 }}
             onClick={toggleHideBalances}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#1A1A2E] flex items-center justify-center shadow-sm"
+            className="w-11 h-11 rounded-full glass flex items-center justify-center"
           >
             {hideBalances ? (
-              <EyeOff className="w-5 h-5 text-purple-600" />
+              <EyeOff className="w-5 h-5 text-cyan-glow" />
             ) : (
-              <Eye className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <Eye className="w-5 h-5 text-[#7B8DB0]" />
             )}
           </motion.button>
           <motion.button whileTap={{ scale: 0.9 }}
-            className="relative w-10 h-10 rounded-full bg-white dark:bg-[#1A1A2E] flex items-center justify-center shadow-sm">
-            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            className="relative w-11 h-11 rounded-full glass flex items-center justify-center">
+            <Bell className="w-5 h-5 text-[#7B8DB0]" />
             {budgetPct >= 80 && (
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-orange-500 rounded-full" />
+              <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-cyan-glow rounded-full shadow-glow" />
             )}
           </motion.button>
         </div>
@@ -126,29 +126,29 @@ export default function HomeScreen() {
       <BalanceCard balance={balance} currency={currency} />
 
       {/* Summary pills */}
-      <div className="flex gap-3 px-4 mt-4">
-        <div className="flex-1 bg-white dark:bg-[#1A1A2E] rounded-2xl p-3 shadow-sm flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-            <span className="text-green-600 text-lg font-bold">↑</span>
+      <div className="grid grid-cols-2 gap-4 px-4 mt-6">
+        <div className="flex-1 glass p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-cyan-dim flex items-center justify-center">
+            <span className="text-cyan-glow text-lg font-bold">↑</span>
           </div>
           <div>
-            <p className="text-[11px] text-gray-400">Money In</p>
-            <p className="text-[15px] font-sora font-bold text-green-500">+{received.toFixed(0)}</p>
+            <p className="text-[13px] font-body font-medium text-[#7B8DB0] uppercase tracking-[0.08em]">Income</p>
+            <p className="text-[18px] font-display font-bold text-[#F0F4FF]">{received.toFixed(0)}</p>
           </div>
         </div>
-        <div className="flex-1 bg-white dark:bg-[#1A1A2E] rounded-2xl p-3 shadow-sm flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-            <span className="text-red-500 text-lg font-bold">↓</span>
+        <div className="flex-1 glass p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-expense/10 flex items-center justify-center">
+            <span className="text-expense text-lg font-bold">↓</span>
           </div>
           <div>
-            <p className="text-[11px] text-gray-400">Money Spent</p>
-            <p className="text-[15px] font-sora font-bold text-red-500">-{spent.toFixed(0)}</p>
+            <p className="text-[13px] font-body font-medium text-[#7B8DB0] uppercase tracking-[0.08em]">Spent</p>
+            <p className="text-[18px] font-display font-bold text-[#F0F4FF]">{spent.toFixed(0)}</p>
           </div>
         </div>
       </div>
 
       {/* Budget card */}
-      <div className="mt-4">
+      <div className="mt-6">
         <BudgetProgressCard label="Monthly Budget" spent={spent} total={overallBudget} currency={settings?.currency ? ['USD','EUR','GBP'].includes(settings.currency) ? (settings.currency === 'USD' ? '$' : settings.currency === 'EUR' ? '€' : '£') : settings.currency : '$'} />
       </div>
 
@@ -162,46 +162,51 @@ export default function HomeScreen() {
       )}
 
       {/* Spending Score */}
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-6">
         <SpendingScore scoreData={scoreData} />
       </div>
 
       {/* Category chips */}
-      <div className="mt-4">
+      <div className="mt-6">
         <CategoryChips selected={selectedCategory} onSelect={setSelectedCategory} />
       </div>
 
       {/* Analytics chart */}
-      <div className="mt-4">
+      <div className="mt-6">
+        <div className="px-4 mb-3">
+          <p className="text-[16px] font-display font-semibold text-[#F0F4FF] tracking-[-0.02em]">Analytics</p>
+        </div>
         <AnalyticsBarChart data={monthlyData} currency={currency} />
       </div>
 
       {/* Recent transactions */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between px-4 mb-3">
-          <p className="text-[17px] font-sora font-bold text-gray-900 dark:text-white">Recent</p>
-          <button onClick={() => navigate('/expenses')} className="text-[13px] text-purple-600 font-semibold">
-            View All →
+      <div className="mt-8">
+        <div className="flex items-center justify-between px-4 mb-4">
+          <p className="text-[16px] font-display font-semibold text-[#F0F4FF] tracking-[-0.02em]">Recent Transactions</p>
+          <button onClick={() => navigate('/expenses')} className="text-[13px] font-body font-bold text-cyan-glow">
+            See all →
           </button>
         </div>
         {recentExpenses.length === 0 ? (
           <EmptyState type="expenses" title="No expenses yet" message="Tap the + button to add your first expense" />
         ) : (
-          recentExpenses.map((exp, i) => (
-            <TransactionItem
-              key={exp.id}
-              expense={exp}
-              currency={currency}
-              index={i}
-              onDelete={handleDelete}
-              onEdit={() => navigate(`/add?edit=${exp.id}`)}
-            />
-          ))
+          <div className="flex flex-col gap-3">
+            {recentExpenses.map((exp, i) => (
+              <TransactionItem
+                key={exp.id}
+                expense={exp}
+                currency={currency}
+                index={i}
+                onDelete={handleDelete}
+                onEdit={() => navigate(`/add?edit=${exp.id}`)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
       {/* Smart insight */}
-      <div className="mt-2">
+      <div className="mt-6">
         <InsightCard message={getInsight()} />
       </div>
 

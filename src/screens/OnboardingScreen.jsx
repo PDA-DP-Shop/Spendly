@@ -6,7 +6,7 @@ import { useSettingsStore } from '../store/settingsStore'
 import { useAppLock } from '../hooks/useAppLock'
 import { settingsService } from '../services/database'
 import { CURRENCIES } from '../constants/currencies'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ShieldCheck, Check } from 'lucide-react'
 import LockSetupModal from '../components/lock/LockSetupModal'
 
 const EMOJIS = ['😊', '😎', '🤩', '🥳', '🐻', '🦁', '🐼', '🦊', '🐸', '🦋', '🌟', '💎']
@@ -72,125 +72,174 @@ export default function OnboardingScreen() {
 
   const steps = [
     // Step 0: Welcome
-    <motion.div key="0" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-      className="flex flex-col items-center justify-center h-full px-8 text-center"
-      style={{ background: 'linear-gradient(160deg, #00C853, #00897B, #0277BD)' }}>
-      <img src="/spendly-logo.png" alt="Spendly" className="w-[120px] h-[120px] rounded-[30px] shadow-2xl mb-8" />
-      <h1 className="text-[40px] font-sora font-bold text-white mb-3">Spendly</h1>
-      <p className="text-[26px] font-sora font-semibold text-white mb-4">Track your money<br />easily 💸</p>
-      <p className="text-[16px] text-green-100 mb-8 leading-relaxed">Everything stays private on your phone.<br />No cloud. No account. Ever.</p>
+    <motion.div key="0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }}
+      className="flex flex-col items-center justify-center h-full px-8 text-center relative overflow-hidden bg-[#050B18]">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-cyan-glow/20 blur-[100px] animate-pulse" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-blue-600/20 blur-[100px]" />
       
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-10 border border-white/20 max-w-[300px]">
-        <p className="text-white text-sm font-medium mb-1">🔒 Your Privacy Promise</p>
-        <p className="text-green-100 text-[12px] leading-snug">We use AES-256-GCM encryption. Even we can't see your data.</p>
-      </div>
+      <div className="relative z-10 w-full flex flex-col items-center">
+        <motion.div 
+          animate={{ y: [0, -10, 0] }} 
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="w-28 h-28 rounded-[38px] glass-accent border-white/10 flex items-center justify-center shadow-glow mb-10"
+        >
+          <img src="/spendly-logo.png" alt="Spendly" className="w-16 h-16 rounded-2xl" />
+        </motion.div>
+        
+        <h1 className="text-[52px] font-display font-bold text-white mb-2 tracking-tighter leading-none">Spendly</h1>
+        <p className="text-[24px] font-display font-bold text-cyan-glow mb-6 tracking-tight">Financial Sovereignty</p>
+        
+        <p className="text-[15px] font-body text-[#7B8DB0] mb-12 leading-relaxed max-w-[280px]">
+          The most secure, private, and powerful way to track your liquidity. <span className="text-[#F0F4FF] font-bold">Offline-first. Cryptographic. Invisible.</span>
+        </p>
+        
+        <div className="glass-elevated border-white/5 rounded-[32px] p-6 mb-12 border-l-cyan-glow/30 border-l-4 max-w-[320px] text-left">
+          <p className="text-[#F0F4FF] text-[13px] font-display font-bold mb-2 flex items-center gap-2">
+             <ShieldCheck className="w-4 h-4 text-cyan-glow" /> 🛡️ ZERO-KNOWLEDGE PROMISE
+          </p>
+          <p className="text-[#7B8DB0] text-[11px] leading-relaxed font-medium">
+            Local-only data architecture. Even we can't see your records. Your privacy is enforced by mathematics, not just promises.
+          </p>
+        </div>
 
-      <motion.button whileTap={{ scale: 0.95 }} onClick={() => setStep(1)}
-        className="w-full max-w-[260px] py-4 bg-white rounded-[20px] text-green-700 text-[16px] font-semibold shadow-xl">
-        Let's Start 🚀
-      </motion.button>
+        <motion.button 
+          whileHover={{ scale: 1.05, y: -4 }}
+          whileTap={{ scale: 0.95 }} 
+          onClick={() => setStep(1)}
+          className="w-full max-w-[280px] py-5 bg-gradient-to-br from-[#0066FF] to-[#00D4FF] rounded-[24px] text-white text-[16px] font-display font-bold shadow-glowLg uppercase tracking-widest"
+        >
+          Initialize App 🚀
+        </motion.button>
+      </div>
     </motion.div>,
 
     // Step 1: Profile setup
-    <motion.div key="1" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-      className="flex flex-col h-full overflow-y-auto">
-      <div className="pt-14 px-6 pb-6 flex-1">
-        <p className="text-sm text-purple-600 font-semibold mb-2">Step 2 of 3</p>
-        <h2 className="text-[28px] font-sora font-bold text-gray-900 mb-1">Tell us about you</h2>
-        <p className="text-gray-400 mb-8">Set up your personal profile</p>
+    <motion.div key="1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+      className="flex flex-col h-full bg-[#050B18]">
+      <div className="pt-16 px-6 pb-6 flex-1 overflow-y-auto scrollbar-hide">
+        <p className="text-[11px] font-display font-bold text-cyan-glow uppercase tracking-[.25em] mb-3">Protocol Set 02</p>
+        <h2 className="text-[36px] font-display font-bold text-[#F0F4FF] mb-2 tracking-tighter leading-none">Identity Setup</h2>
+        <p className="text-[#7B8DB0] font-body font-medium mb-10 text-[15px]">Personalize your tactical dashboard.</p>
+
+        {/* Name */}
+        <p className="text-[11px] font-display font-bold text-[#3D4F70] uppercase tracking-[.2em] mb-3 ml-1">Universal ID</p>
+        <div className="glass-elevated border-white/5 rounded-[24px] p-1.5 focus-within:border-cyan-glow/30 transition-all mb-8 shadow-glowSmall">
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Enter Alias..."
+            className="w-full py-4 px-6 bg-transparent outline-none text-[18px] font-display font-bold text-[#F0F4FF] placeholder-[#3D4F70]"
+          />
+        </div>
 
         {/* Emoji picker */}
-        <p className="text-sm font-semibold text-gray-600 mb-3">Pick your avatar</p>
-        <div className="flex flex-wrap gap-3 mb-6">
+        <p className="text-[11px] font-display font-bold text-[#3D4F70] uppercase tracking-[.2em] mb-4 ml-1">Dashboard Avatar</p>
+        <div className="flex flex-wrap gap-4 mb-10">
           {EMOJIS.map(e => (
             <button key={e} onClick={() => setSelectedEmoji(e)}
-              className={`w-12 h-12 rounded-2xl text-2xl flex items-center justify-center transition-all ${selectedEmoji === e ? 'bg-purple-100 ring-2 ring-purple-600 scale-110' : 'bg-gray-100'}`}>
+              className={`w-14 h-14 rounded-2xl text-2xl flex items-center justify-center transition-all border duration-300 ${
+                selectedEmoji === e ? 'bg-cyan-dim border-cyan-glow/40 shadow-glow scale-110' : 'glass border-transparent'
+              }`}>
               {e}
             </button>
           ))}
         </div>
 
-        {/* Name */}
-        <p className="text-sm font-semibold text-gray-600 mb-2">Your name</p>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="What do we call you?"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-          className="w-full py-4 px-4 rounded-2xl bg-gray-50 border-2 border-gray-100 focus:border-purple-400 outline-none text-[16px] font-medium mb-6"
-        />
+        {/* Currency & Budget */}
+        <div className="grid grid-cols-1 gap-6 mb-10">
+          <div>
+            <p className="text-[11px] font-display font-bold text-[#3D4F70] uppercase tracking-[.2em] mb-3 ml-1">Liquidity Unit</p>
+            <div className="glass border-white/5 rounded-[24px] p-1.5 shadow-glowSmall relative group">
+              <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (${currency})`}
+                className="w-full py-4 px-6 bg-transparent outline-none text-[15px] font-display font-bold text-[#F0F4FF] placeholder-[#3D4F70]"
+              />
+              <div className="max-h-48 overflow-y-auto mt-2 px-2 pb-2 space-y-1 scrollbar-hide">
+                {filteredCurrencies.slice(0, 10).map(c => (
+                  <button key={c.code} onClick={() => { setCurrency(c.code); setCurrencySearch('') }}
+                    className={`w-full flex items-center gap-3 px-5 py-3 rounded-xl transition-all border ${currency === c.code ? 'bg-cyan-dim border-cyan-glow/20' : 'hover:bg-white/5 border-transparent'}`}>
+                    <span className="text-xl filter drop-shadow-md">{c.flag}</span>
+                    <span className="font-display font-bold text-[#F0F4FF]">{c.code}</span>
+                    <span className="text-[#3D4F70] text-[13px]">{c.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
-        {/* Currency */}
-        <p className="text-sm font-semibold text-gray-600 mb-2">Your currency</p>
-        <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (Currently selected: ${currency})`}
-          className="w-full py-3 px-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none text-sm mb-2"
-        />
-        <div className="max-h-36 overflow-y-auto rounded-2xl border border-gray-100 mb-6">
-          {filteredCurrencies.map(c => (
-            <button key={c.code} onClick={() => { setCurrency(c.code); setCurrencySearch('') }}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50 ${currency === c.code ? 'bg-purple-50' : ''}`}>
-              <span className="text-xl">{c.flag}</span>
-              <span className="font-medium text-gray-800">{c.code}</span>
-              <span className="text-gray-400">{c.name}</span>
-              {currency === c.code && <span className="ml-auto text-purple-600 font-bold">✓</span>}
-            </button>
-          ))}
+          <div>
+            <p className="text-[11px] font-display font-bold text-[#3D4F70] uppercase tracking-[.2em] mb-3 ml-1">Monthly Threshold</p>
+            <div className="glass-elevated border-white/5 rounded-[24px] p-1.5 focus-within:border-cyan-glow/30 transition-all shadow-glowSmall">
+              <div className="flex items-center px-6">
+                <span className="text-[#3D4F70] font-display font-bold text-[18px] mr-3">{CURRENCIES.find(c => c.code === currency)?.symbol}</span>
+                <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="0.00"
+                  className="w-full py-4 bg-transparent outline-none text-[18px] font-display font-bold text-[#F0F4FF] placeholder-[#3D4F70]"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Monthly budget */}
-        <p className="text-sm font-semibold text-gray-600 mb-2">Monthly budget</p>
-        <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. 2000"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-          className="w-full py-4 px-4 rounded-2xl bg-gray-50 border-2 border-gray-100 focus:border-purple-400 outline-none text-[16px] font-medium"
-        />
       </div>
-      <div className="px-6 pb-10">
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => setStep(2)}
-          className="w-full py-4 rounded-[20px] text-white text-[16px] font-semibold"
-          style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
-          Next →
+      <div className="px-6 pb-12 pt-4 bg-gradient-to-t from-[#050B18] via-[#050B18] to-transparent">
+        <motion.button 
+          whileHover={{ scale: 1.02, y: -4 }}
+          whileTap={{ scale: 0.97 }} 
+          onClick={() => setStep(2)}
+          className="w-full py-5 rounded-[24px] text-white text-[16px] font-display font-bold shadow-glowLg flex items-center justify-center gap-3 bg-gradient-to-br from-[#0066FF] to-[#00D4FF] uppercase tracking-widest"
+        >
+          Phase Finalization <ChevronRight className="w-5 h-5" />
         </motion.button>
       </div>
     </motion.div>,
 
     // Step 2: Lock setup
-    <motion.div key="2" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-      className="flex flex-col h-full">
-      <div className="pt-14 px-6 pb-6 flex-1 overflow-y-auto">
-        <p className="text-sm text-purple-600 font-semibold mb-2">Step 3 of 3</p>
-        <h2 className="text-[28px] font-sora font-bold text-gray-900 mb-1">Protect your Spendly</h2>
-        <p className="text-gray-400 mb-8">Choose how you want to lock the app</p>
-        <div className="flex flex-col gap-3">
+    <motion.div key="2" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+      className="flex flex-col h-full bg-[#050B18]">
+      <div className="pt-16 px-6 pb-6 flex-1 overflow-y-auto scrollbar-hide">
+        <p className="text-[11px] font-display font-bold text-cyan-glow uppercase tracking-[.25em] mb-3">Protocol Set 03</p>
+        <h2 className="text-[36px] font-display font-bold text-[#F0F4FF] mb-2 tracking-tighter leading-none">Security Gate</h2>
+        <p className="text-[#7B8DB0] font-body font-medium mb-10 text-[15px]">Select your cryptographic entry point.</p>
+
+        <div className="flex flex-col gap-4">
           {LOCK_OPTIONS.map(opt => (
-            <motion.button key={opt.id} whileTap={{ scale: 0.97 }} onClick={() => setLockType(opt.id)}
-              className={`flex items-center gap-4 p-4 rounded-[20px] border-2 text-left transition-all ${
-                lockType === opt.id ? 'border-purple-600 bg-purple-50' : 'border-gray-100 bg-white'
+            <motion.button key={opt.id} 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }} 
+              onClick={() => setLockType(opt.id)}
+              className={`flex items-center gap-5 p-5 rounded-[28px] border-2 text-left transition-all relative overflow-hidden group ${
+                lockType === opt.id ? 'border-cyan-glow/40 glass-accent shadow-glow' : 'border-white/5 glass hover:bg-white/5'
               }`}>
-              <span className="text-3xl">{opt.emoji}</span>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.desc}</p>
+              {lockType === opt.id && <div className="absolute inset-0 bg-cyan-glow/5 animate-pulse pointer-events-none" />}
+              <div className="w-16 h-16 rounded-2xl glass-elevated flex items-center justify-center text-3xl shadow-inner relative z-10">
+                {opt.emoji}
+              </div>
+              <div className="flex-1 relative z-10">
+                <p className="font-display font-bold text-[#F0F4FF] text-[17px] tracking-tight">{opt.label}</p>
+                <p className="text-[13px] font-body font-medium text-[#7B8DB0] mt-0.5">{opt.desc}</p>
               </div>
               {opt.recommended && (
-                <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full font-medium">Best</span>
+                <span className="text-[10px] bg-cyan-glow/20 border border-cyan-glow/30 text-cyan-glow px-2.5 py-1 rounded-full font-display font-bold tracking-widest relative z-10">BEST</span>
               )}
-              {lockType === opt.id && <span className="text-purple-600 font-bold text-lg">✓</span>}
+              {lockType === opt.id && <div className="w-6 h-6 rounded-full bg-cyan-glow flex items-center justify-center shadow-glow relative z-10"><Check className="w-4 h-4 text-white" /></div>}
             </motion.button>
           ))}
         </div>
       </div>
-      <div className="px-6 pb-10">
-        <motion.button whileTap={{ scale: 0.97 }} onClick={finish}
-          className="w-full py-4 rounded-[20px] text-white text-[16px] font-semibold"
-          style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
-          All Done! 🎉
+      <div className="px-6 pb-12 pt-4 bg-gradient-to-t from-[#050B18] via-[#050B18] to-transparent">
+        <motion.button 
+          whileHover={{ scale: 1.02, y: -4 }}
+          whileTap={{ scale: 0.97 }} 
+          onClick={finish}
+          className="w-full py-5 rounded-[24px] text-white text-[16px] font-display font-bold shadow-glowLg flex items-center justify-center gap-3 bg-gradient-to-br from-[#0066FF] to-[#00D4FF] uppercase tracking-widest"
+        >
+          Initialize Filesystem 🎉
         </motion.button>
       </div>
     </motion.div>,
   ]
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden bg-white dark:bg-[#0F0F1A]">
+    <div className="h-dvh flex flex-col overflow-hidden bg-[#050B18]">
       {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 z-10 bg-purple-100">
-        <motion.div animate={{ width: `${((step + 1) / 3) * 100}%` }} className="h-full bg-purple-600" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 z-[100] bg-white/5">
+        <motion.div animate={{ width: `${((step + 1) / 3) * 100}%` }} className="h-full bg-cyan-glow shadow-glow" />
       </div>
       <AnimatePresence mode="wait">
         {steps[step]}

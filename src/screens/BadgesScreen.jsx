@@ -10,38 +10,38 @@ import { format, parseISO } from 'date-fns'
 function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
   if (!badge) return null
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <motion.div className="relative w-full bg-white dark:bg-[#1A1A2E] rounded-t-[28px] p-6 pb-12 flex flex-col items-center text-center"
+    <motion.div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <div className="absolute inset-0 bg-[#050B18]/80 backdrop-blur-[40px]" onClick={onClose} />
+      <motion.div className="relative w-full max-w-md bg-[#070D1F]/95 rounded-t-[40px] sm:rounded-[40px] p-8 pb-14 flex flex-col items-center text-center border-t border-white/5"
         initial={{ y: 300 }} animate={{ y: 0 }} exit={{ y: 300 }} transition={{ type: 'spring', damping: 25 }}>
-        <button onClick={onClose} className="absolute top-5 right-5"><X className="w-5 h-5 text-gray-400" /></button>
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full glass border-none flex items-center justify-center text-[#7B8DB0]"><X className="w-5 h-5" /></button>
         
-        <div className="mb-6 relative">
-          <div className="w-32 h-32 flex items-center justify-center rounded-full text-6xl shadow-xl border-4 border-white dark:border-[#1A1A2E]"
-            style={{ backgroundColor: isEarned ? badge.color + '20' : '#F3F4F6' }}>
+        <div className="mb-0 relative py-12">
+           <div className="absolute inset-0 bg-cyan-glow/5 blur-[40px] rounded-full" />
+           <div className="w-40 h-40 flex items-center justify-center rounded-[48px] text-[72px] shadow-glow relative z-10 glass-accent border-white/10">
             {isEarned ? (
-              <span className="drop-shadow-lg">{badge.emoji}</span>
+              <span className="drop-shadow-glow animate-pulse">{badge.emoji}</span>
             ) : (
-              <Lock className="w-12 h-12 text-gray-300" />
+              <Lock className="w-16 h-16 text-cyan-glow opacity-30" />
             )}
           </div>
           {isEarned && (
-            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center border-4 border-white dark:border-[#1A1A2E] text-white">
-              <Trophy className="w-4 h-4" />
-            </div>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} className="absolute -bottom-2 -right-2 w-12 h-12 bg-cyan-glow rounded-full flex items-center justify-center border-4 border-[#070D1F] text-white shadow-glow">
+              <Trophy className="w-6 h-6" />
+            </motion.div>
           )}
         </div>
 
-        <p className="font-sora font-bold text-[22px] text-gray-900 dark:text-white mb-2">{badge.title}</p>
-        <p className="text-[15px] text-gray-500 max-w-[250px] mb-6 leading-relaxed">{badge.desc}</p>
+        <p className="font-display font-bold text-[32px] text-[#F0F4FF] mb-2 tracking-tighter">{badge.title}</p>
+        <p className="text-[16px] font-body text-[#7B8DB0] max-w-[280px] mb-10 leading-relaxed font-medium">{badge.desc}</p>
         
         {isEarned ? (
-          <div className="py-2.5 px-5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 font-semibold text-[13px]">
-            Earned on {format(parseISO(earnedDate), 'MMMM d, yyyy')}
+          <div className="py-4 px-8 rounded-full bg-cyan-dim border border-cyan-glow/30 text-cyan-glow font-display font-bold text-[13px] tracking-widest uppercase shadow-glowSmall">
+            UNLOCKED ON {format(parseISO(earnedDate), 'MMM d, yyyy')}
           </div>
         ) : (
-          <div className="py-2.5 px-5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 font-semibold text-[13px]">
-            Keep spending smart to unlock this badge
+          <div className="py-4 px-8 rounded-full bg-white/5 border border-white/5 text-[#3D4F70] font-display font-bold text-[12px] tracking-widest uppercase">
+             CONTINUE DRILL TO UNLOCK
           </div>
         )}
       </motion.div>
@@ -58,7 +58,6 @@ export default function BadgesScreen() {
   const earnedMap = earned.reduce((acc, b) => ({ ...acc, [b.badgeId]: b }), {})
   const totalEarned = earned.length
   
-  // Group badges by category
   const categories = [...new Set(BADGES.map(b => b.category))]
 
   const handleSelect = (badge) => {
@@ -69,38 +68,46 @@ export default function BadgesScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] pb-24">
-      <TopHeader title="Achievements" />
+    <div className="flex flex-col min-h-dvh bg-[#050B18] pb-24">
+      <TopHeader title="Tactical Assets" />
 
       {/* Progress Hero */}
-      <div className="mx-4 mb-6 rounded-[24px] p-6 text-white text-center relative overflow-hidden" 
-        style={{ background: 'linear-gradient(135deg, #7C3AED, #F97316)', boxShadow: '0 8px 32px rgba(124,58,237,0.3)' }}>
-        <p className="text-sm font-semibold text-white/80 uppercase tracking-widest mb-1">Badges Earned</p>
-        <div className="flex items-end justify-center gap-1 mb-3">
-          <span className="text-[48px] font-sora font-bold leading-none">{totalEarned}</span>
-          <span className="text-[20px] font-sora font-medium text-white/50 mb-1">/{BADGES.length}</span>
-        </div>
-        <div className="h-2 bg-white/20 rounded-full overflow-hidden w-48 mx-auto">
-          <motion.div className="h-full bg-white rounded-full"
-            initial={{ width: 0 }} animate={{ width: `${(totalEarned / BADGES.length) * 100}%` }} transition={{ delay: 0.3 }} />
+      <div className="mx-6 mb-10 rounded-[36px] p-8 text-white text-center relative overflow-hidden glass-accent border-white/10 shadow-glowLg group">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF]/20 to-[#00D4FF]/20 opacity-50" />
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-cyan-glow/10 blur-[50px] animate-pulse" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-blue-600/10 blur-[50px]" />
+        
+        <div className="relative z-10">
+          <p className="text-[11px] font-display font-bold text-cyan-glow uppercase tracking-[0.25em] mb-4">Mastery Progression</p>
+          <div className="flex items-end justify-center gap-2 mb-6">
+            <span className="text-[54px] font-display font-bold leading-none tracking-tighter drop-shadow-glow">{totalEarned}</span>
+            <span className="text-[22px] font-display font-bold text-[#3D4F70] mb-2">/{BADGES.length}</span>
+          </div>
+          <div className="h-3 bg-white/5 rounded-full overflow-hidden w-full max-w-[280px] mx-auto border border-white/5 p-[2px]">
+            <motion.div className="h-full bg-gradient-to-r from-[#0066FF] to-[#00D4FF] rounded-full shadow-glowSmall"
+              initial={{ width: 0 }} animate={{ width: `${(totalEarned / BADGES.length) * 100}%` }} transition={{ duration: 1, ease: 'easeOut' }} />
+          </div>
+          <p className="text-[11px] font-body font-bold text-[#3D4F70] uppercase tracking-widest mt-6 opacity-60">Status: {totalEarned > 10 ? 'OPERATIVE' : totalEarned > 5 ? 'SPECIALIST' : 'RECRUIT'}</p>
         </div>
       </div>
 
-      <div className="px-4 flex flex-col gap-8">
+      <div className="px-6 flex flex-col gap-10">
         {categories.map(category => {
           const categoryBadges = BADGES.filter(b => b.category === category)
           const earnedInCategory = categoryBadges.filter(b => earnedMap[b.id]).length
           
           return (
             <div key={category}>
-              <div className="flex items-center justify-between mb-4">
-                <p className="font-sora font-bold text-[16px] text-gray-900 dark:text-white">{category}</p>
-                <p className="text-[12px] font-semibold text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full">
-                  {earnedInCategory}/{categoryBadges.length}
-                </p>
+              <div className="flex items-center justify-between mb-5 px-1">
+                <p className="font-display font-bold text-[18px] text-[#F0F4FF] tracking-tight">{category}</p>
+                <div className="bg-cyan-dim border border-cyan-glow/20 px-4 py-1 rounded-full shadow-glowSmall">
+                  <p className="text-[11px] font-display font-bold text-cyan-glow tracking-widest">
+                    {earnedInCategory}/{categoryBadges.length}
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 {categoryBadges.map((badge, i) => {
                   const isEarned = !!earnedMap[badge.id]
                   const isNew = isEarned && earnedMap[badge.id].isNew
@@ -108,25 +115,25 @@ export default function BadgesScreen() {
                   return (
                     <motion.button key={badge.id} 
                       onClick={() => handleSelect(badge)}
+                      whileHover={{ scale: 1.05, y: -4 }}
                       whileTap={{ scale: 0.95 }}
-                      initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
-                      className={`relative aspect-square rounded-[20px] flex flex-col items-center justify-center p-2 shadow-sm 
-                        ${isEarned ? 'bg-white dark:bg-[#1A1A2E]' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                      className={`relative aspect-square rounded-[28px] border transition-all duration-300 flex flex-col items-center justify-center p-3 group
+                        ${isEarned ? 'glass-accent border-cyan-glow/10 shadow-glowSmall' : 'glass border-transparent grayscale brightness-50 opacity-40 hover:grayscale-0 hover:opacity-100'}`}>
                       
                       {isNew && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#1A1A2E]" />
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }} className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-glow rounded-full ring-4 ring-[#050B18] shadow-glow z-10" />
                       )}
 
-                      <div className="w-12 h-12 flex items-center justify-center rounded-full text-2xl mb-1 transition-all"
-                        style={{ backgroundColor: isEarned ? badge.color + '20' : '#F3F4F6' }}>
+                      <div className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl mb-1.5 transition-all shadow-inner relative z-10 ${isEarned ? 'bg-cyan-dim' : 'bg-white/5'}`}>
                         {isEarned ? (
                           <span className="drop-shadow-md">{badge.emoji}</span>
                         ) : (
-                          <Lock className="w-5 h-5 text-gray-300" />
+                          <Lock className="w-6 h-6 text-[#3D4F70]" />
                         )}
                       </div>
                       
-                      <p className={`text-[10px] font-semibold text-center leading-tight ${isEarned ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400'}`}>
+                      <p className={`text-[10px] font-display font-bold text-center leading-tight uppercase tracking-tighter relative z-10 ${isEarned ? 'text-[#F0F4FF]' : 'text-[#3D4F70]'}`}>
                         {badge.title}
                       </p>
                     </motion.button>

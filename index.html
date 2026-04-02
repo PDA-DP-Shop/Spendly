@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Spendly" />
   <meta name="application-name" content="Spendly" />
-  <meta name="theme-color" content="#00C853" />
+  <meta name="theme-color" content="#050B18" />
   
   <!-- SEO meta tags -->
   <meta name="description" content="Spendly - Your private expense tracker. No accounts. No cloud. Everything stays on your phone." />
@@ -49,7 +49,7 @@
   <!-- Preload fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
   
   <!-- Google tag (gtag.js) -->
   <meta name="google-site-verification" content="MpzLq12J-sy2L4S-AlEpUdci9_mncQTs38MhS2AsyOY" />
@@ -57,8 +57,9 @@
   <style>
     * { -webkit-tap-highlight-color: transparent; }
     body { 
-      font-family: 'DM Sans', sans-serif; 
-      background-color: #F5F5F5;
+      font-family: 'Satoshi', sans-serif; 
+      background-color: #050B18;
+      color: #F0F4FF;
       overscroll-behavior: none;
       -webkit-overflow-scrolling: touch;
     }
@@ -67,6 +68,8 @@
       max-width: 100vw;
       overflow-x: hidden;
     }
+    .font-display { font-family: 'Clash Display', sans-serif; }
+    .font-body { font-family: 'Satoshi', sans-serif; }
   </style>
 
   <title>Spendly - Expense Tracker</title>
@@ -74,22 +77,22 @@
 <body>
   <div id="root">
     <!-- Ultra Premium Splash Screen -->
-    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #F5F5F5; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050B18; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
       <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-        <!-- Glowing spinning aura -->
-        <div style="position: absolute; width: 130px; height: 130px; border-radius: 35px; background: conic-gradient(from 0deg, #8BC34A, #00C853, #00BCD4, #2196F3, #8BC34A); animation: aura-spin 2s linear infinite; filter: blur(15px); opacity: 0.65;"></div>
-        <!-- Floating Logo -->
-        <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 120px; height: 120px; border-radius: 26px; animation: logo-float 3s ease-in-out infinite; box-shadow: 0 8px 30px rgba(0,0,0,0.15);" />
+        <div style="position: absolute; width: 140px; height: 140px; border-radius: 40px; background: conic-gradient(from 0deg, #0066FF, #00D4FF, #0066FF); animation: aura-spin 3s linear infinite; filter: blur(20px); opacity: 0.4;"></div>
+        <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 100px; height: 100px; border-radius: 28px; animation: logo-float 4s ease-in-out infinite; box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);" />
       </div>
+      <div style="margin-top: 40px; font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: 32px; color: #F0F4FF; letter-spacing: -1px; animation: text-pulse 2s ease-in-out infinite;">Spendly</div>
     </div>
     <style>
       @keyframes aura-spin { 100% { transform: rotate(360deg); } }
       @keyframes logo-float {
-        0%, 100% { transform: translateY(0px) scale(0.98); }
-        50% { transform: translateY(-10px) scale(1.04); }
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-12px); }
       }
-      @media (prefers-color-scheme: dark) {
-        #splash-screen { background: #0F0F1A !important; }
+      @keyframes text-pulse {
+        0%, 100% { opacity: 0.5; transform: scale(0.98); }
+        50% { opacity: 1; transform: scale(1); }
       }
     </style>
   </div>

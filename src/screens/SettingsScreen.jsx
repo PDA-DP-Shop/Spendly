@@ -15,30 +15,32 @@ import { CURRENCIES } from '../constants/currencies'
 import { exportAllData } from '../services/exportData'
 import { importBackupFile } from '../services/importData'
 import { db, settingsService, secureWipe } from '../services/database'
+import { Check } from 'lucide-react'
 
 const EMOJIS = ['😊','😎','🤩','🥳','🐻','🦁','🐼','🦊','🐸','🦋','🌟','💎','🚀','🎯','💪','🔥']
 const THEMES = [{ id: 'light', label: 'Light', Icon: Sun }, { id: 'dark', label: 'Dark', Icon: Moon }, { id: 'auto', label: 'Auto', Icon: Monitor }]
 const LOCK_TYPES = ['none', 'pin4', 'pin6', 'pattern', 'biometric']
 
-function SettingRow({ icon: Icon, label, value, onClick, color = '#7C3AED' }) {
+function SettingRow({ icon: Icon, label, value, onClick, color = '#00D4FF' }) {
   return (
     <motion.button whileTap={{ scale: 0.98 }} onClick={onClick}
-      className="w-full flex items-center gap-4 px-4 py-4 text-left active:bg-gray-50 dark:active:bg-[#242438]">
-      <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: color + '20' }}>
-        <Icon className="w-4 h-4" style={{ color }} />
+      className="w-full flex items-center gap-4 px-5 py-4 text-left active:bg-white/5 transition-colors group">
+      <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 glass border-none group-hover:shadow-glow transition-all" style={{ background: `linear-gradient(135deg, ${color}20, ${color}05)` }}>
+        <Icon className="w-5 h-5" style={{ color }} />
       </div>
-      <span className="flex-1 text-[15px] text-gray-800 dark:text-white">{label}</span>
-      {value && <span className="text-[13px] text-gray-400 mr-1">{value}</span>}
-      <ChevronRight className="w-4 h-4 text-gray-300" />
+      <span className="flex-1 text-[15px] font-body font-bold text-[#F0F4FF]">{label}</span>
+      {value && <span className="text-[13px] font-body text-[#7B8DB0] mr-1">{value}</span>}
+      <ChevronRight className="w-4 h-4 text-[#3D4F70] group-hover:text-cyan-glow transition-colors" />
     </motion.button>
   )
 }
 
 function SectionCard({ title, children }) {
   return (
-    <div className="mx-4 mb-4 bg-white dark:bg-[#1A1A2E] rounded-[20px] shadow-sm overflow-hidden">
-      <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide px-4 pt-4 pb-1">{title}</p>
-      <div className="divide-y divide-gray-50 dark:divide-[#242438]">{children}</div>
+    <div className="mx-6 mb-8 glass-elevated border-white/5 rounded-[32px] overflow-hidden shadow-glowLg relative group">
+      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <p className="text-[11px] font-display font-bold text-[#3D4F70] uppercase tracking-[0.2em] px-6 pt-6 pb-2 relative z-10">{title}</p>
+      <div className="divide-y divide-white/5 relative z-10">{children}</div>
     </div>
   )
 }
@@ -187,58 +189,62 @@ export default function SettingsScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
-      <TopHeader title="Settings" />
+    <div className="flex flex-col min-h-dvh mb-tab">
+      <TopHeader title="Options" />
 
       {/* Profile card */}
-      <div className="mx-4 mb-4 bg-white dark:bg-[#1A1A2E] rounded-[20px] p-5 shadow-sm">
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center text-4xl">
+      <div className="mx-6 mb-8 glass-accent p-6 relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/5" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-cyan-glow/10" />
+        
+        <div className="flex flex-col items-center gap-4 relative z-10">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-[32px] glass-elevated flex items-center justify-center text-5xl shadow-glow group-hover:scale-105 transition-transform duration-300">
               {settings?.emoji || '😊'}
             </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2 mt-2">
             {EMOJIS.map(e => (
               <button key={e} onClick={() => updateSetting('emoji', e)}
-                className={`w-10 h-10 rounded-xl text-2xl flex items-center justify-center transition-all ${settings?.emoji === e ? 'bg-purple-100 ring-2 ring-purple-600' : 'bg-gray-50'}`}>
+                className={`w-9 h-9 rounded-xl text-xl flex items-center justify-center transition-all ${settings?.emoji === e ? 'bg-cyan-glow/20 ring-1 ring-cyan-glow' : 'bg-white/5 hover:bg-white/10'}`}>
                 {e}
               </button>
             ))}
           </div>
-          <div className="text-center w-full px-4">
+          <div className="text-center w-full px-4 mt-2">
             <input 
               value={settings?.name || ''} 
               onChange={e => updateSetting('name', e.target.value)}
-              placeholder="What's your name?"
-              className="text-[20px] font-sora font-bold text-gray-900 dark:text-white text-center bg-transparent outline-none w-full placeholder:text-gray-300 dark:placeholder:text-gray-600 truncate"
+              placeholder="Your Name"
+              className="text-[26px] font-display font-bold text-[#F0F4FF] text-center bg-transparent outline-none w-full placeholder-[#3D4F70] tracking-tight"
               spellCheck="false"
             />
-            <p className="text-[13px] text-gray-400 mt-1">{currency.flag} {currency.name}</p>
+            <p className="text-[14px] font-body text-[#7B8DB0] mt-1">{currency.flag} {currency.name} · {currency.code}</p>
           </div>
         </div>
       </div>
 
       {/* App Look */}
-      <div className="mx-4 mb-4 bg-white dark:bg-[#1A1A2E] rounded-[20px] p-4 shadow-sm">
-        <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-3">🎨 App Look & Feel</p>
+      <div className="mx-6 mb-6 glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+        <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-5">Visual Experience</p>
         
-        <div className="bg-gray-50 dark:bg-[#242438] rounded-[16px] mb-4">
+        <div className="glass-elevated border-white/5 rounded-[22px] mb-6">
           <SettingRow 
             icon={Globe} 
-            label="App Language" 
+            label="Preferred Language" 
             value={LANGUAGE_OPTIONS.find(o => o.id === (settings?.language || 'en'))?.label} 
             onClick={() => setShowLanguagePicker(true)} 
-            color="#3B82F6" 
-            border={false}
+            color="#00D4FF" 
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {THEMES.map(({ id, label, Icon }) => (
             <button key={id} onClick={() => updateSetting('theme', id)}
-              className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 text-[13px] font-medium transition-all ${
-                settings?.theme === id ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 dark:border-gray-800 text-gray-500'
+              className={`flex-1 flex flex-col items-center gap-2 py-4 rounded-[22px] border transition-all text-[13px] font-body font-bold ${
+                settings?.theme === id 
+                  ? 'bg-cyan-dim border-cyan-glow/30 text-cyan-glow shadow-glow' 
+                  : 'bg-white/5 border-white/5 text-[#7B8DB0]'
               }`}>
               <Icon className="w-5 h-5" />
               {label}
@@ -248,69 +254,76 @@ export default function SettingsScreen() {
       </div>
 
       {/* Quick Links for New Features */}
-      <SectionCard title="🚀 Features">
-        <SettingRow icon={Wallet} label="My Wallets" onClick={() => navigate('/wallets')} color="#22C55E" />
-        <SettingRow icon={CreditCard} label="My EMIs & Loans" onClick={() => navigate('/emis')} color="#F59E0B" />
-        <SettingRow icon={Target} label="Goals & Challenges" onClick={() => navigate('/goals')} color="#EC4899" />
-        <SettingRow icon={Plane} label="Trip Budgets" onClick={() => navigate('/trips')} color="#06B6D4" />
-        <SettingRow icon={Gift} label="Festival Budgets" onClick={() => navigate('/festivals')} color="#EC4899" />
-        <SettingRow icon={Trophy} label="Achievements" onClick={() => navigate('/badges')} color="#F97316" />
+      <SectionCard title="Extensions">
+        <SettingRow icon={Wallet} label="Digital Wallets" onClick={() => navigate('/wallets')} color="#00FF87" />
+        <SettingRow icon={CreditCard} label="Loans & EMIs" onClick={() => navigate('/emis')} color="#00D4FF" />
+        <SettingRow icon={Target} label="Savings Goals" onClick={() => navigate('/goals')} color="#FF4D6D" />
+        <SettingRow icon={Plane} label="Travel Planner" onClick={() => navigate('/trips')} color="#00D4FF" />
+        <SettingRow icon={Gift} label="Event Budgets" onClick={() => navigate('/festivals')} color="#FF4D6D" />
+        <SettingRow icon={Trophy} label="Rank & Rewards" onClick={() => navigate('/badges')} color="#00FF87" />
       </SectionCard>
 
       {/* Currency */}
-      <SectionCard title="💰 Money">
-        <SettingRow icon={ChevronRight} label="Currency" value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} color="#22C55E" />
-        <SettingRow icon={ChevronRight} label="Monthly Budget" value={`${currency.symbol}${settings?.monthlyBudget || 2000}`} onClick={() => navigate('/budget')} color="#22C55E" />
+      <SectionCard title="Finance Control">
+        <SettingRow icon={Globe} label="Operational Currency" value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} color="#00FF87" />
+        <SettingRow icon={Target} label="Spending Limit" value={`${currency.symbol}${settings?.monthlyBudget || 2000}`} onClick={() => navigate('/budget')} color="#00FF87" />
       </SectionCard>
 
       {/* Tools Section */}
-      <SectionCard title="🔨 Tools">
-        <SettingRow icon={Calculator} label="GST Calculator" onClick={() => setShowGST(true)} color="#3B82F6" />
+      <SectionCard title="Utilities">
+        <SettingRow icon={Calculator} label="Taxes Calculator" onClick={() => setShowGST(true)} color="#00D4FF" />
       </SectionCard>
 
       {/* Security */}
-      <SectionCard title="🔒 Security">
-        <SettingRow icon={Lock} label="App Lock" value={LOCK_OPTIONS.find(o => o.id === (settings?.lockType || 'none'))?.label} onClick={() => setShowLockPicker(true)} color="#7C3AED" />
+      <SectionCard title="Privacy & Safety">
+        <SettingRow icon={Shield} label="App Protection" value={LOCK_OPTIONS.find(o => o.id === (settings?.lockType || 'none'))?.label} onClick={() => setShowLockPicker(true)} color="#00D4FF" />
         {['pin4', 'pin6', 'pattern'].includes(settings?.lockType) && (
-          <SettingRow icon={Lock} label="Change PIN / Pattern" onClick={() => setLockSetupType(settings.lockType)} color="#7C3AED" />
+          <SettingRow icon={Lock} label="Reset Security Keys" onClick={() => setLockSetupType(settings.lockType)} color="#00D4FF" />
         )}
-        <SettingRow icon={Shield} label="Stealth Mode (Decoy PIN)" value={settings?.decoyPin ? 'Active' : 'Not Set'} onClick={() => setShowDecoySetup(true)} color="#10B981" />
+        <SettingRow icon={ShieldCheck} label="Ghost Mode (Decoy)" value={settings?.decoyPin ? 'System Ready' : 'Not Configured'} onClick={() => setShowDecoySetup(true)} color="#00FF87" />
       </SectionCard>
 
       {/* Notifications */}
-      <SectionCard title="🔔 Alerts">
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-orange-50 flex items-center justify-center">
-              <Bell className="w-4 h-4 text-orange-500" />
+      <SectionCard title="Communication">
+        <div className="flex items-center justify-between px-5 py-5 group">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-dim flex items-center justify-center glass border-none">
+              <Bell className="w-5 h-5 text-cyan-glow" />
             </div>
-            <span className="text-[15px] text-gray-800 dark:text-white">Budget Alerts</span>
+            <div>
+              <span className="text-[15px] font-body font-bold text-[#F0F4FF] block">Real-time Alerts</span>
+              <p className="text-[11px] font-body text-[#7B8DB0] mt-0.5">Budget limit notifications</p>
+            </div>
           </div>
           <button
             onClick={() => updateSetting('notificationsOn', !settings?.notificationsOn)}
-            className={`w-12 h-6 rounded-full transition-colors ${settings?.notificationsOn ? 'bg-purple-600' : 'bg-gray-200'}`}
+            className={`w-14 h-8 rounded-full transition-all relative ${settings?.notificationsOn ? 'bg-gradient-to-r from-blue-glow to-cyan-glow shadow-glow' : 'bg-[#1A1A2E] border border-white/10'}`}
           >
-            <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform m-0.5 ${settings?.notificationsOn ? 'translate-x-6' : 'translate-x-0'}`} />
+            <motion.div 
+               className={`w-6 h-6 rounded-full bg-white shadow-lg absolute top-1`}
+               animate={{ left: settings?.notificationsOn ? 'calc(100% - 28px)' : '4px' }}
+            />
           </button>
         </div>
       </SectionCard>
 
       {/* Data */}
-      <SectionCard title="📂 My Data">
+      <SectionCard title="Data Infrastructure">
         {showExportInput ? (
-          <div className="px-4 py-3 flex items-center gap-2">
-            <input value={exportPwd} onChange={e => setExportPwd(e.target.value)} type="password" placeholder="Backup password..."
-              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-              className="flex-1 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#242438] text-sm dark:text-white outline-none border border-gray-200 dark:border-gray-800 focus:border-purple-400" />
-            <button onClick={handleExport} className="px-4 py-2 bg-purple-600 text-white text-sm rounded-xl font-medium">Export</button>
-            <button onClick={() => setShowExportInput(false)} className="text-gray-400 text-sm">Cancel</button>
+          <div className="px-5 py-4 flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <input value={exportPwd} onChange={e => setExportPwd(e.target.value)} type="password" placeholder="Set backup password..."
+                className="flex-1 px-4 py-3 rounded-xl glass bg-white/5 text-[14px] text-[#F0F4FF] outline-none border border-white/10 focus:border-cyan-glow/50" />
+              <button onClick={handleExport} className="px-5 py-3 bg-cyan-glow text-white text-[14px] rounded-xl font-bold shadow-glow">Export</button>
+            </div>
+            <button onClick={() => setShowExportInput(false)} className="text-[#7B8DB0] text-[13px] font-body">Dismiss</button>
           </div>
         ) : (
-          <SettingRow icon={Download} label="Export My Data" onClick={() => setShowExportInput(true)} color="#3B82F6" />
+          <SettingRow icon={Download} label="Secure Backup (Export)" onClick={() => setShowExportInput(true)} color="#00D4FF" />
         )}
         
         {showImportInput ? (
-          <div className="px-4 py-3 flex flex-col gap-3 border-t border-gray-50 dark:border-gray-800">
+          <div className="px-5 py-5 flex flex-col gap-4">
             <input type="file" accept=".spendly" 
               onClick={() => {
                 useSecurityStore.getState().setPauseSecurity(true)
@@ -320,100 +333,104 @@ export default function SettingsScreen() {
                 }, { once: true })
               }}
               onChange={e => setImportFile(e.target.files[0])}
-              className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
-            <div className="flex flex-col gap-2 mt-1">
-              <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Backup password..."
-                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
-                className="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-[#242438] text-[15px] dark:text-white outline-none border border-gray-200 dark:border-gray-800 focus:border-purple-400" />
-              <div className="flex items-center gap-2 mt-1">
-                <button onClick={() => handleImport('replace')} className="flex-1 py-3 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-[14px] rounded-xl font-bold transition-colors shadow-sm">Replace</button>
-                <button onClick={() => handleImport('merge')} className="flex-1 py-3 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-[14px] rounded-xl font-bold transition-colors shadow-sm">Merge</button>
+              className="text-[13px] text-[#7B8DB0] file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-none file:text-[12px] file:font-bold file:bg-cyan-dim file:text-cyan-glow" />
+            
+            <div className="flex flex-col gap-3">
+              <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Vault password..."
+                className="w-full px-4 py-3.5 rounded-xl glass bg-white/5 text-[15px] text-[#F0F4FF] outline-none border border-white/10 focus:border-cyan-glow/50" />
+              <div className="flex items-center gap-3">
+                <button onClick={() => handleImport('replace')} className="flex-1 py-4 bg-expense text-white text-[14px] rounded-xl font-bold shadow-[0_0_15px_rgba(255,77,109,0.3)]">Overwrite</button>
+                <button onClick={() => handleImport('merge')} className="flex-1 py-4 bg-cyan-glow text-white text-[14px] rounded-xl font-bold shadow-glow">Merge</button>
               </div>
-              <button onClick={() => { setShowImportInput(false); setImportFile(null); setImportPwd(''); }} className="py-2 text-gray-500 text-[14px] font-medium mt-1">Cancel</button>
+              <button onClick={() => { setShowImportInput(false); setImportFile(null); setImportPwd(''); }} className="py-2 text-[#7B8DB0] text-[14px] font-medium">Cancel</button>
             </div>
           </div>
         ) : (
-           <SettingRow icon={Upload} label="Import Backup" onClick={() => setShowImportInput(true)} color="#22C55E" />
+           <SettingRow icon={Upload} label="Restore Vault (Import)" onClick={() => setShowImportInput(true)} color="#00FF87" />
         )}
 
-        <SettingRow icon={Trash2} label="Clear All Data" onClick={() => setShowClearConfirm(true)} color="#EF4444" />
+        <SettingRow icon={Trash2} label="Complete System Wipe" onClick={() => setShowClearConfirm(true)} color="#FF4D6D" />
       </SectionCard>
 
       {/* Privacy Promise */}
-      <div className="mx-4 mb-6 p-6 rounded-[24px] bg-white dark:bg-[#1A1A2E] shadow-sm border border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-green-600" />
+      <div className="mx-6 mb-8 p-6 rounded-[28px] glass shadow-glowLg relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-cyan-glow/5" />
+        
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-11 h-11 rounded-2xl bg-cyan-dim flex items-center justify-center">
+            <ShieldCheck className="w-6 h-6 text-cyan-glow" />
           </div>
-          <p className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Your Privacy Promise</p>
+          <p className="text-[20px] font-display font-bold text-[#F0F4FF] tracking-tight">Privacy Protocol</p>
         </div>
         
-        <div className="space-y-3 mb-6">
+        <div className="space-y-4 mb-8">
           {[
-            'Data stays on your phone',
-            'Encrypted with your PIN',
-            'No internet needed',
-            'No accounts or sign up',
-            'Nobody can see your data',
-            'No tracking or ads',
-            'Delete anytime, gone forever'
+            'Local-first data architecture',
+            'Full end-to-end encryption',
+            'Sovereign offline operationality',
+            'Zero account / KYC dependency',
+            'Absolute data invisibility',
+            'Zero tracker / ad-network noise',
+            'Irreversible secure deletion'
           ].map((text, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="text-green-500 font-bold mt-0.5">✅</span>
+              <span className="text-cyan-glow font-bold text-lg mt-[-2px]">✧</span>
               <div>
-                <p className="text-[14px] text-gray-700 dark:text-gray-300 font-medium">{text}</p>
-                {text === 'Nobody can see your data' && (
-                  <p className="text-[11px] text-gray-400 mt-0.5">Not Apple. Not Google. Not us. Not anyone.</p>
+                <p className="text-[14px] text-[#F0F4FF] font-body font-medium">{text}</p>
+                {text === 'Absolute data invisibility' && (
+                  <p className="text-[11px] font-body text-[#7B8DB0] mt-0.5">Your financial fingerprint remains yours alone.</p>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/30">
-          <p className="text-purple-700 dark:text-purple-400 font-medium italic text-[13px] text-center leading-relaxed">
-            "We built Spendly so that your money is your business and nobody else's."
+        <div className="p-5 glass-elevated border-cyan-glow/10 rounded-2xl">
+          <p className="text-cyan-glow/80 font-body font-medium italic text-[13px] text-center leading-relaxed">
+            "Engineered for ultimate financial sovereignty."
           </p>
         </div>
       </div>
 
       {/* About */}
-      <div className="mx-4 mb-10 bg-white dark:bg-[#1A1A2E] rounded-[20px] p-5 shadow-sm">
-        <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-4">ℹ️ About</p>
-        <p className="text-[13px] text-gray-400 text-center leading-relaxed">
-          Version 1.0.0 · Spendly{'\n'}
-          Made for maximum privacy.{'\n'}
-          No internet needed. Ever.
-        </p>
+      <div className="mx-6 mb-12 text-center">
+        <p className="text-[12px] font-display font-bold text-[#3D4F70] uppercase tracking-[0.2em] mb-4">Spendly Core v1.0.3</p>
+        <div className="flex justify-center gap-4 text-[#3D4F70]">
+           <button className="text-[13px] font-body hover:text-cyan-glow transition-colors">Privacy</button>
+           <span className="opacity-20">|</span>
+           <button className="text-[13px] font-body hover:text-cyan-glow transition-colors">Terms</button>
+           <span className="opacity-20">|</span>
+           <button className="text-[13px] font-body hover:text-cyan-glow transition-colors">Whitepaper</button>
+        </div>
       </div>
 
       <AnimatePresence>
         {showCurrencyPicker && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-white dark:bg-[#1A1A2E] w-full max-w-md h-[80dvh] rounded-t-[30px] sm:rounded-[30px] flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Select Currency</h3>
-                <button onClick={() => setShowCurrencyPicker(false)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <X className="w-5 h-5 text-gray-500" />
+            className="fixed inset-0 z-[60] bg-[#050B18]/80 backdrop-blur-[40px] flex items-end sm:items-center justify-center">
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="bg-[#070D1F]/95 pt-4 w-full max-w-md h-[85dvh] rounded-t-[32px] sm:rounded-[32px] flex flex-col overflow-hidden border-t border-white/5">
+              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
+              <div className="flex items-center justify-between px-6 mb-6">
+                <h3 className="text-[20px] font-display font-bold text-[#F0F4FF]">Global Currency</h3>
+                <button onClick={() => setShowCurrencyPicker(false)} className="w-9 h-9 rounded-full glass border-none flex items-center justify-center text-[#7B8DB0]">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4 border-b border-gray-50 dark:border-gray-800/50">
-                <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (Currently: ${currency.code})`}
-                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                  className="w-full py-3.5 px-4 rounded-xl bg-gray-50 dark:bg-[#242438] outline-none text-[15px] dark:text-white" />
+              <div className="px-6 mb-4">
+                <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder={`Search... (Current: ${currency.code})`}
+                  className="w-full py-4 px-5 rounded-2xl glass-elevated border-white/5 outline-none text-[15px] text-[#F0F4FF] placeholder-[#3D4F70] focus:border-cyan-glow/30" />
               </div>
-              <div className="flex-1 overflow-y-auto px-2 py-2">
+              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
                 {CURRENCIES.filter(c => c.name.toLowerCase().includes(currencySearch.toLowerCase()) || c.code.toLowerCase().includes(currencySearch.toLowerCase())).map(c => (
                   <button key={c.code} onClick={() => { updateSetting('currency', c.code); setShowCurrencyPicker(false); setCurrencySearch('') }}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors ${settings?.currency === c.code ? 'bg-purple-50 dark:bg-purple-900/20' : 'hover:bg-gray-50 dark:hover:bg-[#242438]'}`}>
-                    <span className="text-2xl">{c.flag}</span>
+                    className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all border ${settings?.currency === c.code ? 'glass-accent border-cyan-glow/30 shadow-glow' : 'glass border-transparent hover:bg-white/5'}`}>
+                    <span className="text-2xl shadow-md">{c.flag}</span>
                     <div className="flex-1 text-left">
-                      <p className="text-[15px] font-semibold text-gray-900 dark:text-white">{c.code}</p>
-                      <p className="text-[13px] text-gray-400">{c.name}</p>
+                      <p className="text-[15px] font-body font-bold text-[#F0F4FF]">{c.code}</p>
+                      <p className="text-[12px] font-body text-[#7B8DB0]">{c.name}</p>
                     </div>
-                    {settings?.currency === c.code && <span className="text-purple-600 font-bold">✓</span>}
+                    {settings?.currency === c.code && <span className="text-cyan-glow text-lg">✓</span>}
                   </button>
                 ))}
               </div>
@@ -425,24 +442,29 @@ export default function SettingsScreen() {
       <AnimatePresence>
         {showLockPicker && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-white dark:bg-[#1A1A2E] w-full max-w-md max-h-[80dvh] rounded-t-[30px] sm:rounded-[30px] flex flex-col overflow-hidden pb-safe">
-              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Select App Lock</h3>
-                <button onClick={() => setShowLockPicker(false)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <X className="w-5 h-5 text-gray-500" />
+            className="fixed inset-0 z-[60] bg-[#050B18]/80 backdrop-blur-[40px] flex items-end sm:items-center justify-center">
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="bg-[#070D1F]/95 pt-4 w-full max-w-md max-h-[80dvh] rounded-t-[32px] sm:rounded-[32px] flex flex-col overflow-hidden border-t border-white/5">
+              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
+              <div className="flex items-center justify-between px-6 mb-6">
+                <h3 className="text-[20px] font-display font-bold text-[#F0F4FF]">Protocol Lock</h3>
+                <button onClick={() => setShowLockPicker(false)} className="w-9 h-9 rounded-full glass border-none flex items-center justify-center text-[#7B8DB0]">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4 flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
+              <div className="p-4 flex flex-col gap-3 overflow-y-auto flex-1 min-h-0">
                 {LOCK_OPTIONS.map(opt => (
                   <button key={opt.id} onClick={() => handleLockTypeSelect(opt.id)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-colors ${settings?.lockType === opt.id ? 'bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-600' : 'bg-gray-50 border-2 border-transparent dark:bg-[#242438] hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{opt.emoji}</span>
-                      <span className="font-medium text-gray-900 dark:text-white">{opt.label}</span>
+                    className={`w-full flex items-center justify-between px-5 py-5 rounded-2xl transition-all border ${
+                      settings?.lockType === opt.id 
+                        ? 'glass-accent border-cyan-glow/30 shadow-glow' 
+                        : 'glass border-transparent hover:bg-white/5'
+                    }`}>
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl filter drop-shadow-md">{opt.emoji}</span>
+                      <span className="font-display font-bold text-[#F0F4FF]">{opt.label}</span>
                     </div>
-                    {settings?.lockType === opt.id && <span className="text-purple-600 font-bold">✓</span>}
+                    {settings?.lockType === opt.id && <Check className="w-5 h-5 text-cyan-glow" />}
                   </button>
                 ))}
               </div>
@@ -454,24 +476,29 @@ export default function SettingsScreen() {
       <AnimatePresence>
         {showLanguagePicker && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-white dark:bg-[#1A1A2E] w-full max-w-md max-h-[80dvh] rounded-t-[30px] sm:rounded-[30px] flex flex-col overflow-hidden pb-safe">
-              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="text-[18px] font-sora font-bold text-gray-900 dark:text-white">Select Language</h3>
-                <button onClick={() => setShowLanguagePicker(false)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <X className="w-5 h-5 text-gray-500" />
+            className="fixed inset-0 z-[60] bg-[#050B18]/80 backdrop-blur-[40px] flex items-end sm:items-center justify-center">
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="bg-[#070D1F]/95 pt-4 w-full max-w-md max-h-[80dvh] rounded-t-[32px] sm:rounded-[32px] flex flex-col overflow-hidden border-t border-white/5">
+              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
+              <div className="flex items-center justify-between px-6 mb-6">
+                <h3 className="text-[20px] font-display font-bold text-[#F0F4FF]">Regional Interface</h3>
+                <button onClick={() => setShowLanguagePicker(false)} className="w-9 h-9 rounded-full glass border-none flex items-center justify-center text-[#7B8DB0]">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4 flex flex-col gap-2 overflow-y-auto flex-1 min-h-0">
+              <div className="p-4 flex flex-col gap-3 overflow-y-auto flex-1 min-h-0">
                 {LANGUAGE_OPTIONS.map(opt => (
                   <button key={opt.id} onClick={() => handleLanguageSelect(opt.id)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-colors ${settings?.language === opt.id ? 'bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-600' : 'bg-gray-50 border-2 border-transparent dark:bg-[#242438] hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{opt.emoji}</span>
-                      <span className="font-medium text-gray-900 dark:text-white">{opt.label}</span>
+                    className={`w-full flex items-center justify-between px-5 py-5 rounded-2xl transition-all border ${
+                      settings?.language === opt.id 
+                        ? 'glass-accent border-cyan-glow/30 shadow-glow' 
+                        : 'glass border-transparent hover:bg-white/5'
+                    }`}>
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl filter drop-shadow-md">{opt.emoji}</span>
+                      <span className="font-display font-bold text-[#F0F4FF]">{opt.label}</span>
                     </div>
-                    {settings?.language === opt.id && <span className="text-purple-600 font-bold">✓</span>}
+                    {settings?.language === opt.id && <Check className="w-5 h-5 text-cyan-glow" />}
                   </button>
                 ))}
               </div>

@@ -1,91 +1,122 @@
-/* Spendly global styles — Tailwind v4 with @theme for design tokens */
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  /* Fonts */
-  --font-sora: "Sora", sans-serif;
-  --font-dm: "DM Sans", sans-serif;
+/* Base reset */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Brand colors */
-  --color-purple: #7C3AED;
-  --color-purple-dark: #6D28D9;
-  --color-purple-light: #EDE9FE;
-  --color-purple-pale: #F3E8FF;
-  --color-orange: #F97316;
-  --color-orange-dark: #EA580C;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
+/* App background */
+body {
+  background-color: #050B18;
+  color: #F0F4FF;
+  font-family: 'Satoshi', sans-serif;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
 
-  /* App background */
-  --color-app-bg: #F5F5F5;
-  --color-dark-bg: #0F0F1A;
-  --color-dark-card: #1A1A2E;
-  --color-dark-elevated: #242438;
-  --color-dark-border: #2D2D45;
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  /* Text */
-  --color-text-dark: #111827;
-  --color-text-grey: #9CA3AF;
-  --color-text-light: #F9FAFB;
+/* Glass card utility */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
 
-  /* Spacing */
-  --spacing-tab: 72px;
+.glass-elevated {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(0,212,255,0.15);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
 
-  /* Animations */
-  --animate-shimmer: shimmer 1.5s infinite;
-  --animate-pulse-glow: pulseGlow 2.5s infinite;
-  --animate-shake: shake 0.5s ease-in-out;
-  --animate-slide-up: slideUp 0.3s ease-out;
-  --animate-bounce-in: bounceIn 0.3s ease-out;
+.glass-accent {
+  background: linear-gradient(135deg,
+    rgba(0,102,255,0.25) 0%,
+    rgba(0,212,255,0.1) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(0,212,255,0.25);
+  box-shadow:
+    0 8px 40px rgba(0,102,255,0.3),
+    0 0 80px rgba(0,212,255,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
 
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(
+    135deg, #0066FF, #00D4FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow animations */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px
+      rgba(0,212,255,0.4);
   }
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 4px 20px rgba(249,115,22,0.4); }
-    50% { box-shadow: 0 4px 30px rgba(249,115,22,0.7); }
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 50%, 90% { transform: translateX(-8px); }
-    30%, 70% { transform: translateX(8px); }
-  }
-  @keyframes slideUp {
-    0% { transform: translateY(20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-  @keyframes bounceIn {
-    0% { transform: scale(0.85); opacity: 0; }
-    60% { transform: scale(1.05); }
-    100% { transform: scale(1); opacity: 1; }
+  50% {
+    box-shadow: 0 4px 40px
+      rgba(0,212,255,0.7);
   }
 }
 
+@keyframes borderSpin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar hide on mobile */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* Selection color */
+::selection {
+  background: rgba(0,212,255,0.3);
+  color: white;
+}
+
+/* Input autofill fix */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px
+    #070D1F inset;
+  -webkit-text-fill-color: #F0F4FF;
+}
+
 @layer base {
-  * {
-    -webkit-tap-highlight-color: transparent;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: "DM Sans", sans-serif;
-    background-color: #F5F5F5;
-    color: #111827;
-    min-height: 100dvh;
-  }
-
-  .dark body {
-    background-color: #0F0F1A;
-    color: #F9FAFB;
-  }
-
   /* Safe area insets for iPhone */
   .safe-top {
     padding-top: max(20px, env(safe-area-inset-top));
@@ -100,11 +131,6 @@
     padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 
-  /* Sora font utility */
-  .font-sora {
-    font-family: "Sora", sans-serif;
-  }
-
   /* Remove number input spinners */
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button {
@@ -114,43 +140,6 @@
 }
 
 @layer utilities {
-  /* Gradient helpers */
-  .gradient-purple {
-    background: linear-gradient(135deg, #7C3AED, #6D28D9);
-  }
-  .gradient-orange {
-    background: linear-gradient(135deg, #EA580C, #DC2626);
-  }
-  .gradient-balance {
-    background: linear-gradient(135deg, #2D2D3A, #1A1A2E);
-  }
-
-  /* Shimmer loading effect */
-  .shimmer {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-  .dark .shimmer {
-    background: linear-gradient(90deg, #1a1a2e 25%, #242438 50%, #1a1a2e 75%);
-    background-size: 200% 100%;
-  }
-
-  /* Card shadow */
-  .card-shadow {
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-
-  /* Hide scrollbar */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Premium Date Input Styling */
   .styling-date-input::-webkit-calendar-picker-indicator {
     background: transparent;
     bottom: 0;
@@ -173,7 +162,7 @@
 
   .styling-date-input::-webkit-datetime-edit-text {
     padding: 0 4px;
-    color: #9CA3AF;
+    color: #7B8DB0;
   }
 
   .styling-date-input::-webkit-datetime-edit-month-field,

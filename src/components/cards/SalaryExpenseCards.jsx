@@ -3,45 +3,55 @@ import { motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { formatMoney } from '../../utils/formatMoney'
 
-function GradientCard({ label, amount, currency, gradient, Icon, delay = 0 }) {
+function GlassStatCard({ label, amount, currency, color, Icon }) {
+  const isIncome = label.toLowerCase().includes('in')
+  const accentColor = isIncome ? '#00FF87' : '#FF4D6D'
+  
   return (
     <motion.div
-      className="flex-1 rounded-[20px] p-4 relative overflow-hidden"
-      style={{ background: gradient, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex-1 rounded-[24px] p-5 relative overflow-hidden glass-elevated border-white/5"
     >
-      <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[11px] text-white/70 font-medium uppercase tracking-wide">{label}</p>
-        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-white" />
+      {/* Decorative Orbs */}
+      <div className="absolute -top-6 -right-6 w-16 h-16 rounded-full blur-[30px]" style={{ backgroundColor: `${accentColor}15` }} />
+      <div className="absolute -bottom-6 -left-6 w-12 h-12 rounded-full blur-[20px]" style={{ backgroundColor: `${accentColor}10` }} />
+      
+      <div className="flex items-center justify-between mb-4 relative z-10">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center glass border-none" style={{ backgroundColor: `${accentColor}15` }}>
+          <Icon className="w-4 h-4" style={{ color: accentColor }} />
+        </div>
+        <p className="text-[10px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.15em]">{label}</p>
+      </div>
+
+      <div className="relative z-10">
+        <p className="text-[20px] font-display font-bold text-[#F0F4FF] leading-tight flex items-baseline gap-1">
+          <span className="text-[14px] opacity-50 font-body">{currency}</span>
+          {formatMoney(amount, '').replace(currency, '').trim()}
+        </p>
+        <div className="flex items-center gap-1.5 mt-2">
+           <div className={`w-1.5 h-1.5 rounded-full ${isIncome ? 'bg-[#00FF87]' : 'bg-[#FF4D6D]'} shadow-glowSmall`} />
+           <p className="text-[11px] font-body text-[#3D4F70] font-bold">This Cycle</p>
         </div>
       </div>
-      <p className="text-[22px] font-sora font-bold text-white leading-tight">
-        {formatMoney(amount, currency)}
-      </p>
-      <p className="text-[11px] text-white/50 mt-1">This month</p>
     </motion.div>
   )
 }
 
 export default function SalaryExpenseCards({ income, expense, currency = 'USD' }) {
   return (
-    <div className="flex gap-3 px-4">
-      <GradientCard
-        label="Money In"
+    <div className="flex gap-4 px-6">
+      <GlassStatCard
+        label="Wealth In"
         amount={income}
         currency={currency}
-        gradient="linear-gradient(135deg, #7C3AED, #6D28D9)"
         Icon={ArrowDownLeft}
-        delay={0.05}
       />
-      <GradientCard
-        label="Money Spent"
+      <GlassStatCard
+        label="Burn Out"
         amount={expense}
         currency={currency}
-        gradient="linear-gradient(135deg, #EA580C, #DC2626)"
         Icon={ArrowUpRight}
-        delay={0.1}
       />
     </div>
   )

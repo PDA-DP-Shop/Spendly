@@ -42,43 +42,51 @@ export default function ExpensesScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
-      <TopHeader title="Expenses" showBell />
+    <div className="flex flex-col min-h-dvh mb-tab">
+      <TopHeader title="Activities" showBell />
 
-      {/* Calendar */}
+      {/* Calendar Strip */}
       <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
-      {/* Income + Expense cards */}
-      <div className="mt-3">
+      {/* Income + Expense cards (using new glass style) */}
+      <div className="mt-4">
         <SalaryExpenseCards income={received} expense={spent} currency={currency} />
       </div>
 
-      {/* Expenses list */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between px-4 mb-3">
-          <p className="text-[17px] font-sora font-bold text-gray-900 dark:text-white">
-            {selectedDate ? format(new Date(selectedDate), 'MMMM d') : 'This Month'}
+      {/* Activities list */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between px-6 mb-5">
+          <p className="text-[17px] font-display font-bold text-[#F0F4FF] tracking-tight">
+            {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : 'Recent Activity'}
           </p>
           {selectedDate && (
-            <button onClick={() => setSelectedDate(null)} className="text-sm text-purple-600 font-medium">
-              Show all
+            <button onClick={() => setSelectedDate(null)} className="text-[13px] font-body font-bold text-cyan-glow">
+              Clear Filter
             </button>
           )}
         </div>
 
         {filtered.length === 0 ? (
-          <EmptyState type="expenses" title="No expenses here" message="Add some expenses to see them" action={() => navigate('/add?mode=type')} actionLabel="Add Expense" />
+          <EmptyState 
+            type="expenses" 
+            title="No Records Found" 
+            message="Your financial history is empty for this period." 
+            action={() => navigate('/add?mode=type')} 
+            actionLabel="Initialize Record" 
+          />
         ) : (
-          filtered.map((exp, i) => (
-            <TransactionItem
-              key={exp.id}
-              expense={exp}
-              currency={currency}
-              index={i}
-              onDelete={handleDelete}
-              onEdit={() => navigate(`/add?edit=${exp.id}`)}
-            />
-          ))
+          <div className="flex flex-col gap-3">
+            {filtered.map((exp, i) => (
+              <TransactionItem
+                key={exp.id}
+                expense={exp}
+                currency={currency}
+                index={i}
+                onDelete={handleDelete}
+                onEdit={() => navigate(`/add?edit=${exp.id}`)}
+              />
+            ))}
+          </div>
         )}
       </div>
 

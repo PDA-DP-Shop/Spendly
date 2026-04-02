@@ -107,25 +107,31 @@ export default function ReportsScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] dark:bg-[#0F0F1A] mb-tab">
-      <div className="flex items-center justify-between pr-4">
-        <TopHeader title="Reports" />
-        <motion.button whileTap={{ scale: 0.9 }} onClick={handleExportPdf} disabled={exporting}
-          className="w-10 h-10 mt-1 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-sm">
+    <div className="flex flex-col min-h-dvh mb-tab">
+      <div className="flex items-center justify-between pr-6 relative z-10">
+        <TopHeader title="Analytics" />
+        <motion.button 
+          whileTap={{ scale: 0.9 }} 
+          onClick={handleExportPdf} 
+          disabled={exporting}
+          className="w-12 h-12 mt-1 rounded-2xl glass border-white/5 flex items-center justify-center shadow-glow transition-all active:shadow-none"
+        >
           {exporting ? (
-            <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
+            <Loader2 className="w-5 h-5 text-cyan-glow animate-spin" />
           ) : (
-            <Download className="w-5 h-5 text-purple-600" />
+            <Download className="w-5 h-5 text-cyan-glow" />
           )}
         </motion.button>
       </div>
 
       {/* Filter chips */}
-      <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-3 px-6 pb-6 overflow-x-auto scrollbar-hide relative z-10">
         {FILTERS.map(f => (
           <motion.button key={f} whileTap={{ scale: 0.95 }} onClick={() => setFilter(f)}
-            className={`px-5 py-2.5 rounded-full text-[13px] font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
-              filter === f ? 'bg-purple-600 text-white shadow-sm' : 'bg-white dark:bg-[#1A1A2E] text-gray-500'
+            className={`px-6 py-3 rounded-xl text-[13px] font-body font-bold whitespace-nowrap flex-shrink-0 transition-all duration-300 border ${
+              filter === f 
+                ? 'bg-cyan-dim border-cyan-glow/30 text-cyan-glow shadow-glowSmall' 
+                : 'glass border-transparent text-[#7B8DB0] hover:bg-white/5'
             }`}>
             {f}
           </motion.button>
@@ -133,54 +139,79 @@ export default function ReportsScreen() {
       </div>
 
       {/* Summary 3-card row */}
-      <div className="flex gap-2 px-4 mb-4">
+      <div className="flex gap-3 px-6 mb-8 relative z-10">
         {[
-          { label: 'Spent', value: spent, color: 'text-red-500' },
-          { label: 'Received', value: received, color: 'text-green-500' },
-          { label: 'Saved', value: Math.max(saved, 0), color: 'text-purple-600' },
+          { label: 'Outflow', value: spent, color: 'text-expense', accent: '#FF4D6D' },
+          { label: 'Inflow', value: received, color: 'text-income', accent: '#00FF87' },
+          { label: 'Reserve', value: Math.max(saved, 0), color: 'text-cyan-glow', accent: '#00D4FF' },
         ].map(item => (
-          <div key={item.label} className="flex-1 bg-white dark:bg-[#1A1A2E] rounded-2xl p-3 text-center shadow-sm">
-            <p className="text-[10px] text-gray-400 uppercase mb-1">{item.label}</p>
-            <p className={`text-[14px] font-sora font-bold ${item.color}`}>{formatMoney(item.value, currency)}</p>
+          <div key={item.label} className="flex-1 glass-elevated border-white/5 rounded-2xl p-4 text-center relative overflow-hidden group">
+            <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full blur-[20px]" style={{ backgroundColor: `${item.accent}10` }} />
+            <p className="text-[10px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-2">{item.label}</p>
+            <p className={`text-[15px] font-display font-bold ${item.color} leading-tight`}>{formatMoney(item.value, currency)}</p>
           </div>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState type="reports" title="No data yet" message="Add some expenses to see your spending reports" />
+        <EmptyState type="reports" title="Data Analysis Unavailable" message="Execute more financial activities to generate predictive insights." />
       ) : (
-        <>
-          <SpendingDonutChart groupedData={grouped} currency={currency} />
-          <PaymentMethodChart expenses={filtered} />
+        <div className="pb-tab space-y-6">
+          <div className="mx-6 glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+            <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Allocation by Category</p>
+            <SpendingDonutChart groupedData={grouped} currency={currency} />
+          </div>
+
+          <div className="mx-6 glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+            <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Payment Infrastructure</p>
+            <PaymentMethodChart expenses={filtered} />
+          </div>
           
-          <div className="mt-4">
+          <div className="mx-6 glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+            <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Inflow Trajectory</p>
             <AnalyticsBarChart data={monthlyData} currency={currency} />
           </div>
-          <div className="mt-4">
+
+          <div className="mx-6 glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+            <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">6-Month Liquidity Trend</p>
             <MonthlyLineChart monthlyTotals={sixMonthData} currency={currency} />
           </div>
 
           {/* Stats grid */}
-          <div className="mx-4 mt-6 mb-4 grid grid-cols-2 gap-3">
+          <div className="mx-6 grid grid-cols-2 gap-4">
             {[
-              { label: '🏆 Top Category', value: topCategory ? topCategory.category : 'None' },
-              { label: '💸 Biggest Buy', value: biggestPurchase ? biggestPurchase.shopName : 'None' },
-              { label: '📅 Daily Average', value: formatMoney(dailyAvg, currency) },
-              { label: '💰 Savings Rate', value: `${savingsRate}%` },
+              { label: 'Dominant Category', value: topCategory ? topCategory.category : 'N/A', icon: '🏆', color: '#00D4FF' },
+              { label: 'Major Acquisition', value: biggestPurchase ? biggestPurchase.shopName : 'N/A', icon: '💎', color: '#FF4D6D' },
+              { label: 'Daily Burn Rate', value: formatMoney(dailyAvg, currency), icon: '🔥', color: '#FFB800' },
+              { label: 'Efficiency Index', value: `${savingsRate}%`, icon: '📈', color: '#00FF87' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white dark:bg-[#1A1A2E] rounded-2xl p-4 shadow-sm">
-                <p className="text-[12px] text-gray-400 mb-1">{stat.label}</p>
-                <p className="text-[16px] font-sora font-bold text-gray-900 dark:text-white capitalize">{stat.value}</p>
+              <div key={stat.label} className="glass-elevated border-white/5 rounded-2xl p-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <span className="text-2xl">{stat.icon}</span>
+                </div>
+                <p className="text-[10px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-1">{stat.label}</p>
+                <p className="text-[16px] font-display font-bold text-[#F0F4FF] capitalize truncate" style={{ color: stat.color }}>{stat.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="mx-4 mt-2 flex flex-col gap-4">
-            <SpendingHeatmap expenses={filtered} currency={currency} />
-            <YearComparisonChart currentYearTotals={currentYearTotals} prevYearTotals={prevYearTotals} currency={currency} />
-            <WeekdayChart rawExpenses={filtered} currency={currency} />
+          <div className="mx-6 space-y-6">
+            <div className="glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+              <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Financial Heatmap</p>
+              <SpendingHeatmap expenses={filtered} currency={currency} />
+            </div>
+            
+            <div className="glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+              <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Yearly Correlation</p>
+              <YearComparisonChart currentYearTotals={currentYearTotals} prevYearTotals={prevYearTotals} currency={currency} />
+            </div>
+
+            <div className="glass border-white/5 rounded-[28px] p-6 shadow-glowLg">
+              <p className="text-[12px] font-display font-bold text-[#7B8DB0] uppercase tracking-[0.1em] mb-4">Temporal Activity</p>
+              <WeekdayChart rawExpenses={filtered} currency={currency} />
+            </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Hidden PDF Template */}
