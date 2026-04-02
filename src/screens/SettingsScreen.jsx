@@ -79,6 +79,9 @@ export default function SettingsScreen() {
   const [showPatternSetup, setShowPatternSetup] = useState(false)
   const [showLanguagePicker, setShowLanguagePicker] = useState(false)
   const [showGST, setShowGST] = useState(false)
+  const [lockSetupType, setLockSetupType] = useState(null)
+  const [showLockPicker, setShowLockPicker] = useState(false)
+  const [currencySearch, setCurrencySearch] = useState('')
 
   const handleLanguageSelect = async (lang) => {
     setShowLanguagePicker(false)
@@ -467,33 +470,13 @@ export default function SettingsScreen() {
         )}
       </AnimatePresence>
 
-      {/* Modals */}
       <AnimatePresence>
-        {showPinSetup && (
-          <PinSetupModal
-            pinLength={showPinSetup === 'pin4' ? 4 : 6}
-            onComplete={async (pin, salt, hash) => {
-              await updateSettings({ lockType: showPinSetup, lockPinHash: hash, lockSalt: salt })
-              setShowPinSetup(false)
-            }}
-            onCancel={() => setShowPinSetup(false)}
-          />
-        )}
         {showDecoySetup && (
-          <PinSetupModal
-            pinLength={settings?.lockType === 'pin4' ? 4 : 6}
-            title="Set Decoy PIN"
-            onComplete={async (pin) => handleDecoySetup(pin)}
+          <LockSetupModal
+            lockType={settings?.lockType === 'pattern' ? 'pattern' : (settings?.lockType === 'pin6' ? 'pin6' : 'pin4')}
+            title="Set Decoy Lock"
+            onSave={handleDecoySetup}
             onCancel={() => setShowDecoySetup(false)}
-          />
-        )}
-        {showPatternSetup && (
-          <PatternSetupModal
-            onComplete={async (pattern) => {
-              await updateSettings({ lockType: 'pattern', lockPattern: pattern })
-              setShowPatternSetup(false)
-            }}
-            onCancel={() => setShowPatternSetup(false)}
           />
         )}
       </AnimatePresence>

@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import PinLock from './PinLock'
 import PatternLock from './PatternLock'
 
-export default function LockSetupModal({ lockType, onSave, onCancel }) {
+export default function LockSetupModal({ lockType, onSave, onCancel, title: customTitle }) {
   const [step, setStep] = useState(1) // 1 = Enter, 2 = Confirm
   const [firstCode, setFirstCode] = useState('')
   const [error, setError] = useState(false)
@@ -25,7 +25,7 @@ export default function LockSetupModal({ lockType, onSave, onCancel }) {
     }
   }
 
-  const title = lockType === 'pattern' ? 'Draw Pattern' : 'Set PIN'
+  const title = customTitle || (lockType === 'pattern' ? 'Draw Pattern' : 'Set PIN')
   const desc = step === 1 
     ? `Enter your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
     : `Confirm your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
