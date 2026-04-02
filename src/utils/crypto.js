@@ -5,7 +5,7 @@
 
 const ITERATIONS = 600000;
 const KEY_LENGTH = 256;
-const ALGORITHM = 'AES-256-GCM';
+const ALGORITHM = 'AES-GCM';
 const HASH = 'SHA-512';
 
 /**

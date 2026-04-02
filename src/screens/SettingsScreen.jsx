@@ -151,6 +151,7 @@ export default function SettingsScreen() {
       setExportPwd('')
       setToast({ id: Date.now(), type: 'success', message: `✅ Backup saved: ${filename}` })
     } catch (e) {
+      console.error('Export error:', e)
       setToast({ id: Date.now(), type: 'error', message: 'Export failed' })
     }
   }
@@ -169,6 +170,7 @@ export default function SettingsScreen() {
       setToast({ id: Date.now(), type: 'success', message: '✅ Backup restored! Reloading...' })
       setTimeout(() => window.location.reload(), 1500)
     } catch (e) {
+      console.error('Import error:', e)
       setToast({ id: Date.now(), type: 'error', message: 'Import failed. Invalid password or corrupted file.' })
     }
   }

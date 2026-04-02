@@ -22,7 +22,7 @@ export async function encryptExport(data, password) {
   
   // 1. Encrypt the data
   const encrypted = await window.crypto.subtle.encrypt(
-    { name: 'AES-256-GCM', iv },
+    { name: 'AES-GCM', iv },
     encKey,
     encoder.encode(JSON.stringify(data))
   );
@@ -88,7 +88,7 @@ export async function decryptExport(buffer, password) {
 
   // 2. Decrypt
   const decrypted = await window.crypto.subtle.decrypt(
-    { name: 'AES-256-GCM', iv },
+    { name: 'AES-GCM', iv },
     encKey,
     encrypted
   );

@@ -8,14 +8,30 @@ export const exportAllData = async (password) => {
   const budgets = await db.budgets.toArray()
   const settings = await db.settings.toArray()
   const scans = await db.scans.toArray()
+  const categories = await db.categories.toArray()
+  const wallets = await db.wallets.toArray()
+  const emis = await db.emis.toArray()
+  const trips = await db.trips.toArray()
+  const goals = await db.goals.toArray()
+  const splits = await db.splits.toArray()
+  const badges = await db.badges.toArray()
+  const festivals = await db.festivals.toArray()
 
   const payload = {
-    version: '1.0',
+    version: '1.1',
     exportedAt: new Date().toISOString(),
     expenses,
     budgets,
     settings,
     scans,
+    categories,
+    wallets,
+    emis,
+    trips,
+    goals,
+    splits,
+    badges,
+    festivals,
   }
 
   const encrypted = await encryptExport(payload, password)
