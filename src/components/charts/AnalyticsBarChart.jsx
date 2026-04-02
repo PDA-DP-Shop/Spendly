@@ -35,7 +35,7 @@ export default function AnalyticsBarChart({ data, currency = 'USD', chartMode = 
   const colorLight = chartMode === 'expense' ? '#FFEBE4' : '#EEF2FF'
 
   return (
-    <div className="w-full relative mt-3 -ml-4">
+    <div className="w-full relative mt-3">
       <ResponsiveContainer width="100%" height={240}>
         <BarChart 
           data={chartData} 

@@ -2,14 +2,14 @@ import { m as motion } from 'framer-motion'
 import { ChevronLeft, LayoutGrid, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-export default function TopHeader({ title, onBack, showBack = false, showBell = true }) {
+export default function TopHeader({ title, onBack, showBack = false, showBell = true, rightElement }) {
   const navigate = useNavigate()
   const S = { fontFamily: "'Nunito', sans-serif" }
 
   return (
-    <div className="flex items-center justify-between px-6 safe-top h-[72px] bg-white sticky top-0 z-50">
+    <div className="flex items-center justify-between px-6 safe-top pt-10 pb-2 bg-white sticky top-0 z-50">
       {/* Left */}
-      <div className="w-11 h-11 flex items-center justify-start">
+      <div className="w-11 h-11 flex items-center justify-start flex-shrink-0">
         {showBack ? (
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -29,12 +29,12 @@ export default function TopHeader({ title, onBack, showBack = false, showBell = 
       </div>
 
       {/* Center */}
-      <h1 className="text-[18px] font-[800] text-[#0F172A] leading-none tracking-tight flex-1 text-center" style={S}>
+      <h1 className="text-[18px] font-[800] text-[#0F172A] leading-none tracking-tight flex-1 text-center truncate px-2" style={S}>
         {title}
       </h1>
 
       {/* Right */}
-      <div className="w-11 h-11 flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2 flex-shrink-0">
         {showBell && (
           <motion.button 
             whileTap={{ scale: 0.9 }}
@@ -44,6 +44,7 @@ export default function TopHeader({ title, onBack, showBack = false, showBell = 
             <span className="absolute top-[12px] right-[12px] w-2.5 h-2.5 rounded-full bg-[#FF7043] border-2 border-white" />
           </motion.button>
         )}
+        {rightElement}
       </div>
     </div>
   )

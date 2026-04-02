@@ -1,6 +1,6 @@
 // Home screen — white premium main dashboard
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Bell, TrendingUp, TrendingDown, Wallet, LayoutGrid } from 'lucide-react'
 import BalanceCard from '../components/cards/BalanceCard'
@@ -32,6 +32,7 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [toast, setToast] = useState(null)
   const [alertDismissed, setAlertDismissed] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
 
   const currency = settings?.currency || 'USD'
   const name = settings?.name || 'Friend'
@@ -85,7 +86,7 @@ export default function HomeScreen() {
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 safe-top pt-8 pb-4">
+      <div className="flex items-center justify-between px-6 safe-top pt-12 pb-4 relative">
         <div className="flex items-center gap-4">
           {/* Avatar circle */}
           <motion.div
@@ -108,6 +109,7 @@ export default function HomeScreen() {
         <div className="flex items-center gap-3">
           <motion.button
             whileTap={{ scale: 0.9 }}
+            onClick={() => setShowNotifications(!showNotifications)}
             className="relative w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm"
           >
             <Bell className="w-5 h-5 text-[var(--primary)]" />
@@ -115,6 +117,35 @@ export default function HomeScreen() {
               <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#FF7043] border-2 border-white" />
             )}
           </motion.button>
+
+          {/* Simple Notification Dropdown */}
+          <AnimatePresence>
+            {showNotifications && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-[84px] right-6 w-72 bg-white border border-[#F0F0F8] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] z-[100] p-4"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[14px] font-[800] text-[#0F172A]" style={S}>Notifications</p>
+                  <span className="text-[10px] font-[800] text-[var(--primary)] px-2 py-0.5 bg-[#EEF2FF] rounded-full uppercase">New</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-[#F8F7FF] rounded-2xl border border-[#F0EEFF]">
+                    <p className="text-[12px] font-[700] text-[#0F172A] mb-1" style={S}>Welcome to Spendly 🚀</p>
+                    <p className="text-[11px] text-[#64748B]" style={S}>Your private data stays 100% on this device.</p>
+                  </div>
+                  {budgetPct >= 80 && (
+                    <div className="p-3 bg-[#FFF7F2] rounded-2xl border border-[#FFEBE4]">
+                      <p className="text-[12px] font-[700] text-[#FF7043] mb-1" style={S}>Budget Alert ⚠️</p>
+                      <p className="text-[11px] text-[#94A3B8]" style={S}>You've used {Math.round(budgetPct)}% of your monthly limit.</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -152,8 +183,8 @@ export default function HomeScreen() {
       </div>
 
       {/* Analytics chart */}
-      <div className="mt-8">
-        <div className="px-6 mb-4 flex items-center justify-between">
+      <div className="mt-8 px-5">
+        <div className="px-1 mb-4 flex items-center justify-between">
           <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
             Monthly Overview
           </p>
@@ -162,7 +193,9 @@ export default function HomeScreen() {
               <span className="text-[11px] font-[800] text-[var(--primary)] uppercase tracking-wider" style={S}>12m</span>
           </div>
         </div>
-        <AnalyticsBarChart data={monthlyData} currency={currency} />
+        <div className="bg-white p-4 pt-6 rounded-[28px] border border-[#F0F0F8] shadow-sm">
+          <AnalyticsBarChart data={monthlyData} currency={currency} />
+        </div>
       </div>
 
       {/* Recent transactions */}

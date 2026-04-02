@@ -114,14 +114,24 @@ export default function ReportsScreen() {
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between pr-5 bg-white border-b border-[#F0F0F8]">
-        <TopHeader title="Analytics" onBack={null} />
-        <motion.button whileTap={{ scale: 0.9 }} onClick={handleExportPdf} disabled={exporting}
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8]">
-          {exporting
-            ? <Loader2 className="w-5 h-5 text-[var(--primary)] animate-spin" />
-            : <Download className="w-5 h-5 text-[var(--primary)]" />}
-        </motion.button>
+      <div className="bg-white border-b border-[#F0F0F8]">
+        <TopHeader 
+          title="Analytics" 
+          onBack={null} 
+          showBell={true}
+          rightElement={
+            <motion.button 
+              whileTap={{ scale: 0.9 }} 
+              onClick={handleExportPdf} 
+              disabled={exporting}
+              className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm ml-2"
+            >
+              {exporting
+                ? <Loader2 className="w-5 h-5 text-[var(--primary)] animate-spin" />
+                : <Download className="w-5 h-5 text-[var(--primary)]" />}
+            </motion.button>
+          }
+        />
       </div>
 
       {/* Filter chips */}
