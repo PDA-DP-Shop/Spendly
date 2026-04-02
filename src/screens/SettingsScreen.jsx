@@ -156,14 +156,19 @@ export default function SettingsScreen() {
     }
   }
 
-  const handleImport = async () => {
+  const handleImport = async (mode) => {
     if (!importPwd || !importFile) return
     
-    const confirmation = prompt('⚠️ This will REPLACE all current data. Type "REPLACE" to confirm:')
-    if (confirmation !== 'REPLACE') return
+    if (mode === 'replace') {
+      const confirmation = prompt('⚠️ This will REPLACE all current data. Type "REPLACE" to confirm:')
+      if (confirmation !== 'REPLACE') return
+    } else {
+      const ok = window.confirm('Merge imported data with current data? This will keep your current settings and append new records.')
+      if (!ok) return
+    }
 
     try {
-      await importBackupFile(importFile, importPwd)
+      await importBackupFile(importFile, importPwd, mode)
       setShowImportInput(false)
       setImportFile(null)
       setImportPwd('')
@@ -316,12 +321,15 @@ export default function SettingsScreen() {
               }}
               onChange={e => setImportFile(e.target.files[0])}
               className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 mt-1">
               <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Backup password..."
-                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                className="flex-1 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#242438] text-sm dark:text-white outline-none border border-gray-200 dark:border-gray-800 focus:border-purple-400" />
-              <button onClick={handleImport} className="px-4 py-2 bg-green-500 text-white text-sm rounded-xl font-medium">Restore</button>
-              <button onClick={() => { setShowImportInput(false); setImportFile(null); setImportPwd(''); }} className="text-gray-400 text-sm">Cancel</button>
+                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
+                className="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-[#242438] text-[15px] dark:text-white outline-none border border-gray-200 dark:border-gray-800 focus:border-purple-400" />
+              <div className="flex items-center gap-2 mt-1">
+                <button onClick={() => handleImport('replace')} className="flex-1 py-3 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-[14px] rounded-xl font-bold transition-colors shadow-sm">Replace</button>
+                <button onClick={() => handleImport('merge')} className="flex-1 py-3 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-[14px] rounded-xl font-bold transition-colors shadow-sm">Merge</button>
+              </div>
+              <button onClick={() => { setShowImportInput(false); setImportFile(null); setImportPwd(''); }} className="py-2 text-gray-500 text-[14px] font-medium mt-1">Cancel</button>
             </div>
           </div>
         ) : (

@@ -458,7 +458,7 @@ export const scoreService = {
 }
 
 // Secure Data Wipe — Zero Knowledge forensic deletion
-export const secureWipe = async () => {
+export const secureWipe = async (skipReload = false) => {
   const tables = [
     db.expenses, db.budgets, db.settings, db.scans, db.categories, db.productCache,
     db.wallets, db.emis, db.trips, db.goals, db.splits, db.badges,
@@ -502,5 +502,7 @@ export const secureWipe = async () => {
   }
 
   // 6. Final reload
-  window.location.reload()
+  if (!skipReload) {
+    window.location.reload()
+  }
 }
