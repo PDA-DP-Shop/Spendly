@@ -1,8 +1,8 @@
-// Settings screen — white premium settings
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, ShieldCheck, Globe, Calculator, Gift, Shield, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info } from 'lucide-react'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
@@ -14,9 +14,9 @@ import { CURRENCIES } from '../constants/currencies'
 import { exportAllData } from '../services/exportData'
 import { importBackupFile } from '../services/importData'
 import { db, settingsService, secureWipe } from '../services/database'
+import { formatMoney } from '../utils/formatMoney'
 
-const EMOJIS = ['😊','😎','🤑','💎','🚀','👑','✌️','✨']
-const THEMES = [{ id: 'light', label: 'Light', Icon: Sun }, { id: 'dark', label: 'Dark', Icon: Moon }, { id: 'system', label: 'System', Icon: Laptop }]
+
 const LOCK_OPTIONS = [
   { id: 'none', label: 'None', emoji: '🔓' },
   { id: 'pin4', label: '4-PIN', emoji: '🔢' },
@@ -28,42 +28,56 @@ const LANGUAGE_OPTIONS = [
   { id: 'en', label: 'English', emoji: '🇺🇸' },
   { id: 'hi', label: 'हिंदी (Hindi)', emoji: '🇮🇳' },
   { id: 'gu', label: 'ગુજરાતી (Gujarati)', emoji: '🇮🇳' },
+  { id: 'es', label: 'Español', emoji: '🇪🇸' },
+  { id: 'fr', label: 'Français', emoji: '🇫🇷' },
+  { id: 'de', label: 'Deutsch', emoji: '🇩🇪' },
+  { id: 'ja', label: '日本語', emoji: '🇯🇵' },
+  { id: 'zh', label: '中文', emoji: '🇨🇳' },
+  { id: 'ru', label: 'Русский', emoji: '🇷🇺' },
+  { id: 'ar', label: 'العربية', emoji: '🇦🇪' },
 ]
 
-const S = { fontFamily: "'Nunito', sans-serif" }
+const HAPTIC_SHAKE = {
+  tap: { 
+    x: [0, -3, 3, -3, 3, 0],
+    transition: { duration: 0.35, ease: "easeInOut" }
+  }
+}
 
-function SettingRow({ icon: Icon, label, value, onClick, color = '#7C6FF7', subtitle }) {
+function SettingRow({ icon: Icon, label, value, onClick, color = '#000000', subtitle }) {
+  const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <motion.button whileTap={{ x: 3 }} onClick={onClick}
-      className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F8F7FF] transition-colors">
-      <div className="w-11 h-11 rounded-[16px] flex items-center justify-center flex-shrink-0 shadow-sm"
-        style={{ background: `${color}15`, border: `1px solid ${color}10` }}>
-        <Icon className="w-5 h-5" style={{ color }} />
+    <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={onClick}
+      className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] transition-colors">
+      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
+        <Icon className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
       </div>
       <div className="flex-1">
-        <span className="text-[16px] font-[800] text-[#0F172A] block tracking-tight" style={S}>{label}</span>
-        {subtitle && <span className="text-[12px] font-[700] text-[#94A3B8] uppercase tracking-wider mt-0.5" style={S}>{subtitle}</span>}
+        <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>{label}</span>
+        {subtitle && <span className="text-[11px] font-[500] text-[#AFAFAF] mt-0.5 block" style={S}>{subtitle}</span>}
       </div>
-      {value && <span className="text-[13px] font-[800] text-[var(--primary)] mr-1 truncate max-w-[80px]" style={S}>{value}</span>}
-      <ChevronRight className="w-4 h-4 text-[#CBD5E1]" />
+      {value && <span className="text-[13px] font-[600] text-[#AFAFAF] mr-2 truncate max-w-[120px]" style={S}>{value}</span>}
+      <ChevronRight className="w-4 h-4 text-[#AFAFAF]" strokeWidth={3} />
     </motion.button>
   )
 }
 
 function SectionCard({ title, children }) {
+  const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <div className="mx-6 mb-6">
-      {title && <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8] mb-3 ml-1" style={S}>{title}</p>}
-      <div className="overflow-hidden bg-white shadow-[0_4px_24px_rgba(124,111,247,0.05)] rounded-[28px] border border-[#F0F0F8]">
-        <div className="divide-y divide-[#F8F9FF]">{children}</div>
+    <div className="mx-6 mb-8">
+      {title && <p className="text-[12px] font-[700] uppercase tracking-wider text-[#AFAFAF] mb-3 ml-2" style={S}>{title}</p>}
+      <div className="overflow-hidden bg-white rounded-[24px] border border-[#EEEEEE] shadow-sm">
+        <div className="divide-y divide-[#EEEEEE]">{children}</div>
       </div>
     </div>
   )
 }
 
 export default function SettingsScreen() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const { settings, updateSetting } = useSettingsStore()
+  const { settings, updateSetting, setPWAInstallVisible } = useSettingsStore()
   const { setupBiometric } = useAppLock()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [toast, setToast] = useState(null)
@@ -79,6 +93,7 @@ export default function SettingsScreen() {
   const [showLockPicker, setShowLockPicker] = useState(false)
   const [currencySearch, setCurrencySearch] = useState('')
   const [showDecoySetup, setShowDecoySetup] = useState(false)
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   const currency = CURRENCIES.find(c => c.code === settings?.currency) || CURRENCIES[0]
 
@@ -106,10 +121,12 @@ export default function SettingsScreen() {
     }
   }
 
-  const handleLockSave = (code) => {
+  const handleLockSave = async (code) => {
     const key = lockSetupType === 'pattern' ? 'lockPattern' : 'lockPin'
-    updateSetting(key, code)
-    updateSetting('lockType', lockSetupType)
+    await updateSetting({
+      [key]: code,
+      lockType: lockSetupType
+    })
     setLockSetupType(null)
     setToast({ id: Date.now(), message: 'Security updated', type: 'success' })
   }
@@ -149,20 +166,20 @@ export default function SettingsScreen() {
       {show && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="fixed inset-0 z-[60]" style={{ background: 'rgba(15,23,42,0.4)' }} />
+            onClick={onClose} className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.4)' }} />
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
             className="fixed bottom-0 left-0 right-0 z-[61] pb-safe bg-white flex flex-col"
-            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
-            <div className="w-12 h-1.5 bg-[#EEF2FF] rounded-full mx-auto mt-4 mb-4" />
-            <div className="flex items-center justify-between px-6 mb-5">
-              <h3 className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h3>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={onClose} 
-                className="w-11 h-11 rounded-full bg-[#F8F9FF] flex items-center justify-center border border-[#F0F0F8]">
-                <X className="w-5 h-5 text-[#64748B]" />
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh' }}>
+            <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-8 mb-6 mt-2">
+              <h3 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{title}</h3>
+              <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={onClose} 
+                className="w-11 h-11 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
+                <X className="w-5 h-5 text-black" strokeWidth={2.5} />
               </motion.button>
             </div>
-            <div className="flex-1 overflow-y-auto px-6 pb-8 scrollbar-hide">{children}</div>
+            <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">{children}</div>
           </motion.div>
         </>
       )}
@@ -170,184 +187,155 @@ export default function SettingsScreen() {
   )
 
   return (
-    <div className="flex flex-col min-h-dvh mb-tab bg-[#F8F7FF] safe-top">
-      {/* Header */}
-      <div className="px-6 pt-10 pb-6 flex items-center justify-between">
-        <h1 className="text-[32px] font-[800] text-[#0F172A] tracking-tight" style={S}>Settings</h1>
-        <div className="w-12 h-12 rounded-[18px] bg-white flex items-center justify-center shadow-sm border border-[#F0F0F8]">
-            <Globe className="w-6 h-6 text-[var(--primary)]" />
+    <div className="flex flex-col min-h-dvh mb-tab bg-white safe-top">
+      <div className="px-7 pt-12 pb-6 flex items-center justify-between bg-white sticky top-0 z-20 border-b border-[#F6F6F6]">
+        <h1 className="text-[28px] font-[800] text-black tracking-tight" style={S}>{t('settings.title')}</h1>
+        <div className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center">
+            <Globe className="w-5 h-5 text-black" strokeWidth={2.5} />
         </div>
       </div>
 
-      <div className="pt-2">
-        {/* Profile card */}
-        <div className="mx-6 mb-8 p-8 text-center bg-white shadow-[0_8px_32px_rgba(124,111,247,0.08)] rounded-[32px] border border-[#F0F0F8]">
-          <motion.div whileTap={{ scale: 0.95 }} className="relative inline-block mb-6">
-            <div className="w-24 h-24 rounded-[28px] flex items-center justify-center text-5xl mx-auto shadow-lg"
-              style={{ background: 'var(--gradient-primary)' }}>
-              {settings?.emoji || '😊'}
-            </div>
-          </motion.div>
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {EMOJIS.map(e => (
-              <button key={e} onClick={() => updateSetting('emoji', e)}
-                className={`w-11 h-11 rounded-[16px] text-[20px] flex items-center justify-center transition-all bg-white border ${settings?.emoji === e ? 'border-[var(--primary)] shadow-md' : 'border-[#EEF2FF]'}`}>
-                {e}
-              </button>
-            ))}
+      <div className="pt-8">
+        <div className="mx-6 mb-12 p-10 text-center bg-white border border-[#EEEEEE] rounded-[40px] shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-black/5" />
+          <div className="w-28 h-28 rounded-full bg-[#F6F6F6] border-2 border-[#EEEEEE] flex items-center justify-center text-[48px] font-[800] text-black mx-auto mb-8 shadow-inner">
+            {settings?.profileName ? settings.profileName.charAt(0).toUpperCase() : <Globe className="w-12 h-12 text-[#D8D8D8]" />}
           </div>
           <input
-            value={settings?.name || ''}
-            onChange={e => updateSetting('name', e.target.value)}
-            placeholder="Your Name"
-            className="text-[26px] font-[800] text-[#0F172A] text-center bg-transparent outline-none w-full placeholder-[#CBD5E1] tracking-tight"
+            value={settings?.profileName || ''}
+            onChange={e => updateSetting('profileName', e.target.value)}
+            placeholder={t('settings.profile')}
+            className="text-[28px] font-[800] text-black text-center bg-transparent outline-none w-full placeholder-[#D8D8D8] tracking-tight"
             style={S}
           />
-          <p className="text-[13px] font-[800] text-[#94A3B8] mt-1.5 uppercase tracking-widest" style={S}>{currency.code} · {currency.name}</p>
+          <p className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-[0.2em] mt-3" style={S}>
+            {currency.code} • {currency.name}
+          </p>
         </div>
 
-        <SectionCard title="Extensions">
-          <SettingRow icon={Wallet} label="Digital Wallets" onClick={() => navigate('/wallets')} color="#10B981" subtitle="Manage your accounts" />
-          <SettingRow icon={CreditCard} label="Loans & EMIs" onClick={() => navigate('/emis')} color="#06B6D4" subtitle="Track installments" />
-          <SettingRow icon={Target} label="Savings Goals" onClick={() => navigate('/goals')} color="#F43F5E" subtitle="Plan your future" />
-          <SettingRow icon={Plane} label="Travel Planner" onClick={() => navigate('/trips')} color="#3B82F6" subtitle="Trip budgeter" />
-          <SettingRow icon={Gift} label="Event Budgets" onClick={() => navigate('/festivals')} color="#EC4899" subtitle="Gifting & more" />
-          <SettingRow icon={Trophy} label="Rank & Rewards" onClick={() => navigate('/badges')} color="#F59E0B" subtitle="Stay motivated" />
+        <SectionCard title={t('settings.finance')}>
+          <SettingRow icon={Wallet} label={t('common.wallets')} onClick={() => navigate('/wallets')} subtitle={t('settings.manageWallets')} />
+          <SettingRow icon={CreditCard} label={t('common.emis')} onClick={() => navigate('/emis')} subtitle={t('settings.trackLoans')} />
+          <SettingRow icon={Target} label={t('common.goals')} onClick={() => navigate('/goals')} subtitle={t('settings.planGoals')} />
+          <SettingRow icon={Plane} label={t('common.trips')} onClick={() => navigate('/trips')} subtitle={t('settings.tripBudgets')} />
+          <SettingRow icon={Gift} label={t('common.festivals')} onClick={() => navigate('/festivals')} subtitle={t('settings.eventBudgets')} />
+          <SettingRow icon={Trophy} label={t('common.badges')} onClick={() => navigate('/badges')} subtitle={t('settings.achievements')} />
         </SectionCard>
 
-        <SectionCard title="Appearance">
-          <SettingRow icon={Globe} label="Language"
+        <SectionCard title={t('settings.preferences')}>
+          <SettingRow icon={Globe} label={t('settings.language')}
             value={LANGUAGE_OPTIONS.find(o => o.id === (settings?.language || 'en'))?.label}
-            onClick={() => setShowLanguagePicker(true)} color="#7C6FF7" />
-          <div className="px-6 py-5">
-            <p className="text-[14px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-4" style={S}>Theme Mode</p>
-            <div className="flex gap-2.5 bg-[#F8F7FF] p-2 rounded-[22px] border border-[#F0F0F8]">
-              {THEMES.map(({ id, label, Icon }) => (
-                <button key={id} onClick={() => updateSetting('theme', id)}
-                  className={`flex-1 flex flex-col items-center gap-2 py-3.5 rounded-[18px] transition-all ${settings?.theme === id ? 'bg-white text-[var(--primary)] shadow-md' : 'text-[#94A3B8]'}`}>
-                  <Icon className="w-5 h-5" />
-                  <span className="text-[12px] font-[800] uppercase tracking-wider" style={S}>{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+            onClick={() => setShowLanguagePicker(true)} />
+          <SettingRow icon={Globe} label={t('settings.currency')} value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} />
+          {/* PWA Install row removed from here as per request */}
         </SectionCard>
 
-        <SectionCard title="Finance">
-          <SettingRow icon={Globe} label="Base Currency" value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} color="#10B981" />
-          <SettingRow icon={Target} label="Monthly Limit" value={`${currency.symbol}${settings?.monthlyBudget || 2000}`} onClick={() => navigate('/budget')} color="#7C6FF7" />
+        <SectionCard title={t('settings.limits')}>
+          <SettingRow icon={Target} label={t('settings.monthlyLimit')} value={formatMoney(settings?.monthlyBudget || 2000, currency.code)} onClick={() => navigate('/budget')} />
+          <SettingRow icon={Calculator} label={t('settings.gstCalc')} onClick={() => setShowGST(true)} />
         </SectionCard>
 
-        <SectionCard title="Security">
-          <SettingRow icon={Shield} label="App Protection"
+        <SectionCard title={t('settings.security')}>
+          <SettingRow icon={Shield} label={t('settings.lock')}
             value={LOCK_OPTIONS.find(o => o.id === (settings?.lockType || 'none'))?.label}
-            onClick={() => setShowLockPicker(true)} color="#7C6FF7" />
-          <SettingRow icon={ShieldCheck} label="Decoy Mode"
-            value={settings?.decoyPin ? 'Active' : 'Setup'}
-            onClick={() => setShowDecoySetup(true)} color="#10B981" />
+            onClick={() => setShowLockPicker(true)} />
+          <SettingRow icon={ShieldCheck} label={t('settings.decoy')}
+            value={settings?.decoyPin ? t('common.active') : t('common.setup')}
+            onClick={() => setShowDecoySetup(true)} />
+          <SettingRow icon={Shield} label={t('settings.terms')} onClick={() => navigate('/terms')} />
+          <SettingRow icon={ShieldCheck} label={t('settings.privacy')} onClick={() => navigate('/privacy')} />
         </SectionCard>
 
-        <SectionCard title="Communications">
-          <div className="flex items-center justify-between px-6 py-5">
+        <SectionCard title={t('settings.notifications')}>
+          <div className="flex items-center justify-between px-6 py-5 bg-white">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8]">
-                <Bell className="w-5 h-5 text-[var(--primary)]" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
+                <Bell className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
               </div>
-              <div>
-                <span className="text-[16px] font-[800] text-[#0F172A] block tracking-tight" style={S}>Budget Alerts</span>
-                <span className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-widest mt-0.5" style={S}>Push notifications</span>
-              </div>
+              <span className="text-[15px] font-[700] text-black tracking-tight" style={S}>{t('settings.dailyUpdates')}</span>
             </div>
-            <button onClick={() => updateSetting('notificationsOn', !settings?.notificationsOn)}
-              className={`w-13 h-7.5 rounded-full transition-all relative border border-[#F0F0F8]`}
-              style={{ background: settings?.notificationsOn ? 'var(--primary)' : '#EEF2FF', width: '52px', height: '30px' }}>
-              <motion.div className="w-6 h-6 rounded-full bg-white shadow-md absolute top-[2px]"
-                animate={{ left: settings?.notificationsOn ? '24px' : '2px' }} />
-            </button>
+            <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+              onClick={() => updateSetting('notificationsOn', !settings?.notificationsOn)}
+              className="w-12 h-7 rounded-full transition-all relative border border-[#EEEEEE]"
+              style={{ background: settings?.notificationsOn ? '#000000' : '#E2E2E2' }}>
+              <motion.div className="w-5 h-5 rounded-full bg-white shadow-md absolute top-[3px]"
+                animate={{ left: settings?.notificationsOn ? '23px' : '3px' }} />
+            </motion.button>
           </div>
         </SectionCard>
 
-        <SectionCard title="Backup & Reset">
-           <SettingRow icon={Download} label="Export Backup" onClick={() => setShowExportInput(true)} color="#7C6FF7" subtitle="Save encrypted file" />
-           <SettingRow icon={Upload} label="Import Data" onClick={() => setShowImportInput(true)} color="#10B981" subtitle="Restore from file" />
-           <SettingRow icon={Trash2} label="Factory Reset" onClick={() => setShowClearConfirm(true)} color="#F43F5E" subtitle="Delete everything" />
+        <SectionCard title={t('settings.data')}>
+           <SettingRow icon={Download} label={t('settings.export')} onClick={() => handleExport()} subtitle={t('settings.saveBackup')} />
+           <SettingRow icon={Upload} label={t('settings.import')} onClick={() => setShowImportInput(true)} subtitle={t('settings.restoreBackup')} />
+           {!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone && (
+             <SettingRow icon={Smartphone} label="Install App" onClick={() => setPWAInstallVisible(true)} subtitle="Add to home screen" />
+           )}
+           <SettingRow icon={Info} label="Migration Guide" onClick={() => navigate('/migration-guide')} subtitle="How to move browser data" />
+           <SettingRow icon={Trash2} label={t('settings.clear')} onClick={() => setShowClearConfirm(true)} subtitle={t('settings.factoryReset')} />
         </SectionCard>
 
-        <div className="mx-6 mb-10 p-8 rounded-[32px] border border-[#F0F0F8] bg-white shadow-sm">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-[18px] flex items-center justify-center bg-[rgba(124,111,247,0.1)]">
-              <ShieldCheck className="w-6 h-6 text-[var(--primary)]" />
-            </div>
-            <div>
-                <p className="text-[18px] font-[800] text-[#0F172A] tracking-tight" style={S}>Private by Design</p>
-                <p className="text-[12px] font-[700] text-[#94A3B8] uppercase tracking-widest" style={S}>Your data, your device</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {['No Trackers', 'Max Security', 'Fully Offline', 'E2E Encrypted'].map((t) => (
-              <div key={t} className="flex items-center gap-2 px-3 py-2.5 rounded-[14px] bg-[#F8F7FF] border border-[#F0F0F8]">
-                <Check className="w-4 h-4 text-[var(--primary)]" />
-                <span className="text-[11px] font-[800] text-[#64748B] uppercase tracking-wider" style={S}>{t}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+         <div className="mx-6 mb-12 p-8 rounded-[40px] bg-black text-white shadow-2xl shadow-black/10 flex flex-col items-center">
+             <ShieldCheck className="w-12 h-12 mb-4 opacity-90" strokeWidth={2.5} />
+             <h3 className="text-[20px] font-[800] mb-2" style={S}>{t('settings.privacy')}</h3>
+             <p className="text-[14px] font-[500] text-white/60 text-center leading-relaxed" style={S}>{t('onboarding.step1_desc')}</p>
+         </div>
 
         <div className="text-center pb-24">
-          <p className="text-[12px] font-[800] tracking-[0.2em] uppercase text-[#CBD5E1]" style={S}>Spendly Build v1.0.4</p>
+          <p className="text-[12px] font-[600] text-[#AFAFAF] uppercase tracking-widest" style={S}>Build v1.0.4</p>
         </div>
       </div>
 
       <BottomSheet show={showCurrencyPicker} onClose={() => setShowCurrencyPicker(false)} title="Select Currency">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <div className="relative">
-              <Calculator className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8]" />
-              <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder="Search code or country..."
-                className="w-full py-4.5 pl-12 pr-5 rounded-[20px] outline-none font-[700] text-[16px]"
-                style={{ background: '#F8F7FF', border: '1px solid #F0F0F8', ...S, color: '#0F172A' }} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#AFAFAF]" strokeWidth={2.5} />
+              <input value={currencySearch} onChange={e => setCurrencySearch(e.target.value)} placeholder="Search currency..."
+                className="w-full py-4 pl-12 pr-6 rounded-2xl outline-none font-[600] text-[15px] bg-[#F6F6F6] border border-[#EEEEEE]"
+                style={S} />
           </div>
-          <div className="grid grid-cols-1 gap-2.5 mt-2">
+          <div className="grid grid-cols-1 gap-2 mt-2">
             {CURRENCIES.filter(c => c.name.toLowerCase().includes(currencySearch.toLowerCase()) || c.code.toLowerCase().includes(currencySearch.toLowerCase())).map(c => (
-                <button key={c.code} onClick={() => { updateSetting('currency', c.code); setShowCurrencyPicker(false); setCurrencySearch('') }}
-                  className={`flex items-center gap-4 px-5 py-4.5 rounded-[22px] transition-all border ${settings?.currency === c.code ? 'bg-[#EEF2FF] border-[var(--primary)] shadow-sm' : 'bg-[#F8F7FF] border-transparent'}`}>
-                  <span className="text-3xl">{c.flag}</span>
+                <motion.button key={c.code} variants={HAPTIC_SHAKE} whileTap="tap"
+                  onClick={() => { updateSetting('currency', c.code); setShowCurrencyPicker(false); setCurrencySearch('') }}
+                  className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all border ${settings?.currency === c.code ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
+                  <span className="text-2xl">{c.flag}</span>
                   <div className="flex-1 text-left">
-                    <p className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>{c.code}</p>
-                    <p className="text-[12px] font-[700] text-[#94A3B8] uppercase tracking-widest" style={S}>{c.name}</p>
+                    <p className={`text-[15px] font-[700] ${settings?.currency === c.code ? 'text-white' : 'text-black'}`} style={S}>{c.code}</p>
+                    <p className={`text-[11px] font-[500] ${settings?.currency === c.code ? 'text-white/60' : 'text-[#AFAFAF]'}`} style={S}>{c.name}</p>
                   </div>
-                  {settings?.currency === c.code && <div className="w-6 h-6 rounded-full bg-[var(--primary)] flex items-center justify-center"><Check className="w-4 h-4 text-white" strokeWidth={3} /></div>}
-                </button>
+                  {settings?.currency === c.code && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
+                </motion.button>
             ))}
           </div>
         </div>
       </BottomSheet>
 
-      <BottomSheet show={showLockPicker} onClose={() => setShowLockPicker(false)} title="Security Lock">
+      <BottomSheet show={showLockPicker} onClose={() => setShowLockPicker(false)} title="Privacy Type">
         <div className="grid grid-cols-1 gap-3">
           {LOCK_OPTIONS.map(opt => (
-            <button key={opt.id} onClick={() => handleLockTypeSelect(opt.id)}
-              className={`flex items-center justify-between px-6 py-5 rounded-[24px] transition-all bg-[#F8F7FF] border ${settings?.lockType === opt.id ? 'border-[var(--primary)] shadow-sm bg-white' : 'border-transparent'}`}>
+            <motion.button key={opt.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleLockTypeSelect(opt.id)}
+              className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all border ${settings?.lockType === opt.id ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
               <div className="flex items-center gap-4">
                 <span className="text-2xl">{opt.emoji}</span>
-                <span className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>{opt.label}</span>
+                <span className={`text-[15px] font-[700] ${settings?.lockType === opt.id ? 'text-white' : 'text-black'}`} style={S}>{opt.label}</span>
               </div>
-              {settings?.lockType === opt.id && <div className="w-5 h-5 rounded-full bg-[var(--primary)]" />}
-            </button>
+              {settings?.lockType === opt.id && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+            </motion.button>
           ))}
         </div>
       </BottomSheet>
 
-      <BottomSheet show={showLanguagePicker} onClose={() => setShowLanguagePicker(false)} title="Language">
+      <BottomSheet show={showLanguagePicker} onClose={() => setShowLanguagePicker(false)} title="Preferred Language">
         <div className="grid grid-cols-1 gap-3">
           {LANGUAGE_OPTIONS.map(opt => (
-            <button key={opt.id} onClick={() => handleLanguageSelect(opt.id)}
-              className={`flex items-center justify-between px-6 py-5 rounded-[24px] transition-all bg-[#F8F7FF] border ${settings?.language === opt.id ? 'border-[var(--primary)] shadow-sm bg-white' : 'border-transparent'}`}>
+            <motion.button key={opt.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleLanguageSelect(opt.id)}
+              className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all border ${settings?.language === opt.id ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
               <div className="flex items-center gap-4">
                 <span className="text-2xl">{opt.emoji}</span>
-                <span className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>{opt.label}</span>
+                <span className={`text-[15px] font-[700] ${settings?.language === opt.id ? 'text-white' : 'text-black'}`} style={S}>{opt.label}</span>
               </div>
-              {settings?.language === opt.id && <div className="w-5 h-5 rounded-full bg-[var(--primary)]" />}
-            </button>
+              {settings?.language === opt.id && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+            </motion.button>
           ))}
         </div>
       </BottomSheet>
@@ -372,16 +360,15 @@ export default function SettingsScreen() {
         message="This will permanently delete your entire history. This action cannot be reversed."
         confirmText="Yes, Wipe Data" onConfirm={handleClearAll} onCancel={() => setShowClearConfirm(false)} />
       
-      {/* Mini Export/Import Inputs Inline (Simplification) */}
       <AnimatePresence>
         {showExportInput && (
-            <BottomSheet show={showExportInput} onClose={() => setShowExportInput(false)} title="Secure Export">
-                <p className="text-[14px] font-[700] text-[#94A3B8] mb-5" style={S}>Set a password to encrypt your backup file. You'll need this to restore it later.</p>
+            <BottomSheet show={showExportInput} onClose={() => setShowExportInput(false)} title="Export Data">
+                <p className="text-[13px] font-[500] text-[#AFAFAF] mb-6" style={S}>Files are encrypted with AES-256. Set a password to protect your backup.</p>
                 <div className="flex flex-col gap-4">
-                    <input value={exportPwd} onChange={e => setExportPwd(e.target.value)} type="password" placeholder="Backup Password"
-                      className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none font-[800]" style={S} />
-                    <motion.button whileTap={{ scale: 0.98 }} onClick={handleExport} className="w-full py-5 rounded-[22px] text-white font-[800] text-[16px] shadow-lg"
-                      style={{ background: 'var(--gradient-primary)', ...S }}>Generate .spendly File</motion.button>
+                    <input value={exportPwd} onChange={e => setExportPwd(e.target.value)} type="password" placeholder="Set Password"
+                      className="w-full py-4 px-6 rounded-2xl bg-[#F6F6F6] border border-[#EEEEEE] outline-none font-[600]" style={S} />
+                    <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={handleExport} className="w-full py-5 rounded-2xl bg-black text-white font-[800] text-[15px] shadow-lg"
+                      style={S}>Export Data</motion.button>
                 </div>
             </BottomSheet>
         )}
@@ -389,24 +376,24 @@ export default function SettingsScreen() {
 
       <AnimatePresence>
         {showImportInput && (
-            <BottomSheet show={showImportInput} onClose={() => setShowImportInput(false)} title="Restore Backup">
-                <p className="text-[14px] font-[700] text-[#94A3B8] mb-5" style={S}>Select your .spendly file and enter the decryption password.</p>
+            <BottomSheet show={showImportInput} onClose={() => setShowImportInput(false)} title="Import Data">
+                <p className="text-[13px] font-[500] text-[#AFAFAF] mb-6" style={S}>Select a .SPENDLY file and enter the decryption password.</p>
                 <div className="flex flex-col gap-4">
-                    <div className="relative w-full py-4 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] overflow-hidden">
+                    <div className="relative w-full py-4 px-6 rounded-2xl bg-[#F6F6F6] border border-[#EEEEEE] overflow-hidden">
                         <input type="file" accept=".spendly" onChange={e => setImportFile(e.target.files[0])}
                             className="absolute inset-0 opacity-0 cursor-pointer" />
                         <div className="flex items-center gap-3">
-                            <Upload className="w-5 h-5 text-[var(--primary)]" />
-                            <span className="text-[15px] font-[800] text-[#0F172A] truncate" style={S}>
-                                {importFile ? importFile.name : 'Choose backup file...'}
+                            <Upload className="w-5 h-5 text-black" strokeWidth={2.5} />
+                            <span className="text-[15px] font-[700] text-black truncate" style={S}>
+                                {importFile ? importFile.name : 'Select File'}
                             </span>
                         </div>
                     </div>
-                    <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Encryption Password"
-                      className="w-full py-4.5 px-6 rounded-[22px] bg-[#F8F7FF] border border-[#F0F0F8] outline-none font-[800]" style={S} />
+                    <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Enter Password"
+                      className="w-full py-4 px-6 rounded-2xl bg-[#F6F6F6] border border-[#EEEEEE] outline-none font-[600]" style={S} />
                     <div className="flex gap-3 mt-2">
-                        <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleImport('replace')} className="flex-1 py-4 rounded-[18px] bg-[#F43F5E] text-white font-[800] text-[15px]" style={S}>Replace All</motion.button>
-                        <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleImport('merge')} className="flex-1 py-4 rounded-[18px] bg-[var(--primary)] text-white font-[800] text-[15px]" style={S}>Merge Data</motion.button>
+                        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleImport('replace')} className="flex-1 py-4 rounded-xl bg-black text-white font-[800] text-[14px]" style={S}>Replace & Import</motion.button>
+                        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleImport('merge')} className="flex-1 py-4 rounded-xl bg-[#F6F6F6] border border-[#EEEEEE] text-black font-[800] text-[14px]" style={S}>Merge Data</motion.button>
                     </div>
                 </div>
             </BottomSheet>

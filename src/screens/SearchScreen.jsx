@@ -11,7 +11,7 @@ import { CATEGORIES } from '../constants/categories'
 import { useNavigate } from 'react-router-dom'
 
 const SORT_OPTIONS = ['Newest', 'Oldest', 'Most', 'Least']
-const S = { fontFamily: "'Nunito', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function SearchScreen() {
   const navigate = useNavigate()
@@ -44,7 +44,7 @@ export default function SearchScreen() {
   const handleDelete = async (id) => {
     const deleted = await deleteExpense(id)
     setToast({
-      id: Date.now(), type: 'success', message: 'Deleted', duration: 4000,
+      id: Date.now(), type: 'success', message: 'Activity Removed', duration: 4000,
       action: { label: 'Undo', fn: async () => { await restoreExpense(deleted); setToast(null) } }
     })
   }
@@ -52,63 +52,57 @@ export default function SearchScreen() {
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Search bar */}
-      <div className="px-5 safe-top pt-6 pb-4 bg-white sticky top-0 z-20 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+      <div className="px-6 safe-top pt-8 pb-5 bg-white sticky top-0 z-20 border-b border-[#EEEEEE]">
         <div
-          className="flex items-center gap-3 px-5 py-4 rounded-[20px] transition-all hover:shadow-md"
-          style={{ background: '#F8F7FF', border: '1px solid #F0F0F8' }}
+          className="flex items-center gap-4 px-6 py-4 rounded-full transition-all bg-[#F6F6F6] border border-[#EEEEEE]"
         >
-          <Search className="w-5 h-5 text-[var(--primary)] flex-shrink-0" />
+          <Search className="w-5 h-5 text-black flex-shrink-0" strokeWidth={3} />
           <input
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search by shop, note, category..."
+            placeholder="Search activities..."
             autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
-            className="flex-1 bg-transparent text-[16px] font-[700] text-[#0F172A] outline-none placeholder-[#CBD5E1]"
+            className="flex-1 bg-transparent text-[16px] font-[900] text-black outline-none placeholder-[#AFAFAF]"
             style={S}
           />
           {query.length > 0 && (
-            <button onClick={() => setQuery('')} className="w-6 h-6 flex items-center justify-center rounded-full bg-[#E2E8F0]/30">
-              <X className="w-3.5 h-3.5 text-[#64748B]" />
+            <button onClick={() => setQuery('')} className="w-7 h-7 flex items-center justify-center rounded-full bg-black">
+              <X className="w-4 h-4 text-white" strokeWidth={3} />
             </button>
           )}
         </div>
       </div>
 
       {/* Category filter chips */}
-      <div className="flex gap-2.5 px-5 py-5 overflow-x-auto scrollbar-hide bg-white border-b border-[#F0F0F8]">
+      <div className="flex gap-3 px-6 py-6 overflow-x-auto scrollbar-hide bg-white border-b border-[#EEEEEE]">
         {[{ id: 'all', name: 'Total', emoji: '✨' }, ...CATEGORIES].map(cat => (
           <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-[800] whitespace-nowrap flex-shrink-0 transition-all border"
-            style={{
-              background: activeCategory === cat.id ? '#F8F7FF' : '#FFFFFF',
-              borderColor: activeCategory === cat.id ? 'var(--primary)' : '#F0F0F8',
-              color: activeCategory === cat.id ? 'var(--primary)' : '#94A3B8',
-              boxShadow: activeCategory === cat.id ? '0 4px 12px rgba(124,111,247,0.08)' : 'none',
-              ...S
-            }}>
-            <span className="text-sm">{cat.emoji}</span>
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-full text-[13px] font-[900] whitespace-nowrap flex-shrink-0 transition-all border ${
+              activeCategory === cat.id 
+                ? 'bg-black text-white border-black shadow-xl' 
+                : 'bg-white text-black border-[#EEEEEE]'
+            }`}
+            style={S}>
+            <span className="text-base">{cat.emoji}</span>
             <span>{cat.name}</span>
           </button>
         ))}
       </div>
 
       {/* Sort row */}
-      <div className="flex items-center gap-3 px-5 py-4 overflow-x-auto scrollbar-hide bg-[#F8F9FA]/30 border-b border-[#F0F0F8]">
+      <div className="flex items-center gap-4 px-6 py-5 overflow-x-auto scrollbar-hide bg-[#FBFBFB] border-b border-[#EEEEEE]">
         <div className="flex items-center gap-2 mr-2">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#94A3B8]" />
-            <span className="text-[11px] font-[800] uppercase tracking-widest text-[#94A3B8] flex-shrink-0" style={S}>Sort</span>
+            <SlidersHorizontal className="w-4 h-4 text-black" strokeWidth={3} />
+            <span className="text-[11px] font-[900] uppercase tracking-[0.2em] text-black flex-shrink-0" style={S}>Sort</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {SORT_OPTIONS.map(s => (
             <button key={s} onClick={() => setSort(s)}
-              className="px-4 py-2 rounded-full text-[12px] font-[800] transition-all border"
-              style={{
-                background: sort === s ? 'var(--primary)' : '#FFFFFF',
-                color: sort === s ? '#FFFFFF' : '#94A3B8',
-                borderColor: sort === s ? 'var(--primary)' : '#F0F0F8',
-                ...S
-              }}>
+              className={`px-6 py-2.5 rounded-full text-[12px] font-[900] transition-all border tracking-[0.1em] ${
+                sort === s ? 'bg-black text-white border-black' : 'bg-white text-black border-[#EEEEEE]'
+              }`}
+              style={S}>
               {s}
             </button>
           ))}
@@ -116,19 +110,19 @@ export default function SearchScreen() {
       </div>
 
       {/* Results */}
-      <div className="flex-1 pt-4">
+      <div className="flex-1 pt-6">
         {results.length === 0 ? (
           <EmptyState
             type="search"
-            title="No results found"
-            message={query ? `We couldn't find anything for "${query}".` : 'Start typing to find transactions.'}
+            title="Search Negative"
+            message={query ? `No records found for "${query}" on this terminal.` : 'Enter search parameters to query the database.'}
           />
         ) : (
           <div className="pb-tab">
-            <div className="flex items-center gap-2 px-5 mb-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
-                <p className="text-[12px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
-                  {results.length} Matches Found
+            <div className="flex items-center gap-3 px-6 mb-6">
+                <div className="w-2 h-2 rounded-full bg-black shadow-[0_0_8px_rgba(0,0,0,0.3)]" />
+                <p className="text-[11px] font-[900] uppercase tracking-[0.2em] text-[#AFAFAF]" style={S}>
+                  {results.length} Activity Encounters
                 </p>
             </div>
             <div className="flex flex-col">

@@ -35,15 +35,22 @@ async function loadLocalDb() {
   localDbLoading = true
   localDbLoadPromise = (async () => {
     try {
-      const res = await fetch('/data/top-50000-products.json.gz', {
-        cache: 'force-cache',
-      })
+      const res = await fetch('/data/top-50000-products.json.gz')
 
       if (!res.ok) throw new Error(`Local DB not found (${res.status})`)
 
-      const ds = new DecompressionStream('gzip')
-      const decompressedStream = res.body.pipeThrough(ds)
-      const products = await new Response(decompressedStream).json()
+      let products
+      try {
+        // Attempt to parse directly (if Vite/server already decompressed it via Content-Encoding: gzip)
+        const clone = res.clone()
+        products = await clone.json()
+      } catch (err) {
+        // If it's a raw gzip blob, manually decompress it
+        const ds = new DecompressionStream('gzip')
+        const decompressedStream = res.body.pipeThrough(ds)
+        products = await new Response(decompressedStream).json()
+      }
+      
       const map = new Map()
       for (const p of products) {
         if (p.barcode) map.set(p.barcode, { name: p.name, brand: p.brand, category: p.category })

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { Info, X, TrendingUp } from 'lucide-react'
 
-export default function SpendingScore({ scoreData }) {
+export default function SpendingScore({ scoreData, compact = false }) {
   const [showTips, setShowTips] = useState(false)
   if (!scoreData) return null
 
@@ -11,36 +11,42 @@ export default function SpendingScore({ scoreData }) {
   const pct = Math.min((score / maxScore) * 100, 100)
 
   // Circular progress SVG logic
-  const radius = 45
+  const radius = compact ? 35 : 45
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (pct / 100) * circumference
   
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
     <>
-      <motion.div whileTap={{ scale: 0.98 }} onClick={() => setShowTips(true)}
-        className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgba(124,111,247,0.06)] border border-[#F0F0F8] relative overflow-hidden flex items-center justify-between cursor-pointer">
-        <div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-[rgba(124,111,247,0.1)] flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-[var(--primary)]" />
+      <motion.div 
+        whileTap={{ scale: 0.98 }} 
+        onClick={() => setShowTips(true)}
+        className={`bg-white rounded-[24px] ${compact ? 'p-5 w-full h-full' : 'p-6'} shadow-premium border border-[#EEEEEE] relative overflow-hidden flex items-center justify-between cursor-pointer`}
+      >
+        <div className={compact ? 'flex-shrink' : ''}>
+          <div className="flex items-center gap-2 mb-2">
+            <div className={`rounded-full bg-black flex items-center justify-center ${compact ? 'w-5 h-5' : 'w-7 h-7'}`}>
+              <TrendingUp className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-white`} strokeWidth={3} />
             </div>
-            <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>Spending Score</p>
+            <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} font-[900] text-black opacity-40 uppercase tracking-[0.15em]`} style={S}>Score</p>
           </div>
-          <p className="text-[40px] font-[800] text-[#0F172A] leading-none mb-2" style={S}>{score}</p>
-          <p className="text-[14px] font-[700]" style={{ color: gradeColor, ...S }}>Out of {maxScore} · {grade}</p>
+          <p className={`${compact ? 'text-[34px]' : 'text-[44px]'} font-[900] text-black leading-none mb-2 tracking-tighter`} style={S}>{score}</p>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: gradeColor }} />
+            <p className={`${compact ? 'text-[12px]' : 'text-[15px]'} font-[800] text-black`} style={S}>{grade}</p>
+          </div>
         </div>
 
-        {/* CSS SVG Donut */}
-        <div className="relative w-24 h-24 flex items-center justify-center">
+        {/* Uber-style stroke donut */}
+        <div className={`relative ${compact ? 'w-20 h-20' : 'w-26 h-26'} flex items-center justify-center flex-shrink-0`}>
           <svg className="w-full h-full transform -rotate-90">
-            <circle cx="48" cy="48" r={radius} stroke="#F1F5F9" strokeWidth="10" fill="transparent" />
-            <motion.circle cx="48" cy="48" r={radius} stroke={gradeColor} strokeWidth="10" fill="transparent"
+            <circle cx={compact ? '40' : '52'} cy={compact ? '40' : '52'} r={radius} stroke="#F2F2F2" strokeWidth={compact ? '6' : '9'} fill="transparent" />
+            <motion.circle cx={compact ? '40' : '52'} cy={compact ? '40' : '52'} r={radius} stroke="#000000" strokeWidth={compact ? '6' : '9'} fill="transparent"
               strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} animate={{ strokeDashoffset }} transition={{ duration: 1.5, ease: "easeOut" }} strokeLinecap="round" />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center text-3xl drop-shadow-sm">
-            {score >= 750 ? '🌟' : score >= 600 ? '👍' : score >= 400 ? '👀' : '😅'}
+          <div className={`absolute inset-0 flex items-center justify-center ${compact ? 'text-xl' : 'text-3xl'} font-bold`}>
+            {score >= 750 ? '↑' : score >= 600 ? '→' : '↓'}
           </div>
         </div>
       </motion.div>

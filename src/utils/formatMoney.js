@@ -1,17 +1,32 @@
-// Formats a number as money with currency symbol
+// Formats a number as money with locale-specific rules (e.g., Lakhs/Crores for India)
 import { getCurrencyByCode } from '../constants/currencies'
+
+const CURRENCY_TO_LOCALE = {
+  USD: 'en-US',
+  EUR: 'de-DE',
+  GBP: 'en-GB',
+  INR: 'en-IN',
+  JPY: 'ja-JP',
+  CNY: 'zh-CN',
+  AED: 'ar-AE',
+  BRL: 'pt-BR',
+  MXN: 'es-MX',
+  RUB: 'ru-RU',
+  CAD: 'en-CA',
+}
 
 export const formatMoney = (amount, currencyCode = 'USD', showSign = false) => {
   const currency = getCurrencyByCode(currencyCode)
+  const locale = CURRENCY_TO_LOCALE[currencyCode] || 'en-US'
   const absAmount = Math.abs(amount)
-  const formatted = absAmount.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+  
+  const formatted = absAmount.toLocaleString(locale, {
+    minimumFractionDigits: currencyCode === 'JPY' ? 0 : 2,
+    maximumFractionDigits: currencyCode === 'JPY' ? 0 : 2,
   })
-  // Always show '-' for negative values; optionally show '+' for positive when showSign=true
-  if (amount < 0) return `-${currency.symbol}${formatted}`
-  const sign = showSign ? '+ ' : ''
-  return `${sign}${currency.symbol}${formatted}`
+
+  const prefix = amount < 0 ? '-' : (showSign ? '+ ' : '')
+  return `${prefix}${currency.symbol}${formatted}`
 }
 
 export const formatMoneyCompact = (amount, currencyCode = 'USD') => {

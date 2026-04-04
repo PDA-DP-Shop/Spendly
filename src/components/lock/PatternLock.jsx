@@ -3,13 +3,56 @@ import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const DOTS = [0, 1, 2, 3, 4, 5, 6, 7, 8] // 3x3 grid
-const S = { fontFamily: "'Nunito', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function PatternLock({ onVerify }) {
   const [pattern, setPattern] = useState([])
   const [drawing, setDrawing] = useState(false)
   const containerRef = useRef(null)
   const dotRefs = useRef([])
+
+  const safeVibrate = (duration) => {
+    if (!navigator.vibrate) return
+    try {
+      // Browsers often block vibration if the user hasn't interacted 
+      // with the page's "active status" yet. Checking userActivation 
+      // where supported (Chrome/Edge) or falling back to a silent try-catch.
+      if (typeof navigator.userActivation === 'undefined' || navigator.userActivation.isActive) {
+        navigator.vibrate(duration)
+      }
+    } catch (e) {
+      // Silently fail if blocked by browser intervention
+    }
+  }
+
+  const handleStart = (i) => {
+    setDrawing(true)
+    setPattern([i])
+    safeVibrate(20)
+  }
+
+  const handleMove = (e) => {
+    if (!drawing) return
+    const touch = e.touches?.[0] || e
+    
+    // e.preventDefault() is intentionally omitted here because 'touch-none'
+    // in CSS handles native scroll prevention, and React's passive listeners
+    // will throw warnings if preventDefault is called.
+
+    const dot = getDotAtPoint(touch.clientX, touch.clientY)
+    if (dot !== null && !pattern.includes(dot)) {
+      setPattern(p => [...p, dot])
+      safeVibrate(15)
+    }
+  }
+
+  const handleEnd = () => {
+    setDrawing(false)
+    if (pattern.length >= 3) {
+      onVerify(pattern.join(''))
+    }
+    setPattern([])
+  }
 
   const getDotAtPoint = (x, y) => {
     for (let i = 0; i < dotRefs.current.length; i++) {
@@ -23,30 +66,11 @@ export default function PatternLock({ onVerify }) {
     return null
   }
 
-  const handleMove = (e) => {
-    if (!drawing) return
-    const touch = e.touches?.[0] || e
-    e.preventDefault?.()
-    const dot = getDotAtPoint(touch.clientX, touch.clientY)
-    if (dot !== null && !pattern.includes(dot)) {
-      setPattern(p => [...p, dot])
-      if (navigator.vibrate) navigator.vibrate(10)
-    }
-  }
-
-  const handleEnd = () => {
-    setDrawing(false)
-    if (pattern.length >= 3) {
-      onVerify(pattern.join(''))
-    }
-    setPattern([])
-  }
-
   return (
-    <div className="flex flex-col items-center gap-10 py-4">
+    <div className="flex flex-col items-center gap-10 py-6">
       <div
         ref={containerRef}
-        className="relative select-none touch-none bg-white p-8 rounded-[40px] shadow-[0_8px_32px_rgba(124,111,247,0.06)] border border-[#F0F0F8]"
+        className="relative select-none touch-none bg-white p-10 rounded-[32px] border border-[#EEEEEE] shadow-2xl"
         onMouseMove={handleMove}
         onMouseUp={handleEnd}
         onTouchMove={handleMove}
@@ -59,26 +83,26 @@ export default function PatternLock({ onVerify }) {
               <div
                 key={i}
                 ref={el => dotRefs.current[i] = el}
-                onMouseDown={() => { setDrawing(true); setPattern([i]) }}
-                onTouchStart={() => { setDrawing(true); setPattern([i]) }}
-                className="w-12 h-12 flex items-center justify-center cursor-pointer relative"
+                onMouseDown={() => handleStart(i)}
+                onTouchStart={() => handleStart(i)}
+                className="w-14 h-14 flex items-center justify-center cursor-pointer relative"
               >
                 <motion.div 
                   animate={{
-                    scale: isSelected ? 1.2 : 1,
-                    backgroundColor: isSelected ? 'var(--primary)' : '#F1F5F9',
-                    boxShadow: isSelected ? '0 0 20px rgba(124,111,247,0.4)' : 'none',
+                    scale: isSelected ? 1.4 : 1,
+                    backgroundColor: isSelected ? '#000000' : '#EEEEEE',
+                    boxShadow: isSelected ? '0 0 16px rgba(0,0,0,0.3)' : 'none',
                   }}
-                  className={`w-4 h-4 rounded-full transition-shadow duration-300 ${isSelected ? '' : 'border border-[#E2E8F0]'}`}
+                  className={`w-3.5 h-3.5 rounded-full transition-all duration-300`}
                 />
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div 
                       key={`ring-${i}`}
                       initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 2, opacity: 0.2 }}
-                      exit={{ scale: 2.5, opacity: 0 }}
-                      className="absolute inset-0 bg-[var(--primary)] rounded-full pointer-events-none"
+                      animate={{ scale: 2.5, opacity: 0.1 }}
+                      exit={{ scale: 3, opacity: 0 }}
+                      className="absolute inset-0 bg-black rounded-full pointer-events-none"
                     />
                   )}
                 </AnimatePresence>
@@ -88,10 +112,10 @@ export default function PatternLock({ onVerify }) {
         </div>
       </div>
       
-      <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse" />
-        <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-[0.2em]" style={S}>
-          Connect at least 3 dots
+      <div className="flex items-center gap-3">
+        <div className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
+        <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.25em]" style={S}>
+          Protocol: Connect 3+ Nodes
         </p>
       </div>
     </div>

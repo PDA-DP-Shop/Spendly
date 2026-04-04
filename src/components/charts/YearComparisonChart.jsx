@@ -1,61 +1,62 @@
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatMoneyCompact } from '../../utils/formatMoney'
 
+const S = { fontFamily: 'Inter' }
+
+const CustomTooltip = ({ active, payload, label, currency }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-black px-6 py-4 rounded-[24px] shadow-2xl border border-white/10">
+        <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em] mb-4" style={S}>{label.toUpperCase()}</p>
+        <div className="flex items-center justify-between gap-8 mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-white" />
+            <span className="text-[13px] font-[900] text-white uppercase tracking-[0.05em]" style={S}>Current</span>
+          </div>
+          <span className="text-[15px] font-[900] text-white" style={S}>{formatMoneyCompact(payload[0].value, currency)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-8">
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#333333]" />
+            <span className="text-[13px] font-[900] text-[#AFAFAF] uppercase tracking-[0.05em]" style={S}>Previous</span>
+          </div>
+          <span className="text-[15px] font-[900] text-[#AFAFAF]" style={S}>{formatMoneyCompact(payload[1].value, currency)}</span>
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function YearComparisonChart({ currentYearTotals, prevYearTotals, currency }) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const S = { fontFamily: 'Nunito' }
   
   const data = months.map((m, i) => ({
-    name: m,
+    name: m.toUpperCase(),
     thisYear: currentYearTotals[i] || 0,
     lastYear: prevYearTotals[i] || 0,
   }))
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white px-4 py-3 rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
-          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-3" style={S}>{label}</p>
-          <div className="flex items-center justify-between gap-6 mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]" />
-              <span className="text-[13px] font-[700] text-[#475569]" style={S}>This Year</span>
-            </div>
-            <span className="text-[14px] font-[800] text-[#0F172A]" style={S}>{formatMoneyCompact(payload[0].value, currency)}</span>
-          </div>
-          <div className="flex items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#E0E7FF]" />
-              <span className="text-[13px] font-[700] text-[#94A3B8]" style={S}>Last Year</span>
-            </div>
-            <span className="text-[14px] font-[800] text-[#94A3B8]" style={S}>{formatMoneyCompact(payload[1].value, currency)}</span>
-          </div>
-        </div>
-      )
-    }
-    return null
-  }
-
   return (
     <div className="w-full">
-      <div className="flex justify-end gap-5 mb-8">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[var(--primary)] shadow-sm" />
-          <span className="text-[11px] font-[800] text-[var(--primary)] uppercase tracking-wider" style={S}>This Year</span>
+      <div className="flex justify-end gap-6 mb-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-black shadow-[0_0_8px_rgba(0,0,0,0.3)]" />
+          <span className="text-[10px] font-[900] text-black uppercase tracking-[0.2em]" style={S}>Current</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#E0E7FF]" />
-          <span className="text-[11px] font-[800] text-[#CBD5E1] uppercase tracking-wider" style={S}>Last Year</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#EEEEEE]" />
+          <span className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em]" style={S}>Previous</span>
         </div>
       </div>
       
-      <div className="h-[220px] w-full">
+      <div className="h-[240px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#CBD5E1', fontFamily: 'Nunito', fontWeight: 700 }} dy={15} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124, 111, 247, 0.03)' }} />
-            <Bar dataKey="thisYear" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={10} animationDuration={1500} />
-            <Bar dataKey="lastYear" fill="#E0E7FF" radius={[4, 4, 0, 0]} barSize={10} animationDuration={1500} />
+          <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barGap={6}>
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#AFAFAF', fontFamily: 'Inter', fontWeight: 900 }} dy={20} />
+            <Tooltip content={<CustomTooltip currency={currency} />} cursor={{ fill: '#F6F6F6', radius: 4 }} />
+            <Bar dataKey="thisYear" fill="#000000" radius={[2, 2, 0, 0]} barSize={8} animationDuration={1200} />
+            <Bar dataKey="lastYear" fill="#EEEEEE" radius={[2, 2, 0, 0]} barSize={8} animationDuration={1200} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -8,7 +8,7 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
   const [step, setStep] = useState(1) // 1 = Enter, 2 = Confirm
   const [firstCode, setFirstCode] = useState('')
   const [error, setError] = useState(false)
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   const handleCodeEntry = (code) => {
     if (step === 1) {
@@ -26,7 +26,7 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
     }
   }
 
-  const title = customTitle || (lockType === 'pattern' ? 'Draw Pattern' : 'Set Secure PIN')
+  const title = customTitle || (lockType === 'pattern' ? 'Draw Pattern' : 'Set your PIN')
   const desc = step === 1 
     ? `Enter your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
     : `Confirm your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
@@ -36,15 +36,15 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
       <div className="flex items-center justify-between px-8 mt-6 mb-10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-             <ShieldCheck className="w-5 h-5 text-[var(--primary)]" />
-             <h2 className="text-[28px] font-[800] text-[#0F172A] tracking-tight" style={S}>{title}</h2>
+             <ShieldCheck className="w-5 h-5 text-black" />
+             <h2 className="text-[28px] font-[800] text-black tracking-tight" style={S}>{title}</h2>
           </div>
-          <p className={`text-[14px] font-[700] uppercase tracking-widest ${error ? 'text-[#EF4444]' : 'text-[#94A3B8]'}`} style={S}>
+          <p className={`text-[12px] font-[700] uppercase tracking-widest ${error ? 'text-[#EF4444]' : 'text-[#AFAFAF]'}`} style={S}>
             {error ? 'Mismatch. Try again.' : desc}
           </p>
         </div>
-        <button onClick={onCancel} className="w-12 h-12 flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] rounded-full shadow-sm active:scale-90 transition-transform">
-          <X className="w-6 h-6 text-[#94A3B8]" />
+        <button onClick={onCancel} className="w-11 h-11 flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] rounded-full active:scale-90 transition-transform">
+          <X className="w-5 h-5 text-black" strokeWidth={2.5} />
         </button>
       </div>
 
@@ -55,7 +55,7 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ type: 'spring', damping: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className="w-full"
           >
             {lockType === 'pattern' ? (
@@ -71,10 +71,11 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
       </div>
 
       <div className="px-8 flex justify-center">
-         <p className="text-[11px] font-[800] text-[#CBD5E1] uppercase tracking-[0.2em]" style={S}>
-           🔒 256-bit Local Encryption
+         <p className="text-[10px] font-[800] text-[#D8D8D8] uppercase tracking-[0.2em]" style={S}>
+            Securely stored on your device
          </p>
       </div>
     </div>
   )
 }
+

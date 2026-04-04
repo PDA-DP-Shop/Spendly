@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { format, addDays, isToday } from 'date-fns'
 
-const S = { fontFamily: "'Nunito', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function CalendarStrip({ selectedDate, onSelectDate }) {
   const scrollRef = useRef(null)
@@ -25,7 +25,7 @@ export default function CalendarStrip({ selectedDate, onSelectDate }) {
   return (
     <div
       ref={scrollRef}
-      className="flex gap-3 px-6 overflow-x-auto scrollbar-hide py-4"
+      className="flex gap-4 px-6 overflow-x-auto scrollbar-hide py-6 border-b border-[#EEEEEE] bg-white sticky top-[64px] z-30"
     >
       {days.map(day => {
         const dateStr = format(day, 'yyyy-MM-dd')
@@ -38,25 +38,28 @@ export default function CalendarStrip({ selectedDate, onSelectDate }) {
           <motion.button
             key={dateStr}
             data-today={isTodayDay}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => onSelectDate(isSelected ? null : dateStr)}
-            className="flex flex-col items-center gap-2 min-w-[54px] py-1"
+            className="flex flex-col items-center gap-3 min-w-[60px]"
           >
-            <span className="text-[11px] text-[#94A3B8] font-[800] uppercase tracking-widest" style={S}>
+            <span className={`text-[9px] font-[900] uppercase tracking-[0.3em] transition-colors ${isSelected ? 'text-black' : 'text-[#AFAFAF]'}`} style={S}>
               {dayLetters[dayLetterIdx]}
             </span>
             <motion.div
-              className={`w-11 h-11 rounded-[16px] flex items-center justify-center text-[16px] font-[800] transition-all border ${
+              className={`w-14 h-14 rounded-full flex items-center justify-center text-[16px] font-[900] transition-all border ${
                 isSelected
-                  ? 'bg-[#7C6FF7] border-[#7C6FF7] text-white shadow-lg shadow-[#7C6FF730]'
+                  ? 'bg-black border-black text-white shadow-[0_12px_24px_rgba(0,0,0,0.2)]'
                   : isTodayDay
-                  ? 'border-[#7C6FF7] text-[#7C6FF7] bg-white'
-                  : 'text-[#475569] bg-white border-[#F0F0F8]'
+                  ? 'border-black text-black bg-[#F6F6F6] shadow-sm'
+                  : 'text-black bg-white border-[#EEEEEE] active:bg-black active:text-white active:border-black'
               }`}
               style={S}
             >
               {dayNum}
             </motion.div>
+            {isTodayDay && !isSelected && (
+              <div className="w-1 h-1 rounded-full bg-black mt-1" />
+            )}
           </motion.button>
         )
       })}

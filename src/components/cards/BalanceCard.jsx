@@ -93,13 +93,13 @@ export default function BalanceCard({ balance, income, expense, currency = 'USD'
         </div>
 
         <div className="flex items-center gap-3 justify-end">
-          <div className="flex flex-col items-end min-w-0 order-1 sm:order-2">
+          <div className="flex flex-col items-end min-w-0">
             <span className="text-white/60 text-[10px] font-[800] uppercase tracking-wider" style={S}>Spent</span>
             <span className="text-white text-[16px] font-[800] truncate" style={S}>
               {hideBalances ? '••••' : formatMoney(expense, currency)}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-[14px] flex items-center justify-center bg-white/20 border border-white/20 order-2 sm:order-1">
+          <div className="w-10 h-10 rounded-[14px] flex items-center justify-center bg-white/20 border border-white/20">
             <ArrowUpRight className="w-5 h-5 text-white" />
           </div>
         </div>

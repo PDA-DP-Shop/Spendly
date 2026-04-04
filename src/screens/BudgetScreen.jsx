@@ -1,6 +1,7 @@
 // Budget screen — white premium per-category budget editor
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import TopHeader from '../components/shared/TopHeader'
 import { useBudgetStore } from '../store/budgetStore'
 import { useExpenses } from '../hooks/useExpenses'
@@ -11,7 +12,7 @@ import { formatMoney } from '../utils/formatMoney'
 import { format } from 'date-fns'
 import { Sparkles, Target, Zap } from 'lucide-react'
 
-const S = { fontFamily: "'Nunito', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
 
 function BudgetBar({ spent, limit, variant = 'primary' }) {
   const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0
@@ -26,7 +27,7 @@ function BudgetBar({ spent, limit, variant = 'primary' }) {
   }
 
   return (
-    <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: variant === 'white' ? 'rgba(255,255,255,0.2)' : '#F1F5F9' }}>
+    <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: variant === 'white' ? 'rgba(255,255,255,0.2)' : '#F6F6F6' }}>
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: `${pct}%` }}
@@ -39,6 +40,7 @@ function BudgetBar({ spent, limit, variant = 'primary' }) {
 }
 
 export default function BudgetScreen() {
+  const { t } = useTranslation()
   const { budgets, overallBudget, loadBudgets, setCategoryBudget, setOverallBudget, getCategoryBudget } = useBudgetStore()
   const { getThisMonth } = useExpenses()
   const { settings } = useSettingsStore()
@@ -78,61 +80,61 @@ export default function BudgetScreen() {
   const pctUsed = overallBudget > 0 ? Math.round((spent / overallBudget) * 100) : 0
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#F8F7FF] pb-24">
-      <TopHeader title="Budgeting" />
+    <div className="flex flex-col min-h-dvh bg-white pb-24">
+      <TopHeader title={t('budget.title')} />
 
       <div className="px-6 py-4 flex items-center justify-between">
          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]" />
-            <p className="text-[13px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
+            <div className="w-2.5 h-2.5 rounded-full bg-black" />
+            <p className="text-[13px] font-[800] uppercase tracking-widest text-[#AFAFAF]" style={S}>
               {format(new Date(), 'MMMM yyyy')}
             </p>
          </div>
-         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#F0F0F8] shadow-sm">
+         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F6F6F6] border border-[#EEEEEE]">
             <Zap className="w-3 h-3 text-[#F59E0B]" fill="currentColor" />
-            <p className="text-[10px] font-[800] text-[#0F172A] uppercase tracking-wider" style={S}>Live Tracker</p>
+            <p className="text-[10px] font-[800] text-black uppercase tracking-wider" style={S}>Live Track</p>
          </div>
       </div>
 
       {/* Overall budget card */}
-      <div className="mx-6 mt-2 mb-10 p-8 relative overflow-hidden shadow-xl"
+      <div className="mx-6 mt-2 mb-12 p-10 relative overflow-hidden shadow-2xl shadow-black/10"
         style={{ 
-            background: 'var(--gradient-primary)', 
-            borderRadius: '36px', 
+            background: 'black', 
+            borderRadius: '40px', 
         }}>
-        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 -mr-16 -mt-16" />
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-5 -mr-16 -mt-16" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white opacity-5" />
 
         <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-                <p className="text-[12px] font-[800] text-white/70 uppercase tracking-[0.2em]" style={S}>Target Allowance</p>
-                <div className="px-3 py-1 rounded-full bg-white/20 border border-white/20">
-                    <p className="text-[10px] font-[800] text-white uppercase tracking-wider" style={S}>{pctUsed}% USED</p>
+            <div className="flex items-center justify-between mb-8">
+                <p className="text-[12px] font-[800] text-white/50 uppercase tracking-[0.2em]" style={S}>{t('budget.total')}</p>
+                <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    <p className="text-[10px] font-[800] text-white uppercase tracking-wider" style={S}>{pctUsed}% {t('budget.spent').toUpperCase()}</p>
                 </div>
             </div>
 
-            <div className="flex items-baseline gap-2 mb-8 border-b border-white/20 pb-1">
-                <span className="text-[24px] text-white/50 font-[800]" style={S}>{currencySymbol}</span>
+            <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-2">
+                <span className="text-[28px] text-white/30 font-[800]" style={S}>{currencySymbol}</span>
                 <input
                     type="number"
                     value={editingOverall}
                     onChange={e => setEditingOverall(e.target.value)}
                     onBlur={saveOverall}
                     autoComplete="off"
-                    className="flex-1 text-[42px] font-[800] text-white bg-transparent outline-none placeholder-white/30 tracking-tight"
+                    className="flex-1 text-[48px] font-[800] text-white bg-transparent outline-none placeholder-white/20 tracking-tight"
                     style={S}
                 />
             </div>
 
             <BudgetBar spent={spent} limit={overallBudget} variant="white" />
-            <div className="flex justify-between mt-5">
+            <div className="flex justify-between mt-6">
                 <div className="flex flex-col">
-                    <span className="text-[10px] text-white/60 font-[800] uppercase tracking-widest mb-0.5" style={S}>Utilised</span>
-                    <span className="text-[16px] text-white font-[800]" style={S}>{formatMoney(spent, currency)}</span>
+                    <span className="text-[11px] text-white/40 font-[800] uppercase tracking-widest mb-1" style={S}>{t('budget.spent')}</span>
+                    <span className="text-[18px] text-white font-[800]" style={S}>{formatMoney(spent, currency)}</span>
                 </div>
                 <div className="flex flex-col items-end">
-                    <span className="text-[10px] text-white/60 font-[800] uppercase tracking-widest mb-0.5" style={S}>Total Cap</span>
-                    <span className="text-[16px] text-white font-[800]" style={S}>{formatMoney(overallBudget, currency)}</span>
+                    <span className="text-[11px] text-white/40 font-[800] uppercase tracking-widest mb-1" style={S}>{t('budget.total')}</span>
+                    <span className="text-[18px] text-white font-[800]" style={S}>{formatMoney(overallBudget, currency)}</span>
                 </div>
             </div>
         </div>
@@ -140,32 +142,31 @@ export default function BudgetScreen() {
 
       {/* Per-category budgets */}
       <div className="px-6 pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[18px] font-[800] text-[#0F172A] tracking-tight" style={S}>Category Limits</h3>
-          <div className="w-10 h-10 rounded-[14px] bg-white border border-[#F0F0F8] flex items-center justify-center">
-             <Sparkles className="w-5 h-5 text-[#FF7043]" />
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="text-[20px] font-[800] text-black tracking-tight" style={S}>{t('budget.healthy')}</h3>
+          <div className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center">
+             <Sparkles className="w-5 h-5 text-[#F59E0B]" />
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           {CATEGORIES.slice(0, 10).map(cat => {
             const catSpent = getCatSpent(cat.id)
             const catLimit = parseFloat(catBudgets[cat.id] || '0')
             const pct = catLimit > 0 ? Math.round((catSpent / catLimit) * 100) : 0
 
             return (
-              <div key={cat.id} className="p-6 bg-white border border-[#F0F0F8] rounded-[32px] shadow-sm">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-[#F0F0F8]"
-                    style={{ background: `${cat.color}10` }}>
+              <div key={cat.id} className="p-8 bg-white border border-[#EEEEEE] rounded-[40px] shadow-sm">
+                <div className="flex items-center gap-5 mb-8">
+                  <div className="w-16 h-16 rounded-[24px] flex items-center justify-center text-[32px] bg-[#F6F6F6] border border-[#EEEEEE]">
                     {cat.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>{cat.name}</p>
-                    <p className="text-[12px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>{formatMoney(catSpent, currency)} spent</p>
+                    <p className="text-[18px] font-[800] text-black tracking-tight" style={S}>{cat.name}</p>
+                    <p className="text-[13px] font-[700] text-[#AFAFAF] uppercase tracking-wider" style={S}>{formatMoney(catSpent, currency)} {t('budget.spent')}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 px-4 h-12 rounded-[18px] bg-[#F8F7FF] border border-[#F0F0F8]">
-                    <span className="text-[12px] font-[800] text-[#94A3B8]" style={S}>{currencySymbol}</span>
+                  <div className="flex items-center gap-2 px-5 h-14 rounded-[20px] bg-[#F6F6F6] border border-[#EEEEEE]">
+                    <span className="text-[13px] font-[800] text-[#AFAFAF]" style={S}>{currencySymbol}</span>
                     <input
                       type="number"
                       value={catBudgets[cat.id] || ''}
@@ -173,7 +174,7 @@ export default function BudgetScreen() {
                       onChange={e => setCatBudgets(b => ({ ...b, [cat.id]: e.target.value }))}
                       onBlur={() => saveCatBudget(cat.id)}
                       autoComplete="off"
-                      className="w-16 text-right text-[15px] font-[800] text-[#0F172A] bg-transparent outline-none placeholder-[#CBD5E1]"
+                      className="w-16 text-right text-[16px] font-[800] text-black bg-transparent outline-none placeholder-[#D8D8D8]"
                       style={S}
                     />
                   </div>
@@ -182,12 +183,12 @@ export default function BudgetScreen() {
                 <BudgetBar spent={catSpent} limit={catLimit} />
 
                 {catLimit > 0 && (
-                  <div className="flex justify-between mt-4">
-                    <span className={`text-[10px] font-[800] uppercase tracking-widest ${pct > 100 ? 'text-[#F43F5E]' : 'text-[var(--primary)]'}`} style={S}>
-                        {pct}% CONSUMED
+                  <div className="flex justify-between mt-5">
+                    <span className={`text-[11px] font-[800] uppercase tracking-widest ${pct > 100 ? 'text-[#EF4444]' : 'text-black opacity-40'}`} style={S}>
+                        {pct}% {t('budget.spent').toUpperCase()}
                     </span>
-                    <span className="text-[10px] font-[800] uppercase tracking-widest text-[#94A3B8]" style={S}>
-                      {formatMoney(Math.max(catLimit - catSpent, 0), currency)} DRAIN LEFT
+                    <span className="text-[11px] font-[800] uppercase tracking-widest text-[#AFAFAF]" style={S}>
+                      {formatMoney(Math.max(catLimit - catSpent, 0), currency)} {t('budget.remaining').toUpperCase()}
                     </span>
                   </div>
                 )}

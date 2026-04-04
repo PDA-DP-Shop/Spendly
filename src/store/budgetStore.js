@@ -27,7 +27,10 @@ export const useBudgetStore = create((set, get) => ({
 
   // Set overall monthly budget
   setOverallBudget: async (amount) => {
-    await settingsService.update({ monthlyBudget: amount })
+    await budgetService.setOverall(amount, get().currentMonth, get().currentYear)
+    // Sync with settings store
+    const { useSettingsStore } = await import('./settingsStore')
+    await useSettingsStore.getState().updateSetting('monthlyBudget', amount)
     set({ overallBudget: amount })
   },
 

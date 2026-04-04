@@ -4,14 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react'
 
 const TYPES = {
-  success: { icon: CheckCircle, color: '#10B981', bg: '#ECFDF5', track: '#10B981' },
-  error:   { icon: XCircle,     color: '#F43F5E', bg: '#FFF1F2', track: '#F43F5E' },
-  info:    { icon: Info,        color: '#6366F1', bg: '#EEF2FF', track: '#6366F1' },
-  warning: { icon: AlertTriangle, color: '#F59E0B', bg: '#FFFBEB', track: '#F59E0B' },
+  success: { icon: CheckCircle, color: '#000000', bg: '#F6F6F6', track: '#000000' },
+  error:   { icon: XCircle,     color: '#000000', bg: '#F6F6F6', track: '#000000' },
+  info:    { icon: Info,        color: '#000000', bg: '#F6F6F6', track: '#000000' },
+  warning: { icon: AlertTriangle, color: '#000000', bg: '#F6F6F6', track: '#000000' },
 }
 
 export default function ToastMessage({ toast, onClose }) {
   const [progress, setProgress] = useState(100)
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   useEffect(() => {
     if (!toast) return
@@ -39,47 +40,40 @@ export default function ToastMessage({ toast, onClose }) {
     <AnimatePresence>
       <motion.div
         key={toast.id}
-        initial={{ y: -80, opacity: 0 }}
+        initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -80, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="fixed top-4 left-4 right-4 z-[200] overflow-hidden"
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
-          border: '1px solid #F0F0F8',
-        }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+        className="fixed bottom-28 left-6 right-6 z-[200] overflow-hidden bg-white border border-[#EEEEEE] rounded-[24px] shadow-[0_24px_48px_rgba(0,0,0,0.15)]"
       >
-        <div className="flex items-center gap-3 px-4 py-3.5">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: type.bg }}>
-            <Icon className="w-5 h-5" style={{ color: type.color }} />
+        <div className="flex items-center gap-4 px-6 py-5">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
+            <Icon className="w-5 h-5 text-black" strokeWidth={3} />
           </div>
-          <p className="flex-1 text-[14px] font-medium text-[#0F172A]" style={{ fontFamily: "'Nunito', sans-serif" }}>
+          <p className="flex-1 text-[13px] font-[900] text-black uppercase tracking-tight" style={S}>
             {toast.message}
           </p>
           {toast.action && (
             <button
               onClick={() => { toast.action.fn?.(); onClose?.() }}
-              className="text-[13px] font-bold px-3 py-1.5 rounded-[8px]"
-              style={{ color: type.color, background: type.bg }}
+              className="text-[10px] font-[900] px-5 py-2.5 rounded-full bg-black text-white uppercase tracking-[0.2em] shadow-lg"
+              style={S}
             >
               {toast.action.label}
             </button>
           )}
-          <button onClick={onClose} className="ml-1 p-1">
-            <X className="w-4 h-4 text-[#94A3B8]" />
+          <button onClick={onClose} className="p-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
+            <X className="w-4 h-4 text-black" strokeWidth={3} />
           </button>
         </div>
 
-        {/* Progress drain bar */}
-        <div className="h-[3px] bg-[#F1F5F9]">
+        {/* Progress drain bar — Platform Style */}
+        <div className="h-[2px] bg-[#EEEEEE]">
           <div
             className="h-full transition-none"
             style={{
               width: `${progress}%`,
-              background: type.track,
-              borderRadius: '0 0 0 0',
+              background: '#000000',
               transition: progress === 100 ? 'none' : 'width 50ms linear'
             }}
           />

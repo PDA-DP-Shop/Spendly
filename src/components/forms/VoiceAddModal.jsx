@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, X, Check, Loader2 } from 'lucide-react'
 import { guessCategory } from '../../utils/guessCategory'
 
-const S = { fontFamily: "'Nunito', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function VoiceAddModal({ onClose, onParsed }) {
   const [isListening, setIsListening] = useState(false)
@@ -12,6 +12,7 @@ export default function VoiceAddModal({ onClose, onParsed }) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const recognitionRef = useRef(null)
+  const transcriptRef = useRef('')
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -31,6 +32,7 @@ export default function VoiceAddModal({ onClose, onParsed }) {
         current += event.results[i][0].transcript
       }
       setTranscript(current)
+      transcriptRef.current = current
     }
 
     recognition.onerror = (event) => {
@@ -44,20 +46,11 @@ export default function VoiceAddModal({ onClose, onParsed }) {
 
     recognition.onend = () => {
       setIsListening(false)
-      if (transcript) processTranscript(transcript)
+      if (transcriptRef.current) processTranscript(transcriptRef.current)
     }
 
     recognitionRef.current = recognition
   }, [])
-
-  useEffect(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.onend = () => {
-        setIsListening(false)
-        if (transcript) processTranscript(transcript)
-      }
-    }
-  }, [transcript])
 
   const startListening = () => {
     if (!recognitionRef.current) return
@@ -109,21 +102,21 @@ export default function VoiceAddModal({ onClose, onParsed }) {
   return (
     <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-6"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       
       <motion.div className="relative w-full max-w-[340px] bg-white rounded-[40px] p-8 shadow-2xl flex flex-col items-center text-center"
         initial={{ y: 50, scale: 0.9, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}>
         
-        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-[#F8F7FF] flex items-center justify-center border border-[#F0F0F8]">
-          <X className="w-5 h-5 text-[#64748B]" />
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
+          <X className="w-5 h-5 text-black" strokeWidth={2.5} />
         </button>
 
-        <div className="w-16 h-16 rounded-[22px] bg-[#EEF2FF] flex items-center justify-center mb-6">
-           <Mic className="w-8 h-8 text-[#7C6FF7]" />
+        <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center mb-6">
+           <Mic className="w-8 h-8 text-white" strokeWidth={2.5} />
         </div>
 
-        <h3 className="text-[22px] font-[800] text-[#0F172A] mb-2 tracking-tight" style={S}>Neural Voice</h3>
-        <p className="text-[14px] font-[700] text-[#94A3B8] mb-8 leading-relaxed" style={S}>"Spent 500 on coffee today"</p>
+        <h3 className="text-[20px] font-[900] text-black mb-2 tracking-tight" style={S}>Neural Voice</h3>
+        <p className="text-[13px] font-[600] text-[#AFAFAF] mb-8 leading-relaxed uppercase tracking-[0.1em]" style={S}>"Spent 500 on coffee today"</p>
 
         {/* Mic Button */}
         <div className="relative mb-10">
@@ -131,30 +124,29 @@ export default function VoiceAddModal({ onClose, onParsed }) {
             {isListening && (
               <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1.5, opacity: 0 }} 
                 transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
-                className="absolute inset-0 rounded-full bg-[#7C6FF7] opacity-20" />
+                className="absolute inset-0 rounded-full bg-black opacity-20" />
             )}
           </AnimatePresence>
           <motion.button 
             whileTap={{ scale: 0.9 }}
             onClick={isListening ? stopListening : startListening}
-            className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-white shadow-xl shadow-[#7C6FF730] transition-all"
-            style={{ background: 'var(--gradient-primary)' }}>
-            <Mic className={`w-10 h-10 ${isListening ? 'animate-pulse' : ''}`} />
+            className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-white bg-black shadow-2xl shadow-black/30 transition-all">
+            <Mic className={`w-10 h-10 ${isListening ? 'animate-pulse' : ''}`} strokeWidth={3} />
           </motion.button>
         </div>
 
         {/* Status */}
         <div className="h-14 flex items-center justify-center w-full">
           {isProcessing ? (
-            <div className="flex items-center gap-2 text-[#7C6FF7] font-[800]" style={S}>
-              <Loader2 className="w-5 h-5 animate-spin" /> Synchronizing...
+            <div className="flex items-center gap-2 text-black font-[900] uppercase text-[12px] tracking-[0.2em]" style={S}>
+              <Loader2 className="w-4 h-4 animate-spin" /> Synchronizing
             </div>
           ) : error ? (
-            <p className="text-[13px] text-[#F43F5E] font-[800] px-4" style={S}>{error}</p>
+            <p className="text-[12px] text-[#E11900] font-[900] px-4 uppercase tracking-[0.1em]" style={S}>{error}</p>
           ) : transcript ? (
-            <p className="text-[15px] text-[#475569] font-[700] italic leading-tight" style={S}>"{transcript}"</p>
+            <p className="text-[15px] text-black font-[700] italic leading-tight" style={S}>"{transcript}"</p>
           ) : (
-            <p className="text-[14px] text-[#94A3B8] font-[800] uppercase tracking-widest" style={S}>Ready to Scan</p>
+            <p className="text-[12px] text-[#AFAFAF] font-[900] uppercase tracking-[0.2em]" style={S}>Ready to Scan</p>
           )}
         </div>
 

@@ -1,6 +1,13 @@
 // EmptyState — indigo-accented empty states for each screen type
 import { motion } from 'framer-motion'
 
+const HAPTIC_SHAKE = {
+  tap: { 
+    x: [0, -3, 3, -3, 3, 0],
+    transition: { duration: 0.35, ease: "easeInOut" }
+  }
+}
+
 const CONFIGS = {
   expenses: { emoji: '💸', title: 'No expenses yet', message: 'Tap the + button to add your first expense' },
   reports:  { emoji: '📊', title: 'No data yet', message: 'Add some expenses to see your analytics' },
@@ -13,39 +20,35 @@ const CONFIGS = {
 
 export default function EmptyState({ type = 'default', title, message, action, onAction }) {
   const config = CONFIGS[type] || CONFIGS.default
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.1, type: 'spring', damping: 25 }}
-      className="flex flex-col items-center justify-center px-10 py-20 text-center"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1, duration: 0.6 }}
+      className="flex flex-col items-center justify-center px-10 py-16 text-center"
     >
       <div
-        className="w-24 h-24 rounded-[32px] flex items-center justify-center text-4xl mb-6 relative"
-        style={{ background: '#F8F7FF', border: '1px solid #F0F0F8', boxShadow: '0 8px 16px rgba(124,111,247,0.04)' }}
+        className="w-28 h-28 rounded-full flex items-center justify-center text-5xl mb-8 relative bg-[#F6F6F6] border border-[#EEEEEE]"
       >
-        <div className="absolute inset-0 rounded-[32px] opacity-10" style={{ background: 'var(--gradient-primary)' }} />
         <span className="relative z-10">{config.emoji}</span>
       </div>
-      <h3 className="text-[22px] font-[800] text-[#0F172A] mb-2" style={S}>
+      <h3 className="text-[22px] font-[800] text-black mb-3 tracking-tight" style={S}>
         {title || config.title}
       </h3>
-      <p className="text-[15px] font-[600] text-[#94A3B8] leading-relaxed max-w-[280px]" style={S}>
+      <p className="text-[14px] font-[500] text-[#AFAFAF] leading-relaxed max-w-[300px]" style={S}>
         {message || config.message}
       </p>
-      {action && (
+      {(action || onAction) && (
         <motion.button
-          whileTap={{ scale: 0.96 }}
+          variants={HAPTIC_SHAKE}
+          whileTap="tap"
           onClick={onAction}
-          className="mt-8 px-8 py-4 rounded-[20px] text-white text-[15px] font-[800] shadow-fab"
-          style={{
-            background: 'var(--gradient-primary)',
-            ...S
-          }}
+          className="mt-10 px-10 py-4.5 rounded-full text-white bg-black text-[14px] font-[800] shadow-xl shadow-black/10"
+          style={S}
         >
-          {action}
+          {action || 'Get Started'}
         </motion.button>
       )}
     </motion.div>

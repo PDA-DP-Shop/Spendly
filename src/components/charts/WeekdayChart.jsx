@@ -1,8 +1,9 @@
 import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatMoneyCompact } from '../../utils/formatMoney'
 
+const S = { fontFamily: "'Inter', sans-serif" }
+
 export default function WeekdayChart({ rawExpenses, currency }) {
-  const S = { fontFamily: 'Nunito' }
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const totals = [0,0,0,0,0,0,0]
   const counts = [0,0,0,0,0,0,0]
@@ -19,16 +20,16 @@ export default function WeekdayChart({ rawExpenses, currency }) {
   const data = orderedDays.map((name, i) => {
     const jsIndex = i === 6 ? 0 : i + 1
     const avg = counts[jsIndex] > 0 ? totals[jsIndex] / counts[jsIndex] : 0
-    return { name, avg, total: totals[jsIndex], isWeekend: name === 'Sat' || name === 'Sun' }
+    return { name: name.toUpperCase(), avg, total: totals[jsIndex], isWeekend: name === 'Sat' || name === 'Sun' }
   })
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload
       return (
-        <div className="bg-white px-4 py-2.5 rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
-          <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={S}>{d.name} Average</p>
-          <p className="text-[16px] font-[800]" style={{ color: d.isWeekend ? 'var(--secondary)' : 'var(--primary)', ...S }}>
+        <div className="bg-black px-5 py-3 rounded-full shadow-2xl border border-white/10">
+          <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>{d.name} Average</p>
+          <p className="text-[15px] font-[900] text-white" style={S}>
             {formatMoneyCompact(d.avg, currency)}
           </p>
         </div>
@@ -44,32 +45,32 @@ export default function WeekdayChart({ rawExpenses, currency }) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-10">
           <div className="flex flex-col">
-            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider mb-0.5" style={S}>Daily Load</p>
-            <h4 className="text-[16px] font-[800] text-[#0F172A] tracking-tight" style={S}>Averages</h4>
+            <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>Intensity Load</p>
+            <h4 className="text-[18px] font-[900] text-black tracking-tight" style={S}>Average Consumption</h4>
           </div>
-        <div className="bg-[#FFF7F2] border border-[#FFEBE4] text-[var(--secondary)] px-4 py-2 rounded-full text-[11px] font-[800] uppercase tracking-wider" style={S}>
-          {weekendPct}% Weekend
+        <div className="bg-black border border-black text-white px-5 py-2.5 rounded-full text-[10px] font-[900] uppercase tracking-[0.2em] shadow-xl shadow-black/20" style={S}>
+          {weekendPct}% Peak
         </div>
       </div>
 
-      <div className="h-[200px] w-full">
+      <div className="h-[220px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124, 111, 247, 0.02)' }} />
-            <Bar dataKey="avg" radius={[12, 12, 12, 12]} barSize={36} animationDuration={1500}>
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F6F6F6', radius: 10 }} />
+            <Bar dataKey="avg" radius={[18, 18, 18, 18]} barSize={34} animationDuration={1200}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.isWeekend ? 'var(--secondary)' : 'var(--primary)'} />
+                <Cell key={`cell-${index}`} fill={entry.isWeekend ? '#000000' : '#EEEEEE'} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-between px-2 mt-5">
+      <div className="flex justify-between px-3 mt-8">
         {data.map(d => (
-          <p key={d.name} className="text-[11px] font-[800] uppercase tracking-widest" style={{ color: d.isWeekend ? 'var(--secondary)' : '#CBD5E1', ...S }}>
+          <p key={d.name} className="text-[10px] font-[900] uppercase tracking-[0.2em]" style={{ color: d.isWeekend ? '#000000' : '#AFAFAF', ...S }}>
             {d.name.charAt(0)}
           </p>
         ))}

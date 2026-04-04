@@ -1,34 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
 @layer base {
   :root {
-    --primary: #7C6FF7;
-    --secondary: #FF7043;
-    --text-primary: #1A1A2E;
-    --text-secondary: #6B7280;
-    --text-muted: #9CA3AF;
+    --primary: #2563EB;
+    --secondary: #000000;
+    --accent: #2563EB;
+    --text-primary: #000000;
+    --text-secondary: #545454;
+    --text-muted: #AFAFAF;
+
+    /* Premium Motion Spec */
+    --ease-quintic: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration-base: 300ms;
 
     --bg-main: #FFFFFF;
-    --bg-section: #F8F7FF;
+    --bg-section: #F6F6F6;
     --bg-card: #FFFFFF;
 
-    --income: #4CAF50;
-    --expense: #F44336;
+    --border: #EEEEEE;
+    --border-radius-card: 28px;
+    --border-radius-btn: 100px;
 
-    --gradient-primary: linear-gradient(135deg, #9B6FE4 0%, #C56BB0 50%, #E8845A 100%);
-    --gradient-orange: linear-gradient(135deg, #FF7043, #FF9800);
-
-    --border: #F0EEFF;
-    --border-radius-card: 20px;
-    --border-radius-btn: 16px;
-
-    --shadow-card: 0 4px 20px rgba(124,111,247,0.1);
-    --shadow-fab: 0 8px 24px rgba(124,111,247,0.45);
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.04);
+    --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.08);
     
-    --safe-top: env(safe-area-inset-top, 24px);
+    --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 24px);
   }
 
@@ -37,9 +36,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: var(--text-primary);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Inter', sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -51,11 +55,22 @@
     padding-bottom: var(--safe-bottom);
   }
   .pb-tab {
-    padding-bottom: calc(72px + var(--safe-bottom) + 20px);
+    padding-bottom: calc(80px + var(--safe-bottom));
   }
   .mb-tab {
-    margin-bottom: calc(72px + var(--safe-bottom) + 20px);
+    margin-bottom: calc(80px + var(--safe-bottom));
   }
+
+  /* Accessibility: Prefers Reduced Motion override */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -63,32 +78,18 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .premium-shadow {
+    box-shadow: var(--shadow-premium);
+  }
 }
 
 @keyframes walletFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-8px); }
 }
 .animate-wallet {
   animation: walletFloat 3s ease-in-out infinite;
-}
-
-@keyframes cardShimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.shimmer-bg {
-  position: relative;
-  overflow: hidden;
-}
-.shimmer-bg::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(90deg, #F0EEFF 25%, #E8E0FF 50%, #F0EEFF 75%);
-  animation: cardShimmer 1.4s infinite;
-  z-index: 1;
 }
 
 button {

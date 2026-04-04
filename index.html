@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Spendly" />
   <meta name="application-name" content="Spendly" />
-  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="theme-color" content="#000000" />
   
   <!-- SEO meta tags -->
   <meta name="description" content="Spendly - Your private expense tracker. No accounts. No cloud. Everything stays on your phone." />
@@ -49,7 +49,7 @@
   <!-- Preload fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   
   <!-- Google tag (gtag.js) -->
   <meta name="google-site-verification" content="MpzLq12J-sy2L4S-AlEpUdci9_mncQTs38MhS2AsyOY" />
@@ -57,11 +57,12 @@
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     body { 
-      font-family: 'Nunito', sans-serif; 
+      font-family: 'Inter', sans-serif; 
       background-color: #FFFFFF;
-      color: #0F172A;
+      color: #000000;
       overscroll-behavior: none;
       -webkit-overflow-scrolling: touch;
+      margin: 0;
     }
     #root { 
       min-height: 100dvh;
@@ -70,25 +71,24 @@
     }
   </style>
 
-  <title>Spendly - Expense Tracker</title>
+  <title>Spendly - Private Finance Node</title>
 </head>
 <body>
   <div id="root">
-    <!-- White Premium Splash Screen -->
+    <!-- Uber Minimalist Splash Screen -->
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
-      <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-        <div style="position: absolute; width: 120px; height: 120px; border-radius: 36px; background: linear-gradient(135deg, rgba(124,111,247,0.15), rgba(197,107,176,0.1)); filter: blur(16px); animation: splash-pulse 2s ease-in-out infinite;"></div>
-        <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 90px; height: 90px; border-radius: 24px; box-shadow: 0 8px 32px rgba(124,111,247,0.25); animation: logo-float 3s ease-in-out infinite;" />
+      <div style="position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 48px;">
+        <div style="position: absolute; width: 160px; height: 160px; border-radius: 100%; border: 1px solid rgba(0,0,0,0.05); animation: splash-pulse 3s ease-in-out infinite;"></div>
+        <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 100px; height: 100px; border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); filter: grayscale(100%);" />
       </div>
-      <div style="margin-top: 24px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 28px; color: #0F172A; letter-spacing: -0.5px;">Spendly</div>
-      <div style="margin-top: 8px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em;">Neural Engine Loading</div>
-      <div style="margin-top: 32px; width: 180px; height: 6px; background: #F8F7FF; border: 1px solid #F0F0F8; border-radius: 100px; overflow: hidden;">
-        <div style="height: 100%; background: linear-gradient(135deg, #9B6FE4, #C56BB0); border-radius: 100px; animation: load-bar 1.5s ease-in-out forwards;"></div>
+      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; color: #000000; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 8px;">Spendly</div>
+      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 9px; color: #AFAFAF; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 40px;">Neural_System_Init</div>
+      <div style="width: 160px; height: 2px; background: #F6F6F6; border-radius: 100px; overflow: hidden;">
+        <div style="height: 100%; background: #000000; border-radius: 100px; animation: load-bar 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;"></div>
       </div>
     </div>
     <style>
-      @keyframes splash-pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
-      @keyframes logo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+      @keyframes splash-pulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.2)} }
       @keyframes load-bar { 0%{width:0%} 100%{width:100%} }
     </style>
   </div>

@@ -1,101 +1,101 @@
-// Bottom navigation bar — "Floating Island" premium glassmorphism
+// Bottom navigation bar — "Curved Notch" premium design
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, BarChart2, Plus, Receipt, User } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
+const HAPTIC_SHAKE = {
+  tap: { 
+    x: [0, -3, 3, -3, 3, 0],
+    transition: { duration: 0.35, ease: "easeInOut" }
+  }
+}
+
+function TabButton({ tab, isActive, onClick, S }) {
+  const Icon = tab.icon
+  return (
+    <motion.button
+      variants={HAPTIC_SHAKE}
+      whileTap="tap"
+      onClick={onClick}
+      className="flex flex-col items-center justify-center flex-1 h-full pointer-events-auto relative"
+    >
+      <div className="flex flex-col items-center">
+        <Icon
+          className="w-[22px] h-[22px] mb-1 transition-all duration-300"
+          style={{ 
+            color: isActive ? '#000000' : '#AFAFAF',
+            strokeWidth: isActive ? 3 : 2.5
+          }}
+        />
+        <span 
+          className={`text-[10px] font-[700] ${isActive ? 'text-black' : 'text-[#AFAFAF]'}`}
+          style={S}
+        >
+          {tab.label}
+        </span>
+        
+        {isActive && (
+          <motion.div
+            layoutId="active-nav-line"
+            className="absolute -top-[1px] w-8 h-[2px] bg-black rounded-b-full"
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          />
+        )}
+      </div>
+    </motion.button>
+  )
+}
 
 export default function BottomTabBar({ onAddPress }) {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const [tappedTab, setTappedTab] = useState(null)
 
   const tabs = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/reports', icon: BarChart2, label: 'Stats' },
+    { path: '/', icon: Home, label: t('common.home') },
+    { path: '/reports', icon: BarChart2, label: t('common.reports') },
     { path: 'plus', isFAB: true },
-    { path: '/expenses', icon: Receipt, label: 'Files' },
-    { path: '/settings', icon: User, label: 'Me' },
+    { path: '/expenses', icon: Receipt, label: t('common.recent') },
+    { path: '/settings', icon: User, label: t('common.profile') },
   ]
 
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] px-6 pb-8 pointer-events-none">
-      <div
-        className="mx-auto max-w-[400px] h-[76px] flex items-center justify-between px-2 relative pointer-events-auto bg-white/70 backdrop-blur-2xl border border-white/40 rounded-[38px] shadow-[0_25px_50px_-12px_rgba(124,111,247,0.15)] ring-1 ring-black/[0.02]"
-      >
+    <div className="fixed bottom-0 left-0 right-0 z-[50] h-[78px] pointer-events-none">
+      {/* Platform Background Layer — Flat Premium */}
+      <div className="absolute bottom-0 left-0 w-full h-full bg-white border-t border-[#EEEEEE] pointer-events-auto" />
+
+      {/* Navigation Content */}
+      <div className="mx-auto max-w-[420px] h-full flex items-center justify-between px-6 relative z-10 safe-bottom">
         {tabs.map((tab, idx) => {
           if (tab.isFAB) {
             return (
-              <div key="fab" className="relative flex-1 flex justify-center -top-2">
+              <div key="fab" className="relative flex-1 flex justify-center pointer-events-auto">
                 <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  animate={{ 
-                    y: [0, -3, 0],
-                    boxShadow: [
-                      '0 10px 20px rgba(124,111,247,0.25)',
-                      '0 15px 30px rgba(124,111,247,0.4)',
-                      '0 10px 20px rgba(124,111,247,0.25)'
-                    ]
-                  }}
-                  transition={{ 
-                    y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-                    boxShadow: { duration: 4, repeat: Infinity, ease: 'easeInOut' }
-                  }}
+                  variants={HAPTIC_SHAKE}
+                  whileTap="tap"
                   onClick={onAddPress}
-                  className="w-[62px] h-[62px] rounded-[22px] flex items-center justify-center bg-[var(--primary)] text-white"
+                  className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-white bg-black active:bg-[#333333] transition-colors shadow-xl"
                 >
-                  <Plus className="w-9 h-9" strokeWidth={3.5} />
+                  <Plus className="w-8 h-8" strokeWidth={3} />
                 </motion.button>
               </div>
             )
           }
 
-          const isActive = location.pathname === tab.path || (tab.path === '/expenses' && location.pathname === '/search')
-          const Icon = tab.icon
-          const isTapping = tappedTab === tab.path
-
+          const isActive = location.pathname === tab.path || (tab.path === '/expenses' && (location.pathname === '/search' || location.pathname === '/expenses'))
+          
           return (
-            <button
+            <TabButton 
               key={tab.path}
-              onClick={() => {
-                setTappedTab(tab.path)
-                setTimeout(() => setTappedTab(null), 300)
-                navigate(tab.path)
-              }}
-              className="flex flex-col items-center justify-center flex-1 h-full relative group"
-            >
-              <motion.div
-                animate={isTapping ? { scale: 0.88, y: -2 } : { scale: 1, y: 0 }}
-                className="relative flex flex-col items-center justify-center z-10"
-              >
-                <div className="relative mb-0.5">
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-island-indicator"
-                        className="absolute inset-[-12px] rounded-[20px] bg-[var(--primary)]/[0.06] border border-[var(--primary)]/[0.12] z-0"
-                        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  <Icon
-                    className="w-5.5 h-5.5 relative z-10 transition-transform duration-300 group-hover:scale-110"
-                    style={{ 
-                      color: isActive ? 'var(--primary)' : '#94A3B8',
-                      strokeWidth: isActive ? 2.5 : 2
-                    }}
-                  />
-                </div>
-                
-                <span 
-                  className={`text-[10px] font-[800] uppercase tracking-[0.08em] transition-all duration-300 ${isActive ? 'text-[var(--primary)] opacity-100 translate-y-0.5' : 'text-[#94A3B8] opacity-60'}`}
-                  style={S}
-                >
-                  {tab.label}
-                </span>
-              </motion.div>
-            </button>
+              tab={tab}
+              isActive={isActive}
+              onClick={() => navigate(tab.path)}
+              S={S}
+            />
           )
         })}
       </div>

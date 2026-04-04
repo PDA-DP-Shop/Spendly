@@ -20,18 +20,26 @@ import PaymentMethodChart from '../components/charts/PaymentMethodChart'
 import { PdfReportTemplate } from '../components/shared/PdfReportTemplate'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { Download, Loader2, Sparkles } from 'lucide-react'
+import { Download, Loader2, Sparkles, PieChart, BarChart3, TrendingUp, Calendar, Zap, Shield, Target } from 'lucide-react'
+import SalaryExpenseCards from '../components/cards/SalaryExpenseCards'
 
 const FILTERS = ['This Week', 'This Month', '3 Months', 'All Time']
-const S = { fontFamily: "'Nunito', sans-serif" }
+
+const HAPTIC_SHAKE = {
+  tap: { 
+    x: [0, -3, 3, -3, 3, 0],
+    transition: { duration: 0.35, ease: "easeInOut" }
+  }
+}
 
 function WhiteCard({ title, children }) {
+  const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <div className="mx-5 mb-5 p-6 bg-white border border-[#F0F0F8] rounded-[28px] shadow-[0_4px_24px_rgba(124,111,247,0.04)]">
+    <div className="mx-6 mb-6 p-7 bg-white border border-[#EEEEEE] rounded-[24px] shadow-sm">
       {title && (
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-[13px] font-[800] uppercase tracking-wider text-[#94A3B8]" style={S}>{title}</p>
-          <div className="w-1.5 h-1.5 rounded-full bg-[#E2E8F0]" />
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-[13px] font-[800] text-black tracking-tight" style={S}>{title}</p>
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500/20" />
         </div>
       )}
       {children}
@@ -48,6 +56,7 @@ export default function ReportsScreen() {
   const { expenses } = useExpenses()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   const now = new Date()
   const filterExpenses = (exps) => {
@@ -79,10 +88,7 @@ export default function ReportsScreen() {
     const key = format(subMonths(now, 11 - i), 'yyyy-MM')
     return calculateReceived(expenses.filter(e => e.date?.startsWith(key)))
   })
-  const sixMonthData = Array.from({ length: 6 }, (_, i) => {
-    const key = format(subMonths(now, 5 - i), 'yyyy-MM')
-    return calculateSpent(expenses.filter(e => e.date?.startsWith(key)))
-  })
+
   const currentYearTotals = Array.from({ length: 12 }, (_, i) => {
     const key = format(new Date(now.getFullYear(), i, 1), 'yyyy-MM')
     return calculateSpent(expenses.filter(e => e.date?.startsWith(key)))
@@ -112,82 +118,46 @@ export default function ReportsScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh mb-tab bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-[#F0F0F8]">
+    <div className="flex flex-col min-h-dvh mb-tab bg-white safe-top">
+      <div className="bg-white sticky top-0 z-50 border-b border-[#F6F6F6]">
         <TopHeader 
           title="Analytics" 
-          onBack={null} 
           showBell={true}
           rightElement={
-            <motion.button 
-              whileTap={{ scale: 0.9 }} 
-              onClick={handleExportPdf} 
-              disabled={exporting}
-              className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[#F8F7FF] border border-[#F0F0F8] shadow-sm ml-2"
+            <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+              onClick={handleExportPdf} disabled={exporting}
+              className="w-11 h-11 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] ml-2"
             >
               {exporting
-                ? <Loader2 className="w-5 h-5 text-[var(--primary)] animate-spin" />
-                : <Download className="w-5 h-5 text-[var(--primary)]" />}
+                ? <Loader2 className="w-5 h-5 text-black animate-spin" strokeWidth={2.5} />
+                : <Download className="w-5 h-5 text-black" strokeWidth={2.5} />}
             </motion.button>
           }
         />
       </div>
 
-      {/* Filter chips */}
-      <div className="flex gap-3 px-5 py-5 overflow-x-auto scrollbar-hide bg-white border-b border-[#F0F0F8]">
+      <div className="flex gap-3 px-6 py-5 overflow-x-auto scrollbar-hide bg-white border-b border-[#F6F6F6] sticky top-[64px] z-20">
         {FILTERS.map(f => (
-          <motion.button key={f} whileTap={{ scale: 0.95 }} onClick={() => setFilter(f)}
-            className="px-6 py-2.5 rounded-full text-[13px] font-[800] whitespace-nowrap flex-shrink-0 transition-all border"
-            style={{
-              background: filter === f ? '#EEF2FF' : '#FFFFFF',
-              color: filter === f ? 'var(--primary)' : '#94A3B8',
-              borderColor: filter === f ? 'var(--primary)' : '#F0F0F8',
-              boxShadow: filter === f ? '0 4px 12px rgba(124,111,247,0.15)' : 'none',
-              ...S
-            }}>
+          <motion.button key={f} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => setFilter(f)}
+            className={`px-6 py-2.5 rounded-full text-[13px] font-[700] whitespace-nowrap flex-shrink-0 transition-all border ${
+              filter === f ? 'bg-black text-white border-black shadow-md' : 'bg-[#F6F6F6] text-[#AFAFAF] border-transparent'
+            }`}
+            style={S}>
             {f}
           </motion.button>
         ))}
       </div>
 
-      {/* Stats row */}
-      <div className="flex gap-4 px-5 pt-6 pb-2">
-        <div className="flex-1 p-5 rounded-[28px] flex flex-col justify-between border border-[#F0F0F8]" style={{ background: '#F8F7FF' }}>
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-white shadow-sm border border-[#F1F5F9]">
-              <span className="text-[14px] text-[var(--primary)] font-bold">↓</span>
-            </div>
-            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>
-              Income
-            </p>
-          </div>
-          <p className="text-[22px] font-[800] text-[#0F172A]" style={S}>
-            {formatMoney(received, currency)}
-          </p>
-        </div>
-
-        <div className="flex-1 p-5 rounded-[28px] flex flex-col justify-between border border-[#FFF1EE]" style={{ background: '#FFF7F2' }}>
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-white shadow-sm border border-[#FFEBE4]">
-              <span className="text-[14px] text-[var(--secondary)] font-bold">↑</span>
-            </div>
-            <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-wider" style={S}>
-              Expenses
-            </p>
-          </div>
-          <p className="text-[22px] font-[800] text-[#0F172A]" style={S}>
-            {formatMoney(spent, currency)}
-          </p>
-        </div>
+      <div className="pt-8 pb-4">
+        <SalaryExpenseCards income={received} expense={spent} currency={currency} />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
-            <EmptyState type="reports" title="No analytics yet" message="Add some expenses to see your financial health report." />
+        <div className="flex-1 flex items-center justify-center py-20">
+            <EmptyState type="reports" title="No data yet" message="Add some transactions to see your financial breakdown." />
         </div>
       ) : (
-        <div className="pb-8 mt-5">
+        <div className="pb-16 mt-4">
           <WhiteCard title="Spending by Category">
             <SpendingDonutChart groupedData={grouped} currency={currency} />
           </WhiteCard>
@@ -196,54 +166,37 @@ export default function ReportsScreen() {
             <PaymentMethodChart expenses={filtered} />
           </WhiteCard>
 
-          <WhiteCard title="Financial Trend">
-            <div className="flex bg-[#F8F7FF] border border-[#F0F0F8] p-1.5 rounded-[16px] mb-5">
-              <button
-                className="flex-1 py-2 text-[13px] font-[800] rounded-[12px] transition-all"
-                style={{
-                  background: chartMode === 'expense' ? '#FFFFFF' : 'transparent',
-                  color: chartMode === 'expense' ? 'var(--secondary)' : '#94A3B8',
-                  boxShadow: chartMode === 'expense' ? '0 4px 12px rgba(255,112,67,0.1)' : 'none',
-                  ...S
-                }}
-                onClick={() => setChartMode('expense')}
-              >
+          <WhiteCard title="Spending Trends">
+            <div className="flex bg-[#F6F6F6] border border-[#EEEEEE] p-1.5 rounded-full mb-8">
+              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+                className={`flex-1 py-3 text-[12px] font-[700] rounded-full transition-all ${chartMode === 'expense' ? 'bg-white text-black shadow-sm border border-[#EEEEEE]' : 'text-[#AFAFAF]'}`}
+                style={S} onClick={() => setChartMode('expense')}>
                 Expenses
-              </button>
-              <button
-                className="flex-1 py-2 text-[13px] font-[800] rounded-[12px] transition-all"
-                style={{
-                  background: chartMode === 'income' ? '#FFFFFF' : 'transparent',
-                  color: chartMode === 'income' ? 'var(--primary)' : '#94A3B8',
-                  boxShadow: chartMode === 'income' ? '0 4px 12px rgba(124,111,247,0.1)' : 'none',
-                  ...S
-                }}
-                onClick={() => setChartMode('income')}
-              >
+              </motion.button>
+              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+                className={`flex-1 py-3 text-[12px] font-[700] rounded-full transition-all ${chartMode === 'income' ? 'bg-white text-black shadow-sm border border-[#EEEEEE]' : 'text-[#AFAFAF]'}`}
+                style={S} onClick={() => setChartMode('income')}>
                 Income
-              </button>
+              </motion.button>
             </div>
             <AnalyticsBarChart data={chartMode === 'expense' ? monthlyData : incomeData} currency={currency} chartMode={chartMode} />
           </WhiteCard>
 
-          <WhiteCard title="6-Month Evolution">
-            <MonthlyLineChart monthlyTotals={sixMonthData} currency={currency} />
-          </WhiteCard>
-
-          {/* Stats grid */}
-          <div className="mx-5 grid grid-cols-2 gap-4 mb-5">
+          <div className="mx-6 grid grid-cols-2 gap-4 mb-8">
             {[
-              { label: 'Top Category', value: topCategory ? topCategory.category : 'N/A', icon: '🏆', color: 'var(--primary)', bg: '#F8F7FF', border: '#F0F0F8' },
-              { label: 'Biggest Buy', value: biggestPurchase ? biggestPurchase.shopName : 'N/A', icon: '💎', color: 'var(--secondary)', bg: '#FFF7F2', border: '#FFEBE4' },
-              { label: 'Daily Average', value: formatMoney(dailyAvg, currency), icon: '🔥', color: '#F59E0B', bg: '#FFFBEB', border: '#FEF3C7' },
-              { label: 'Savings Rate', value: `${savingsRate}%`, icon: '📈', color: '#10B981', bg: '#ECFDF5', border: '#D1FAE5' },
+              { label: 'Top Category', value: topCategory ? topCategory.category : 'N/A', icon: PieChart, color: 'text-blue-500' },
+              { label: 'Largest Expense', value: biggestPurchase ? biggestPurchase.shopName : 'N/A', icon: Zap, color: 'text-amber-500' },
+              { label: 'Daily Average', value: formatMoney(dailyAvg, currency), icon: BarChart3, color: 'text-emerald-500' },
+              { label: 'Savings Rate', value: `${savingsRate}%`, icon: Target, color: 'text-indigo-500' },
             ].map(stat => (
-              <div key={stat.label} className="p-5 rounded-[24px] border shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
-                style={{ background: '#FFFFFF', borderColor: stat.border }}>
-                <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-xl mb-4 shadow-sm" style={{ background: stat.bg }}>{stat.icon}</div>
-                <p className="text-[11px] font-[800] uppercase tracking-wider text-[#94A3B8] mb-1.5" style={S}>{stat.label}</p>
-                <p className="text-[16px] font-[800] capitalize truncate transition-colors" style={{ color: stat.color, ...S }}>{stat.value}</p>
-              </div>
+              <motion.div key={stat.label} variants={HAPTIC_SHAKE} whileTap="tap"
+                className="p-6 rounded-[28px] border border-[#EEEEEE] bg-white shadow-sm flex flex-col">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] mb-5 ${stat.color}`}>
+                  <stat.icon className="w-5 h-5" strokeWidth={2.5} />
+                </div>
+                <p className="text-[12px] font-[600] text-[#AFAFAF] mb-1" style={S}>{stat.label}</p>
+                <p className="text-[15px] font-[800] text-black tracking-tight truncate uppercase" style={S}>{stat.value}</p>
+              </motion.div>
             ))}
           </div>
 
@@ -251,11 +204,11 @@ export default function ReportsScreen() {
             <SpendingHeatmap expenses={filtered} currency={currency} />
           </WhiteCard>
           
-          <WhiteCard title="Year vs Year Growth">
+          <WhiteCard title="Year Comparison">
             <YearComparisonChart currentYearTotals={currentYearTotals} prevYearTotals={prevYearTotals} currency={currency} />
           </WhiteCard>
           
-          <WhiteCard title="Spending by Day">
+          <WhiteCard title="Activity by Weekday">
             <WeekdayChart rawExpenses={filtered} currency={currency} />
           </WhiteCard>
         </div>

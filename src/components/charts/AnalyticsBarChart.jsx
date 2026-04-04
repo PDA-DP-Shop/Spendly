@@ -7,13 +7,13 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 const CustomTooltip = ({ active, payload, currency, chartMode }) => {
   if (active && payload && payload.length) {
-    const textColor = chartMode === 'expense' ? 'text-[var(--secondary)]' : 'text-[var(--primary)]'
+    const S = { fontFamily: 'Inter' }
     return (
-      <div className="bg-white px-4 py-2.5 rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-[#F0F0F8]">
-        <p className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1" style={{ fontFamily: 'Nunito' }}>
+      <div className="bg-black px-5 py-3 rounded-full shadow-2xl border border-white/10">
+        <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>
           {payload[0].payload.month}
         </p>
-        <p className={`text-[16px] font-[800] ${textColor}`} style={{ fontFamily: 'Nunito' }}>
+        <p className="text-[15px] font-[900] text-white" style={S}>
           {formatMoneyCompact(payload[0].value, currency)}
         </p>
       </div>
@@ -26,54 +26,52 @@ export default function AnalyticsBarChart({ data, currency = 'USD', chartMode = 
   const [activeMonth, setActiveMonth] = useState(new Date().getMonth())
 
   const chartData = MONTHS.map((m, i) => ({
-    month: m,
+    month: m.toUpperCase(),
     amount: data?.[i] || 0,
     index: i,
   }))
 
-  const colorBase = chartMode === 'expense' ? '#FF7043' : '#7C6FF7'
-  const colorLight = chartMode === 'expense' ? '#FFEBE4' : '#EEF2FF'
+  const colorActive = '#000000'
+  const colorInactive = '#EEEEEE'
 
   return (
-    <div className="w-full relative mt-3">
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="w-full relative mt-6">
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart 
           data={chartData} 
-          barSize={14} 
+          barSize={12} 
           onClick={e => e?.activePayload && setActiveMonth(e.activePayload[0].payload.index)}
-          margin={{ top: 10, right: 0, left: 10, bottom: 5 }}
+          margin={{ top: 10, right: 0, left: 0, bottom: 5 }}
         >
           <XAxis
             dataKey="month"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 11, fill: '#CBD5E1', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }}
-            dy={12}
+            tick={{ fontSize: 9, fill: '#AFAFAF', fontFamily: 'Inter', fontWeight: 900 }}
+            dy={15}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 11, fill: '#CBD5E1', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }}
+            tick={{ fontSize: 9, fill: '#AFAFAF', fontFamily: 'Inter', fontWeight: 900 }}
             tickFormatter={(val) => formatMoneyCompact(val, currency)}
-            width={50}
+            width={40}
           />
           <Tooltip 
             content={<CustomTooltip currency={currency} chartMode={chartMode} />} 
-            cursor={{ fill: 'rgba(124, 111, 247, 0.04)', radius: 10 }} 
+            cursor={{ fill: '#F6F6F6', radius: 4 }} 
             animationDuration={200}
           />
           <Bar 
             dataKey="amount" 
-            radius={[6, 6, 6, 6]}
+            radius={[4, 4, 4, 4]}
             animationBegin={0}
-            animationDuration={1200}
+            animationDuration={1000}
           >
             {chartData.map((entry, i) => (
               <Cell
                 key={i}
-                fill={i === activeMonth ? colorBase : colorLight}
-                stroke={i === activeMonth ? colorBase : 'transparent'}
-                strokeWidth={1}
+                fill={i === activeMonth ? colorActive : colorInactive}
                 className="transition-all duration-300"
               />
             ))}

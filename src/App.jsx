@@ -16,6 +16,7 @@ import { useExpenseStore } from './store/expenseStore'
 import { useSecurityStore } from './store/securityStore'
 import PWAInstallGuide from './components/pwa/PWAInstallGuide'
 import NotificationDrawer from './components/shared/NotificationDrawer'
+import GlobalLoading from './components/shared/GlobalLoading'
 
 const HomeScreen = lazy(() => import('./screens/HomeScreen'))
 const ExpensesScreen = lazy(() => import('./screens/ExpensesScreen'))
@@ -31,35 +32,42 @@ const GoalsScreen = lazy(() => import('./screens/GoalsScreen'))
 const TripsScreen = lazy(() => import('./screens/TripsScreen'))
 const BadgesScreen = lazy(() => import('./screens/BadgesScreen'))
 const FestivalsScreen = lazy(() => import('./screens/FestivalsScreen'))
+const TermsScreen = lazy(() => import('./screens/TermsScreen'))
+const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'))
+const MigrationGuideScreen = lazy(() => import('./screens/MigrationGuideScreen'))
 
-const TAB_PATHS = ['/', '/reports', '/search', '/settings', '/expenses', '/budget', '/scans']
+const TAB_PATHS = [
+  '/', '/reports', '/search', '/settings', '/expenses', '/budget', '/scans',
+  '/wallets', '/emis', '/goals', '/trips', '/badges', '/festivals'
+]
 
 // White skeleton loader shown while lazy screen chunks load
 function ScreenSkeleton() {
+  const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <div className="min-h-dvh bg-white px-5 pt-4">
-      <div className="flex items-center gap-3 mb-6 safe-top">
-        <div className="shimmer-bg w-10 h-10 rounded-full bg-[#F0EEFF]" />
-        <div className="flex flex-col gap-2">
-          <div className="shimmer-bg w-24 h-3 rounded bg-[#F0EEFF]" />
-          <div className="shimmer-bg w-32 h-4 rounded bg-[#F0EEFF]" />
+    <div className="min-h-dvh bg-white px-7 pt-12">
+      <div className="flex items-center gap-4 mb-10 safe-top">
+        <div className="shimmer-bg w-12 h-12 rounded-full bg-[#EEEEEE]" />
+        <div className="flex flex-col gap-2.5">
+          <div className="shimmer-bg w-20 h-2 bg-[#EEEEEE] rounded-full" />
+          <div className="shimmer-bg w-36 h-5 bg-[#EEEEEE] rounded-full" />
         </div>
       </div>
-      <div className="shimmer-bg w-full h-48 rounded-[24px] mb-4 bg-[#F0EEFF]" />
-      <div className="flex gap-3 mb-4">
-        <div className="shimmer-bg flex-1 h-20 rounded-[16px] bg-[#F0EEFF]" />
-        <div className="shimmer-bg flex-1 h-20 rounded-[16px] bg-[#F0EEFF]" />
+      <div className="shimmer-bg w-full h-56 rounded-[32px] mb-8 bg-[#F6F6F6]" />
+      <div className="flex gap-4 mb-8">
+        <div className="shimmer-bg flex-1 h-24 rounded-[24px] bg-[#F6F6F6]" />
+        <div className="shimmer-bg flex-1 h-24 rounded-[24px] bg-[#F6F6F6]" />
       </div>
-      <div className="shimmer-bg w-full h-24 rounded-[16px] mb-4 bg-[#F0EEFF]" />
-      <div className="shimmer-bg w-32 h-4 rounded mb-3 bg-[#F0EEFF]" />
-      {[1,2,3,4,5].map(i => (
-        <div key={i} className="flex items-center gap-3 mb-3">
-          <div className="shimmer-bg w-11 h-11 rounded-full flex-shrink-0 bg-[#F0EEFF]" />
-          <div className="flex-1 flex flex-col gap-1.5">
-            <div className="shimmer-bg w-3/4 h-4 rounded bg-[#F0EEFF]" />
-            <div className="shimmer-bg w-1/2 h-3 rounded bg-[#F0EEFF]" />
+      <div className="shimmer-bg w-full h-28 rounded-[24px] mb-8 bg-[#F6F6F6]" />
+      <div className="shimmer-bg w-24 h-2.5 rounded-full mb-6 bg-[#EEEEEE]" />
+      {[1,2,3,4].map(i => (
+        <div key={i} className="flex items-center gap-5 mb-5 overflow-hidden">
+          <div className="shimmer-bg w-12 h-12 rounded-full bg-[#EEEEEE] flex-shrink-0" />
+          <div className="flex-1 flex flex-col gap-2">
+            <div className="shimmer-bg w-3/4 h-3 bg-[#F6F6F6] rounded-full" />
+            <div className="shimmer-bg w-1/2 h-2.5 bg-[#EEEEEE] rounded-full" />
           </div>
-          <div className="shimmer-bg w-16 h-4 rounded bg-[#F0EEFF]" />
+          <div className="shimmer-bg w-14 h-4 bg-[#F6F6F6] rounded-full" />
         </div>
       ))}
     </div>
@@ -75,23 +83,37 @@ function AppWrapper() {
     <>
       <ErrorBoundary>
         <Suspense fallback={<ScreenSkeleton />}>
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<HomeScreen />} />
-            <Route path="/expenses" element={<ExpensesScreen />} />
-            <Route path="/add" element={<AddExpenseScreen />} />
-            <Route path="/reports" element={<ReportsScreen />} />
-            <Route path="/search" element={<SearchScreen />} />
-            <Route path="/scans" element={<ScansScreen />} />
-            <Route path="/budget" element={<BudgetScreen />} />
-            <Route path="/settings" element={<SettingsScreen />} />
-            <Route path="/wallets" element={<WalletsScreen />} />
-            <Route path="/emis" element={<EMIScreen />} />
-            <Route path="/goals" element={<GoalsScreen />} />
-            <Route path="/trips" element={<TripsScreen />} />
-            <Route path="/badges" element={<BadgesScreen />} />
-            <Route path="/festivals" element={<FestivalsScreen />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="flex-1"
+            >
+              <Routes location={location}>
+                <Route path="/" element={<HomeScreen />} />
+                <Route path="/expenses" element={<ExpensesScreen />} />
+                <Route path="/add" element={<AddExpenseScreen />} />
+                <Route path="/reports" element={<ReportsScreen />} />
+                <Route path="/search" element={<SearchScreen />} />
+                <Route path="/scans" element={<ScansScreen />} />
+                <Route path="/budget" element={<BudgetScreen />} />
+                <Route path="/settings" element={<SettingsScreen />} />
+                <Route path="/wallets" element={<WalletsScreen />} />
+                <Route path="/emis" element={<EMIScreen />} />
+                <Route path="/goals" element={<GoalsScreen />} />
+                <Route path="/trips" element={<TripsScreen />} />
+                <Route path="/badges" element={<BadgesScreen />} />
+                <Route path="/festivals" element={<FestivalsScreen />} />
+                <Route path="/terms" element={<TermsScreen />} />
+                <Route path="/privacy" element={<PrivacyPolicyScreen />} />
+                <Route path="/migration-guide" element={<MigrationGuideScreen />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
         </Suspense>
       </ErrorBoundary>
 
@@ -181,44 +203,7 @@ export default function App() {
 
   // Loading screen
   if (!ready) {
-    return (
-      <LazyMotion features={domAnimation}>
-        <div className="h-dvh flex flex-col items-center justify-center bg-[#FFFFFF]">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="relative flex items-center justify-center mb-6"
-          >
-            <div className="absolute w-[120px] h-[120px] rounded-[32px] opacity-30 blur-[16px]"
-              style={{ background: 'var(--gradient-primary)', animation: 'pulse 2.5s ease-in-out infinite' }} />
-            <img src="/spendly-logo.png" alt="Spendly"
-              className="relative z-10 w-[100px] h-[100px] rounded-[26px] drop-shadow-xl"
-              style={{ animation: 'walletFloat 3s ease-in-out infinite' }} />
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-[22px] font-bold text-[#1A1A2E] mb-2"
-          >
-            Spendly
-          </motion.p>
-          <p className="text-[14px] text-[#9CA3AF] mb-8">
-            Loading Spendly...
-          </p>
-          <div className="w-[200px] h-[4px] bg-[#F0EEFF] rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: '0%' }}
-              animate={{ width: '100%' }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              className="h-full rounded-full"
-              style={{ background: 'var(--gradient-primary)' }}
-            />
-          </div>
-        </div>
-      </LazyMotion>
-    )
+    return <GlobalLoading />
   }
 
   if (isDesktop) return <DesktopBlockScreen />
@@ -236,8 +221,8 @@ export default function App() {
             <LockScreen />
           ) : (
             <div className="flex flex-col items-center gap-4">
-              <img src="/spendly-logo.png" className="w-[90px] h-[90px] rounded-[22px]"
-                style={{ boxShadow: '0 8px 32px rgba(124,111,247,0.2)' }} alt="Spendly" />
+              <img src="/spendly-logo.png" className="w-[90px] h-[90px] rounded-[18px]"
+                style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.1)' }} alt="Spendly" />
               <p className="text-[#1A1A2E] font-bold text-xl">
                 Spendly is Locked
               </p>

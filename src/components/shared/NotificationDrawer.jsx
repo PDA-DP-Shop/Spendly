@@ -1,12 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, X } from 'lucide-react'
+import { useEffect } from 'react'
 import { useUIStore } from '../../store/uiStore'
 import { useBudgetStore } from '../../store/budgetStore'
 import { useExpenses } from '../../hooks/useExpenses'
 import { calculateSpent } from '../../utils/calculateTotal'
 
 export default function NotificationDrawer() {
-  const { showNotifications, toggleNotifications } = useUIStore()
+  const { notificationsOpen, toggleNotifications, setHasUnreadNotifications } = useUIStore()
   const { overallBudget } = useBudgetStore()
   const { getThisMonth } = useExpenses()
   
@@ -14,9 +15,15 @@ export default function NotificationDrawer() {
   const budgetPct = overallBudget > 0 ? (spent / overallBudget) * 100 : 0
   const S = { fontFamily: "'Nunito', sans-serif" }
 
+  useEffect(() => {
+    if (budgetPct >= 80) {
+      setHasUnreadNotifications(true)
+    }
+  }, [budgetPct, setHasUnreadNotifications])
+
   return (
     <AnimatePresence>
-      {showNotifications && (
+      {notificationsOpen && (
         <>
           {/* Backdrop */}
           <motion.div

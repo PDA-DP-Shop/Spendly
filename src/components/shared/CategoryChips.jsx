@@ -1,37 +1,48 @@
-// CategoryChips — horizontal scroll chips with white premium active state
 import { motion } from 'framer-motion'
 import { CATEGORIES } from '../../constants/categories'
 
+const HAPTIC_SHAKE = {
+  tap: { 
+    x: [0, -3, 3, -3, 3, 0],
+    transition: { duration: 0.35, ease: "easeInOut" }
+  }
+}
+
 export default function CategoryChips({ selected, onSelect }) {
-  const all = [{ id: 'all', name: 'All', emoji: '✨' }, ...CATEGORIES]
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
-    <div className="flex gap-3 px-6 overflow-x-auto scrollbar-hide pb-2">
-      {all.map((cat, i) => {
-        const isActive = selected === cat.id
-        return (
-          <motion.button
-            key={cat.id}
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.03, type: 'spring', stiffness: 300, damping: 25 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => onSelect(cat.id)}
-            className="flex items-center gap-2.5 px-6 py-2.5 rounded-[18px] whitespace-nowrap text-[14px] font-[800] flex-shrink-0 transition-all border shadow-sm"
-            style={{
-              background: isActive ? 'var(--primary)' : '#FFFFFF',
-              borderColor: isActive ? 'var(--primary)' : '#F0F0F8',
-              color: isActive ? '#FFFFFF' : '#94A3B8',
-              boxShadow: isActive ? '0 8px 20px rgba(124,111,247,0.25)' : 'none',
-              ...S
-            }}
-          >
-            <span className="text-base">{cat.emoji}</span>
-            <span className="tracking-tight">{cat.name}</span>
-          </motion.button>
-        )
-      })}
+    <div className="overflow-x-auto scrollbar-hide flex gap-3 px-6 pb-2">
+      <motion.button
+        variants={HAPTIC_SHAKE}
+        whileTap="tap"
+        onClick={() => onSelect('all')}
+        className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[13px] font-[700] transition-all border ${
+          selected === 'all'
+            ? 'bg-black text-white border-black'
+            : 'bg-white text-black border-[#EEEEEE]'
+        }`}
+        style={S}
+      >
+        All
+      </motion.button>
+      {CATEGORIES.map((cat) => (
+        <motion.button
+          key={cat.id}
+          variants={HAPTIC_SHAKE}
+          whileTap="tap"
+          onClick={() => onSelect(cat.id)}
+          className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[13px] font-[700] transition-all flex items-center gap-2 border ${
+            selected === cat.id
+              ? 'bg-black text-white border-black shadow-lg'
+              : 'bg-white text-black border-[#EEEEEE]'
+          }`}
+          style={S}
+        >
+          <span className="text-lg">{cat.emoji}</span>
+          <span>{cat.name}</span>
+        </motion.button>
+      ))}
     </div>
   )
 }

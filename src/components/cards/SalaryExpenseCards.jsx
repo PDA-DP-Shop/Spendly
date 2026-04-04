@@ -1,44 +1,56 @@
-// SalaryExpenseCards — white mini cards showing income and expense stats
+// SalaryExpenseCards — simplified premium stat cards
 import { motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { formatMoney } from '../../utils/formatMoney'
+import { useTranslation } from 'react-i18next'
 
 function StatCard({ label, amount, currency, isIncome, index }) {
-  const color = isIncome ? '#10B981' : '#FF7043'
-  const bg = isIncome ? '#F0FDF4' : '#FFF7ED'
   const Icon = isIncome ? ArrowDownLeft : ArrowUpRight
-  const S = { fontFamily: "'Nunito', sans-serif" }
+  const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="flex-1 p-5 bg-white border border-[#F0F0F8] rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
+      transition={{ delay: index * 0.05, duration: 0.6 }}
+      className={`relative p-5 rounded-[28px] border flex flex-col justify-between overflow-hidden h-[130px] ${
+        isIncome 
+          ? 'bg-[#F9F9F9] border-[#EEEEEE]' 
+          : 'bg-black border-black text-white'
+      }`}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="w-9 h-9 rounded-[12px] flex items-center justify-center shadow-sm" style={{ background: bg, border: `1px solid ${color}15` }}>
-          <Icon className="w-5 h-5" style={{ color }} />
+      <div className="flex items-center justify-between mb-2">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors ${
+          isIncome ? 'bg-white border-[#EEEEEE]' : 'bg-white/10 border-white/10'
+        }`}>
+          <Icon className={`w-4 h-4 ${isIncome ? 'text-black' : 'text-white'}`} strokeWidth={3} />
         </div>
-        <p className="text-[11px] font-[800] uppercase tracking-[0.1em] text-[#94A3B8]" style={S}>
+        <div className={`text-[10px] font-[800] uppercase tracking-wider truncate text-right flex-1 ml-2 ${
+          isIncome ? 'text-[#AFAFAF]' : 'text-white/40'
+        }`} style={S}>
           {label}
-        </p>
+        </div>
       </div>
-      <p className="text-[22px] font-[800] text-[#0F172A] tracking-tight" style={S}>
-        {formatMoney(amount, currency)}
-      </p>
-      <div className="flex items-center gap-1.5 mt-2">
-        <p className="text-[11px] font-[700] text-[#CBD5E1] uppercase tracking-wider" style={S}>This Month</p>
+
+      <div>
+        <p className={`text-[20px] font-[900] tracking-tighter leading-tight truncate ${
+          isIncome ? 'text-black' : 'text-white'
+        }`} style={S}>
+          {formatMoney(amount, currency)}
+        </p>
       </div>
     </motion.div>
   )
 }
 
-export default function SalaryExpenseCards({ income, expense, currency = 'USD' }) {
+export default function SalaryExpenseCards({ income, expense, currency = 'USD', labels }) {
+  const { t } = useTranslation()
+  const displayLabels = labels || { income: t('home.inflow'), expense: t('home.spent') }
+
   return (
-    <div className="flex gap-4 px-5">
-      <StatCard label="Income" amount={income} currency={currency} isIncome={true} index={0} />
-      <StatCard label="Spent" amount={expense} currency={currency} isIncome={false} index={1} />
+    <div className="grid grid-cols-2 gap-4 px-6 mt-4">
+      <StatCard label={displayLabels.income} amount={income} currency={currency} isIncome={true} index={0} />
+      <StatCard label={displayLabels.expense} amount={expense} currency={currency} isIncome={false} index={1} />
     </div>
   )
 }
