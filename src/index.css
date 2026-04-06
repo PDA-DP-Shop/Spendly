@@ -107,6 +107,35 @@
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(0,0,0,0.2);
   }
+
+  /* Universal Desktop-First Shell */
+  .app-shell {
+    background-color: #F8F9FA; /* Subtle grey for the "outside" of the phone */
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .app-content {
+    width: 100%;
+    max-width: 450px;
+    min-height: 100dvh;
+    background-color: #FFFFFF;
+    position: relative;
+    box-shadow: 0 0 100px rgba(0,0,0,0.05);
+  }
+
+  /* For screens smaller than mobile, remove the shell padding/background */
+  @media (max-width: 450px) {
+    .app-shell {
+      background-color: #FFFFFF;
+    }
+    .app-content {
+      max-width: 100%;
+      box-shadow: none;
+    }
+  }
 }
 
 @layer utilities {

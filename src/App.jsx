@@ -139,10 +139,6 @@ export default function App() {
   const clearEncryptionKey = useSessionStore(state => state.clearEncryptionKey)
 
   useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth > 1024)
-    check()
-    window.addEventListener('resize', check)
-
     initDatabase()
       .then(() => {
         loadSettings()
@@ -152,8 +148,6 @@ export default function App() {
       .then(() => useLockStore.getState().loadLockoutState())
       .then(() => loadExpenses())
       .then(() => setReady(true))
-
-    return () => window.removeEventListener('resize', check)
   }, [])
 
   useEffect(() => {
@@ -205,45 +199,52 @@ export default function App() {
     }
   }, [setBackgrounded, clearEncryptionKey])
 
-  // Loading screen
+  // Determine the content to render based on app state
+  let content;
   if (!ready) {
-    return <GlobalLoading />
-  }
-
-  if (isDesktop) return <DesktopBlockScreen />
-  if (!settings?.onboardingDone) return (
-    <LazyMotion features={domAnimation}>
-      <OnboardingScreen />
-    </LazyMotion>
-  )
-  
-  if (isBackgrounded || (isLocked && settings?.lockType !== 'none')) {
-    return (
-      <LazyMotion features={domAnimation}>
-        <div className="fixed inset-0 z-[999] bg-[#FFFFFF] flex items-center justify-center">
+    content = <GlobalLoading />;
+  } else if (!settings?.onboardingDone) {
+    content = <OnboardingScreen />;
+  } else if (isBackgrounded || (isLocked && settings?.lockType !== 'none')) {
+    content = (
+      <div className="fixed inset-0 z-[999] bg-[#FFFFFF] flex items-center justify-center p-6">
+        <div className="w-full max-w-[400px]">
           {isLocked && settings?.lockType !== 'none' ? (
             <LockScreen />
           ) : (
-            <div className="flex flex-col items-center gap-4">
-              <img src="/spendly-logo.png" className="w-[90px] h-[90px] rounded-[18px]"
-                style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.1)' }} alt="Spendly" />
-              <p className="text-[#1A1A2E] font-bold text-xl">
-                Spendly is Locked
-              </p>
+            <div className="flex flex-col items-center gap-10 text-center">
+              <img src="/spendly-logo.png" className="w-[100px] h-[100px] rounded-[24px]"
+                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }} alt="Spendly" />
+              <div className="flex flex-col gap-3">
+                <p className="text-[#1A1A2E] font-[900] text-3xl uppercase tracking-tighter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  Spendly is Locked
+                </p>
+                <p className="text-[#AFAFAF] font-[700] text-[11px] uppercase tracking-[0.3em]">
+                  Authentication required to continue
+                </p>
+              </div>
             </div>
           )}
         </div>
-      </LazyMotion>
-    )
-  }
-
-  return (
-    <LazyMotion features={domAnimation}>
-      <div className="relative z-10 w-full min-h-dvh bg-white">
+      </div>
+    );
+  } else {
+    content = (
+      <>
         <OfflineBanner />
         <AppWrapper />
         <PWAInstallGuide />
         <NotificationDrawer />
+      </>
+    );
+  }
+
+  return (
+    <LazyMotion features={domAnimation}>
+      <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-dvh">
+        <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden">
+          {content}
+        </div>
       </div>
     </LazyMotion>
   )

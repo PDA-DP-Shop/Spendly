@@ -19,11 +19,31 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
 
   useEffect(() => {
     try {
+      // 1. Sanitize the expression for our safe parser
       const cleanExp = expression.replace(/×/g, '*').replace(/÷/g, '/')
-      if (cleanExp.match(/[+\-*/]$/)) return
       
-      let evaluated = new Function(`return ${cleanExp}`)()
+      // 2. Safe Arithmetic Evaluation (Replaces insecure new Function/eval)
+      const evaluateSimple = (str) => {
+        // Matches numbers and operators
+        const tokens = str.match(/(\d+(\.\d+)?|[+\-*/])/g)
+        if (!tokens || tokens.length === 0) return 0
+        
+        let total = parseFloat(tokens[0])
+        for (let i = 1; i < tokens.length; i += 2) {
+          const op = tokens[i]
+          const next = parseFloat(tokens[i+1])
+          if (isNaN(next)) break
+          if (op === '+') total += next
+          else if (op === '-') total -= next
+          else if (op === '*') total *= next
+          else if (op === '/') total /= next
+        }
+        return total
+      }
+
+      let evaluated = evaluateSimple(cleanExp)
       
+      // 3. Apply Multipliers (GST, Tip, Split)
       if (gst > 0) evaluated = evaluated * (1 + (gst / 100))
       if (tip > 0) evaluated = evaluated * (1 + (tip / 100))
       if (split > 1) evaluated = evaluated / (split || 1)
@@ -33,7 +53,9 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
       } else {
         setResult(Number(evaluated.toFixed(2)).toString())
       }
-    } catch (e) {}
+    } catch (e) {
+      setResult('Error')
+    }
   }, [expression, split, gst, tip])
 
   const handlePress = (val) => {
@@ -71,25 +93,35 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
   ]
 
   return (
-    <motion.div className="fixed inset-0 z-[100] flex items-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div className="fixed inset-0 z-[100] flex items-end justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      {/* Background overlay limited to app width or full screen */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       
-      <motion.div className="relative w-full bg-white rounded-t-[32px] flex flex-col pt-4 overflow-hidden"
+      <motion.div className="relative w-full max-w-[450px] bg-white rounded-t-[32px] flex flex-col pt-4 overflow-hidden"
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 28, stiffness: 300 }}>
         
         <div className="w-12 h-1.5 bg-[#EEEEEE] rounded-full mx-auto mb-6 mt-2" />
 
-        <div className="px-8 pb-8">
-          <div className="flex flex-col mb-6">
-            <span className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-wide mb-2" style={S}>Calculation</span>
-            <div className="text-[20px] font-[700] text-[#D8D8D8] break-all tracking-tight leading-tight" style={S}>{expression}</div>
+        <div className="px-8 pb-10">
+          <div className="flex flex-col mb-8 text-center">
+            <span className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-[0.2em] mb-2" style={S}>Calculation</span>
+            <div className="text-[18px] font-[700] text-[#D8D8D8] break-all tracking-tight leading-tight" style={S}>{expression}</div>
           </div>
           
-          <div className="flex items-end justify-between border-b border-[#F6F6F6] pb-8">
-            <span className="text-[24px] font-[800] text-black/20 mr-4" style={S}>{currency}</span>
-            <span className="text-[52px] font-[800] text-black break-all leading-none tracking-tightest" style={S}>
-              {result || expression}
-            </span>
+          <div className="flex flex-col items-center border-b border-[#F6F6F6] pb-10">
+            <div className="flex items-baseline gap-3">
+              <span className="text-[22px] font-[800] text-black/20" style={S}>{currency}</span>
+              <span 
+                className="font-[800] text-black break-all leading-none tracking-tightest" 
+                style={{ 
+                  ...S,
+                  fontSize: (result || expression).length > 8 ? '42px' : '64px',
+                  transition: 'font-size 0.2s ease'
+                }}
+              >
+                {result || expression}
+              </span>
+            </div>
           </div>
         </div>
 

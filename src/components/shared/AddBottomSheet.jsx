@@ -58,7 +58,7 @@ export default function AddBottomSheet({ show, onClose }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 500, damping: 50 }}
-            className="fixed bottom-0 left-0 right-0 z-[101] bg-white pb-safe"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[101] bg-white pb-safe shadow-2xl"
             style={{
               borderRadius: '32px 32px 0 0',
               borderTop: '1px solid #EEEEEE'

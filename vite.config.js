@@ -86,6 +86,8 @@ export default defineConfig({
           /^\/_/,
           /\/[^/?]+\.[^/]+$/
         ],
+        // Essential Safari Redirection Fix: Disable navigation preload and ensure clean responses.
+        navigationPreload: false,
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true

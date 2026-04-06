@@ -64,7 +64,7 @@ export default function BottomTabBar({ onAddPress }) {
   const S = { fontFamily: "'Inter', sans-serif" }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[50] h-[78px] pointer-events-none">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[50] h-[78px] pointer-events-none">
       {/* Platform Background Layer — Flat Premium */}
       <div className="absolute bottom-0 left-0 w-full h-full bg-white border-t border-[#EEEEEE] pointer-events-auto" />
 

@@ -54,7 +54,7 @@ export const useSettingsStore = create((set, get) => ({
     set(s => ({ settings: { ...s.settings, onboardingDone: true } }))
   },
 
-  getCurrency: () => get().settings?.currency || 'USD',
+  getCurrency: () => get().settings?.currency || 'INR',
   getName: () => get().settings?.name || 'Friend',
   getEmoji: () => get().settings?.emoji || '😊',
   getTheme: () => get().settings?.theme || 'light',

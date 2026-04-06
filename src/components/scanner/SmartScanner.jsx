@@ -72,8 +72,9 @@ export default function SmartScanner({ onResult, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black flex flex-col overflow-hidden"
+      className="fixed-shell inset-0 z-[100] bg-black flex flex-col overflow-hidden text-white"
     >
+      <div className="absolute inset-0 bg-black" />
       {/* Live Camera Feed */}
       <video
         ref={videoRef}

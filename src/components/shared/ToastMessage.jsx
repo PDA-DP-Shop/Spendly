@@ -44,39 +44,41 @@ export default function ToastMessage({ toast, onClose }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-        className="fixed bottom-28 left-6 right-6 z-[200] overflow-hidden bg-white border border-[#EEEEEE] rounded-[24px] shadow-[0_24px_48px_rgba(0,0,0,0.15)]"
+        className="fixed-shell bottom-28 px-6 z-[200]"
       >
-        <div className="flex items-center gap-4 px-6 py-5">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
-            <Icon className="w-5 h-5 text-black" strokeWidth={3} />
-          </div>
-          <p className="flex-1 text-[13px] font-[900] text-black uppercase tracking-tight" style={S}>
-            {toast.message}
-          </p>
-          {toast.action && (
-            <button
-              onClick={() => { toast.action.fn?.(); onClose?.() }}
-              className="text-[10px] font-[900] px-5 py-2.5 rounded-full bg-black text-white uppercase tracking-[0.2em] shadow-lg"
-              style={S}
-            >
-              {toast.action.label}
+        <div className="overflow-hidden bg-white border border-[#EEEEEE] rounded-[24px] shadow-[0_24px_48px_rgba(0,0,0,0.15)]">
+          <div className="flex items-center gap-4 px-6 py-5">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
+              <Icon className="w-5 h-5 text-black" strokeWidth={3} />
+            </div>
+            <p className="flex-1 text-[13px] font-[900] text-black uppercase tracking-tight" style={S}>
+              {toast.message}
+            </p>
+            {toast.action && (
+              <button
+                onClick={() => { toast.action.fn?.(); onClose?.() }}
+                className="text-[10px] font-[900] px-5 py-2.5 rounded-full bg-black text-white uppercase tracking-[0.2em] shadow-lg"
+                style={S}
+              >
+                {toast.action.label}
+              </button>
+            )}
+            <button onClick={onClose} className="p-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
+              <X className="w-4 h-4 text-black" strokeWidth={3} />
             </button>
-          )}
-          <button onClick={onClose} className="p-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
-            <X className="w-4 h-4 text-black" strokeWidth={3} />
-          </button>
-        </div>
+          </div>
 
-        {/* Progress drain bar — Platform Style */}
-        <div className="h-[2px] bg-[#EEEEEE]">
-          <div
-            className="h-full transition-none"
-            style={{
-              width: `${progress}%`,
-              background: '#000000',
-              transition: progress === 100 ? 'none' : 'width 50ms linear'
-            }}
-          />
+          {/* Progress drain bar — Platform Style */}
+          <div className="h-[2px] bg-[#EEEEEE]">
+            <div
+              className="h-full transition-none"
+              style={{
+                width: `${progress}%`,
+                background: '#000000',
+                transition: progress === 100 ? 'none' : 'width 50ms linear'
+              }}
+            />
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>
