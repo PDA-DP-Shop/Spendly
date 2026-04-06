@@ -18,6 +18,17 @@
 import { productCacheService } from './database.js'
 
 // ── Tier 1: In-memory local database ────────────────────────────────────────
+// Fallback for extremely common barcodes (hardcoded for reliability)
+const commonProductsFallback = [
+  { barcode: '8901491101831', name: 'Parle-G Biscuits', brand: 'Parle', category: 'food' },
+  { barcode: '8901058000104', name: 'Amul Butter', brand: 'Amul', category: 'food' },
+  { barcode: '8901030660601', name: 'Dove Soap', brand: 'Unilever', category: 'shopping' },
+  { barcode: '8901030704916', name: 'Pepsodent Toothpaste', brand: 'HUL', category: 'shopping' },
+  { barcode: '8901764312308', name: 'Britannia Good Day', brand: 'Britannia', category: 'food' },
+  { barcode: '049000000443', name: 'Coca-Cola 500ml', brand: 'Coca-Cola', category: 'food' },
+  { barcode: '8904063229063', name: 'Lays Magic Masala', brand: 'PepsiCo', category: 'food' }
+]
+
 let localDbMap = null       // Map<barcode, {name, brand, category}>
 let localDbLoading = false
 let localDbLoadPromise = null
@@ -59,8 +70,13 @@ async function loadLocalDb() {
       console.info(`[ProductLookup] Local DB loaded: ${map.size.toLocaleString()} products`)
       return map
     } catch (e) {
-      console.warn('[ProductLookup] Local DB unavailable, falling back to API only.', e.message)
-      localDbMap = new Map()  // empty map — tier 1 always misses gracefully
+      console.warn('[ProductLookup] Local 50k DB unavailable, using common fallback.', e.message)
+      const map = new Map()
+      // Load the hardcoded common products as a fallback
+      for (const p of commonProductsFallback) {
+        map.set(p.barcode, { name: p.name, brand: p.brand, category: p.category })
+      }
+      localDbMap = map
       return localDbMap
     }
   })()

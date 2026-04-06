@@ -1,7 +1,7 @@
 // AddBottomSheet — white premium slide-up sheet for add options
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Keyboard, ScanBarcode, Mic, X } from 'lucide-react'
+import { Plus, Keyboard, ScanBarcode, Mic, X, Receipt } from 'lucide-react'
 
 const OPTIONS = [
   {
@@ -14,13 +14,14 @@ const OPTIONS = [
     path: '/add?mode=type'
   },
   {
-    id: 'scan-bill',
+    id: 'smart-scan',
     icon: ScanBarcode,
-    title: 'Digital Capture',
-    subtitle: 'OCR from photo',
+    title: 'Smart Scan',
+    subtitle: 'Neural Camera Scanner',
     color: '#000000',
     bg: '#F6F6F6',
-    path: '/add?mode=scan-bill'
+    path: '/add?mode=smart-scan',
+    badge: 'NEW'
   },
   {
     id: 'voice',
@@ -68,8 +69,8 @@ export default function AddBottomSheet({ show, onClose }) {
               <div className="w-12 h-1.5 rounded-full bg-[#EEEEEE]" />
             </div>
 
-            <div className="flex items-center justify-between px-7 pb-8 pt-2">
-              <p className="text-[22px] font-[900] text-black tracking-tighter" style={S}>
+            <div className="flex items-center justify-between px-7 pb-6 pt-2">
+              <p className="text-[19px] font-[900] text-black tracking-tighter uppercase" style={S}>
                 Access Platform
               </p>
               <button 
@@ -88,21 +89,26 @@ export default function AddBottomSheet({ show, onClose }) {
                     key={opt.id}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => { onClose(); navigate(opt.path) }}
-                    className="w-full flex items-center gap-6 px-6 py-6 rounded-[28px] text-left bg-white border border-[#EEEEEE] transition-all active:bg-[#F6F6F6]"
+                    className="w-full flex items-center gap-5 px-5 py-5 rounded-[26px] text-left bg-white border border-[#F0F0F0] transition-all active:bg-[#F6F6F6]"
                   >
                     <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 bg-black text-white"
+                      className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-black text-white"
                     >
-                      <Icon className="w-8 h-8" strokeWidth={2.5} />
+                      <Icon className="w-6.5 h-6.5" strokeWidth={2.5} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-[17px] font-[900] text-black mb-1 uppercase tracking-tight" style={S}>
+                      <p className="text-[15px] font-[900] text-black mb-1 uppercase tracking-tight" style={S}>
                         {opt.title}
                       </p>
-                      <p className="text-[12px] font-[900] text-[#AFAFAF] uppercase tracking-[0.1em]" style={S}>
+                      <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.15em] opacity-80" style={S}>
                         {opt.subtitle}
                       </p>
                     </div>
+                    {opt.badge && (
+                      <div className="px-3 py-1 rounded-full bg-blue-600 text-white text-[9px] font-[900] tracking-tighter mr-1" style={S}>
+                        {opt.badge}
+                      </div>
+                    )}
                     <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
                       <Plus className="w-5 h-5 text-black" strokeWidth={4} />
                     </div>

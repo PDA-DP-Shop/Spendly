@@ -10,23 +10,41 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Spendly" />
   <meta name="application-name" content="Spendly" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#FFFFFF" />
   
   <!-- SEO meta tags -->
-  <meta name="description" content="Spendly - Your private expense tracker. No accounts. No cloud. Everything stays on your phone." />
-  <meta name="keywords" content="expense tracker, budget, spending, private, offline" />
+  <meta name="description" content="Spendly - 100% private offline expense tracker. Manage your budget and track spending without cloud syncing, bank links, or accounts. Secure local money manager." />
+  <meta name="keywords" content="offline expense tracker, private budget app, no cloud finance, local storage money manager, secure expense log, manual entry budget, Spendly, expense scanner, UPI QR scanner" />
   <meta name="author" content="Spendly" />
+  <link rel="canonical" href="https://spendly-24hrs.pages.dev" />
   
-  <!-- Open Graph (WhatsApp, Twitter preview) -->
-  <meta property="og:title" content="Spendly - Private Expense Tracker" />
-  <meta property="og:description" content="Track expenses privately. No accounts. Works offline." />
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Spendly",
+    "operatingSystem": "iOS, Android, Windows, macOS, Linux",
+    "applicationCategory": "FinanceApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "100% private offline expense tracker and budget manager. No account required."
+  }
+  </script>
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Spendly - Private Offline Expense Tracker" />
+  <meta property="og:description" content="Track expenses privately. No accounts. 100% offline." />
   <meta property="og:image" content="/og-image.png" />
-  <meta property="og:url" content="https://spendly.pages.dev" />
+  <meta property="og:url" content="https://spendly-24hrs.pages.dev" />
   <meta property="og:type" content="website" />
   
   <!-- Twitter card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Spendly" />
+  <meta name="twitter:title" content="Spendly - 100% Private Budgeting" />
   <meta name="twitter:description" content="Private expense tracker for your phone" />
   <meta name="twitter:image" content="/og-image.png" />
   
@@ -92,6 +110,16 @@
       @keyframes load-bar { 0%{width:0%} 100%{width:100%} }
     </style>
   </div>
+  
+  <noscript>
+    <div style="padding: 20px; font-family: sans-serif; text-align: center;">
+      <h1>Spendly - Private Offline Expense Tracker</h1>
+      <p>Manage your spending without the cloud. No accounts, no data leaves your phone.</p>
+      <p>Key Features: Offline mode, Receipt Scanning, UPI QR Parsing, Secure Local Storage, Personal Finance Intelligence.</p>
+      <p>Visit <a href="https://spendly-24hrs.pages.dev">Spendly</a> to manage your budget privately.</p>
+    </div>
+  </noscript>
+
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

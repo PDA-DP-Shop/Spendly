@@ -42,6 +42,25 @@ class SpendlyDB extends Dexie {
       monthlyReports: '++id, month, year',
       spendingScore: '++id, month, year',
     })
+
+    // Version 4: Intelligent Scanner — scanned products and AI learning
+    this.version(4).stores({
+      expenses: '++id, type, category, date, addedAt, shopName',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      scannedProducts: '++id, barcode, productName, brand, category',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+    })
   }
 }
 
@@ -276,6 +295,24 @@ export const productCacheService = {
   async put(barcode, product) {
     await db.productCache.put({ barcode, ...product, cachedAt: new Date().toISOString() })
   },
+}
+
+// Scanned products with user corrections (Intelligence)
+export const scannedProductService = {
+  async get(barcode) {
+    return await db.scannedProducts.where('barcode').equals(barcode).first() || null
+  },
+  async add(product) {
+    // Check if barcode already exists, if so update it
+    const existing = await this.get(product.barcode)
+    if (existing) {
+      return await db.scannedProducts.update(existing.id, { ...product, updatedAt: new Date().toISOString() })
+    }
+    return await db.scannedProducts.add({ ...product, createdAt: new Date().toISOString() })
+  },
+  async getAll() {
+    return await db.scannedProducts.reverse().toArray()
+  }
 }
 
 // ── New Feature Services (all encrypted) ────────────────────────────────────

@@ -87,12 +87,13 @@ export default function HomeScreen() {
         
         <div className="relative z-10 flex items-center justify-between">
           <div>
+            <h1 className="sr-only">Spendly - Private Offline Expense Tracker & Budget Manager</h1>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-widest mb-1" style={S}>
               Spendly
             </motion.p>
-            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-[32px] font-[800] text-black tracking-tight" style={S}>
+            <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-[32px] font-[800] text-black tracking-tight" style={S}>
               {t('home.greeting', { name: name.split(' ')[0] })}
-            </motion.h1>
+            </motion.h2>
           </div>
           
           <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={toggleNotifications}

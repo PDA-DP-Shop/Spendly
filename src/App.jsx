@@ -144,7 +144,11 @@ export default function App() {
     window.addEventListener('resize', check)
 
     initDatabase()
-      .then(() => loadSettings())
+      .then(() => {
+        loadSettings()
+        // Warm up AI scanning engine in background
+        import('./services/scanner/ocrProcessor').then(m => m.preloadOCRWorker())
+      })
       .then(() => useLockStore.getState().loadLockoutState())
       .then(() => loadExpenses())
       .then(() => setReady(true))

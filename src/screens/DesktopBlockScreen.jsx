@@ -7,7 +7,7 @@ export default function DesktopBlockScreen() {
   const APP_URL = "https://spendly-24hrs.pages.dev"
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center text-center px-8 relative overflow-hidden">
+    <div className="min-h-dvh bg-white flex flex-col items-center justify-center text-center px-8 relative overflow-hidden">
       {/* Decorative gradients */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#F6F6F6] rounded-full -mr-64 -mt-64 blur-3xl opacity-50" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#F6F6F6] rounded-full -ml-64 -mb-64 blur-3xl opacity-50" />

@@ -4,6 +4,9 @@
 @config "../tailwind.config.js";
 
 @layer base {
+  html {
+    background-color: #FFFFFF;
+  }
   :root {
     --primary: #2563EB;
     --secondary: #000000;
@@ -32,18 +35,77 @@
   }
 
   body {
-    background-color: #FFFFFF;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
+    
+    /* Universal Font Smoothing */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* Platform Consistency */
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    
+    /* No Bounce Scroll (iOS/Safari) */
     overscroll-behavior-y: none;
+    overflow-x: hidden;
+    margin: 0;
+  }
+
+  /* Robust Normalization: No native platform buttons/inputs */
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    touch-action: manipulation; /* Prevents double-tap zoom delay */
+  }
+
+  /* Allow text selection in inputs */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 800;
     letter-spacing: -0.02em;
+  }
+
+  /* Modern Unified Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.1) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.2);
   }
 }
 

@@ -2,7 +2,7 @@
 import { useState, useRef, lazy, Suspense, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronDown, Calendar, Receipt, ScanBarcode, Check, Plus, Minus, Landmark, Share2, MessageCircle } from 'lucide-react'
+import { ChevronLeft, ChevronDown, Calendar, Receipt, ScanBarcode, Check, Plus, Minus, Landmark, Share2, MessageCircle, RotateCcw } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import SmartCalculator from '../components/forms/SmartCalculator'
 import VoiceAddModal from '../components/forms/VoiceAddModal'
@@ -19,6 +19,10 @@ import { format } from 'date-fns'
 import { CURRENCIES } from '../constants/currencies'
 import { PAYMENT_METHODS } from '../constants/paymentMethods'
 import { parseBankSMS } from '../utils/smsParser'
+import { useLocation } from 'react-router-dom'
+import { scannedProductService } from '../services/database'
+
+const SmartScanner = lazy(() => import('../components/scanner/SmartScanner'))
 
 const HAPTIC_SHAKE = {
   tap: { 
@@ -55,6 +59,9 @@ export default function AddExpenseScreen() {
   const S = { fontFamily: "'Inter', sans-serif" }
   const currObj = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0]
 
+  const location = useLocation()
+  const prefilled = location.state?.prefilled
+
   useEffect(() => {
     if (editId && expenses.length > 0) {
       const numericId = parseInt(editId)
@@ -69,10 +76,17 @@ export default function AddExpenseScreen() {
         if (exp.paymentMethod) setPaymentMethod(exp.paymentMethod)
         if (exp.isSplit) { setIsSplit(true); setSplitPeople(exp.splitPeople || 2) }
       }
+    } else if (prefilled) {
+      // Handle data from Smart Scanner
+      if (prefilled.amount) setAmountStr(prefilled.amount.toString())
+      if (prefilled.shopName) setShopName(prefilled.shopName)
+      if (prefilled.category) setCategory(prefilled.category.toLowerCase())
+      if (prefilled.note) setNote(prefilled.note)
+      if (prefilled.date) setDateStr(format(new Date(prefilled.date), "yyyy-MM-dd'T'HH:mm"))
     } else if (mode === 'type' && !editId) {
       checkClipboardForSMS()
     }
-  }, [editId, expenses, mode])
+  }, [editId, expenses, mode, prefilled])
 
   const checkClipboardForSMS = async () => {
     try {
@@ -124,6 +138,17 @@ export default function AddExpenseScreen() {
       isSplit, splitPeople: isSplit ? splitPeople : 1,
       isRepeating: false, repeatEvery: null, tags: [],
     }
+
+    // Intelligent Learning Loop: Save user corrections back to database
+    if (prefilled?.barcodeValue) {
+      await scannedProductService.add({
+        barcode: prefilled.barcodeValue,
+        productName: shopName,
+        brand: note.split(' • ')[0] || '', // Extract brand if possible from note
+        category: category
+      })
+    }
+
     if (editId) await updateExpense(editId, expense)
     else await addExpense(expense)
     setSaved(true)
@@ -134,7 +159,7 @@ export default function AddExpenseScreen() {
   const splitAmount = (parseFloat(amountStr) || 0) / splitPeople
 
   return (
-    <div className="min-h-screen flex flex-col bg-white overflow-x-hidden safe-top pb-8">
+    <div className="min-h-dvh flex flex-col bg-white overflow-x-hidden safe-top pb-8">
       <div className="flex items-center justify-between px-6 pt-10 pb-5 bg-white sticky top-0 z-50">
         <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => navigate(-1)}
           className="w-11 h-11 rounded-full flex items-center justify-center bg-white border border-[#EEEEEE]">
@@ -145,6 +170,36 @@ export default function AddExpenseScreen() {
         </h1>
         <div className="w-11" />
       </div>
+
+      {/* Scan Source Badge & Rescan */}
+      {prefilled && (
+        <div className="px-6 pb-2 flex items-center justify-between">
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+            prefilled.scanType === 'bill' ? 'bg-orange-50 border-orange-100 text-orange-600' :
+            prefilled.scanType === 'barcode' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+            prefilled.scanType === 'product_package' ? 'bg-blue-50 border-blue-100 text-blue-600' :
+            'bg-purple-50 border-purple-100 text-purple-600'
+          }`}>
+             {prefilled.scanType === 'bill' ? <Receipt className="w-3.5 h-3.5" /> : 
+              prefilled.scanType === 'barcode' ? <ScanBarcode className="w-3.5 h-3.5" /> : 
+              prefilled.scanType === 'upi_qr' ? <Check className="w-3.5 h-3.5" /> :
+              <ScanBarcode className="w-3.5 h-3.5" />}
+             <span className="text-[11px] font-[800] uppercase tracking-wider" style={S}>
+               From {prefilled.scanType.replace('_', ' ')} scan
+             </span>
+          </div>
+          
+          <motion.button 
+            variants={HAPTIC_SHAKE} whileTap="tap"
+            onClick={() => navigate('/add?mode=smart-scan', { replace: true })}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-black text-white text-[11px] font-[800] uppercase tracking-wider shadow-sm active:scale-90 transition-transform"
+            style={S}
+          >
+            <RotateCcw className="w-3.5 h-3.5" strokeWidth={3} />
+            Rescan
+          </motion.button>
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col pt-4">
         <div className="px-6 mb-10">
@@ -279,6 +334,18 @@ export default function AddExpenseScreen() {
 
       <AnimatePresence>
         <Suspense fallback={<div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-4 border-[#EEEEEE] border-t-black animate-spin" /></div>}>
+          {mode === 'smart-scan' && (
+            <SmartScanner 
+              onResult={(data) => {
+                if (data.forceEdit) {
+                   navigate('/add?mode=type', { state: { prefilled: data }, replace: true })
+                } else {
+                   navigate('/add?mode=type', { state: { prefilled: data }, replace: true })
+                }
+              }} 
+              onClose={() => navigate(-1)} 
+            />
+          )}
           {mode === 'scan-product' && <BarcodeScanner onProductFound={(p) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
           {mode === 'scan-bill' && <BillScanner onBillScanned={(d) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
           {mode === 'voice' && <VoiceAddModal onParsed={(d) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
