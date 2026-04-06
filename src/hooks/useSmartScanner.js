@@ -8,6 +8,7 @@ import { detectBarcode, processBarcode } from '../services/scanner/barcodeDetect
 
 export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
   const [scanStatus, setScanStatus] = useState('Point at product or bill')
+  const [isScanning, setIsScanning] = useState(false)
   const canvasRef = useRef(document.createElement('canvas'))
   const barcodeCanvasRef = useRef(document.createElement('canvas'))
   const highResCanvasRef = useRef(document.createElement('canvas'))
