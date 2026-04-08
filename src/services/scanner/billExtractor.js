@@ -159,21 +159,44 @@ function extractDetailedAmounts(text, lines) {
 
 function extractDate(text) {
   const datePatterns = [
-    // UK/EU (DD/MM/YYYY)
-    /(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](\d{4})/,
+    // ISO (YYYY-MM-DD)
+    /(20\d{2})[\/\. \-](\d{1,2})[\/\. \-](\d{1,2})/,
+    // UK/EU/IN (DD/MM/YYYY)
+    /(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](20\d{2})/,
     // UK/EU Short (DD/MM/YY)
     /(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](\d{2})\b/,
-    // US (MM/DD/YYYY)
-    /(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](\d{4})/,
-    // ISO (YYYY-MM-DD)
-    /(\d{4})[\/\. \-](\d{1,2})[\/\. \-](\d{1,2})/,
     // Written format (08 APR 2026)
-    /(\d{1,2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s+(\d{2,4})/i
+    /(\d{1,2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\s+(20\d{2})/i
   ]
   
   for (const pattern of datePatterns) {
     const m = text.match(pattern)
-    if (m) return m[0]
+    if (m) {
+      try {
+        let y, m_month, d;
+        // Check pattern type by structure
+        if (m[1].length === 4) { // ISO or Written short? (ISO usually starts with 4 digits)
+            y = m[1]; m_month = m[2]; d = m[3];
+        } else if (m[3].length === 4) { // DD/MM/YYYY
+            y = m[3]; m_month = m[2]; d = m[1];
+        } else if (m[3].length === 2 && !isNaN(m[3])) { // DD/MM/YY
+            y = "20" + m[3]; m_month = m[2]; d = m[1];
+        } else {
+            return format(new Date(), 'yyyy-MM-dd')
+        }
+
+        // Handle written months
+        const monthMap = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 }
+        if (isNaN(m_month)) {
+            m_month = monthMap[m_month.toLowerCase().substring(0,3)];
+        }
+
+        const dateObj = new Date(y, parseInt(m_month) - 1, parseInt(d))
+        if (!isNaN(dateObj.getTime())) {
+          return format(dateObj, 'yyyy-MM-dd')
+        }
+      } catch (e) {}
+    }
   }
   return format(new Date(), 'yyyy-MM-dd')
 }
@@ -185,7 +208,11 @@ function extractTime(text) {
   ]
   for (const p of timePatterns) {
     const m = text.match(p)
-    if (m) return m[0]
+    if (m) {
+      const hh = m[1].padStart(2, '0')
+      const mm = m[2].padStart(2, '0')
+      return `${hh}:${mm}`
+    }
   }
   return format(new Date(), 'HH:mm')
 }
