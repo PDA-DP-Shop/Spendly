@@ -39,56 +39,70 @@ let localDbLoadPromise = null
  * decompresses it transparently — we just fetch JSON.
  * Falls back gracefully if the file isn't present (e.g., db not yet built).
  */
+/**
+ * Lazily loads the bundled product database.
+ * Optimized for performance: loading is deferred to idle time to prevent UI lag.
+ */
 async function loadLocalDb() {
   if (localDbMap) return localDbMap
   if (localDbLoading) return localDbLoadPromise
 
   localDbLoading = true
-  localDbLoadPromise = (async () => {
-    try {
-      const res = await fetch('/data/top-50000-products.json.gz')
-
-      if (!res.ok) throw new Error(`Local DB not found (${res.status})`)
-
-      let products
+  localDbLoadPromise = new Promise((resolve) => {
+    // Start loading on next idle period or after a short delay
+    const startLoad = async () => {
       try {
-        // Attempt to parse directly (if Vite/server already decompressed it via Content-Encoding: gzip)
-        const clone = res.clone()
-        products = await clone.json()
-      } catch (err) {
-        // If it's a raw gzip blob, manually decompress it
-        const ds = new DecompressionStream('gzip')
-        const decompressedStream = res.body.pipeThrough(ds)
-        products = await new Response(decompressedStream).json()
+        console.info('[ProductLookup] Initializing product dataset in background...')
+        const res = await fetch('/data/top-50000-products.json.gz')
+        if (!res.ok) throw new Error('DB not found')
+
+        let products
+        try {
+          const clone = res.clone()
+          products = await clone.json()
+        } catch (err) {
+          const ds = new DecompressionStream('gzip')
+          const decompressedStream = res.body.pipeThrough(ds)
+          products = await new Response(decompressedStream).json()
+        }
+        
+        const map = new Map()
+        // Process in chunks if needed, but for 50k a single loop is usually okay if deferred
+        for (const p of products) {
+          if (p.barcode) map.set(String(p.barcode), { name: p.name, brand: p.brand, category: p.category })
+        }
+        localDbMap = map
+        console.info(`[ProductLookup] Local DB ready: ${map.size} items`)
+        resolve(map)
+      } catch (e) {
+        console.warn('[ProductLookup] Using local fallbacks:', e.message)
+        const map = new Map()
+        for (const p of commonProductsFallback) {
+          map.set(String(p.barcode), { name: p.name, brand: p.brand, category: p.category })
+        }
+        localDbMap = map
+        resolve(map)
       }
-      
-      const map = new Map()
-      for (const p of products) {
-        if (p.barcode) map.set(p.barcode, { name: p.name, brand: p.brand, category: p.category })
-      }
-      localDbMap = map
-      console.info(`[ProductLookup] Local DB loaded: ${map.size.toLocaleString()} products`)
-      return map
-    } catch (e) {
-      console.warn('[ProductLookup] Local 50k DB unavailable, using common fallback.', e.message)
-      const map = new Map()
-      // Load the hardcoded common products as a fallback
-      for (const p of commonProductsFallback) {
-        map.set(p.barcode, { name: p.name, brand: p.brand, category: p.category })
-      }
-      localDbMap = map
-      return localDbMap
     }
-  })()
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => startLoad(), { timeout: 2000 })
+    } else {
+      setTimeout(startLoad, 500)
+    }
+  })
 
   return localDbLoadPromise
 }
 
-// ── Tier 3: Remote API lookup ────────────────────────────────────────────────
+// ── Tier 3: Remote API lookup (CORS Optimized) ──────────────────────────────
 async function fetchFromApi(barcode) {
+  const proxy = 'https://corsproxy.io/?'
+  
   // 3-A: UPCitemdb (worldwide general products)
   try {
-    const res = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`)
+    const url = `${proxy}${encodeURIComponent(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`)}`
+    const res = await fetch(url)
     const data = await res.json()
     if (data.code === 'OK' && data.items?.length > 0) {
       const item = data.items[0]
@@ -96,6 +110,7 @@ async function fetchFromApi(barcode) {
         name: item.title || '',
         brand: item.brand || '',
         image: item.images?.[0] || null,
+        amount: item.lowest_recorded_price || item.highest_recorded_price || null,
         category: item.category ? item.category.split(' > ').pop() : 'General',
         categoryTags: item.category ? item.category.split(' > ') : [],
       }
@@ -106,7 +121,8 @@ async function fetchFromApi(barcode) {
 
   // 3-B: Open Products Facts (worldwide general items)
   try {
-    const res = await fetch(`https://world.openproductsfacts.org/api/v0/product/${barcode}.json`)
+    const url = `${proxy}${encodeURIComponent(`https://world.openproductsfacts.org/api/v0/product/${barcode}.json`)}`
+    const res = await fetch(url)
     const data = await res.json()
     if (data.status === 1 && data.product?.product_name) {
       return {
@@ -123,7 +139,8 @@ async function fetchFromApi(barcode) {
 
   // 3-C: Open Food Facts (worldwide food & groceries)
   try {
-    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)
+    const url = `${proxy}${encodeURIComponent(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)}`
+    const res = await fetch(url)
     const data = await res.json()
     if (data.status === 1 && data.product?.product_name) {
       return {

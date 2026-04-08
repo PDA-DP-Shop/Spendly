@@ -51,7 +51,7 @@ class SpendlyDB extends Dexie {
       scans: '++id, expenseId, addedAt',
       categories: '++id',
       productCache: 'barcode',
-      scannedProducts: '++id, barcode, productName, brand, category',
+      scannedProducts: '++id, barcode, productName, brand, category, amount',
       wallets: '++id',
       emis: '++id',
       trips: '++id',

@@ -77,12 +77,13 @@ export default function AddExpenseScreen() {
         if (exp.isSplit) { setIsSplit(true); setSplitPeople(exp.splitPeople || 2) }
       }
     } else if (prefilled) {
-      // Handle data from Smart Scanner
-      if (prefilled.amount) setAmountStr(prefilled.amount.toString())
-      if (prefilled.shopName) setShopName(prefilled.shopName)
-      if (prefilled.category) setCategory(prefilled.category.toLowerCase())
-      if (prefilled.note) setNote(prefilled.note)
-      if (prefilled.date) setDateStr(format(new Date(prefilled.date), "yyyy-MM-dd'T'HH:mm"))
+      // Handle data from Smart Scanner (structured as { type, data })
+      const d = prefilled.data || prefilled
+      if (d.amount) setAmountStr(d.amount.toString())
+      if (d.shopName) setShopName(d.shopName)
+      if (d.category) setCategory(d.category.toLowerCase())
+      if (d.note) setNote(d.note)
+      if (d.date) setDateStr(format(new Date(d.date || new Date()), "yyyy-MM-dd'T'HH:mm"))
     } else if (mode === 'type' && !editId) {
       checkClipboardForSMS()
     }
@@ -140,12 +141,14 @@ export default function AddExpenseScreen() {
     }
 
     // Intelligent Learning Loop: Save user corrections back to database
-    if (prefilled?.barcodeValue) {
+    const prefilledData = prefilled?.data || prefilled
+    if (prefilledData?.barcodeValue) {
       await scannedProductService.add({
-        barcode: prefilled.barcodeValue,
+        barcode: prefilledData.barcodeValue,
         productName: shopName,
         brand: note.split(' • ')[0] || '', // Extract brand if possible from note
-        category: category
+        category: category,
+        amount: amount // Teach the app the price of this product
       })
     }
 
@@ -172,34 +175,38 @@ export default function AddExpenseScreen() {
       </div>
 
       {/* Scan Source Badge & Rescan */}
-      {prefilled && (
-        <div className="px-6 pb-2 flex items-center justify-between">
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-            prefilled.scanType === 'bill' ? 'bg-orange-50 border-orange-100 text-orange-600' :
-            prefilled.scanType === 'barcode' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
-            prefilled.scanType === 'product_package' ? 'bg-blue-50 border-blue-100 text-blue-600' :
-            'bg-purple-50 border-purple-100 text-purple-600'
-          }`}>
-             {prefilled.scanType === 'bill' ? <Receipt className="w-3.5 h-3.5" /> : 
-              prefilled.scanType === 'barcode' ? <ScanBarcode className="w-3.5 h-3.5" /> : 
-              prefilled.scanType === 'upi_qr' ? <Check className="w-3.5 h-3.5" /> :
-              <ScanBarcode className="w-3.5 h-3.5" />}
-             <span className="text-[11px] font-[800] uppercase tracking-wider" style={S}>
-               From {prefilled.scanType.replace('_', ' ')} scan
-             </span>
+      {prefilled && (() => {
+        const d = prefilled.data || prefilled
+        const sType = d.scanType || prefilled.scanType || 'smart'
+        return (
+          <div className="px-6 pb-2 flex items-center justify-between">
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+              sType === 'bill' ? 'bg-orange-50 border-orange-100 text-orange-600' :
+              sType === 'barcode' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+              sType === 'product_package' ? 'bg-blue-50 border-blue-100 text-blue-600' :
+              'bg-purple-50 border-purple-100 text-purple-600'
+            }`}>
+               {sType === 'bill' ? <Receipt className="w-3.5 h-3.5" /> : 
+                sType === 'barcode' ? <ScanBarcode className="w-3.5 h-3.5" /> : 
+                sType === 'upi_qr' ? <Check className="w-3.5 h-3.5" /> :
+                <ScanBarcode className="w-3.5 h-3.5" />}
+               <span className="text-[11px] font-[800] uppercase tracking-wider" style={S}>
+                 From {sType.replace('_', ' ')} scan
+               </span>
+            </div>
+            
+            <motion.button 
+              variants={HAPTIC_SHAKE} whileTap="tap"
+              onClick={() => navigate('/add?mode=smart-scan', { replace: true })}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-black text-white text-[11px] font-[800] uppercase tracking-wider shadow-sm active:scale-90 transition-transform"
+              style={S}
+            >
+              <RotateCcw className="w-3.5 h-3.5" strokeWidth={3} />
+              Rescan
+            </motion.button>
           </div>
-          
-          <motion.button 
-            variants={HAPTIC_SHAKE} whileTap="tap"
-            onClick={() => navigate('/add?mode=smart-scan', { replace: true })}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-black text-white text-[11px] font-[800] uppercase tracking-wider shadow-sm active:scale-90 transition-transform"
-            style={S}
-          >
-            <RotateCcw className="w-3.5 h-3.5" strokeWidth={3} />
-            Rescan
-          </motion.button>
-        </div>
-      )}
+        )
+      })()}
 
       <div className="flex-1 flex flex-col pt-4">
         <div className="px-6 mb-10">
@@ -337,6 +344,7 @@ export default function AddExpenseScreen() {
           {mode === 'smart-scan' && (
             <SmartScanner 
               onResult={(data) => {
+                if (!data) return
                 if (data.forceEdit) {
                    navigate('/add?mode=type', { state: { prefilled: data }, replace: true })
                 } else {
@@ -346,9 +354,9 @@ export default function AddExpenseScreen() {
               onClose={() => navigate(-1)} 
             />
           )}
-          {mode === 'scan-product' && <BarcodeScanner onProductFound={(p) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
-          {mode === 'scan-bill' && <BillScanner onBillScanned={(d) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
-          {mode === 'voice' && <VoiceAddModal onParsed={(d) => navigate('/add?mode=type', { replace: true })} onClose={() => navigate(-1)} />}
+          {mode === 'scan-product' && <BarcodeScanner onProductFound={(p) => p && navigate('/add?mode=type', { state: { prefilled: p }, replace: true })} onClose={() => navigate(-1)} />}
+          {mode === 'scan-bill' && <BillScanner onBillScanned={(d) => d && navigate('/add?mode=type', { state: { prefilled: d }, replace: true })} onClose={() => navigate(-1)} />}
+          {mode === 'voice' && <VoiceAddModal onParsed={(d) => d && navigate('/add?mode=type', { state: { prefilled: d }, replace: true })} onClose={() => navigate(-1)} />}
         </Suspense>
       </AnimatePresence>
 

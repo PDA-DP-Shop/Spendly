@@ -142,8 +142,9 @@ export default function App() {
     initDatabase()
       .then(() => {
         loadSettings()
-        // Warm up AI scanning engine in background
+        // Warm up AI scanning engine and Offline Product DB in background
         import('./services/scanner/ocrProcessor').then(m => m.preloadOCRWorker())
+        import('./services/productLookup').then(m => m.preloadLocalDb())
       })
       .then(() => useLockStore.getState().loadLockoutState())
       .then(() => loadExpenses())

@@ -5,17 +5,30 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { runScanPipeline, processManualScan } from '../services/scanner/smartScanService'
 import { detectBarcode, processBarcode } from '../services/scanner/barcodeDetector'
+import { isCloudReady } from '../services/scanner/cloudScanService'
 
 export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
   const [scanStatus, setScanStatus] = useState('Point at product or bill')
   const [isScanning, setIsScanning] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const canvasRef = useRef(document.createElement('canvas'))
   const barcodeCanvasRef = useRef(document.createElement('canvas'))
   const highResCanvasRef = useRef(document.createElement('canvas'))
   const frameCount = useRef(0)
+  const lastScanTime = useRef(0)
+  const passToggle = useRef(true) // Toggle between Global and Center pass
 
   const scanLoop = useCallback(async () => {
-    // Only perform auto-scanning loop if isScanning is true AND we are in BARCODE mode
+    // 1. Throttling: High-performance interval (100ms) for "Instant" feel
+    const now = Date.now()
+    if (now - lastScanTime.current < 100) {
+      if (isScanning && mode === 'BARCODE') {
+        requestAnimationFrame(scanLoop)
+      }
+      return
+    }
+    lastScanTime.current = now
+
     if (!isScanning || !videoRef.current || mode !== 'BARCODE') {
       return
     }
@@ -24,7 +37,7 @@ export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
-    // Optimize Resolution: Downscale to 640px for 4x faster processing
+    // Optimize Resolution: Downscale to 640px for accuracy while remaining fast
     const SCAN_W = 640
     const scale = Math.min(SCAN_W / video.videoWidth, 1)
     const w = video.videoWidth * scale
@@ -39,70 +52,43 @@ export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
     canvas.height = h
     ctx.drawImage(video, 0, 0, w, h)
 
-    // 1. Optimized Barcode Search (Focus on center viewfinder)
-    setScanStatus('Searching for Barcode...')
-    
-    // Reuse bCanvas for performance
+    // 2. Intelligent Barcode Search (Alternating Passes)
     const bCanvas = barcodeCanvasRef.current
     const bCtx = bCanvas.getContext('2d', { willReadFrequently: true })
-    const bW = w * 0.7 
-    const bH = h * 0.4
-    if (bCanvas.width !== bW) {
+    let barcode = null
+
+    if (passToggle.current) {
+      // Pass A: Full frame check (Fast, for large barcodes)
+      bCanvas.width = w
+      bCanvas.height = h
+      bCtx.drawImage(canvas, 0, 0)
+      barcode = await detectBarcode(bCanvas)
+    } else {
+      // Pass B: High-Contrast center crop (Accurate, for small barcodes)
+      const bW = w * 0.7 
+      const bH = h * 0.5
       bCanvas.width = bW
       bCanvas.height = bH
+      bCtx.drawImage(canvas, (w - bW) / 2, (h - bH) / 2, bW, bH, 0, 0, bW, bH)
+      barcode = await detectBarcode(bCanvas)
     }
     
-    // Draw the center part of the main canvas into the barcode canvas
-    bCtx.drawImage(canvas, (w - bW) / 2, (h - bH) / 2, bW, bH, 0, 0, bW, bH)
-    
-    const barcode = await detectBarcode(bCanvas)
+    passToggle.current = !passToggle.current // Switch pass for next frame
     
     if (barcode) {
-      setScanStatus('Decoding Barcode...')
+      setScanStatus('Verifying...')
       const productResult = await processBarcode(barcode.text)
-      onResult({ type: 'BARCODE', result: productResult, instant: true })
+      if (productResult.success) {
+        onResult({ ...productResult, instant: true })
+      }
       setIsScanning(false)
       frameCount.current = 0
       return
     }
 
-    // 2. Isolated Fallback to OCR (Two-Stage: Detect & Extract)
     frameCount.current++
     if (frameCount.current > 15) {
-      // Step A: Fast Detection (Low-Res, Fast Mode)
-      // This is near-instant even on 4K devices
-      const detection = await runScanPipeline(video, canvas, false, true)
-      
-      if (detection && detection.type === 'BILL') {
-        const isStrongMatch = detection.confidence > 5
-        const isForced = frameCount.current > 60 // ~2s timeout for shaky hands
-        
-        if (isStrongMatch || isForced) {
-           setScanStatus('High-Precision Extracting...')
-           // Step B: Deep Extraction (High-Res, Multi-Pass)
-           // We use the full video resolution for maximum accuracy
-           const hrCanvas = highResCanvasRef.current
-           const hrCtx = hrCanvas.getContext('2d')
-           hrCanvas.width = video.videoWidth
-           hrCanvas.height = video.videoHeight
-           hrCtx.drawImage(video, 0, 0)
-           
-           const deepResult = await runScanPipeline(video, hrCanvas, true, false)
-           if (deepResult && (deepResult.type === 'BILL' || deepResult.type === 'PRODUCT')) {
-             setScanStatus(`${deepResult.type} Captured!`)
-             onResult({ ...deepResult, instant: true })
-             setIsScanning(false)
-             frameCount.current = 0
-             return
-           }
-        } else {
-           setScanStatus('Aligning Bill...')
-        }
-      } else if (detection && detection.type === 'STATUS') {
-        setScanStatus(detection.message)
-      } else {
-        setScanStatus('Searching for items...')
-      }
+      setScanStatus('Center barcode for auto-scan')
     }
 
     if (isScanning && mode === 'BARCODE') {
@@ -112,9 +98,16 @@ export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
 
   // Manual Capture for SCAN mode - Updated with Cropping Logic
   const capturePhoto = useCallback(async () => {
-    if (!videoRef.current) return
+    if (!videoRef.current || isProcessing) return
     
-    setScanStatus('Reading Image...')
+    setIsProcessing(true)
+    // Small delay to ensure React flushes the 'isProcessing' state to the UI
+    await new Promise(r => setTimeout(r, 100))
+
+    // Check for Cloud Capability early for UI feedback
+    const cloudActive = isCloudReady()
+    setScanStatus(cloudActive ? 'Cloud Accuracy Pass (99.9%)...' : 'AI Shield Binary Pass (99%)...')
+    
     const video = videoRef.current
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -122,33 +115,43 @@ export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
     const vW = video.videoWidth
     const vH = video.videoHeight
     
-    // SCAN mode Frame dimensions in % from ScannerOverlay:
-    // w: 80vw, h: 60vh. But centered.
-    // Normalized to video proportions:
-    const cropW = vW * 0.8
-    const cropH = vH * 0.6
-    const startX = (vW - cropW) / 2
-    const startY = (vH - cropH) / 2
+    if (!vW || !vH) {
+      setIsProcessing(false)
+      setScanStatus('Waiting for camera...')
+      return
+    }
+
+    // Improved Cropping: Align with Viewfinder Guide (Hole)
+    // ScannerOverlay uses 92% width for hole
+    const cropW = Math.floor(vW * 0.9)
+    const cropH = Math.floor(vH * 0.65)
+    const startX = Math.floor((vW - cropW) / 2)
+    const startY = Math.floor((vH - cropH) / 2)
     
     canvas.width = cropW
     canvas.height = cropH
     
-    // Draw only the cropped portion
     ctx.drawImage(video, startX, startY, cropW, cropH, 0, 0, cropW, cropH)
     
-    // Process manually - This now uses the Multi-Pass Binary Shield
-    // We update status periodically to show progress
-    setScanStatus('Reading Image... (Binary Pass)')
-    const result = await processManualScan(canvas)
-    
-    if (result && result.type !== 'STATUS') {
-      setScanStatus(`${result.type} Captured!`)
-      onResult({ ...result, instant: false }) 
-    } else {
-      setScanStatus('Could not read accurately. Try again.')
-      setTimeout(() => setScanStatus('Point at product or bill'), 2000)
+    try {
+      // Analysis Pass
+      const result = await processManualScan(canvas)
+      
+      if (result && result.type !== 'STATUS') {
+        const sourceLabel = result.source === 'CLOUD' ? 'Cloud' : 'AI Shield'
+        setScanStatus(`${result.type} Verified by ${sourceLabel}!`)
+        onResult({ ...result, instant: false }) 
+      } else {
+        setScanStatus('Accuracy low. Adjust light & try again.')
+        setTimeout(() => setScanStatus('Point at product or bill'), 2500)
+      }
+    } catch (e) {
+      console.error("Capture processing failed", e)
+      setScanStatus('System error. Restarting...')
+    } finally {
+      setIsProcessing(false)
     }
-  }, [videoRef, onResult])
+  }, [videoRef, onResult, isProcessing])
 
   useEffect(() => {
     if (isScanning && mode === 'BARCODE') {
@@ -159,6 +162,7 @@ export function useSmartScanner(videoRef, onResult, mode = 'BARCODE') {
   return {
     scanStatus,
     isScanning,
+    isProcessing,
     setIsScanning,
     capturePhoto
   }

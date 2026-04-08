@@ -17,16 +17,38 @@ hints.set(DecodeHintType.POSSIBLE_FORMATS, [
 ])
 hints.set(DecodeHintType.TRY_HARDER, true) // Enable intensive search for barcodes
 
-// 2. Initialize Reader with Hints
-const reader = new BrowserMultiFormatReader(hints)
+// 2. Initialize Native Hardware Reader (If available)
+const nativeDetector = ('BarcodeDetector' in window) ? new window.BarcodeDetector({
+  formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code', 'code_128', 'code_39']
+}) : null
+
+// 3. Initialize ZXing Reader with Hints (Fallback)
+const zxingReader = new BrowserMultiFormatReader(hints)
 
 /**
  * Scan a single frame (canvas or video element) for barcodes
+ * Uses Hardware Acceleration (Native) first, falls back to Software (ZXing)
  */
 export async function detectBarcode(source) {
+  // Pass 1: Try Native Hardware Detector (Near-Instant)
+  if (nativeDetector) {
+    try {
+      const results = await nativeDetector.detect(source)
+      if (results.length > 0) {
+        return {
+          text: results[0].rawValue,
+          format: results[0].format,
+          points: results[0].cornerPoints
+        }
+      }
+    } catch (e) {
+      console.warn('Native BarcodeDetector failed, falling back to ZXing', e)
+    }
+  }
+
+  // Pass 2: Fallback to ZXing (Robust software decoding)
   try {
-    // ZXing JS decodeFromCanvas handles the canvas image data extraction
-    const result = await reader.decodeFromCanvas(source)
+    const result = await zxingReader.decodeFromCanvas(source)
     if (result) {
       return {
         text: result.getText(),
@@ -35,7 +57,7 @@ export async function detectBarcode(source) {
       }
     }
   } catch (err) {
-    // No barcode found in this frame (standard behavior)
+    // No barcode found
   }
   return null
 }
@@ -50,7 +72,7 @@ import { lookupBarcode } from '../productLookup'
 export async function processBarcode(barcodeValue) {
   const code = String(barcodeValue).trim()
   
-  // 1. Check local cache (Scanned by user before / Stored in IndexedDB)
+  // 1. Check local history (Learned from user before)
   const cached = await scannedProductService.get(code)
   if (cached) {
     return {
@@ -58,9 +80,11 @@ export async function processBarcode(barcodeValue) {
       data: {
         shopName: cached.productName,
         category: cached.category,
+        amount: cached.amount || 0, // Retrieve learned price
         note: cached.brand,
         scanType: 'barcode',
-        barcodeValue: code
+        barcodeValue: code,
+        isVerified: true
       },
       source: 'LOCAL_HISTORY'
     }
@@ -75,10 +99,12 @@ export async function processBarcode(barcodeValue) {
       data: {
         shopName: productInfo.name,
         category: productInfo.category,
+        amount: productInfo.amount || 0, // Retrieve API estimate
         note: productInfo.brand,
         imageUri: productInfo.image,
         scanType: 'barcode',
-        barcodeValue: code
+        barcodeValue: code,
+        isVerified: productInfo.source === 'local'
       },
       source: productInfo.source === 'local' ? 'OFFLINE_DB' : 'REMOTE_API'
     }
