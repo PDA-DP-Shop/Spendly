@@ -1,0 +1,73 @@
+name: Deploy Spendly Apps
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+
+  deploy-user-app:
+    name: Deploy Spendly User
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: apps/spendly-user/package-lock.json
+      
+      - name: Install dependencies
+        run: |
+          cd apps/spendly-user
+          npm ci
+      
+      - name: Build user app
+        run: |
+          cd apps/spendly-user
+          npm run build
+      
+      - name: Deploy to Cloudflare
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{secrets.CF_API_TOKEN}}
+          accountId: ${{secrets.CF_ACCOUNT}}
+          projectName: spendly-user
+          directory: apps/spendly-user/dist
+          gitHubToken: ${{secrets.GITHUB_TOKEN}}
+
+  deploy-shop-app:
+    name: Deploy Spendly Shop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: apps/spendly-shop/package-lock.json
+      
+      - name: Install dependencies
+        run: |
+          cd apps/spendly-shop
+          npm ci
+      
+      - name: Build shop app
+        run: |
+          cd apps/spendly-shop
+          npm run build
+      
+      - name: Deploy to Cloudflare
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{secrets.CF_API_TOKEN}}
+          accountId: ${{secrets.CF_ACCOUNT}}
+          projectName: spendly-shop
+          directory: apps/spendly-shop/dist
+          gitHubToken: ${{secrets.GITHUB_TOKEN}}

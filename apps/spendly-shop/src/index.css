@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --shadow-premium: 0 10px 40px -10px rgba(16, 185, 129, 0.1);
+  }
+
+  body {
+    @apply bg-white text-slate-900 antialiased selection:bg-emerald-100;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    touch-action: manipulation;
+  }
+
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  /* Modern Unified Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.1) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.2);
+  }
+
+  .app-shell {
+    background-color: #F8F9FA;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .app-content {
+    width: 100%;
+    max-width: 450px;
+    min-height: 100dvh;
+    background-color: #FFFFFF;
+    position: relative;
+    box-shadow: 0 0 100px rgba(0,0,0,0.05);
+  }
+
+  @media (max-width: 450px) {
+    .app-shell {
+      background-color: #FFFFFF;
+    }
+    .app-content {
+      max-width: 100%;
+      box-shadow: none;
+    }
+  }
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: var(--safe-top);
+  }
+  .safe-bottom {
+    padding-bottom: var(--safe-bottom);
+  }
+  .pb-tab {
+    padding-bottom: calc(80px + var(--safe-bottom));
+  }
+  .mb-tab {
+    margin-bottom: calc(80px + var(--safe-bottom));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .premium-shadow {
+    box-shadow: var(--shadow-premium);
+  }
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

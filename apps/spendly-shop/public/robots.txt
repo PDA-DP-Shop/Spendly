@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://spendly-shop.pages.dev/sitemap.xml
