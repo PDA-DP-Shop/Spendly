@@ -108,7 +108,7 @@ Both apps are configured for automatic deployment via **GitHub Actions** to **Cl
 ---
 
 <p align="center">
-  Built with ❤️ by <b>Team Codinity</b> <br/>
+  Built with ❤️ by <b>Patel Devansh</b> <br/>
   <i>"Privacy is not an option, it's a fundamental right."</i>
 </p>
 
