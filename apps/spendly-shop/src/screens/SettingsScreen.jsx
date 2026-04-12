@@ -53,21 +53,20 @@ const BottomSheet = ({ show, onClose, title, children }) => (
 // ─── Settings Row ────────────────────────────────────────────────────────────
 const SettingsRow = ({ icon: Icon, title, subtitle, value, onClick, danger, toggle, toggled, onToggle, last }) => (
   <button
-    onClick={toggle ? undefined : onClick}
-    className={`w-full flex items-center gap-4 px-6 py-5 text-left transition-colors ${!last ? 'border-b border-[#F1F5F9]' : ''} ${danger ? 'active:bg-red-50' : 'active:bg-[#F8FAFC]'}`}
+    onClick={toggle ? onToggle : onClick}
+    className={`w-full flex items-center gap-4 px-6 py-5 text-left transition-colors pointer-events-auto ${!last ? 'border-b border-[#F1F5F9]' : ''} ${danger ? 'active:bg-red-50' : 'active:bg-[#F8FAFC]'}`}
   >
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-50' : 'bg-[#F8FAFC]'} border border-[#F1F5F9]`}>
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-50' : 'bg-[#F8FAFC]'} border border-[#F1F5F9] pointer-events-none`}>
       <Icon className={`w-4.5 h-4.5 ${danger ? 'text-red-500' : 'text-black'}`} strokeWidth={2.5} />
     </div>
-    <div className="flex-1 min-w-0">
+    <div className="flex-1 min-w-0 pointer-events-none">
       <span className={`text-[15px] font-[700] block tracking-tight ${danger ? 'text-red-500' : 'text-black'}`}>{title}</span>
       {subtitle && <span className="text-[11px] font-[500] text-[#94A3B8] mt-0.5 block">{subtitle}</span>}
     </div>
-    {value && !toggle && <span className="text-[13px] font-[600] text-[#94A3B8] mr-2 truncate max-w-[100px]">{value}</span>}
+    {value && !toggle && <span className="text-[13px] font-[600] text-[#94A3B8] mr-2 truncate max-w-[100px] pointer-events-none">{value}</span>}
     {toggle ? (
       <div
-        onClick={onToggle}
-        className={`w-12 h-7 rounded-full transition-all relative border border-[#F1F5F9] flex-shrink-0`}
+        className="w-12 h-7 rounded-full transition-all relative border border-[#F1F5F9] flex-shrink-0 pointer-events-none"
         style={{ background: toggled ? '#000' : '#E2E8F0' }}
       >
         <motion.div
@@ -77,7 +76,7 @@ const SettingsRow = ({ icon: Icon, title, subtitle, value, onClick, danger, togg
         />
       </div>
     ) : (
-      !danger && <ChevronRight className="w-4 h-4 text-[#CBD5E1] flex-shrink-0" strokeWidth={3} />
+      !danger && <ChevronRight className="w-4 h-4 text-[#CBD5E1] flex-shrink-0 pointer-events-none" strokeWidth={3} />
     )}
   </button>
 );

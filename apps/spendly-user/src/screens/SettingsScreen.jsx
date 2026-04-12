@@ -38,27 +38,34 @@ const LANGUAGE_OPTIONS = [
   { id: 'ar', label: 'العربية', emoji: '🇦🇪' },
 ]
 
-const HAPTIC_SHAKE = {
+const HAPTIC_TOUCH = {
   tap: { 
-    x: [0, -3, 3, -3, 3, 0],
-    transition: { duration: 0.35, ease: "easeInOut" }
+    scale: 0.98,
+    transition: { duration: 0.1 }
   }
 }
 
 function SettingRow({ icon: Icon, label, value, onClick, color = '#000000', subtitle }) {
   const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={onClick}
-      className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] transition-colors">
-      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
+    <motion.button 
+      variants={HAPTIC_TOUCH} 
+      whileTap="tap" 
+      onClick={(e) => {
+        // Stop propagation if nested, but here it's fine
+        onClick?.(e)
+      }}
+      className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] transition-colors touch-auto pointer-events-auto"
+    >
+      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE] pointer-events-none">
         <Icon className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 pointer-events-none">
         <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>{label}</span>
         {subtitle && <span className="text-[11px] font-[500] text-[#AFAFAF] mt-0.5 block" style={S}>{subtitle}</span>}
       </div>
-      {value && <span className="text-[13px] font-[600] text-[#AFAFAF] mr-2 truncate max-w-[120px]" style={S}>{value}</span>}
-      <ChevronRight className="w-4 h-4 text-[#AFAFAF]" strokeWidth={3} />
+      {value && <span className="text-[13px] font-[600] text-[#AFAFAF] mr-2 truncate max-w-[120px] pointer-events-none" style={S}>{value}</span>}
+      <ChevronRight className="w-4 h-4 text-[#AFAFAF] pointer-events-none" strokeWidth={3} />
     </motion.button>
   )
 }
