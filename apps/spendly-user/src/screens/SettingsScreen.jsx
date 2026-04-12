@@ -89,10 +89,10 @@ function BottomSheet({ show, onClose, title, children }) {
       {show && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="fixed inset-0 z-[1001]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
+            onClick={onClose} className="fixed inset-0 z-[1001] pointer-events-auto" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col pointer-events-auto"
             style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
             <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
             <div className="flex items-center justify-between px-8 mb-6 mt-2">
