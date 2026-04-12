@@ -8,10 +8,10 @@ import { useTranslation } from 'react-i18next'
 import { X, Lock, Trophy, Medal, Star, Target } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 
-const HAPTIC_SHAKE = {
+const HAPTIC_TOUCH = {
   tap: { 
-    x: [0, -3, 3, -3, 3, 0],
-    transition: { duration: 0.35, ease: "easeInOut" }
+    scale: 0.95,
+    transition: { duration: 0.1 }
   }
 }
 
@@ -29,7 +29,7 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
         style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
         
         <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-10" />
-        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={onClose} 
+        <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
           className="absolute top-8 right-8 w-11 h-11 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
           <X className="w-5 h-5 text-black" strokeWidth={2.5} />
         </motion.button>
@@ -150,7 +150,7 @@ export default function BadgesScreen() {
                   return (
                     <motion.button key={badge.id} 
                       onClick={() => handleSelect(badge)}
-                      variants={HAPTIC_SHAKE}
+                      variants={HAPTIC_TOUCH}
                       whileTap="tap"
                       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
                       className={`relative aspect-square rounded-[32px] border transition-all flex flex-col items-center justify-center p-4
