@@ -52,7 +52,6 @@ function SettingRow({ icon: Icon, label, value, onClick, color = '#000000', subt
       variants={HAPTIC_TOUCH} 
       whileTap="tap" 
       onClick={(e) => {
-        // Stop propagation if nested, but here it's fine
         onClick?.(e)
       }}
       className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] transition-colors touch-auto pointer-events-auto"
@@ -241,7 +240,6 @@ export default function SettingsScreen() {
             value={LANGUAGE_OPTIONS.find(o => o.id === (settings?.language || 'en'))?.label}
             onClick={() => setShowLanguagePicker(true)} />
           <SettingRow icon={Globe} label={t('settings.currency')} value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} />
-          {/* PWA Install row removed from here as per request */}
         </SectionCard>
 
         <SectionCard title={t('settings.limits')}>
@@ -261,7 +259,6 @@ export default function SettingsScreen() {
         </SectionCard>
 
         <SectionCard title="Permissions">
-          {/* Camera */}
           <div className="flex items-center gap-4 px-6 py-5">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
               <ScanLine className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
@@ -280,7 +277,6 @@ export default function SettingsScreen() {
                 onClick={async () => {
                   const ok = await permissionService.requestCamera()
                   setPermStatus(s => ({ ...s, camera: ok ? 'granted' : 'denied' }))
-                  setToast({ id: Date.now(), type: ok ? 'success' : 'error', message: ok ? 'Camera access granted' : 'Camera access denied' })
                 }}
                 className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
                 Allow
@@ -288,7 +284,6 @@ export default function SettingsScreen() {
             )}
           </div>
 
-          {/* Notifications */}
           <div className="flex items-center gap-4 px-6 py-5 border-t border-[#EEEEEE]">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
               <Bell className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
@@ -308,7 +303,6 @@ export default function SettingsScreen() {
                   if ('Notification' in window) {
                     const res = await Notification.requestPermission()
                     setPermStatus(s => ({ ...s, notifications: res }))
-                    setToast({ id: Date.now(), type: res === 'granted' ? 'success' : 'error', message: res === 'granted' ? 'Notifications enabled' : 'Notifications blocked' })
                   }
                 }}
                 className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
@@ -317,9 +311,8 @@ export default function SettingsScreen() {
             )}
           </div>
 
-          {/* Manage in browser */}
           <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
-            onClick={() => setToast({ id: Date.now(), type: 'info', message: 'Go to browser Settings → Site Settings → this site to revoke permissions' })}
+            onClick={() => setToast({ id: Date.now(), type: 'info', message: 'Manage Site Settings in Browser' })}
             className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] border-t border-[#EEEEEE]">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
               <ShieldCheck className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
@@ -353,18 +346,9 @@ export default function SettingsScreen() {
         <SectionCard title={t('settings.data')}>
            <SettingRow icon={Download} label={t('settings.export')} onClick={() => handleExport()} subtitle={t('settings.saveBackup')} />
            <SettingRow icon={Upload} label={t('settings.import')} onClick={() => setShowImportInput(true)} subtitle={t('settings.restoreBackup')} />
-           {!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone && (
-             <SettingRow icon={Smartphone} label="Install App" onClick={() => setPWAInstallVisible(true)} subtitle="Add to home screen" />
-           )}
            <SettingRow icon={Info} label="Migration Guide" onClick={() => navigate('/migration-guide')} subtitle="How to move browser data" />
            <SettingRow icon={Trash2} label={t('settings.clear')} onClick={() => setShowClearConfirm(true)} subtitle={t('settings.factoryReset')} />
         </SectionCard>
-
-         <div className="mx-6 mb-12 p-8 rounded-[40px] bg-black text-white shadow-2xl shadow-black/10 flex flex-col items-center">
-             <ShieldCheck className="w-12 h-12 mb-4 opacity-90" strokeWidth={2.5} />
-             <h3 className="text-[20px] font-[800] mb-2" style={S}>{t('settings.privacy')}</h3>
-             <p className="text-[14px] font-[500] text-white/60 text-center leading-relaxed" style={S}>{t('onboarding.step1_desc')}</p>
-         </div>
 
         <div className="text-center pb-24">
           <p className="text-[12px] font-[600] text-[#AFAFAF] uppercase tracking-widest" style={S}>Build v1.0.4</p>
@@ -485,6 +469,7 @@ export default function SettingsScreen() {
             </BottomSheet>
         )}
       </AnimatePresence>
+
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
     </div>
   )
