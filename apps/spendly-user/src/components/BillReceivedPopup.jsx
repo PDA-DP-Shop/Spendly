@@ -141,5 +141,3 @@ const BillReceivedPopup = ({ bill, onClose }) => {
 };
 
 export default BillReceivedPopup;
-
-export default BillReceivedPopup;
