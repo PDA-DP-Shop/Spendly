@@ -191,8 +191,11 @@ function AppShell() {
   const showTab = TAB_ROUTES.includes(location.pathname);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.querySelector('.app-content')?.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.body.scrollTo(0, 0);
+    document.documentElement.scrollTo(0, 0);
+    const appContent = document.querySelector('.app-content');
+    if (appContent) appContent.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (

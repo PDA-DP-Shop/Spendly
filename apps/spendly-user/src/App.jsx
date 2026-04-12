@@ -112,11 +112,13 @@ function ScreenSkeleton() {
 function AppWrapper() {
   const location = useLocation()
 
-  // Auto scroll to top on navigation
+  // Aggressive auto scroll to top on navigation
   useEffect(() => {
-    window.scrollTo(0, 0)
-    // Also scroll app-content div if it's the one scrolling
-    document.querySelector('.app-content')?.scrollTo(0, 0)
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    document.body.scrollTo(0, 0)
+    document.documentElement.scrollTo(0, 0)
+    const appContent = document.querySelector('.app-content')
+    if (appContent) appContent.scrollTo(0, 0)
   }, [location.pathname])
 
   const showTab = TAB_PATHS.includes(location.pathname)
