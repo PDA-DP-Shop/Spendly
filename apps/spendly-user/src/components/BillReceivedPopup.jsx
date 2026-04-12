@@ -1,26 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Receipt, Check, X, CreditCard, Clock, ShoppingBag } from 'lucide-react';
+import { Receipt, Check, X, CreditCard, Clock, ShoppingBag, AlertCircle } from 'lucide-react';
 import { useExpenseStore } from '../store/expenseStore';
 import { formatMoney } from '../utils/formatMoney';
+import { expenseService } from '../services/database';
 
 const S = { fontFamily: "'Inter', sans-serif" };
 
 const BillReceivedPopup = ({ bill, onClose }) => {
   const addExpense = useExpenseStore(state => state.addExpense);
+  const [isDuplicate, setIsDuplicate] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    // Check for duplicate
+    if (bill?.billId) {
+      expenseService.getAll().then(all => {
+        const match = all.find(e => e.billId === bill.billId);
+        if (match) setIsDuplicate(true);
+        setChecking(false);
+      });
+    } else {
+      setChecking(false);
+    }
+
     // Auto-close after 5 minutes of inactivity
     const timer = setTimeout(() => {
       onClose();
     }, 300000);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [bill, onClose]);
 
   if (!bill) return null;
 
   const handleAdd = async () => {
+    if (isDuplicate) return;
+
     const catMap = {
       'grocery': 'shopping',
       'medical': 'health',
@@ -128,10 +144,19 @@ const BillReceivedPopup = ({ bill, onClose }) => {
             </button>
             <button 
                 onClick={handleAdd}
-                className="flex-[2] h-16 bg-black text-white rounded-2xl font-[900] text-[16px] shadow-xl shadow-black/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                disabled={isDuplicate || checking}
+                className={`flex-[2] h-16 rounded-2xl font-[900] text-[16px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 ${
+                  isDuplicate ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-none' : 'bg-black text-white shadow-black/10'
+                }`}
                 style={S}
             >
-                <Check className="w-5 h-5" strokeWidth={3} /> Add to Wallet
+                {checking ? (
+                  <Clock className="w-5 h-5 animate-pulse" />
+                ) : isDuplicate ? (
+                  <><Check className="w-5 h-5" strokeWidth={3} /> Already Added</>
+                ) : (
+                  <><Plus className="w-5 h-5" strokeWidth={3} /> Add to Wallet</>
+                )}
             </button>
         </div>
       </motion.div>
