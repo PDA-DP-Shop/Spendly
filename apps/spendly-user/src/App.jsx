@@ -440,6 +440,7 @@ export default function App() {
         <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-dvh">
           <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden">
             {content}
+            <div id="modal-root" className="absolute inset-0 z-[100] pointer-events-none" />
           </div>
         </div>
       )}

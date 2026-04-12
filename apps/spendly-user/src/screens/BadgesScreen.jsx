@@ -21,7 +21,7 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
   const { t } = useTranslation()
   const S = { fontFamily: "'Inter', sans-serif" }
   return createPortal(
-    <>
+    <div className="pointer-events-auto">
       <motion.div key={`bg-${badge.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="absolute inset-0 z-[100]" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
       <motion.div key={`sheet-${badge.id}`} initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
@@ -62,8 +62,8 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
           </div>
         )}
       </motion.div>
-    </>,
-    document.body
+    </div>,
+    document.getElementById('modal-root') || document.body
   )
 }
 
