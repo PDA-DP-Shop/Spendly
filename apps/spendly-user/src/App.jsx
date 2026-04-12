@@ -23,6 +23,8 @@ import BillReceivedPopup from './components/BillReceivedPopup'
 import NFCGlow from './components/animations/NFCGlow'
 import { useAppUpdate } from './hooks/useAppUpdate'
 import { UpdateBanner } from './components/UpdateBanner'
+import { useBadgeCheck } from './hooks/useBadgeCheck'
+import BadgeEarnedCelebration from './components/shared/BadgeEarnedCelebration'
 
 
 const BillCodeEntry = lazy(() => import('./screens/BillCodeEntry'))
@@ -224,6 +226,9 @@ export default function App() {
   const [incomingBill, setIncomingBill] = useState(null)
   const [showBillPopup, setShowBillPopup] = useState(false)
 
+  // Automated Achievement Tracking
+  useBadgeCheck()
+
   // Desktop detection
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth > 768)
@@ -407,6 +412,7 @@ export default function App() {
         <AppWrapper />
         <PWAInstallGuide />
         <NotificationDrawer />
+        <BadgeEarnedCelebration />
         {showBillPopup && incomingBill && (
           <BillReceivedPopup 
             bill={incomingBill} 
