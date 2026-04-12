@@ -21,12 +21,12 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
   const S = { fontFamily: "'Inter', sans-serif" }
   return (
     <>
-      <motion.div key="badge-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      <motion.div key={`bg-${badge.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="absolute inset-0 z-[100]" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
-      <motion.div key="badge-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="absolute bottom-0 left-0 right-0 z-[101] bg-white flex flex-col items-center text-center px-8"
-        style={{ borderRadius: '40px 40px 0 0', maxHeight: '90%', boxShadow: '0 -20px 40px rgba(0,0,0,0.2)', paddingBottom: 'calc(env(safe-area-inset-bottom, 24px) + 20px)' }}>
+      <motion.div key={`sheet-${badge.id}`} initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200, mass: 0.8 }}
+        className="absolute bottom-0 left-0 right-0 z-[101] bg-white flex flex-col items-center text-center px-8 shadow-premium"
+        style={{ borderRadius: '40px 40px 0 0', maxHeight: '90%', paddingBottom: 'calc(env(safe-area-inset-bottom, 24px) + 20px)' }}>
         
         <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-10" />
         <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
