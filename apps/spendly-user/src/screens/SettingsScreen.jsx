@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -78,6 +79,35 @@ function SectionCard({ title, children }) {
         <div className="divide-y divide-[#EEEEEE]">{children}</div>
       </div>
     </div>
+  )
+}
+
+function BottomSheet({ show, onClose, title, children }) {
+  const S = { fontFamily: "'Inter', sans-serif" }
+  return createPortal(
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="fixed inset-0 z-[1001]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+            <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-8 mb-6 mt-2">
+              <h3 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{title}</h3>
+              <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
+                className="w-11 h-11 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
+                <X className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </motion.button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
   )
 }
 
@@ -174,30 +204,6 @@ export default function SettingsScreen() {
     window.location.reload()
   }
 
-  const BottomSheet = ({ show, onClose, title, children }) => (
-    <AnimatePresence>
-      {show && (
-        <>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.4)' }} />
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-            className="fixed bottom-0 left-0 right-0 z-[61] pb-safe bg-white flex flex-col"
-            style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh' }}>
-            <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
-            <div className="flex items-center justify-between px-8 mb-6 mt-2">
-              <h3 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{title}</h3>
-              <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
-                className="w-11 h-11 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
-                <X className="w-5 h-5 text-black" strokeWidth={2.5} />
-              </motion.button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">{children}</div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
 
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white safe-top">
