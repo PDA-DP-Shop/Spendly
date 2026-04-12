@@ -1,5 +1,6 @@
 // Festivals Screen — Feature 21 Seasonal Budgeting
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Calendar, Gift, ShoppingBag, Utensils, Music, Tag, ChevronRight, Trash2, PartyPopper, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -27,15 +28,15 @@ const HAPTIC_SHAKE = {
 
 function BottomSheet({ show, onClose, title, children }) {
   const S = { fontFamily: "'Inter', sans-serif" }
-  return (
+  return createPortal(
     <AnimatePresence>
       {show && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(0,0,0,0.4)' }} />
+            onClick={onClose} className="fixed inset-0 z-[1001]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col"
             style={{ borderRadius: '40px 40px 0 0', maxHeight: '95dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
             <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
             <div className="flex items-center justify-between px-8 mb-5 mt-2">
@@ -49,7 +50,8 @@ function BottomSheet({ show, onClose, title, children }) {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
   )
 }
 
@@ -157,11 +159,11 @@ export default function FestivalsScreen() {
               <div>
                 <p className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-wider mb-4 ml-1" style={S}>Select Template</p>
                 <div className="grid grid-cols-2 gap-4">
-                  {FESTIVAL_TEMPLATES.map(t => (
-                    <motion.button key={t_item.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { setSelectedTemplate(t_item.id); setBudget(t_item.defaultBudget.toString()) }}
-                      className={`p-6 rounded-[32px] border transition-all flex flex-col items-center gap-3 ${selectedTemplate === t_item.id ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-[#F6F6F6] border-transparent'}`}>
-                      <span className="text-4xl">{t_item.icon}</span>
-                      <span className="text-[12px] font-[800] text-black uppercase tracking-tight" style={S}>{t(t_item.nameKey)}</span>
+                  {FESTIVAL_TEMPLATES.map(tpl => (
+                    <motion.button key={tpl.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { setSelectedTemplate(tpl.id); setBudget(tpl.defaultBudget.toString()) }}
+                      className={`p-6 rounded-[32px] border transition-all flex flex-col items-center gap-3 ${selectedTemplate === tpl.id ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-[#F6F6F6] border-transparent'}`}>
+                      <span className="text-4xl">{tpl.icon}</span>
+                      <span className="text-[12px] font-[800] text-black uppercase tracking-tight" style={S}>{t(tpl.nameKey)}</span>
                     </motion.button>
                   ))}
                 </div>

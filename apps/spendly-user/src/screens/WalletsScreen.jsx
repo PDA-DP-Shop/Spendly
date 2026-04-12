@@ -1,5 +1,6 @@
 // WalletsScreen.jsx — Feature 4: Wallet Balance Tracker
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
 import EmptyState from '../components/shared/EmptyState'
@@ -27,15 +28,15 @@ const HAPTIC_SHAKE = {
 
 function BottomSheet({ show, onClose, title, children }) {
   const S = { fontFamily: "'Inter', sans-serif" }
-  return (
+  return createPortal(
     <AnimatePresence>
       {show && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(0,0,0,0.4)' }} />
+            onClick={onClose} className="fixed inset-0 z-[1001]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-            className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col"
             style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
             <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
             <div className="flex items-center justify-between px-8 mb-5 mt-2">
@@ -49,7 +50,8 @@ function BottomSheet({ show, onClose, title, children }) {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
   )
 }
 
