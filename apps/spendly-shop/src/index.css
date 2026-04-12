@@ -4,11 +4,12 @@
   :root {
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --shadow-premium: 0 10px 40px -10px rgba(16, 185, 129, 0.1);
+    --shadow-premium: 0 10px 40px -10px rgba(124, 111, 247, 0.1);
   }
 
   body {
-    @apply bg-white text-slate-900 antialiased selection:bg-emerald-100;
+    @apply bg-white text-slate-900 antialiased selection:bg-indigo-100;
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -67,7 +68,7 @@
   }
 
   .app-shell {
-    background-color: #F8F9FA;
+    background-color: #F8F9FF; /* Sophisticated blue-ish white */
     min-height: 100vh;
     width: 100%;
     display: flex;
@@ -78,14 +79,14 @@
     width: 100%;
     max-width: 450px;
     min-height: 100dvh;
-    background-color: #FFFFFF;
+    background-color: #F8F9FF;
     position: relative;
-    box-shadow: 0 0 100px rgba(0,0,0,0.05);
+    box-shadow: 0 0 100px rgba(124, 111, 247, 0.05);
   }
 
   @media (max-width: 450px) {
     .app-shell {
-      background-color: #FFFFFF;
+      background-color: #F8F9FF;
     }
     .app-content {
       max-width: 100%;
@@ -102,10 +103,10 @@
     padding-bottom: var(--safe-bottom);
   }
   .pb-tab {
-    padding-bottom: calc(80px + var(--safe-bottom));
+    padding-bottom: calc(88px + var(--safe-bottom));
   }
   .mb-tab {
-    margin-bottom: calc(80px + var(--safe-bottom));
+    margin-bottom: calc(88px + var(--safe-bottom));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -125,14 +126,43 @@
     scrollbar-width: none;
   }
 
-  .premium-shadow {
-    box-shadow: var(--shadow-premium);
+  .shadow-premium {
+    box-shadow: 0 25px 50px -12px rgba(124, 111, 247, 0.08);
+  }
+  
+  .glass {
+    @apply bg-white/70 backdrop-blur-2xl border border-white/40;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    70% { transform: scale(0.9); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-pulse-subtle {
+    animation: pulseSubtle 3s infinite ease-in-out;
+  }
+
+  @keyframes pulseSubtle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(0.98); }
   }
 }
 
 button {
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

@@ -61,6 +61,25 @@ class SpendlyDB extends Dexie {
       monthlyReports: '++id, month, year',
       spendingScore: '++id, month, year',
     })
+
+    // Version 5: Spendly Shop Ecosystem Integration
+    this.version(5).stores({
+      expenses: '++id, type, category, date, addedAt, shopName, billId, billSource',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      scannedProducts: '++id, barcode, productName, brand, category, amount',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+    })
   }
 }
 

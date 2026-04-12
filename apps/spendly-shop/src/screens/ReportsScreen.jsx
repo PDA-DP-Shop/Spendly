@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, Receipt, Users, Clock, 
   Trophy, Download, Share2, ArrowLeft,
-  ChevronRight, Banknote, CreditCard, PieChart
+  ChevronRight, Banknote, CreditCard, PieChart,
+  Target, Zap, Activity, Filter, BarChart, X
 } from 'lucide-react';
 
 import { useBillStore } from '../store/billStore';
 import { useCustomerStore } from '../store/customerStore';
 import { formatMoney } from '../utils/formatMoney';
 
-const FILTERS = ['Today', 'This Week', 'This Month', 'Custom'];
+const FILTERS = ['Today', 'This Week', 'This Month', 'All Time'];
 
 const ReportsScreen = () => {
     const navigate = useNavigate();
@@ -24,52 +25,69 @@ const ReportsScreen = () => {
         loadCustomers();
     }, []);
 
-    // Calculate report data based on filter
-    const totalSales = bills.reduce((sum, b) => sum + b.total, 0);
+    const totalSales = bills.reduce((sum, b) => sum + (b.total || 0), 0);
     const avgBill = bills.length > 0 ? totalSales / bills.length : 0;
     
-    const paymentMetrics = bills.reduce((acc, bill) => {
-        const method = bill.paymentMethod?.toLowerCase() || 'cash';
-        acc[method] = (acc[method] || 0) + bill.total;
-        return acc;
-    }, { cash: 0, upi: 0, card: 0, credit: 0 });
+    const topItems = useMemo(() => {
+        const itemMap = {};
+        bills.forEach(bill => {
+            (bill.items || []).forEach(item => {
+                const name = item.name || 'Unknown Item';
+                if (!itemMap[name]) itemMap[name] = { name, qty: 0, amount: 0 };
+                itemMap[name].qty += (item.quantity || 1);
+                itemMap[name].amount += (item.price * (item.quantity || 1));
+            });
+        });
+        return Object.values(itemMap).sort((a, b) => b.amount - a.amount).slice(0, 5);
+    }, [bills]);
 
-    const topItems = [
-        { name: 'Parle-G 100g', qty: 45, amount: 2250 },
-        { name: 'Amul Milk 500ml', qty: 32, amount: 1600 },
-        { name: 'Coca Cola 250ml', qty: 28, amount: 1120 },
-        { name: 'Maggi Noodles', qty: 25, amount: 1250 },
-        { name: 'Surf Excel', qty: 12, amount: 1800 }
-    ];
-
-    const topCustomers = [
-        { name: 'Devansh Patel', bills: 12, amount: 4500 },
-        { name: 'Hardik Shah', bills: 8, amount: 3200 },
-        { name: 'Rahul Sharma', bills: 5, amount: 1500 }
-    ];
+    // Real weekly sales — last 7 days from actual bills
+    const weeklyBars = useMemo(() => {
+        const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return d.toISOString().split('T')[0];
+        });
+        const totals = days.map(day =>
+            bills.filter(b => b.createdAt?.startsWith(day)).reduce((s, b) => s + (b.total || 0), 0)
+        );
+        const max = Math.max(...totals, 1);
+        return days.map((day, i) => ({
+            pct: Math.round((totals[i] / max) * 100),
+            label: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][new Date(day).getDay()],
+            isToday: i === 6,
+        }));
+    }, [bills]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24">
-            {/* Header */}
-            <header className="bg-white p-6 pb-4 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-slate-50">
-                <button onClick={() => navigate('/home')} className="flex items-center gap-2 text-slate-800 font-black">
-                    <ArrowLeft className="w-5 h-5" /> Reports
+        <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+            <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
+                <button onClick={() => navigate('/home')} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
+                    <div className="p-2 bg-[#F8FAFC] rounded-xl group-hover:bg-black group-hover:text-white transition-all">
+                        <ArrowLeft className="w-5 h-5" />
+                    </div>
+                    <span className="text-[17px]">Sales Reports</span>
                 </button>
                 <div className="flex gap-4">
-                    <Download className="w-5 h-5 text-slate-400" />
-                    <Share2 className="w-5 h-5 text-slate-400" />
+                    <button className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#64748B]">
+                        <Download className="w-5 h-5" />
+                    </button>
                 </div>
             </header>
 
-            <div className="p-4 space-y-6">
-                {/* Filter Row */}
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide px-1">
-                    {FILTERS.map(f => (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-6 space-y-10"
+            >
+                {/* Time Filter */}
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6">
+                    {FILTERS.map((f, idx) => (
                         <button 
                             key={f} 
                             onClick={() => setFilter(f)}
-                            className={`px-6 py-2.5 rounded-full text-[13px] font-[800] whitespace-nowrap transition-all border ${
-                                filter === f ? 'bg-black text-white border-black shadow-md' : 'bg-white text-[#AFAFAF] border-slate-100'
+                            className={`px-6 py-3.5 rounded-full text-[11px] font-[800] uppercase tracking-widest whitespace-nowrap transition-all border ${
+                                filter === f ? 'bg-black text-white border-black shadow-md' : 'bg-[#F8FAFC] text-[#64748B] border-transparent'
                             }`}
                         >
                             {f}
@@ -77,137 +95,98 @@ const ReportsScreen = () => {
                     ))}
                 </div>
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-5 rounded-card border border-slate-100 shadow-sm space-y-2">
-                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-primary">
-                            <TrendingUp className="w-5 h-5" />
+                {/* Main Metrics */}
+                <div className="grid grid-cols-2 gap-4">
+                    {[
+                        { label: 'Revenue', val: formatMoney(totalSales), icon: TrendingUp, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                        { label: 'Bills', val: bills.length, icon: Receipt, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                        { label: 'Clients', val: customers.length, icon: Users, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                        { label: 'Avg Bill', val: formatMoney(avgBill), icon: Activity, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                    ].map((s, i) => (
+                        <div 
+                            key={i}
+                            className="bg-[#F8FAFC] p-8 rounded-[32px] space-y-4 border border-transparent shadow-sm"
+                        >
+                            <div className={`w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm`}>
+                                <s.icon className={`w-6 h-6 ${s.color}`} />
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-1.5">{s.label}</div>
+                                <div className="text-[20px] font-[800] text-black tracking-tight">{s.val}</div>
+                            </div>
                         </div>
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Sales</div>
-                        <div className="text-xl font-black text-slate-900">{formatMoney(totalSales)}</div>
-                    </div>
-                    <div className="bg-white p-5 rounded-card border border-slate-100 shadow-sm space-y-2">
-                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500">
-                            <Receipt className="w-5 h-5" />
-                        </div>
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Bills</div>
-                        <div className="text-xl font-black text-slate-900">{bills.length}</div>
-                    </div>
-                    <div className="bg-white p-5 rounded-card border border-slate-100 shadow-sm space-y-2">
-                        <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-purple-500">
-                            <Users className="w-5 h-5" />
-                        </div>
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customers</div>
-                        <div className="text-xl font-black text-slate-900">{customers.length}</div>
-                    </div>
-                    <div className="bg-white p-5 rounded-card border border-slate-100 shadow-sm space-y-2">
-                        <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-500">
-                            <Banknote className="w-5 h-5" />
-                        </div>
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Bill</div>
-                        <div className="text-xl font-black text-slate-900">{formatMoney(avgBill)}</div>
-                    </div>
+                    ))}
                 </div>
 
-                {/* Sales Chart Placeholder */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-slate-900">Sales Trend</h3>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last 7 Days</div>
+                {/* Performance Graph */}
+                <div className="bg-black rounded-[32px] p-8 text-white shadow-xl space-y-10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16" />
+                    
+                    <div className="flex items-center justify-between relative z-10">
+                        <div>
+                            <h3 className="text-[18px] font-[800] tracking-tight">Weekly Performance</h3>
+                            <span className="text-[10px] font-[800] text-white/40 uppercase tracking-widest mt-2 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-white/40 rounded-full inline-block" /> Revenue Trend
+                            </span>
+                        </div>
+                        <div className="p-3 bg-white/10 rounded-xl">
+                            <BarChart className="w-5 h-5 text-white/60" />
+                        </div>
                     </div>
-                    <div className="h-40 flex items-end justify-between gap-2 pt-4">
-                        {[40, 65, 45, 90, 55, 75, 80].map((h, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                <motion.div 
+
+                    <div className="h-44 flex items-end justify-between gap-3 pt-4 relative z-10 px-2">
+                        {weeklyBars.map((bar, i) => (
+                            <div key={i} className="flex-1 flex flex-col items-center gap-4">
+                                <motion.div
                                     initial={{ height: 0 }}
-                                    animate={{ height: `${h}%` }}
-                                    className={`w-full rounded-t-lg ${i === 6 ? 'bg-primary' : 'bg-emerald-50'}`}
+                                    animate={{ height: `${Math.max(bar.pct, 4)}%` }}
+                                    transition={{ duration: 1, ease: [0.33, 1, 0.68, 1], delay: i * 0.05 }}
+                                    className={`w-full rounded-t-lg ${bar.isToday ? 'bg-white' : 'bg-white/10'}`}
                                 />
-                                <span className="text-[8px] font-black text-slate-300 uppercase">D0{i+1}</span>
+                                <span className={`text-[9px] font-[800] uppercase tracking-widest ${bar.isToday ? 'text-white/60' : 'text-white/20'}`}>{bar.label}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Payment Breakdown */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6">
+                {/* Top Selling */}
+                <div className="bg-[#F8FAFC] rounded-[32px] p-8 space-y-8 border border-transparent">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-slate-900">Payment Modes</h3>
-                        <PieChart className="w-4 h-4 text-slate-300" />
+                        <h3 className="text-[18px] font-[800] text-black tracking-tight">Top Products</h3>
+                        <Trophy className="w-5 h-5 text-black" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        {[
-                            { label: 'Cash', val: paymentMetrics.cash, color: 'bg-emerald-500' },
-                            { label: 'UPI', val: paymentMetrics.upi, color: 'bg-blue-500' },
-                            { label: 'Card', val: paymentMetrics.card, color: 'bg-indigo-500' },
-                            { label: 'Credit', val: paymentMetrics.credit, color: 'bg-red-500' }
-                        ].map(p => (
-                            <div key={p.label} className="flex items-center gap-3">
-                                <div className={`w-2 h-8 rounded-full ${p.color}`} />
-                                <div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{p.label}</div>
-                                    <div className="font-black text-slate-800 text-xs">{formatMoney(p.val)}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Top Items Sold */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-slate-900">Top Selling Items</h3>
-                        <Trophy className="w-4 h-4 text-amber-500" />
-                    </div>
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {topItems.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${idx === 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-400'}`}>
+                            <div key={idx} className="flex items-center justify-between group">
+                                <div className="flex items-center gap-5">
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-[800] text-[15px] bg-white border border-[#F1F5F9] shadow-sm`}>
                                         {idx + 1}
                                     </div>
                                     <div>
-                                        <div className="font-black text-slate-800 text-xs">{item.name}</div>
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase">{item.qty} units sold</div>
+                                        <div className="font-[800] text-black text-[16px] tracking-tight">{item.name}</div>
+                                        <div className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mt-1">{item.qty} Sold</div>
                                     </div>
                                 </div>
-                                <div className="font-black text-slate-900 text-xs">{formatMoney(item.amount)}</div>
+                                <div className="text-right">
+                                    <div className="font-[800] text-black text-[17px] tracking-tight">{formatMoney(item.amount)}</div>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Top Customers */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6">
-                    <h3 className="text-sm font-black text-slate-900">Top Customers</h3>
-                    <div className="space-y-4">
-                        {topCustomers.map((c, idx) => (
-                            <div key={idx} className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-50 to-emerald-100 text-primary font-black rounded-xl flex items-center justify-center text-xs">
-                                        {c.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <div className="font-black text-slate-800 text-xs">{c.name}</div>
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase">{c.bills} bills created</div>
-                                    </div>
-                                </div>
-                                <div className="font-black text-primary text-xs">{formatMoney(c.amount)}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3 pt-4">
-                    <button className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-100">
-                        <Download className="w-4 h-4" /> Download PDF Report
+                {/* Actions */}
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                    <button className="bg-white border border-[#F1F5F9] rounded-[24px] py-6 flex flex-col items-center justify-center gap-3 shadow-sm transition-active active:bg-slate-50">
+                        <Download className="w-6 h-6 text-black" />
+                        <span className="text-[10px] font-[800] uppercase tracking-widest text-[#94A3B8]">PDF Report</span>
                     </button>
-                    <button className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg">
-                        <Share2 className="w-4 h-4" /> Share via WhatsApp
+                    <button className="bg-black text-white rounded-[24px] py-6 flex flex-col items-center justify-center gap-3 shadow-md active:bg-slate-900 transition-all">
+                        <Share2 className="w-6 h-6 text-white" />
+                        <span className="text-[10px] font-[800] uppercase tracking-widest text-white/40">Share Stats</span>
                     </button>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

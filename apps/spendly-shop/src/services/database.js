@@ -12,9 +12,9 @@ export const setEncryptionKey = (bits) => {
 class SpendlyShopDB extends Dexie {
   constructor() {
     super('SpendlyShopDB');
-    this.version(1).stores({
+    this.version(2).stores({
       shop: '++id',
-      bills: '++id, billNumber, status, createdAt',
+      bills: '++id, billId, billNumber, status, createdAt',
       customers: '++id, name, phone',
       savedItems: '++id, name, barcode, timesUsed',
       creditBook: '++id, customerId, billId, status',

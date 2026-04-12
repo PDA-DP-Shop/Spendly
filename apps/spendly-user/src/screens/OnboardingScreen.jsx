@@ -7,7 +7,7 @@ import { useSettingsStore } from '../store/settingsStore'
 import { useAppLock } from '../hooks/useAppLock'
 import { settingsService } from '../services/database'
 import { CURRENCIES } from '../constants/currencies'
-import { ChevronRight, ShieldCheck, Check, Search, User, X, FileText, ExternalLink, Camera, Mic, Activity } from 'lucide-react'
+import { ChevronRight, ShieldCheck, Check, Search, User, X, FileText, ExternalLink, ScanLine, Bell, Activity } from 'lucide-react'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import { permissionService } from '../services/permissionService'
 
@@ -79,7 +79,7 @@ export default function OnboardingScreen() {
   const [agreedTerms, setAgreedTerms] = useState(false)
   const [agreedPrivacy, setAgreedPrivacy] = useState(false)
   const [legalModal, setLegalModal] = useState(null) // 'terms' | 'privacy' | null
-  const [permissionsState, setPermissionsState] = useState({ camera: false, mic: false })
+  const [permissionsState, setPermissionsState] = useState({ camera: false, notifications: false })
   const [requesting, setRequesting] = useState(false)
 
   const handleLanguageSelect = (langId) => {
@@ -110,8 +110,12 @@ export default function OnboardingScreen() {
     const results = await permissionService.requestAllPermissions()
     setPermissionsState(results)
     setRequesting(false)
-    // Small pause for visual feedback
-    setTimeout(() => setStep(4), 500)
+    setTimeout(() => setStep(4), 600)
+  }
+
+  const handleSkipPermissions = () => {
+    permissionService.skip()
+    setStep(4)
   }
 
   const finalizeOnboarding = async (code = null) => {
@@ -384,51 +388,78 @@ export default function OnboardingScreen() {
     <motion.div key="perms" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
       className="flex flex-col h-full bg-white">
       <div className="flex-1 overflow-y-auto pt-16 px-8 pb-6 flex flex-col items-center scrollbar-hide">
-        <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-6 flex-shrink-0">
-            <Activity className="w-8 h-8 text-blue-600" strokeWidth={2.5} />
+        <div className="w-16 h-16 rounded-[24px] bg-black flex items-center justify-center mb-6 flex-shrink-0 shadow-lg">
+            <Activity className="w-8 h-8 text-white" strokeWidth={2.5} />
         </div>
-        <h2 className="text-[26px] font-[800] text-black mb-2 tracking-tight text-center" style={S}>System Access</h2>
+        <h2 className="text-[26px] font-[800] text-black mb-2 tracking-tight text-center" style={S}>App Permissions</h2>
         <p className="text-[13px] font-[500] text-[#AFAFAF] text-center mb-10 max-w-[280px]" style={S}>
-          Spendly needs these to unlock its most powerful features
+          Allow once — Spendly remembers and won't ask again
         </p>
 
         <div className="w-full space-y-3">
-            <div className={`flex items-center gap-4 p-5 rounded-[28px] border transition-all ${permissionsState.camera ? 'bg-emerald-50 border-emerald-100' : 'bg-[#F6F6F6] border-transparent'}`}>
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${permissionsState.camera ? 'bg-emerald-500 text-white' : 'bg-white text-black border border-[#EEEEEE]'}`}>
-                    <Camera className="w-5 h-5" />
-                </div>
+            {/* Camera */}
+            <motion.div
+              animate={permissionsState.camera ? { borderColor: '#D1FAE5', backgroundColor: '#F0FDF4' } : {}}
+              className="flex items-center gap-4 p-5 rounded-[28px] border border-[#EEEEEE] bg-[#F6F6F6] transition-all"
+            >
+                <motion.div
+                  animate={permissionsState.camera ? { backgroundColor: '#10B981', color: '#fff' } : {}}
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white border border-[#EEEEEE] text-black"
+                >
+                    <ScanLine className="w-5 h-5" strokeWidth={2.5} />
+                </motion.div>
                 <div className="flex-1">
                     <p className="text-[14px] font-[800] text-black" style={S}>Smart Scanner</p>
-                    <p className="text-[10px] font-[600] text-[#AFAFAF]" style={S}>For bills and barcodes</p>
+                    <p className="text-[10px] font-[600] text-[#AFAFAF]" style={S}>Scan QR bills & receipts</p>
                 </div>
-                {permissionsState.camera && <Check className="w-5 h-5 text-emerald-500" strokeWidth={4} />}
-            </div>
+                {permissionsState.camera && (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400 }}>
+                    <Check className="w-5 h-5 text-emerald-500" strokeWidth={4} />
+                  </motion.div>
+                )}
+            </motion.div>
 
-            <div className={`flex items-center gap-4 p-5 rounded-[28px] border transition-all ${permissionsState.mic ? 'bg-emerald-50 border-emerald-100' : 'bg-[#F6F6F6] border-transparent'}`}>
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${permissionsState.mic ? 'bg-emerald-500 text-white' : 'bg-white text-black border border-[#EEEEEE]'}`}>
-                    <Mic className="w-5 h-5" />
-                </div>
+            {/* Notifications */}
+            <motion.div
+              animate={permissionsState.notifications ? { borderColor: '#D1FAE5', backgroundColor: '#F0FDF4' } : {}}
+              className="flex items-center gap-4 p-5 rounded-[28px] border border-[#EEEEEE] bg-[#F6F6F6] transition-all"
+            >
+                <motion.div
+                  animate={permissionsState.notifications ? { backgroundColor: '#10B981', color: '#fff' } : {}}
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white border border-[#EEEEEE] text-black"
+                >
+                    <Bell className="w-5 h-5" strokeWidth={2.5} />
+                </motion.div>
                 <div className="flex-1">
-                    <p className="text-[14px] font-[800] text-black" style={S}>Voice Command</p>
-                    <p className="text-[10px] font-[600] text-[#AFAFAF]" style={S}>Add expenses with voice</p>
+                    <p className="text-[14px] font-[800] text-black" style={S}>Notifications</p>
+                    <p className="text-[10px] font-[600] text-[#AFAFAF]" style={S}>Budget alerts & reminders</p>
                 </div>
-                {permissionsState.mic && <Check className="w-5 h-5 text-emerald-500" strokeWidth={4} />}
-            </div>
+                {permissionsState.notifications && (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400 }}>
+                    <Check className="w-5 h-5 text-emerald-500" strokeWidth={4} />
+                  </motion.div>
+                )}
+            </motion.div>
         </div>
 
-        <div className="mt-8 p-5 rounded-[24px] bg-blue-50/50 border border-blue-100">
-            <p className="text-[11px] font-[600] text-blue-600 leading-relaxed text-center" style={S}>
-                Spendly works locally. Data from your camera and microphone stays private on your phone.
+        <div className="mt-8 p-5 rounded-[24px] bg-[#F6F6F6] border border-[#EEEEEE]">
+            <p className="text-[11px] font-[600] text-[#AFAFAF] leading-relaxed text-center" style={S}>
+                🔒 All data stays on your device. Camera is only used to scan bills — never stores photos.
             </p>
         </div>
       </div>
       
       <div className="px-8 pb-10 pt-4 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10">
-        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={handleGrantPermissions} disabled={requesting}
+        <motion.button
+          variants={HAPTIC_SHAKE} whileTap="tap"
+          onClick={handleGrantPermissions}
+          disabled={requesting}
           className="w-full py-5 rounded-[22px] bg-black text-white text-[15px] font-[800] flex items-center justify-center gap-3 shadow-xl mb-4" style={S}>
-          {requesting ? 'Opening Prompt...' : 'Allow Everything'}
+          {requesting ? (
+            <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Requesting…</>
+          ) : 'Allow Permissions'}
         </motion.button>
-        <button onClick={() => setStep(4)} className="w-full py-2 text-[11px] font-[800] text-[#D8D8D8] uppercase tracking-[0.2em]" style={S}>
+        <button onClick={handleSkipPermissions} className="w-full py-2 text-[11px] font-[800] text-[#D8D8D8] uppercase tracking-[0.2em]" style={S}>
             Skip for now
         </button>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Delete, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Delete, ArrowRight, Lock, ShieldCheck, User, Store, ArrowLeft } from 'lucide-react';
 import { useShopStore } from '../store/shopStore';
 
 const LockScreen = () => {
@@ -15,8 +15,7 @@ const LockScreen = () => {
       const newPin = pin + num;
       setPin(newPin);
       if (newPin.length === 4) {
-        // Authenticate - for now auto-success
-        setTimeout(() => navigate('/home'), 300);
+        setTimeout(() => navigate('/home'), 500);
       }
     }
   };
@@ -24,55 +23,85 @@ const LockScreen = () => {
   const handleDelete = () => setPin(pin.slice(0, -1));
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-between py-20 bg-white">
-      <div className="flex flex-col items-center">
-        <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
-          <ShoppingBag className="w-10 h-10 text-primary" />
-        </div>
-        <h1 className="text-2xl font-black text-slate-900">{shop?.name || 'Spendly Shop'}</h1>
-        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2">
-          {isStaff ? 'Staff Mode Active' : 'Enter Shop PIN'}
-        </p>
-      </div>
+    <div className="h-screen w-full flex flex-col items-center justify-between py-16 bg-white relative overflow-hidden font-sans">
+      <div className="absolute top-0 right-0 w-80 h-80 bg-black/5 rounded-full blur-[90px] -z-10 -mr-40 -mt-40" />
 
-      <div className="flex gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <motion.div
-            key={i}
-            animate={{ scale: pin.length >= i ? 1.2 : 1 }}
-            className={`w-3.5 h-3.5 rounded-full border-2 transition-colors ${
-              pin.length >= i ? 'bg-primary border-primary' : 'bg-transparent border-slate-200'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="w-full px-12 grid grid-cols-3 gap-y-10 gap-x-8 text-center pt-8">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-          <button 
-            key={num} 
-            onClick={() => handleKeyPress(num)}
-            className="text-3xl font-black text-slate-800 active:bg-slate-50 py-2 rounded-full transition-colors"
-          >
-            {num}
-          </button>
-        ))}
-        <div />
-        <button onClick={() => handleKeyPress(0)} className="text-3xl font-black text-slate-800 active:bg-slate-50 py-2 rounded-full transition-colors">0</button>
-        <button onClick={handleDelete} className="flex items-center justify-center text-slate-400 active:bg-slate-50 py-2 rounded-full transition-colors">
-          <Delete />
-        </button>
-      </div>
-
-      <button 
-        onClick={() => {
-            setIsStaff(!isStaff);
-            setPin('');
-        }}
-        className="text-primary font-bold text-sm tracking-wide uppercase active:opacity-50 transition-opacity"
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex flex-col items-center pt-10"
       >
-        {isStaff ? 'Return to Admin?' : 'Staff Login?'}
-      </button>
+        <div className="w-20 h-20 bg-black rounded-[24px] flex items-center justify-center shadow-xl mb-8">
+            <Store className="w-10 h-10 text-white" />
+        </div>
+        
+        <h1 className="text-[24px] font-[800] text-black tracking-tight">{shop?.name || 'Spendly Shop'}</h1>
+        <div className="mt-2 flex items-center gap-2">
+             <div className="w-1 h-1 bg-emerald-500 rounded-full" />
+             <p className="text-[#94A3B8] font-[800] text-[10px] uppercase tracking-widest">
+                {isStaff ? 'Staff Member' : 'Owner'} Mode
+             </p>
+        </div>
+      </motion.div>
+
+      <div className="flex flex-col items-center gap-12 w-full">
+        <h2 className="text-[#94A3B8] font-[800] text-[12px] uppercase tracking-widest">Enter Access PIN</h2>
+        
+        {/* PIN Indicators */}
+        <div className="flex gap-8">
+            {[1, 2, 3, 4].map((i) => (
+                <div
+                    key={i}
+                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
+                        pin.length >= i ? 'bg-black border-black scale-125' : 'bg-transparent border-[#CBD5E1]'
+                    }`}
+                />
+            ))}
+        </div>
+
+        {/* Number Pad */}
+        <div className="w-full max-w-[320px] grid grid-cols-3 gap-y-6 gap-x-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+            <button 
+                key={num} 
+                onClick={() => handleKeyPress(num)}
+                className="h-20 text-[28px] font-[800] text-black rounded-full flex items-center justify-center active:bg-[#F8FAFC] transition-all"
+            >
+                {num}
+            </button>
+            ))}
+            <div />
+            <button 
+                onClick={() => handleKeyPress(0)} 
+                className="h-20 text-[28px] font-[800] text-black rounded-full flex items-center justify-center active:bg-[#F8FAFC] transition-all"
+            >
+                0
+            </button>
+            <button 
+                onClick={handleDelete} 
+                className="h-20 flex items-center justify-center text-[#94A3B8] active:text-black transition-all"
+            >
+                <Delete className="w-6 h-6" />
+            </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-6 w-full px-8">
+        <button 
+            onClick={() => {
+                setIsStaff(!isStaff);
+                setPin('');
+            }}
+            className="w-full h-16 bg-[#F8FAFC] text-black rounded-full font-[800] text-[12px] uppercase tracking-widest border border-[#F1F5F9] active:bg-[#F1F5F9] transition-all"
+        >
+            {isStaff ? 'Switch to Owner' : 'Login as Staff'}
+        </button>
+
+        <div className="flex items-center gap-2 opacity-30">
+            <Lock className="w-3 h-3 text-black" />
+            <span className="text-[10px] font-[800] text-black uppercase tracking-widest">Secured by Spendly</span>
+        </div>
+      </div>
     </div>
   );
 };

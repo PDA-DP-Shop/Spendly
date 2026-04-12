@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useState, lazy, Suspense, useRef } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, LazyMotion, domAnimation, m as motion } from 'framer-motion'
 import BottomTabBar from './components/shared/BottomTabBar'
@@ -21,6 +21,9 @@ import { handleIncomingBill } from './services/billReceiver'
 import { startNFCReceiver } from './services/nfcReceiver'
 import BillReceivedPopup from './components/BillReceivedPopup'
 import NFCGlow from './components/animations/NFCGlow'
+import { useAppUpdate } from './hooks/useAppUpdate'
+import { UpdateBanner } from './components/UpdateBanner'
+
 
 const BillCodeEntry = lazy(() => import('./screens/BillCodeEntry'))
 
@@ -43,9 +46,35 @@ const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'))
 const MigrationGuideScreen = lazy(() => import('./screens/MigrationGuideScreen'))
 
 const TAB_PATHS = [
-  '/', '/reports', '/search', '/settings', '/expenses', '/budget', '/scans',
+  '/', '/reports', '/search', '/settings', '/expenses', '/budget',
   '/wallets', '/emis', '/goals', '/trips', '/badges', '/festivals'
 ]
+
+// Route depth — higher = deeper in the app (forward), lower = back
+const ROUTE_DEPTH = {
+  '/': 1,
+  '/expenses': 2,
+  '/reports': 2,
+  '/search': 2,
+  '/settings': 2,
+  '/budget': 2,
+  '/scans': 2,
+  '/wallets': 2,
+  '/emis': 2,
+  '/goals': 2,
+  '/trips': 2,
+  '/badges': 2,
+  '/festivals': 2,
+  '/add': 3,
+  '/bill-code': 3,
+  '/migration-guide': 3,
+  '/terms': 3,
+  '/privacy': 3,
+}
+
+function getDepth(pathname) {
+  return ROUTE_DEPTH[pathname] ?? 2
+}
 
 // White skeleton loader shown while lazy screen chunks load
 function ScreenSkeleton() {
@@ -84,43 +113,70 @@ function AppWrapper() {
   const location = useLocation()
   const showTab = TAB_PATHS.includes(location.pathname)
   const [showAddSheet, setShowAddSheet] = useState(false)
+  const prevPath = useRef(location.pathname)
+  const [direction, setDirection] = useState(1)
+
+  // Determine slide direction based on route depth
+  const prevDepth = getDepth(prevPath.current)
+  const nextDepth = getDepth(location.pathname)
+  if (prevPath.current !== location.pathname) {
+    const newDir = nextDepth >= prevDepth ? 1 : -1
+    if (newDir !== direction) setDirection(newDir)
+    prevPath.current = location.pathname
+  }
+
+  const variants = {
+    initial: (dir) => ({ x: dir > 0 ? '100%' : '-30%', opacity: dir > 0 ? 1 : 0 }),
+    animate: { x: 0, opacity: 1 },
+    exit: (dir) => ({ x: dir > 0 ? '-30%' : '100%', opacity: dir > 0 ? 0 : 1 }),
+  }
+
+  const isScans = location.pathname === '/scans'
 
   return (
     <>
       <ErrorBoundary>
         <Suspense fallback={<ScreenSkeleton />}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="flex-1"
-            >
-              <Routes location={location}>
-                <Route path="/" element={<HomeScreen />} />
-                <Route path="/expenses" element={<ExpensesScreen />} />
-                <Route path="/add" element={<AddExpenseScreen />} />
-                <Route path="/reports" element={<ReportsScreen />} />
-                <Route path="/search" element={<SearchScreen />} />
-                <Route path="/scans" element={<ScansScreen />} />
-                <Route path="/budget" element={<BudgetScreen />} />
-                <Route path="/settings" element={<SettingsScreen />} />
-                <Route path="/wallets" element={<WalletsScreen />} />
-                <Route path="/emis" element={<EMIScreen />} />
-                <Route path="/goals" element={<GoalsScreen />} />
-                <Route path="/trips" element={<TripsScreen />} />
-                <Route path="/badges" element={<BadgesScreen />} />
-                <Route path="/festivals" element={<FestivalsScreen />} />
-                <Route path="/terms" element={<TermsScreen />} />
-                <Route path="/privacy" element={<PrivacyPolicyScreen />} />
-                <Route path="/migration-guide" element={<MigrationGuideScreen />} />
-                <Route path="/bill-code" element={<BillCodeEntry onBillFound={bill => window.dispatchEvent(new CustomEvent('bill-received', { detail: bill }))} />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </motion.div>
-          </AnimatePresence>
+          {/* ScansScreen MUST be outside the motion wrapper — position:fixed is
+              relative to transformed ancestors, which would clip the camera overlay */}
+          {isScans ? (
+            <ScansScreen />
+          ) : (
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={location.pathname}
+                custom={direction}
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                className="flex-1"
+                style={{ willChange: 'transform' }}
+              >
+                <Routes location={location}>
+                  <Route path="/" element={<HomeScreen />} />
+                  <Route path="/expenses" element={<ExpensesScreen />} />
+                  <Route path="/add" element={<AddExpenseScreen />} />
+                  <Route path="/reports" element={<ReportsScreen />} />
+                  <Route path="/search" element={<SearchScreen />} />
+                  <Route path="/budget" element={<BudgetScreen />} />
+                  <Route path="/settings" element={<SettingsScreen />} />
+                  <Route path="/wallets" element={<WalletsScreen />} />
+                  <Route path="/emis" element={<EMIScreen />} />
+                  <Route path="/goals" element={<GoalsScreen />} />
+                  <Route path="/trips" element={<TripsScreen />} />
+                  <Route path="/badges" element={<BadgesScreen />} />
+                  <Route path="/festivals" element={<FestivalsScreen />} />
+                  <Route path="/terms" element={<TermsScreen />} />
+                  <Route path="/privacy" element={<PrivacyPolicyScreen />} />
+                  <Route path="/migration-guide" element={<MigrationGuideScreen />} />
+                  <Route path="/bill-code" element={<BillCodeEntry onBillFound={bill => window.dispatchEvent(new CustomEvent('bill-received', { detail: bill }))} />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </Suspense>
       </ErrorBoundary>
 
@@ -135,6 +191,14 @@ function AppWrapper() {
 }
 
 export default function App() {
+  const {
+    updateReady,
+    isUpdating,
+    isOfflineReady,
+    applyUpdate,
+    dismissUpdate
+  } = useAppUpdate()
+
   const [ready, setReady] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   const settings = useSettingsStore(state => state.settings)
@@ -150,6 +214,14 @@ export default function App() {
   const [incomingBill, setIncomingBill] = useState(null)
   const [showBillPopup, setShowBillPopup] = useState(false)
 
+  // Desktop detection
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth > 768)
+    checkDesktop()
+    window.addEventListener('resize', checkDesktop)
+    return () => window.removeEventListener('resize', checkDesktop)
+  }, [])
+
   // URL Deep Link Handler
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -158,15 +230,18 @@ export default function App() {
     if (billData) {
       try {
         const decoded = decodeURIComponent(billData)
-        const bill = JSON.parse(atob(decoded))
+        // UTF-8 safe decoding
+        const jsonStr = decodeURIComponent(escape(atob(decoded)))
+        const bill = JSON.parse(jsonStr)
         
         if (bill.type === 'SPENDLY_BILL') {
           setIncomingBill(bill)
           setShowBillPopup(true)
+          // Clean URL
           window.history.replaceState({}, '', '/')
         }
       } catch (e) {
-        console.log('Invalid bill data')
+        console.error('Invalid bill data:', e)
       }
     }
   }, [])
@@ -185,18 +260,19 @@ export default function App() {
             if (record.recordType === 'url'){
               const url = new TextDecoder().decode(record.data)
               
-              if (url.includes('/bill?data=')){
+              if (url.includes('?data=')){
                 const params = new URLSearchParams(url.split('?')[1])
                 const data = params.get('data')
                 
                 if (data) {
                   try {
                     const decoded = decodeURIComponent(data)
-                    const bill = JSON.parse(atob(decoded))
+                    const jsonStr = decodeURIComponent(escape(atob(decoded)))
+                    const bill = JSON.parse(jsonStr)
                     setIncomingBill(bill)
                     setShowBillPopup(true)
                   } catch (e) {
-                    console.error("NFC bill parse failed")
+                    console.error("NFC bill parse failed", e)
                   }
                 }
               }
@@ -287,6 +363,8 @@ export default function App() {
   let content;
   if (!ready) {
     content = <GlobalLoading />;
+  } else if (isDesktop) {
+    content = <DesktopBlockScreen />;
   } else if (!settings?.onboardingDone) {
     content = <OnboardingScreen />;
   } else if (isBackgrounded || (isLocked && settings?.lockType !== 'none')) {
@@ -331,12 +409,24 @@ export default function App() {
 
   return (
     <LazyMotion features={domAnimation}>
+      <UpdateBanner
+        updateReady={updateReady}
+        isUpdating={isUpdating}
+        onUpdate={applyUpdate}
+        onDismiss={dismissUpdate}
+      />
       <NFCGlow active={isReceivingNFC} color="purple" />
-      <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-dvh">
-        <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden">
+      {isDesktop ? (
+        <div className="w-full h-dvh bg-white overflow-hidden relative">
           {content}
         </div>
-      </div>
+      ) : (
+        <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-dvh">
+          <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden">
+            {content}
+          </div>
+        </div>
+      )}
     </LazyMotion>
   )
 }

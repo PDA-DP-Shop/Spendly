@@ -1,33 +1,18 @@
 /**
- * Encodes bill object to a Base64 string for the Spendly User app URL
+ * Encodes bill data into a URL-safe Base64 string
+ * with UTF-8 support for customer names/items.
  */
-
-export function encodeBillToURL(billData) {
-  const BASE_URL = 'https://spendly-24hrs.pages.dev';
-  
-  const billObject = {
-    type: "SPENDLY_BILL",
-    version: "1.0",
-    shopName: billData.shopName || "My Shop",
-    shopPhone: billData.shopPhone || "",
-    shopUPI: billData.shopUPI || "",
-    billNumber: billData.billNumber,
-    items: billData.items,
-    subtotal: billData.subtotal,
-    gstAmount: billData.gstAmount,
-    discountAmount: billData.discountAmount,
-    total: billData.total,
-    paymentMethod: billData.paymentMethod,
-    createdAt: billData.createdAt
+export function encodeBillToURL(bill) {
+  const billData = {
+    ...bill,
+    type: 'SPENDLY_BILL',
+    shopCategory: bill.shopCategory || 'grocery'
   };
 
-  try {
-    const json = JSON.stringify(billObject);
-    // Use btoa with encodeUriComponent to handle unicode characters in item names
-    const encoded = btoa(encodeURIComponent(json));
-    return `${BASE_URL}/bill?data=${encoded}`;
-  } catch (e) {
-    console.error("Encoding bill failed", e);
-    return BASE_URL;
-  }
+  // Safe Base64 encoding for Unicode
+  const jsonStr = JSON.stringify(billData);
+  const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+  
+  // Use the production URL of the user app
+  return `https://spendly-24hrs.pages.dev/?data=${encodeURIComponent(base64)}`;
 }

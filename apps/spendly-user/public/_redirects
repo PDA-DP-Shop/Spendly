@@ -1,7 +1,1 @@
-# Force HTTPS always
-http://spendly.pages.dev/* https://spendly.pages.dev/:splat 301!
-http://www.spendly.pages.dev/* https://spendly.pages.dev/:splat 301!
-
-# PWA single page app routing fix
-# All routes go to index.html
-/*    /index.html   200
+/*    /index.html    200

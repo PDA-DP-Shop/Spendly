@@ -53,7 +53,7 @@ const BillReceivedPopup = ({ bill, onClose }) => {
         <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8" />
         
         <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-emerald-100">
+            <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-indigo-100">
                 {bill.shopName?.charAt(0) || '🏪'}
             </div>
             <div>
@@ -114,7 +114,7 @@ const BillReceivedPopup = ({ bill, onClose }) => {
         <div className="space-y-4">
             <button 
                 onClick={handleAdd}
-                className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-emerald-100 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 active:scale-95 transition-transform flex items-center justify-center gap-2"
             >
                 <Check className="w-6 h-6" /> Add to Spendly
             </button>

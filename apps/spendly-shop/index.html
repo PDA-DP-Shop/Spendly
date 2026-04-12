@@ -10,13 +10,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Spendly Shop" />
   <meta name="application-name" content="Spendly Shop" />
-  <meta name="theme-color" content="#10B981" />
+  <meta name="theme-color" content="#FFFFFF" />
   
   <!-- SEO meta tags -->
   <meta name="description" content="Spendly Shop - Create and send bills to customers instantly. 100% private offline business tool." />
   
+  <!-- Apple touch icons -->
+  <link rel="apple-touch-icon" href="/icon-192.png" style />
+  <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+  
+  <!-- Apple splash screens -->
+  <link rel="apple-touch-startup-image" href="/splash-iphone.png" media="(device-width: 390px)" />
+  <link rel="apple-touch-startup-image" href="/splash-ipad.png" media="(device-width: 768px)" />
+  
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
   
   <!-- PWA manifest -->
   <link rel="manifest" href="/manifest.json" />
@@ -46,7 +56,24 @@
   <title>Spendly Shop</title>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Uber Minimalist Splash Screen -->
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
+      <div style="position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 48px;">
+        <div style="position: absolute; width: 160px; height: 160px; border-radius: 100%; border: 1px solid rgba(0,0,0,0.05); animation: splash-pulse 3s ease-in-out infinite;"></div>
+        <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 30px 60px rgba(0,0,0,0.1); filter: grayscale(100%);" />
+      </div>
+      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; color: #000000; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 8px;">Spendly Shop</div>
+      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 9px; color: #AFAFAF; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 40px;">Shop_Systems_Online</div>
+      <div style="width: 160px; height: 2px; background: #F6F6F6; border-radius: 100px; overflow: hidden;">
+        <div style="height: 100%; background: #000000; border-radius: 100px; animation: load-bar 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;"></div>
+      </div>
+    </div>
+    <style>
+      @keyframes splash-pulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.2)} }
+      @keyframes load-bar { 0%{width:0%} 100%{width:100%} }
+    </style>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

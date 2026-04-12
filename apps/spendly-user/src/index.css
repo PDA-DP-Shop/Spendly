@@ -146,10 +146,10 @@
     padding-bottom: var(--safe-bottom);
   }
   .pb-tab {
-    padding-bottom: calc(80px + var(--safe-bottom));
+    padding-bottom: calc(96px + var(--safe-bottom));
   }
   .mb-tab {
-    margin-bottom: calc(80px + var(--safe-bottom));
+    margin-bottom: calc(96px + var(--safe-bottom));
   }
 
   /* Accessibility: Prefers Reduced Motion override */

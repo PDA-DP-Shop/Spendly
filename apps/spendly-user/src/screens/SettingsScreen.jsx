@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info } from 'lucide-react'
+import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info, ScanLine, Camera } from 'lucide-react'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
@@ -15,6 +15,7 @@ import { exportAllData } from '../services/exportData'
 import { importBackupFile } from '../services/importData'
 import { db, settingsService, secureWipe } from '../services/database'
 import { formatMoney } from '../utils/formatMoney'
+import { permissionService } from '../services/permissionService'
 
 
 const LOCK_OPTIONS = [
@@ -93,7 +94,13 @@ export default function SettingsScreen() {
   const [showLockPicker, setShowLockPicker] = useState(false)
   const [currencySearch, setCurrencySearch] = useState('')
   const [showDecoySetup, setShowDecoySetup] = useState(false)
+  const [permStatus, setPermStatus] = useState({ camera: 'prompt', notifications: 'prompt' })
   const S = { fontFamily: "'Inter', sans-serif" }
+
+  // Load permission status on mount
+  useEffect(() => {
+    permissionService.checkStatus().then(s => setPermStatus(s))
+  }, [])
 
   const currency = CURRENCIES.find(c => c.code === settings?.currency) || CURRENCIES[0]
 
@@ -244,6 +251,78 @@ export default function SettingsScreen() {
             onClick={() => setShowDecoySetup(true)} />
           <SettingRow icon={Shield} label={t('settings.terms')} onClick={() => navigate('/terms')} />
           <SettingRow icon={ShieldCheck} label={t('settings.privacy')} onClick={() => navigate('/privacy')} />
+        </SectionCard>
+
+        <SectionCard title="Permissions">
+          {/* Camera */}
+          <div className="flex items-center gap-4 px-6 py-5">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
+              <ScanLine className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Camera (Scanner)</span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${permissionService.dotColor(permStatus.camera)}`} />
+                <span className={`text-[11px] font-[600] ${permissionService.color(permStatus.camera)}`} style={S}>
+                  {permissionService.label(permStatus.camera)}
+                </span>
+              </div>
+            </div>
+            {permStatus.camera !== 'granted' && (
+              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+                onClick={async () => {
+                  const ok = await permissionService.requestCamera()
+                  setPermStatus(s => ({ ...s, camera: ok ? 'granted' : 'denied' }))
+                  setToast({ id: Date.now(), type: ok ? 'success' : 'error', message: ok ? 'Camera access granted' : 'Camera access denied' })
+                }}
+                className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
+                Allow
+              </motion.button>
+            )}
+          </div>
+
+          {/* Notifications */}
+          <div className="flex items-center gap-4 px-6 py-5 border-t border-[#EEEEEE]">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
+              <Bell className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Notifications</span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${permissionService.dotColor(permStatus.notifications)}`} />
+                <span className={`text-[11px] font-[600] ${permissionService.color(permStatus.notifications)}`} style={S}>
+                  {permissionService.label(permStatus.notifications)}
+                </span>
+              </div>
+            </div>
+            {permStatus.notifications !== 'granted' && (
+              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+                onClick={async () => {
+                  if ('Notification' in window) {
+                    const res = await Notification.requestPermission()
+                    setPermStatus(s => ({ ...s, notifications: res }))
+                    setToast({ id: Date.now(), type: res === 'granted' ? 'success' : 'error', message: res === 'granted' ? 'Notifications enabled' : 'Notifications blocked' })
+                  }
+                }}
+                className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
+                Allow
+              </motion.button>
+            )}
+          </div>
+
+          {/* Manage in browser */}
+          <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+            onClick={() => setToast({ id: Date.now(), type: 'info', message: 'Go to browser Settings → Site Settings → this site to revoke permissions' })}
+            className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] border-t border-[#EEEEEE]">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
+              <ShieldCheck className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Manage in Browser</span>
+              <span className="text-[11px] font-[500] text-[#AFAFAF] mt-0.5 block" style={S}>Revoke or change permissions</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#AFAFAF]" strokeWidth={3} />
+          </motion.button>
         </SectionCard>
 
         <SectionCard title={t('settings.notifications')}>

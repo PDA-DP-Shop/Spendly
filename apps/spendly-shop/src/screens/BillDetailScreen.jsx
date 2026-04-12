@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ArrowLeft, Share2, MoreVertical, Send, 
     FileText, CheckCircle2, Clock, SmartphoneNfc, 
-    UserPlus, Banknote, MessageCircle, AlertCircle
+    UserPlus, Banknote, MessageCircle, AlertCircle,
+    Download, Printer, Trash2, X
 } from 'lucide-react';
 
 import { useBillStore } from '../store/billStore';
@@ -12,6 +13,8 @@ import { useShopStore } from '../store/shopStore';
 import { formatMoney } from '../utils/formatMoney';
 import { formatDate } from '../utils/formatDate';
 import { generateBillPDF } from '../services/pdfGenerator';
+import { parseBillNumber } from '../utils/billNumber';
+
 
 const BillDetailScreen = () => {
     const { id } = useParams();
@@ -22,9 +25,13 @@ const BillDetailScreen = () => {
     const bill = bills.find(b => b.id === parseInt(id));
 
     if (!bill) return (
-        <div className="p-12 text-center">
-            <p className="text-slate-400 font-bold">Bill not found</p>
-            <button onClick={() => navigate('/home')} className="mt-4 text-primary font-bold">Return Home</button>
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-12 text-center">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                <X className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-[24px] font-[800] text-black mb-2">Error</h2>
+            <p className="text-[#94A3B8] font-[500] mb-8">Bill could not be found.</p>
+            <button onClick={() => navigate('/home')} className="bg-black text-white px-8 py-4 rounded-full font-[800]">Return Home</button>
         </div>
     );
 
@@ -37,144 +44,187 @@ const BillDetailScreen = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24">
-            {/* Header */}
-            <header className="bg-white p-6 pb-4 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-slate-50">
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-800 font-black">
-                    <ArrowLeft className="w-5 h-5" /> Bill #{bill.billNumber}
+        <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+            <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
+                <button onClick={() => navigate(-1)} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
+                    <div className="p-2 bg-[#F8FAFC] rounded-xl group-hover:bg-black group-hover:text-white transition-all">
+                        <ArrowLeft className="w-5 h-5" />
+                    </div>
+                    <span className="text-[17px]">Invoice Details</span>
                 </button>
-                <div className="flex gap-4">
-                    <Share2 className="w-5 h-5 text-slate-400" />
-                    <MoreVertical className="w-5 h-5 text-slate-400" />
-                </div>
+                <button className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8]">
+                    <Share2 className="w-5 h-5" />
+                </button>
             </header>
 
-            <div className="p-4 space-y-6">
-                {/* Bill Card (Reusing preview style) */}
-                <div className="bg-white rounded-card shadow-sm border border-slate-100 overflow-hidden opacity-90 grayscale-[20%]">
-                    <div className="p-8 text-center border-b border-dashed border-slate-100">
-                        <div className="text-4xl mb-2">{shop?.logoEmoji || '🏪'}</div>
-                        <h2 className="text-lg font-black text-slate-900 leading-tight">{shop?.name || 'My Shop'}</h2>
-                    </div>
-                    
-                    <div className="p-6 space-y-4">
-                        <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
-                            <span>{bill.billNumber}</span>
-                            <span>{formatDate(bill.createdAt)}</span>
+            <div className="p-6 space-y-8">
+                {/* Invoice Card */}
+                <div className="bg-white rounded-[32px] border border-[#F1F5F9] shadow-sm overflow-hidden relative">
+                    <div className="p-10 text-center space-y-4 bg-[#F8FAFC] border-b border-[#F1F5F9]">
+                        <div className="w-20 h-20 bg-white rounded-[24px] shadow-sm border border-[#F1F5F9] flex items-center justify-center text-[36px] mx-auto">
+                            {shop?.logoEmoji || '🏪'}
                         </div>
-                        
-                        <div className="border-t border-slate-50 pt-4">
-                            <table className="w-full text-xs font-bold">
+                        <div>
+                            <h2 className="text-[24px] font-[800] text-black tracking-tight">{shop?.name || 'Shop Name'}</h2>
+                            <p className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mt-2">{bill.billNumber}</p>
+                        </div>
+                    </div>
+
+                    <div className="p-10 space-y-8">
+                        <div className="bg-[#F8FAFC] rounded-[24px] p-6 border border-[#F1F5F9] text-center">
+                            <h3 className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-3">Unique Bill Identifier</h3>
+                            {(() => {
+                                const parsed = parseBillNumber(bill.billNumber);
+                                if (!parsed) return <div className="text-[17px] font-[800] tracking-tight">{bill.billNumber}</div>;
+                                return (
+                                    <div className="flex items-center justify-center gap-1.5 flex-wrap text-[15px] font-[900] tracking-tight font-mono bg-white p-4 rounded-[16px] shadow-sm">
+                                        <span className="text-[#8B5CF6]">{parsed.shopCode}</span>
+                                        <span className="text-[#CBD5E1]">-</span>
+                                        <span className="text-[#94A3B8]">{parsed.date}</span>
+                                        <span className="text-[#CBD5E1]">-</span>
+                                        <span className="text-black">{parsed.sequence}</span>
+                                        <span className="text-[#CBD5E1]">-</span>
+                                        <span className="text-[#F97316]">{parsed.random}</span>
+                                    </div>
+                                )
+                            })()}
+                        </div>
+
+                        <div className="flex justify-between items-center text-[11px] font-[800] uppercase tracking-widest text-[#94A3B8]">
+                            <div>Processed</div>
+                            <div className="text-right">Date & Time</div>
+                        </div>
+                        <div className="flex justify-between items-center text-[15px] font-[800] text-black">
+                            <div className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 className="w-4 h-4" /> Success</div>
+                            <div className="text-right">{formatDate(bill.createdAt, 'short')}</div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="h-px bg-[#F1F5F9]" />
+                            <table className="w-full text-sm font-[800]">
+                                <thead>
+                                    <tr className="text-[10px] font-[800] text-[#CBD5E1] uppercase tracking-widest border-b border-[#F1F5F9]">
+                                        <th className="text-left pb-4">Item</th>
+                                        <th className="text-center pb-4">Qty</th>
+                                        <th className="text-right pb-4">Price</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     {bill.items.map((item, i) => (
-                                        <tr key={i}>
-                                            <td className="py-1 text-slate-600">{item.name} x {item.quantity}</td>
-                                            <td className="py-1 text-right text-slate-900">{formatMoney(item.price * item.quantity)}</td>
+                                        <tr key={i} className="border-b border-[#F1F5F9]/50">
+                                            <td className="py-4 text-black text-[15px]">{item.name}</td>
+                                            <td className="py-4 text-center text-[#94A3B8]">{item.quantity}</td>
+                                            <td className="py-4 text-right text-black font-[800]">{formatMoney(item.price * item.quantity)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
 
-                        <div className="border-t-2 border-slate-50 pt-4 flex justify-between items-center">
-                            <span className="text-lg font-black text-slate-900 leading-tight">TOTAL</span>
-                            <span className="text-2xl font-black text-primary">{formatMoney(bill.total)}</span>
+                        <div className="pt-4 space-y-4">
+                            <div className="flex justify-between items-center text-[#94A3B8] text-[15px] font-[800]">
+                                <span>Subtotal</span>
+                                <span>{formatMoney(bill.subtotal || bill.total)}</span>
+                            </div>
+                            {bill.gstAmount > 0 && (
+                                <div className="flex justify-between items-center text-black text-[15px] font-[800]">
+                                    <span>GST ({bill.gstPercent}%)</span>
+                                    <span>+{formatMoney(bill.gstAmount)}</span>
+                                </div>
+                            )}
+                            {bill.discountAmount > 0 && (
+                                <div className="flex justify-between items-center text-[#EF4444] text-[15px] font-[800]">
+                                    <span>Discount</span>
+                                    <span>-{formatMoney(bill.discountAmount)}</span>
+                                </div>
+                            )}
+                            <div className="pt-4 border-t border-[#F1F5F9] flex justify-between items-end">
+                                <span className="text-[12px] font-[800] text-black uppercase tracking-widest">Total Amount</span>
+                                <span className="text-[36px] font-[800] text-black tracking-tight">{formatMoney(bill.total)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Main Action Buttons */}
-                <div className="flex gap-3">
+                {/* Actions */}
+                <div className="grid grid-cols-4 gap-3">
                     <button 
                         onClick={() => navigate(`/send-bill/${bill.id}`)}
-                        className="flex-1 bg-primary text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-100"
+                        className="col-span-2 bg-black text-white rounded-[24px] h-[72px] font-[800] text-[15px] flex items-center justify-center gap-3 shadow-lg active:bg-slate-900 transition-all font-sans"
                     >
-                        <Send className="w-4 h-4" /> Resend
+                        <Send className="w-5 h-5 text-white/50" /> Send Invoice
                     </button>
                     <button 
                         onClick={handleDownloadPDF}
-                        className="bg-white border border-slate-100 p-4 rounded-2xl flex items-center justify-center text-slate-600 active:bg-slate-50"
+                        className="bg-[#F8FAFC] rounded-[24px] flex flex-col items-center justify-center gap-2 text-[#94A3B8] h-[72px] active:bg-slate-100 transition-all"
                     >
-                        <FileText className="w-5 h-5" />
+                        <Download className="w-5 h-5" />
+                        <span className="text-[9px] font-[800] uppercase tracking-widest">PDF</span>
                     </button>
-                    <button className="bg-white border border-slate-100 p-4 rounded-2xl flex items-center justify-center text-slate-600 active:bg-slate-50">
-                        <Share2 className="w-5 h-5" />
+                    <button 
+                        className="bg-[#F8FAFC] rounded-[24px] flex flex-col items-center justify-center gap-2 text-[#94A3B8] h-[72px] active:bg-slate-100 transition-all"
+                    >
+                        <Printer className="w-5 h-5" />
+                        <span className="text-[9px] font-[800] uppercase tracking-widest">Print</span>
                     </button>
                 </div>
 
-                {/* Status Timeline */}
-                <div className="bg-white rounded-card p-6 border border-slate-100 shadow-sm space-y-6">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Bill Status</h3>
+                {/* Timeline */}
+                <div className="bg-[#F8FAFC] rounded-[32px] p-8 space-y-8 border border-transparent">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-[12px] font-[800] text-black uppercase tracking-widest">Tracking</h3>
+                        <div className={`text-[10px] font-[800] uppercase px-3 py-1 rounded-full tracking-widest ${
+                            bill.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                        }`}>
+                            {bill.status} Status
+                        </div>
+                    </div>
                     
-                    <div className="space-y-6 relative ml-2">
-                        <div className="absolute left-[3px] top-2 bottom-2 w-0.5 bg-slate-100" />
+                    <div className="space-y-8 relative ml-4">
+                        <div className="absolute left-0 top-2 bottom-2 w-px bg-[#F1F5F9]" />
                         
-                        <div className="flex items-start gap-4 relative">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shadow-lg shadow-emerald-200" />
+                        <div className="flex items-start gap-5 relative">
+                            <div className="w-2.5 h-2.5 rounded-full bg-black -ml-[5px]" />
                             <div>
-                                <div className="text-sm font-black text-slate-800">Bill Created</div>
-                                <div className="text-[10px] font-bold text-slate-400">{formatDate(bill.createdAt, 'time')}</div>
+                                <div className="text-[15px] font-[800] text-black tracking-tight leading-none">Created</div>
+                                <div className="text-[11px] font-[500] text-[#94A3B8] mt-1.5">{formatDate(bill.createdAt, 'time')} • Invoice ready</div>
                             </div>
                         </div>
 
-                        {bill.status === 'sent' || bill.status === 'paid' ? (
-                            <div className="flex items-start gap-4 relative">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5" />
-                                <div>
-                                    <div className="text-sm font-black text-slate-800">Sent to Customer</div>
-                                    <div className="text-[10px] font-bold text-slate-400">Via {bill.sentVia || 'QR Code'}</div>
-                                </div>
+                        <div className="flex items-start gap-5 relative">
+                            <div className={`w-2.5 h-2.5 rounded-full -ml-[5px] ${bill.status === 'sent' || bill.status === 'paid' ? 'bg-black' : 'bg-[#CBD5E1]'}`} />
+                            <div>
+                                <div className={`text-[15px] font-[800] tracking-tight leading-none ${bill.status === 'sent' || bill.status === 'paid' ? 'text-black' : 'text-[#CBD5E1]'}`}>Sent</div>
+                                <div className="text-[11px] font-[500] text-[#94A3B8] mt-1.5">Delivered via Digital Link</div>
                             </div>
-                        ) : null}
+                        </div>
 
-                        {bill.status === 'paid' ? (
-                            <div className="flex items-start gap-4 relative animate-bounce-in">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5" />
-                                <div>
-                                    <div className="text-sm font-black text-slate-800">Payment Completed</div>
-                                    <div className="text-[10px] font-bold text-slate-400">Marked as Paid</div>
-                                </div>
+                        <div className="flex items-start gap-5 relative">
+                            <div className={`w-2.5 h-2.5 rounded-full -ml-[5px] ${bill.status === 'paid' ? 'bg-black' : 'bg-[#CBD5E1]'}`} />
+                            <div>
+                                <div className={`text-[15px] font-[800] tracking-tight leading-none ${bill.status === 'paid' ? 'text-black' : 'text-[#CBD5E1]'}`}>Settled</div>
+                                <div className="text-[11px] font-[500] text-[#94A3B8] mt-1.5">{bill.status === 'paid' ? 'Payment Confirmed' : 'Waiting for payment'}</div>
                             </div>
-                        ) : (
-                            <div className="flex items-start gap-4 relative opacity-50">
-                                <div className="w-2 h-2 rounded-full bg-slate-200 mt-1.5" />
-                                <div>
-                                    <div className="text-sm font-black text-slate-400">Awaiting Payment</div>
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Credit Section (if status is not paid / credit logic) */}
                 {bill.status !== 'paid' && (
-                    <motion.div 
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="bg-amber-50 border border-amber-100 p-6 rounded-card space-y-4"
-                    >
+                    <div className="bg-[#FEF2F2] p-8 rounded-[32px] space-y-6">
                         <div className="flex items-center gap-3">
-                            <AlertCircle className="w-5 h-5 text-amber-500" />
-                            <h3 className="text-sm font-black text-amber-900 leading-tight">
-                                {formatMoney(bill.total)} on credit
-                            </h3>
+                            <AlertCircle className="w-5 h-5 text-[#EF4444]" />
+                            <h3 className="text-[17px] font-[800] text-[#991B1B] tracking-tight">Pending Payment</h3>
                         </div>
-                        <p className="text-xs font-bold text-amber-700">
-                            Customer: {bill.customerName || 'Walk-in'}<br/>
-                            Given on: {formatDate(bill.createdAt)}
+                        <p className="text-[13px] font-[500] text-[#B91C1C] opacity-80 uppercase tracking-widest">
+                            {formatMoney(bill.total)} Outstanding
                         </p>
-                        <div className="grid grid-cols-1 gap-2">
-                            <button 
-                                onClick={handleMarkAsPaid}
-                                className="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-sm active:scale-95 transition-transform"
-                            >
-                                Mark as Paid
-                            </button>
-                            <button className="w-full bg-white border border-amber-200 text-amber-700 py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2">
-                                <MessageCircle className="w-4 h-4" /> Send Reminder
-                            </button>
-                        </div>
-                    </motion.div>
+                        <button 
+                            onClick={handleMarkAsPaid}
+                            className="w-full h-16 bg-[#EF4444] text-white rounded-full font-[800] text-[15px] active:bg-red-700 transition-all shadow-md"
+                        >
+                            Mark as Paid
+                        </button>
+                    </div>
                 )}
             </div>
         </div>

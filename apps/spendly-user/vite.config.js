@@ -20,81 +20,55 @@ export default defineConfig({
       ],
       manifest: false,
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 8000000,
+
         globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'
+          '**/*.{js,css,html,ico,png,svg,webp,woff2,ttf,json,gz}'
         ],
-        maximumFileSizeToCacheInBytes: 8000000,  // 8 MB — covers our ~5 MB product DB
+
+        navigateFallback: '/index.html',
+
         runtimeCaching: [
-          // ── Local product database ────────────────────────────────────
           {
-            urlPattern: /\/data\/top-50000-products\.json\.gz$/i,
-            handler: 'CacheFirst',
+            urlPattern: /\/$/,
+            handler: 'NetworkFirst',
             options: {
-              cacheName: 'product-db-cache',
+              cacheName: 'html-cache',
+              networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 1,
-                maxAgeSeconds: 60 * 60 * 24 * 30  // 30 days
-              },
-              cacheableResponse: { statuses: [0, 200] },
+                maxAgeSeconds: 86400
+              }
             }
           },
           {
-            urlPattern: /^https:\/\/world\.openfoodfacts\.org\/.*/i,
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'product-api-cache',
+              cacheName: 'fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 31536000
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/world\.openfoodfacts\.org/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'products-cache',
               expiration: {
                 maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 30
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
+                maxAgeSeconds: 2592000
               }
             }
           }
-        ],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [
-          /^\/_/,
-          /\/[^/?]+\.[^/]+$/
-        ],
-        // Essential Safari Redirection Fix: Disable navigation preload and ensure clean responses.
-        navigationPreload: false,
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true
+        ]
       },
-      devOptions: {
-        enabled: false
-      }
+
+      devOptions: { enabled: false }
     })
   ],
   base: '/',
