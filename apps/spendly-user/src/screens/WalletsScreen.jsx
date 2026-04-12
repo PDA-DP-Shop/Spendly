@@ -147,6 +147,7 @@ function AdjustSheet({ wallet, onSave, onClose, show }) {
 }
 
 export default function WalletsScreen() {
+  const { t } = useTranslation()
   const { wallets, loadWallets, addWallet, adjustBalance, removeWallet, totalBalance } = useWalletStore()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
