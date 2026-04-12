@@ -75,7 +75,7 @@ export default function BadgesScreen() {
 
   const earnedMap = earned.reduce((acc, b) => ({ ...acc, [b.badgeId]: b }), {})
   const totalEarned = earned.length
-  const categories = [...new Set(BADGES.map(b => b.category))]
+  const categories = [...new Set(BADGES.map(b => b.categoryKey))]
 
   const handleSelect = (badge) => {
     setSelectedBadge(badge)
@@ -125,7 +125,7 @@ export default function BadgesScreen() {
 
       <div className="px-6 flex flex-col gap-14 pb-10">
         {categories.map(category => {
-          const categoryBadges = BADGES.filter(b => b.category === category)
+          const categoryBadges = BADGES.filter(b => b.categoryKey === category)
           const earnedInCategory = categoryBadges.filter(b => earnedMap[b.id]).length
           
           return (
