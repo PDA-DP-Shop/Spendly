@@ -35,8 +35,8 @@ export default function AnalyticsBarChart({ data, currency = 'USD', chartMode = 
   const colorInactive = '#EEEEEE'
 
   return (
-    <div className="w-full relative mt-6">
-      <ResponsiveContainer width="100%" height={260}>
+    <div className="w-full relative mt-6 min-w-0">
+      <ResponsiveContainer width="100%" height={260} debounce={1}>
         <BarChart 
           data={chartData} 
           barSize={12} 

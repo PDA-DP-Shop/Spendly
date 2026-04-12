@@ -31,8 +31,8 @@ export default function SpendingDonutChart({ groupedData, currency = 'USD' }) {
 
   return (
     <div className="w-full">
-      <div className="relative h-[260px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="relative h-[260px] min-w-0">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <PieChart>
             <Pie
               data={data}

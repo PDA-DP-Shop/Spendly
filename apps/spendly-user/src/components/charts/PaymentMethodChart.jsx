@@ -29,8 +29,8 @@ export default function PaymentMethodChart({ expenses }) {
   return (
     <div className="w-full">
       <div className="flex items-center gap-8">
-        <div className="w-[140px] h-[140px] flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-[140px] h-[140px] flex-shrink-0 min-w-0">
+          <ResponsiveContainer width="100%" height="100%" debounce={1}>
             <PieChart>
               <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={2} dataKey="value" stroke="none">
                 {data.map((entry, index) => (

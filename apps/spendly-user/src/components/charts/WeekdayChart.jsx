@@ -55,8 +55,8 @@ export default function WeekdayChart({ rawExpenses, currency }) {
         </div>
       </div>
 
-      <div className="h-[220px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-[220px] w-full min-w-0">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F6F6F6', radius: 10 }} />
             <Bar dataKey="avg" radius={[18, 18, 18, 18]} barSize={34} animationDuration={1200}>

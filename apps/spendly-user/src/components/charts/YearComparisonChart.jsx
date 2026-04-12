@@ -50,8 +50,8 @@ export default function YearComparisonChart({ currentYearTotals, prevYearTotals,
         </div>
       </div>
       
-      <div className="h-[240px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-[240px] w-full min-w-0">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barGap={6}>
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#AFAFAF', fontFamily: 'Inter', fontWeight: 900 }} dy={20} />
             <Tooltip content={<CustomTooltip currency={currency} />} cursor={{ fill: '#F6F6F6', radius: 4 }} />

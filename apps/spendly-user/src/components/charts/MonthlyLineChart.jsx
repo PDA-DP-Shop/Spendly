@@ -23,7 +23,7 @@ export default function MonthlyLineChart({ monthlyTotals, currency = 'USD' }) {
   }))
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       <div className="flex items-center justify-between mb-10">
         <div className="flex flex-col">
           <p className="text-[10px] font-[900] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>Trajectory</p>
