@@ -150,7 +150,7 @@ function useCameraScanner({ onResult, paused }) {
     let lastScanAt = 0
     let processing = false
 
-    const tick = (now) => {
+    const tick = async (now) => {
       rafRef.current = requestAnimationFrame(tick)
       if (paused || processing) return
 
@@ -164,6 +164,12 @@ function useCameraScanner({ onResult, paused }) {
       processing = true
       lastScanAt = now
 
+      // ── Draw video frame to downscaled canvas (320x240) for fast processing ──
+      canvas.width = SCAN_W
+      canvas.height = SCAN_H
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.drawImage(video, 0, 0, SCAN_W, SCAN_H)
+
       const tryResult = (text) => {
         if (!text || text === lastResult.current) { 
           processing = false
@@ -175,18 +181,18 @@ function useCameraScanner({ onResult, paused }) {
         onResult(text)
       }
 
-      const tryFallbackToZXing = () => {
+      const tryFallbackToZXing = async () => {
         if (!zxingRef.current) { processing = false; return }
         try {
-          // Sync decode from current video/canvas state
-          const result = zxingRef.current.decodeFromCanvas(canvas)
+          // Await async decode from current canvas content
+          const result = await zxingRef.current.decodeFromCanvas(canvas)
           if (result) {
             tryResult(result.getText())
           } else {
             processing = false
           }
         } catch (e) {
-          // No barcode found in this frame
+          // No barcode found in this frame (ZXing throws on miss)
           processing = false
         }
       }
@@ -198,17 +204,18 @@ function useCameraScanner({ onResult, paused }) {
               formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'upc_a']
             })
           }
-          detectorRef.current.detect(canvas)
-            .then(codes => { 
-                if (codes.length > 0) tryResult(codes[0].rawValue)
-                else processing = false
-            })
-            .catch(() => tryFallbackToZXing())
+          const codes = await detectorRef.current.detect(canvas)
+          if (codes.length > 0) {
+            tryResult(codes[0].rawValue)
+          } else {
+            // No result from native detector, try ZXing
+            await tryFallbackToZXing()
+          }
         } catch (e) {
-          tryFallbackToZXing()
+          await tryFallbackToZXing()
         }
       } else {
-        tryFallbackToZXing()
+        await tryFallbackToZXing()
       }
     }
 
