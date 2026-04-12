@@ -37,15 +37,32 @@ const MODES = [
 
 // ─── Decode helpers ──────────────────────────────────────────────────────────
 function decodeBillUrl(text) {
+  if (!text) return null
   try {
-    if (!text.includes('?data=')) return null
-    const params = new URLSearchParams(text.split('?')[1])
-    const data = params.get('data')
-    if (!data) return null
-    const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(data))))
-    const bill = JSON.parse(jsonStr)
-    return bill?.type === 'SPENDLY_BILL' ? bill : null
-  } catch { return null }
+    // Case 1: Raw JSON string (e.g. from clipboard or direct JSON QR)
+    if (text.trim().startsWith('{')) {
+      const data = JSON.parse(text)
+      if (data.type === 'SPENDLY_BILL' || data.source === 'spendly-shop') return data
+    }
+
+    // Case 2: Spendly Bill URL (contains ?data=...)
+    if (text.includes('?data=')) {
+      const params = new URLSearchParams(text.split('?')[1])
+      const data = params.get('data')
+      if (!data) return null
+      
+      // Standard UTF-8 safe base64 decode
+      const rawBase64 = data
+      const jsonStr = decodeURIComponent(escape(atob(rawBase64)))
+      const bill = JSON.parse(jsonStr)
+      
+      return (bill?.type === 'SPENDLY_BILL' || bill?.source === 'spendly-shop') ? bill : null
+    }
+  } catch (e) {
+    console.warn('[Scanner] Failed to decode bill data:', e)
+    return null
+  }
+  return null
 }
 
 function decodeUPIUrl(text) {
