@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useBadgeStore } from '../store/badgeStore'
+import { useBadgeStore } from '../../store/badgeStore'
 import { useTranslation } from 'react-i18next'
 import confetti from 'canvas-confetti'
 import { Star, Trophy, X } from 'lucide-react'
