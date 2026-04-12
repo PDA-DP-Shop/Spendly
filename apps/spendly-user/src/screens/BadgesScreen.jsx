@@ -1,5 +1,6 @@
 // BadgesScreen.jsx — Feature 18: Achievements Grid
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
 import { useBadgeStore } from '../store/badgeStore'
@@ -19,7 +20,7 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
   if (!badge) return null
   const { t } = useTranslation()
   const S = { fontFamily: "'Inter', sans-serif" }
-  return (
+  return createPortal(
     <>
       <motion.div key={`bg-${badge.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="absolute inset-0 z-[100]" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
@@ -61,7 +62,8 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
           </div>
         )}
       </motion.div>
-    </>
+    </>,
+    document.body
   )
 }
 
