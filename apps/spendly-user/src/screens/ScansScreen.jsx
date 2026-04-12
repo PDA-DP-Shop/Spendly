@@ -143,9 +143,9 @@ function useCameraScanner({ onResult, paused }) {
   useEffect(() => {
     if (!hasCamera) return
 
-    const SCAN_INTERVAL = 200   // ms between decode attempts (5fps)
-    const SCAN_W = 320           // decode at 320px wide — fast but accurate enough
-    const SCAN_H = 240
+    const SCAN_INTERVAL = 150   // Faster scan rate
+    const SCAN_W = 640           // Higher resolution for better accuracy
+    const SCAN_H = 480
 
     let lastScanAt = 0
     let processing = false
@@ -816,48 +816,43 @@ export default function ScansScreen() {
   const currentMode = MODES.find(m => m.id === mode)
 
   const handleRaw = useCallback((text) => {
-    setScanning(false)
-    setRawText(text)
+    if (!text) return
+    console.log('[Scanner] Scanned:', text)
+    
+    // ── Tier 1: Universal Auto-Detection ──
+    // 1. Check for Spendly Bill (URL or JSON)
+    const billFromUrl = decodeBillUrl(text)
+    if (billFromUrl) {
+      setResult({ type: 'bill', data: billFromUrl })
+      setScanning(false)
+      return
+    }
 
-    if (mode === 'bill') {
-      const result = parseScannedQR(text)
-      if (result.isSpendlyBill) {
-        setResult({ type: 'bill', data: result.data })
-      } else {
-        // Fallback for extremely old legacy generic QR links
-        const bill = decodeBillUrl(text)
-        if (bill) {
-          setResult({ type: 'bill', data: bill })
-        } else {
-          setError('No Spendly bill found in this QR code')
-          setTimeout(() => { setError(''); setScanning(true) }, 2500)
-        }
-      }
+    const billResult = parseScannedQR(text)
+    if (billResult.isSpendlyBill) {
+      setResult({ type: 'bill', data: billResult.data })
+      setScanning(false)
+      return
+    }
 
-    } else if (mode === 'payment') {
-      const upi = decodeUPIUrl(text)
-      if (upi) {
-        setResult({ type: 'payment', data: upi })
-      } else if (text.startsWith('http') || text.includes('@')) {
-        setResult({ type: 'payment', data: { pa: text, pn: 'Unknown', am: 0, tn: '' } })
-      } else {
-        setError('Not a payment QR code')
-        setTimeout(() => { setError(''); setScanning(true) }, 2500)
-      }
+    // 2. Check for UPI / Payment
+    const upi = decodeUPIUrl(text)
+    if (upi) {
+      setResult({ type: 'payment', data: upi })
+      setScanning(false)
+      return
+    }
 
-    } else if (mode === 'barcode') {
-      if (isBarcode(text) || text.length > 2) {
-        try { navigator.vibrate?.(60) } catch {}
-        setBarcodeResolving(true)
-
-        // ── 3-Tier intelligent product lookup ──────────────────────────────
-        ;(async () => {
+    // 3. Fallback to Barcode/Generic logic
+    if (isBarcode(text)) {
+      setScanning(false)
+      setBarcodeResolving(true)
+      ;(async () => {
           let productName = ''
           let productBrand = ''
           let productCategory = 'shopping'
           let productPrice = undefined
 
-          // Tier 0: User's own scan history (fastest — their own past entries)
           try {
             const personal = await scannedProductService.get(text)
             if (personal) {
@@ -868,7 +863,6 @@ export default function ScansScreen() {
             }
           } catch {}
 
-          // Tier 1+2: local 50k DB → IndexedDB cache → remote API
           if (!productName) {
             try {
               const found = await lookupBarcode(text)
@@ -876,38 +870,36 @@ export default function ScansScreen() {
                 productName    = found.name || ''
                 productBrand   = found.brand || ''
                 productCategory = mapCategoryFromTags(found.category, found.categoryTags)
-                // API sometimes returns a price range
                 if (found.amount && !productPrice) productPrice = found.amount
               }
             } catch {}
           }
 
           setBarcodeResolving(false)
-
-          navigate('/add?mode=type', {
+          navigate('/add', {
             state: {
               prefilled: {
-                shopName:  productName
-                  ? (productBrand ? `${productName} (${productBrand})` : productName)
-                  : '',
-                note:      productName
-                  ? `${productName}${productBrand ? ' — ' + productBrand : ''}`
-                  : `Barcode: ${text}`,
-                // Pre-fill price only if we have a confident value from personal history
+                shopName: productName ? (productBrand ? `${productName} (${productBrand})` : productName) : '',
+                note: productName ? `${productName}${productBrand ? ' — ' + productBrand : ''}` : `Barcode: ${text}`,
                 ...(productPrice > 0 ? { amount: productPrice } : {}),
-                category:   productCategory,
-                scanType:  'barcode',
+                category: productCategory,
+                scanType: 'barcode',
                 barcodeValue: text,
               }
             }
           })
-        })()
-      } else {
-        setError('Could not read barcode')
-        setTimeout(() => { setError(''); setScanning(true) }, 2500)
-      }
+      })()
+      return
     }
-  }, [mode, navigate])
+
+    // If nothing matched and we are in barcode mode, just treat as generic text
+    if (mode === 'barcode') {
+       // already handled above but if it wasn't a "classic" barcode but still text
+       setScanning(false)
+       setRawText(text)
+       setResult({ type: 'barcode', data: text })
+    }
+  }, [navigate, mode])
 
   const handleModeChange = (newMode) => {
     dismiss()
