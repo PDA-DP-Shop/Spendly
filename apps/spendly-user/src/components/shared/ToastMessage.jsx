@@ -1,5 +1,5 @@
-// ToastMessage — white card toast with colored icon and drain progress bar
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react'
 
@@ -36,7 +36,7 @@ export default function ToastMessage({ toast, onClose }) {
   const type = TYPES[toast.type] || TYPES.info
   const Icon = type.icon
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         key={toast.id}
@@ -44,7 +44,7 @@ export default function ToastMessage({ toast, onClose }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-        className="fixed-shell bottom-28 px-6 z-[200]"
+        className="fixed bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[450px] px-6 z-[3000] pointer-events-auto"
       >
         <div className="overflow-hidden bg-white border border-[#EEEEEE] rounded-[24px] shadow-[0_24px_48px_rgba(0,0,0,0.15)]">
           <div className="flex items-center gap-4 px-6 py-5">
@@ -68,7 +68,6 @@ export default function ToastMessage({ toast, onClose }) {
             </button>
           </div>
 
-          {/* Progress drain bar — Platform Style */}
           <div className="h-[2px] bg-[#EEEEEE]">
             <div
               className="h-full transition-none"
@@ -81,6 +80,7 @@ export default function ToastMessage({ toast, onClose }) {
           </div>
         </div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
   )
 }

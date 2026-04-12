@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ShieldCheck } from 'lucide-react'
@@ -31,9 +32,9 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
     ? `Enter your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
     : `Confirm your new ${lockType === 'pattern' ? 'pattern' : 'PIN'}`
 
-  return (
-    <div className="fixed inset-0 z-[60] bg-white flex flex-col safe-top pb-8">
-      <div className="flex items-center justify-between px-8 mt-6 mb-10">
+  return createPortal(
+    <div className="fixed inset-0 z-[1001] bg-white flex flex-col pointer-events-auto left-1/2 -translate-x-1/2 w-full max-w-[450px]">
+      <div className="flex items-center justify-between px-8 mt-10 mb-10">
         <div>
           <div className="flex items-center gap-2 mb-1">
              <ShieldCheck className="w-5 h-5 text-black" />
@@ -70,12 +71,13 @@ export default function LockSetupModal({ lockType, onSave, onCancel, title: cust
         </AnimatePresence>
       </div>
 
-      <div className="px-8 flex justify-center">
+      <div className="px-8 flex justify-center pb-12">
          <p className="text-[10px] font-[800] text-[#D8D8D8] uppercase tracking-[0.2em]" style={S}>
             Securely stored on your device
          </p>
       </div>
-    </div>
+    </div>,
+    document.getElementById('modal-root') || document.body
   )
 }
 

@@ -1,4 +1,4 @@
-// Feature 20: GST Calculator (Standalone Tool)
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calculator, X, Percent, Check, Copy } from 'lucide-react'
@@ -44,9 +44,9 @@ export default function GSTCalculator({ onClose }) {
     }
   }
 
-  return (
+  return createPortal(
     <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-      className="fixed inset-0 z-[100] bg-white flex flex-col safe-top">
+      className="fixed inset-0 z-[1001] bg-white flex flex-col pointer-events-auto left-1/2 -translate-x-1/2 w-full max-w-[450px]">
       
       {/* Header */}
       <div className="flex items-center justify-between px-8 pt-8 pb-6 border-b border-[#F6F6F6]">
@@ -145,6 +145,7 @@ export default function GSTCalculator({ onClose }) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.div>,
+    document.getElementById('modal-root') || document.body
   )
 }

@@ -1,9 +1,9 @@
-// ConfirmDialog — white card modal with spring animation
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 
 export default function ConfirmDialog({ show, title, message, confirmText = 'Yes, do it', cancelText = 'Cancel', isDestructive = true, onConfirm, onCancel }) {
-  return (
+  return createPortal(
     <AnimatePresence>
       {show && (
         <>
@@ -11,8 +11,8 @@ export default function ConfirmDialog({ show, title, message, confirmText = 'Yes
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000]"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropBlur: '4px' }}
+            className="fixed inset-0 z-[2000] pointer-events-auto"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
             onClick={(e) => {
               e.stopPropagation()
               onCancel()
@@ -23,7 +23,7 @@ export default function ConfirmDialog({ show, title, message, confirmText = 'Yes
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[1001] p-10 bg-white border border-[#EEEEEE] rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.3)] max-h-[90dvh] overflow-y-auto"
+            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[2001] p-10 bg-white border border-[#EEEEEE] rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.3)] max-h-[90dvh] overflow-y-auto pointer-events-auto mx-auto max-w-[400px]"
             onClick={(e) => e.stopPropagation()}
           >
             {isDestructive && (
@@ -64,6 +64,7 @@ export default function ConfirmDialog({ show, title, message, confirmText = 'Yes
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
   )
 }
