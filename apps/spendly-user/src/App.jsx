@@ -111,6 +111,14 @@ function ScreenSkeleton() {
 
 function AppWrapper() {
   const location = useLocation()
+
+  // Auto scroll to top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    // Also scroll app-content div if it's the one scrolling
+    document.querySelector('.app-content')?.scrollTo(0, 0)
+  }, [location.pathname])
+
   const showTab = TAB_PATHS.includes(location.pathname)
   const [showAddSheet, setShowAddSheet] = useState(false)
   const prevPath = useRef(location.pathname)

@@ -190,6 +190,11 @@ function AppShell() {
   const location = useLocation();
   const showTab = TAB_ROUTES.includes(location.pathname);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.querySelector('.app-content')?.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <AnimatedRoutes />
