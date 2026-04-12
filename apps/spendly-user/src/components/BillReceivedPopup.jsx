@@ -1,23 +1,26 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Receipt, Check, X, CreditCard, Clock } from 'lucide-react';
+import { Receipt, Check, X, CreditCard, Clock, ShoppingBag } from 'lucide-react';
 import { useExpenseStore } from '../store/expenseStore';
 import { formatMoney } from '../utils/formatMoney';
+
+const S = { fontFamily: "'Inter', sans-serif" };
 
 const BillReceivedPopup = ({ bill, onClose }) => {
   const addExpense = useExpenseStore(state => state.addExpense);
 
   useEffect(() => {
+    // Auto-close after 5 minutes of inactivity
     const timer = setTimeout(() => {
       onClose();
-    }, 300000); // 5 minutes
+    }, 300000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   if (!bill) return null;
 
   const handleAdd = async () => {
-    // Category mapping from shop category to user app category
     const catMap = {
       'grocery': 'shopping',
       'medical': 'health',
@@ -28,106 +31,115 @@ const BillReceivedPopup = ({ bill, onClose }) => {
     };
 
     const expenseData = {
-      shopName: bill.shopName,
+      shopName: bill.shopName || bill.shop?.name || 'Local Store',
       amount: bill.total,
-      category: catMap[bill.shopCategory?.toLowerCase()] || 'shopping',
-      date: bill.createdAt,
+      category: catMap[bill.shopCategory?.toLowerCase()] || bill.category || 'shopping',
+      date: bill.createdAt || bill.timestamp || new Date().toISOString(),
       note: `Bill #${bill.billNumber} via Spendly Shop`,
-      scanType: "shop_bill"
+      scanType: "shop_bill",
+      billItems: bill.items,
+      billId: bill.billId
     };
 
     await addExpense(expenseData);
     onClose();
   };
 
-  const moreCount = bill.items.length - 5;
+  const moreCount = (bill.items?.length || 0) - 5;
+  const displayDate = bill.createdAt || bill.timestamp || new Date().toISOString();
+  const dateStr = displayDate.includes('T') ? displayDate.split('T')[0] : displayDate;
 
-  return (
-    <div className="fixed inset-0 z-[1000] flex items-end justify-center pointer-events-none">
+  return createPortal(
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center pointer-events-none left-1/2 -translate-x-1/2 w-full max-w-[450px]">
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
+        onClick={onClose}
+      />
+      
       <motion.div 
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
-        className="w-full max-w-[500px] bg-white rounded-t-[40px] shadow-2xl p-8 pointer-events-auto border-t border-slate-100"
+        transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+        className="relative w-full bg-white rounded-t-[40px] shadow-[0_-20px_60px_rgba(0,0,0,0.15)] p-8 pointer-events-auto border-t border-slate-100 pb-12"
       >
         <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8" />
         
-        <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-indigo-100">
-                {bill.shopName?.charAt(0) || '🏪'}
+        <div className="flex items-center gap-5 mb-8">
+            <div className="w-16 h-16 bg-black rounded-[24px] flex items-center justify-center text-white shadow-xl">
+                <ShoppingBag className="w-8 h-8" />
             </div>
-            <div>
-                <h2 className="text-xl font-black text-slate-900 leading-tight">🧾 Bill Received!</h2>
-                <p className="text-sm font-bold text-primary">{bill.shopName}</p>
+            <div className="flex-1 min-w-0">
+                <h2 className="text-[24px] font-[900] text-black tracking-tight leading-none mb-2" style={S}>Bill Received!</h2>
+                <p className="text-[14px] font-[700] text-[#AFAFAF] uppercase tracking-widest truncate" style={S}>{bill.shopName || bill.shop?.name}</p>
             </div>
+            <button onClick={onClose} className="w-10 h-10 bg-[#F6F6F6] rounded-full flex items-center justify-center border border-[#EEEEEE]">
+                <X className="w-5 h-5 text-black" strokeWidth={2.5} />
+            </button>
         </div>
 
-        <div className="space-y-4 mb-8">
-            <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <span>Bill #{bill.billNumber}</span>
-                <span>{bill.createdAt.split('T')[0]}</span>
+        <div className="space-y-5 mb-10">
+            <div className="flex justify-between items-center text-[10px] font-[900] text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-3">
+                <span>Ref: #{bill.billNumber}</span>
+                <span>{dateStr}</span>
             </div>
 
-            <div className="space-y-3">
-                {bill.items.slice(0, 5).map((item, i) => (
-                    <div key={i} className="flex justify-between items-center text-sm font-bold">
-                        <span className="text-slate-600">{item.name}</span>
-                        <span className="text-slate-900">{item.quantity} × {formatMoney(item.price)}</span>
+            <div className="space-y-4">
+                {(bill.items || []).slice(0, 5).map((item, i) => (
+                    <div key={i} className="flex justify-between items-center">
+                        <span className="text-[15px] font-[700] text-black" style={S}>{item.name}</span>
+                        <div className="text-right">
+                          <p className="text-[13px] font-[800] text-black" style={S}>{formatMoney(item.price)}</p>
+                          <p className="text-[10px] font-[700] text-[#AFAFAF]" style={S}>{item.quantity || 1} unit{item.quantity !== 1 ? 's' : ''}</p>
+                        </div>
                     </div>
                 ))}
                 {moreCount > 0 && (
-                    <div className="text-xs font-bold text-slate-400">
-                        + {moreCount} more items
+                    <div className="text-[11px] font-[800] text-[#AFAFAF] uppercase tracking-widest pt-1">
+                        + {moreCount} more items in digital receipt
                     </div>
                 )}
             </div>
 
-            <div className="border-t-2 border-slate-50 pt-4 space-y-2">
-                {bill.gstAmount > 0 && (
-                    <div className="flex justify-between text-xs font-bold text-slate-400">
-                        <span>GST</span>
-                        <span>{formatMoney(bill.gstAmount)}</span>
-                    </div>
-                )}
-                {bill.discountAmount > 0 && (
-                    <div className="flex justify-between text-xs font-bold text-red-500">
-                        <span>Discount</span>
-                        <span>-{formatMoney(bill.discountAmount)}</span>
-                    </div>
-                )}
-                <div className="flex justify-between items-center mt-2">
-                    <span className="text-lg font-black text-slate-900 uppercase">Total</span>
-                    <span className="text-2xl font-black text-primary">{formatMoney(bill.total)}</span>
+            <div className="bg-[#F6F6F6] rounded-[24px] p-6 space-y-3">
+                <div className="flex justify-between items-center">
+                    <span className="text-[16px] font-[900] text-black uppercase tracking-tight" style={S}>Total Amount</span>
+                    <span className="text-[28px] font-[900] text-black tracking-tighter" style={S}>{formatMoney(bill.total)}</span>
                 </div>
-            </div>
-
-            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2">
-                <div className="flex items-center gap-1.5">
-                    <CreditCard className="w-3 h-3" /> {bill.paymentMethod}
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> {new Date(bill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <div className="flex items-center gap-4 text-[10px] font-[800] text-[#AFAFAF] uppercase tracking-widest pt-3 border-t border-slate-200/50">
+                    <div className="flex items-center gap-2">
+                        <CreditCard className="w-3.5 h-3.5" /> {bill.paymentMethod || 'CASH'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5" /> {new Date(displayDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div className="space-y-4">
-            <button 
-                onClick={handleAdd}
-                className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 active:scale-95 transition-transform flex items-center justify-center gap-2"
-            >
-                <Check className="w-6 h-6" /> Add to Spendly
-            </button>
+        <div className="flex gap-4">
             <button 
                 onClick={onClose}
-                className="w-full text-slate-400 font-bold text-sm uppercase tracking-widest py-2 active:opacity-50"
+                className="flex-1 h-16 bg-[#F6F6F6] text-[#AFAFAF] rounded-2xl font-[900] text-[14px] uppercase tracking-widest active:scale-95 transition-all"
+                style={S}
             >
-                Skip
+                Dismiss
+            </button>
+            <button 
+                onClick={handleAdd}
+                className="flex-[2] h-16 bg-black text-white rounded-2xl font-[900] text-[16px] shadow-xl shadow-black/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                style={S}
+            >
+                <Check className="w-5 h-5" strokeWidth={3} /> Add to Wallet
             </button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.getElementById('modal-root') || document.body
   );
 };
+
+export default BillReceivedPopup;
 
 export default BillReceivedPopup;
