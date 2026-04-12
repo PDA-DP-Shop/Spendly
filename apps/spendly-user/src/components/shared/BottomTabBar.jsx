@@ -1,6 +1,6 @@
 // Bottom navigation bar — Dark Floating Pill (matches Spendly Shop style)
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, BarChart2, ScanLine, Receipt, User } from 'lucide-react'
+import { Home, BarChart2, Plus, Receipt, User } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
