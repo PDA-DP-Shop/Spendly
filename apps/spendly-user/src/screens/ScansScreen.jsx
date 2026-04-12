@@ -22,6 +22,7 @@ import { useExpenseStore } from '../store/expenseStore'
 import { lookupBarcode } from '../services/productLookup'
 import { scannedProductService, expenseService } from '../services/database'
 import { parseScannedQR } from '../utils/qrCode'
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library'
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
@@ -83,19 +84,27 @@ function useCameraScanner({ onResult, paused }) {
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
   const rafRef = useRef(null)
-  const jsQRRef = useRef(null)
+  const zxingRef = useRef(null)
   const detectorRef = useRef(null)
   const lastResult = useRef(null)
   const [hasCamera, setHasCamera] = useState(null) // null=loading
 
-  // Load jsQR CDN fallback
   useEffect(() => {
-    if (window.jsQR) { jsQRRef.current = window.jsQR; return }
-    const s = document.createElement('script')
-    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
-    s.onload = () => { jsQRRef.current = window.jsQR }
-    document.head.appendChild(s)
-    return () => { try { document.head.removeChild(s) } catch {} }
+    // Initialize ZXing MultiFormat reader
+    const hints = new Map()
+    // Prioritize QR codes but support standard barcodes too
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.QR_CODE,
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.UPC_A
+    ])
+    zxingRef.current = new BrowserMultiFormatReader(hints)
+    
+    return () => {
+      zxingRef.current?.reset()
+    }
   }, [])
 
   const startCamera = useCallback(async () => {
@@ -143,9 +152,7 @@ function useCameraScanner({ onResult, paused }) {
 
     const tick = (now) => {
       rafRef.current = requestAnimationFrame(tick)
-
-      // Pause when a result sheet is open
-      if (paused) return
+      if (paused || processing) return
 
       // Throttle: only process at SCAN_INTERVAL
       if (now - lastScanAt < SCAN_INTERVAL) return
@@ -154,58 +161,54 @@ function useCameraScanner({ onResult, paused }) {
       const canvas = canvasRef.current
       if (!video || !canvas || video.readyState < 2) return
 
-      // Skip if previous decode hasn't finished (BarcodeDetector is async)
-      if (processing) return
       processing = true
       lastScanAt = now
 
-      // Draw at reduced resolution — fast path
-      canvas.width = SCAN_W
-      canvas.height = SCAN_H
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })
-      ctx.drawImage(video, 0, 0, SCAN_W, SCAN_H)
-
       const tryResult = (text) => {
-        if (!text || text === lastResult.current) { processing = false; return }
+        if (!text || text === lastResult.current) { 
+          processing = false
+          return 
+        }
         lastResult.current = text
         try { navigator.vibrate?.(60) } catch {}
         processing = false
         onResult(text)
       }
 
-      const tryFallbackToJsQR = () => {
-        if (jsQRRef.current) {
-          try {
-            const imageData = ctx.getImageData(0, 0, SCAN_W, SCAN_H)
-            const code = jsQRRef.current(imageData.data, SCAN_W, SCAN_H, {
-              inversionAttempts: 'dontInvert'
-            })
-            tryResult(code?.data || null)
-          } catch {
+      const tryFallbackToZXing = () => {
+        if (!zxingRef.current) { processing = false; return }
+        try {
+          // Sync decode from current video/canvas state
+          const result = zxingRef.current.decodeFromCanvas(canvas)
+          if (result) {
+            tryResult(result.getText())
+          } else {
             processing = false
           }
-        } else {
+        } catch (e) {
+          // No barcode found in this frame
           processing = false
         }
       }
 
       if ('BarcodeDetector' in window) {
         try {
-          // Initialize once for performance
           if (!detectorRef.current) {
             detectorRef.current = new window.BarcodeDetector({
-              formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'upc_a', 'upc_e', 'code_39']
+              formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'upc_a']
             })
           }
           detectorRef.current.detect(canvas)
-            .then(codes => { tryResult(codes[0]?.rawValue || null) })
-            .catch(() => { tryFallbackToJsQR() })
+            .then(codes => { 
+                if (codes.length > 0) tryResult(codes[0].rawValue)
+                else processing = false
+            })
+            .catch(() => tryFallbackToZXing())
         } catch (e) {
-          // Safari throws if formats are unsupported
-          tryFallbackToJsQR()
+          tryFallbackToZXing()
         }
       } else {
-        tryFallbackToJsQR()
+        tryFallbackToZXing()
       }
     }
 
@@ -899,13 +902,6 @@ export default function ScansScreen() {
     }
   }, [mode, navigate])
 
-  const dismiss = () => {
-    setResult(null)
-    setError('')
-    setRawText('')
-    setScanning(true)
-  }
-
   const handleModeChange = (newMode) => {
     dismiss()
     setMode(newMode)
@@ -927,10 +923,19 @@ export default function ScansScreen() {
     dismiss()
   }
 
-  const { videoRef, canvasRef, hasCamera } = useCameraScanner({
+  const { videoRef, canvasRef, hasCamera, resetScan } = useCameraScanner({
     onResult: handleRaw,
     paused: !!result || mode === 'receipt',
   })
+
+  // Handle dismiss with cache reset
+  const dismiss = () => {
+    setResult(null)
+    setError('')
+    setRawText('')
+    setScanning(true)
+    resetScan()
+  }
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
