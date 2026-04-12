@@ -75,12 +75,10 @@ export default function BottomTabBar({ onAddPress }) {
                   <motion.button
                     variants={HAPTIC}
                     whileTap="tap"
-                    onClick={() => navigate('/scans')}
-                    className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-[0_0_0_4px_rgba(255,255,255,0.08)] active:scale-90 transition-all ${
-                      scanActive ? 'bg-white/90 text-black' : 'bg-white text-black'
-                    }`}
+                    onClick={onAddPress}
+                    className="w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-[0_0_0_4px_rgba(255,255,255,0.08)] active:scale-90 transition-all bg-white text-black"
                   >
-                    <ScanLine className="w-6 h-6" strokeWidth={2.5} />
+                    <Plus className="w-6 h-6" strokeWidth={3} />
                   </motion.button>
                 </div>
               )

@@ -7,31 +7,22 @@ const OPTIONS = [
   {
     id: 'type',
     icon: Keyboard,
-    title: 'Manual Entry',
-    subtitle: 'Type it in yourself',
+    title: 'Add Expenses',
+    subtitle: 'Standard Manual Entry',
     color: '#000000',
     bg: '#F6F6F6',
-    path: '/add?mode=type'
+    path: '/add'
   },
   {
     id: 'smart-scan',
     icon: ScanBarcode,
     title: 'Smart Scan',
-    subtitle: 'Neural Camera Scanner',
+    subtitle: 'AI Universal Scanner',
     color: '#000000',
     bg: '#F6F6F6',
-    path: '/add?mode=smart-scan',
+    path: '/scans',
     badge: 'NEW'
-  },
-  {
-    id: 'voice',
-    icon: Mic,
-    title: 'Voice Command',
-    subtitle: 'Neural processing',
-    color: '#000000',
-    bg: '#F6F6F6',
-    path: '/add?mode=voice'
-  },
+  }
 ]
 
 export default function AddBottomSheet({ show, onClose }) {
