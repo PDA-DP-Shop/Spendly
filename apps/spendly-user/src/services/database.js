@@ -274,6 +274,10 @@ export const budgetService = {
     const settings = await settingsService.get()
     return settings?.monthlyBudget || 2000
   },
+  async setOverall(amount, month, year) {
+    // Current implementation stores overall budget in global settings
+    await settingsService.update({ monthlyBudget: amount })
+  },
 }
 
 // Scans operations
