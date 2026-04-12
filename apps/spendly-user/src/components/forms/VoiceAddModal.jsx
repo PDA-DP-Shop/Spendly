@@ -1,4 +1,4 @@
-// VoiceAddModal.jsx — Feature 11: Voice Add Expense
+import { createPortal } from 'react-dom'
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, X, Check, Loader2 } from 'lucide-react'
@@ -99,12 +99,12 @@ export default function VoiceAddModal({ onClose, onParsed }) {
     }, 800)
   }
 
-  return (
-    <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+  return createPortal(
+    <motion.div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 pointer-events-auto left-1/2 -translate-x-1/2 w-full max-w-[450px]"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
       
-      <motion.div className="relative w-full max-w-[340px] bg-white rounded-[40px] p-8 shadow-2xl flex flex-col items-center text-center"
+      <motion.div className="relative w-full max-w-[340px] bg-white rounded-[40px] p-8 shadow-2xl flex flex-col items-center text-center pointer-events-auto"
         initial={{ y: 50, scale: 0.9, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}>
         
         <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
@@ -118,7 +118,6 @@ export default function VoiceAddModal({ onClose, onParsed }) {
         <h3 className="text-[20px] font-[900] text-black mb-2 tracking-tight" style={S}>Neural Voice</h3>
         <p className="text-[13px] font-[600] text-[#AFAFAF] mb-8 leading-relaxed uppercase tracking-[0.1em]" style={S}>"Spent 500 on coffee today"</p>
 
-        {/* Mic Button */}
         <div className="relative mb-10">
           <AnimatePresence>
             {isListening && (
@@ -135,7 +134,6 @@ export default function VoiceAddModal({ onClose, onParsed }) {
           </motion.button>
         </div>
 
-        {/* Status */}
         <div className="h-14 flex items-center justify-center w-full">
           {isProcessing ? (
             <div className="flex items-center gap-2 text-black font-[900] uppercase text-[12px] tracking-[0.2em]" style={S}>
@@ -149,8 +147,8 @@ export default function VoiceAddModal({ onClose, onParsed }) {
             <p className="text-[12px] text-[#AFAFAF] font-[900] uppercase tracking-[0.2em]" style={S}>Ready to Scan</p>
           )}
         </div>
-
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.getElementById('modal-root') || document.body
   )
 }

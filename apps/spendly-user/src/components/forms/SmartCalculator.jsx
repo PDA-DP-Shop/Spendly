@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Delete, Percent, Users, Receipt, X } from 'lucide-react'
@@ -19,12 +20,9 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
 
   useEffect(() => {
     try {
-      // 1. Sanitize the expression for our safe parser
       const cleanExp = expression.replace(/×/g, '*').replace(/÷/g, '/')
       
-      // 2. Safe Arithmetic Evaluation (Replaces insecure new Function/eval)
       const evaluateSimple = (str) => {
-        // Matches numbers and operators
         const tokens = str.match(/(\d+(\.\d+)?|[+\-*/])/g)
         if (!tokens || tokens.length === 0) return 0
         
@@ -43,7 +41,6 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
 
       let evaluated = evaluateSimple(cleanExp)
       
-      // 3. Apply Multipliers (GST, Tip, Split)
       if (gst > 0) evaluated = evaluated * (1 + (gst / 100))
       if (tip > 0) evaluated = evaluated * (1 + (tip / 100))
       if (split > 1) evaluated = evaluated / (split || 1)
@@ -92,31 +89,30 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
     '%', '0', '.', 'SAVE'
   ]
 
-  return (
-    <motion.div className="fixed inset-0 z-[100] flex items-end justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      {/* Background overlay limited to app width or full screen */}
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+  return createPortal(
+    <motion.div className="fixed inset-0 z-[2000] flex items-end justify-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      {/* Background overlay limited to app width — using centered fixed container */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
       
-      <motion.div className="relative w-full max-w-[450px] bg-white rounded-t-[32px] flex flex-col pt-4 overflow-hidden"
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 28, stiffness: 300 }}>
+      <motion.div className="relative w-full max-w-[450px] bg-white rounded-t-[40px] flex flex-col pt-2 shadow-[0_-20px_50px_rgba(0,0,0,0.1)] overflow-hidden pointer-events-auto"
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}>
         
-        <div className="w-12 h-1.5 bg-[#EEEEEE] rounded-full mx-auto mb-6 mt-2" />
+        <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
 
-        <div className="px-8 pb-10">
-          <div className="flex flex-col mb-8 text-center">
-            <span className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-[0.2em] mb-2" style={S}>Calculation</span>
-            <div className="text-[18px] font-[700] text-[#D8D8D8] break-all tracking-tight leading-tight" style={S}>{expression}</div>
+        <div className="px-8 pb-6">
+          <div className="flex flex-col mb-4 text-center">
+            <span className="text-[11px] font-[800] text-[#AFAFAF] uppercase tracking-[0.2em] mb-2" style={S}>Calculation</span>
+            <div className="text-[15px] font-[700] text-[#D8D8D8] break-all tracking-tight leading-tight" style={S}>{expression}</div>
           </div>
           
-          <div className="flex flex-col items-center border-b border-[#F6F6F6] pb-10">
+          <div className="flex flex-col items-center">
             <div className="flex items-baseline gap-3">
-              <span className="text-[22px] font-[800] text-black/20" style={S}>{currency}</span>
+              <span className="text-[20px] font-[800] text-black/20" style={S}>{currency}</span>
               <span 
                 className="font-[800] text-black break-all leading-none tracking-tightest" 
                 style={{ 
                   ...S,
-                  fontSize: (result || expression).length > 8 ? '42px' : '64px',
-                  transition: 'font-size 0.2s ease'
+                  fontSize: (result || expression).length > 8 ? '40px' : '56px',
                 }}
               >
                 {result || expression}
@@ -126,58 +122,67 @@ export default function SmartCalculator({ initialValue, onSave, onClose, currenc
         </div>
 
         <div className="flex gap-3 px-8 py-5 bg-[#F6F6F6] overflow-x-auto scrollbar-hide border-y border-[#EEEEEE]">
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => setSplit(s => s >= 10 ? 1 : s + 1)}
-            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${split > 1 ? 'bg-black text-white border-black' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setSplit(s => s >= 10 ? 1 : s + 1)}
+            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${split > 1 ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
             <Users className="w-4 h-4" strokeWidth={3} /> 
             {split > 1 ? `Split ${split}` : 'Split'}
           </motion.button>
           
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => setTip(t => t === 20 ? 0 : t + 5)}
-            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${tip > 0 ? 'bg-black text-white border-black' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setTip(t => t === 20 ? 0 : t + 5)}
+            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${tip > 0 ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
             <Receipt className="w-4 h-4" strokeWidth={3} />
             {tip > 0 ? `Tip ${tip}%` : 'Tip'}
           </motion.button>
           
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => setGst(g => g === 28 ? 0 : g === 0 ? 5 : g === 5 ? 12 : g === 12 ? 18 : 28)}
-            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${gst > 0 ? 'bg-black text-white border-black' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setGst(g => g === 28 ? 0 : g === 0 ? 5 : g === 5 ? 12 : g === 12 ? 18 : 28)}
+            className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-full text-[13px] font-[700] transition-all border ${gst > 0 ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-black border-[#EEEEEE]'}`} style={S}>
             <Percent className="w-4 h-4" strokeWidth={3} />
             {gst > 0 ? `GST ${gst}%` : 'GST'}
           </motion.button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 p-8 pb-12 bg-white">
+        <div className="grid grid-cols-4 gap-2.5 p-6 pb-12 bg-white">
           {buttons.map(btn => {
             const isOperator = ['÷','×','-','+','='].includes(btn)
             const isAction = ['C','⌫','%','SAVE'].includes(btn)
             const isHighlight = btn === 'SAVE' || btn === '='
             
             return (
-              <motion.button key={btn} variants={HAPTIC_SHAKE} whileTap="tap"
+              <motion.button key={btn} whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   if (btn === 'C') { setExpression('0'); setSplit(1); setTip(0); setGst(0); setResult('') }
                   else if (btn === '⌫') handleDelete()
                   else if (btn === 'SAVE' || btn === '=') handleApply()
                   else if (btn === '%') {
                     try { 
-                      const currentVal = new Function(`return ${expression.replace(/×/g, '*').replace(/÷/g, '/')}`)()
-                      setExpression((currentVal / 100).toString()) 
+                      const clean = expression.replace(/×/g, '*').replace(/÷/g, '/')
+                      const tokens = clean.match(/(\d+(\.\d+)?|[+\-*/])/g)
+                      if (tokens) {
+                        const lastToken = tokens[tokens.length - 1]
+                        if (!isNaN(parseFloat(lastToken))) {
+                           const val = parseFloat(lastToken) / 100
+                           const newExp = expression.slice(0, -lastToken.length) + val.toString()
+                           setExpression(newExp)
+                        }
+                      }
                     } catch(e){}
                   }
                   else handlePress(btn)
                 }}
-                className={`flex items-center justify-center rounded-[24px] transition-all border ${isHighlight ? 'bg-black border-black text-white shadow-lg' : isOperator || isAction ? 'bg-[#F6F6F6] border-[#EEEEEE] text-black' : 'bg-white border-[#EEEEEE] text-black active:bg-black active:text-white'}`}
+                className={`flex items-center justify-center rounded-[20px] transition-all border ${isHighlight ? 'bg-black border-black text-white shadow-lg' : isOperator || isAction ? 'bg-[#F6F6F6] border-[#EEEEEE] text-black' : 'bg-white border-[#EEEEEE] text-black active:bg-black active:text-white font-[800]'}`}
                 style={{
-                  fontSize: isHighlight ? '14px' : (btn === '⌫' ? '28px' : '26px'),
-                  fontWeight: 700,
-                  height: '78px',
+                  fontSize: isHighlight ? '13px' : (btn === '⌫' ? '28px' : '22px'),
+                  fontWeight: 800,
+                  height: '64px',
                   ...S
                 }}>
-                {btn === '⌫' ? <Delete className="w-7 h-7" strokeWidth={3} /> : btn}
+                {btn === '⌫' ? <Delete className="w-6 h-6" strokeWidth={3} /> : btn}
               </motion.button>
             )
           })}
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.getElementById('modal-root') || document.body
   )
 }
