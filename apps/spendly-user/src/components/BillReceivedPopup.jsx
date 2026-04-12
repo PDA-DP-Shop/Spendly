@@ -54,7 +54,8 @@ const BillReceivedPopup = ({ bill, onClose }) => {
       note: `Bill #${bill.billNumber} via Spendly Shop`,
       scanType: "shop_bill",
       billItems: bill.items,
-      billId: bill.billId
+      billId: bill.billId,
+      type: 'spent'
     };
 
     await addExpense(expenseData);

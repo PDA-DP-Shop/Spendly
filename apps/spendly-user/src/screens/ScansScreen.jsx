@@ -354,6 +354,7 @@ function BillSheet({ bill, onClose, currency }) {
         billItems: bill.items,
         scanType: 'shop_bill',
         paymentMethod: bill.paymentMethod,
+        type: 'spent',
       })
       setSaved(true)
       try { navigator.vibrate?.([50, 30, 80]) } catch {}
