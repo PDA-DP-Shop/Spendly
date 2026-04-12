@@ -188,7 +188,7 @@ export default function SettingsScreen() {
             <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
             <div className="flex items-center justify-between px-8 mb-6 mt-2">
               <h3 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{title}</h3>
-              <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={onClose} 
+              <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
                 className="w-11 h-11 rounded-full bg-[#F6F6F6] flex items-center justify-center border border-[#EEEEEE]">
                 <X className="w-5 h-5 text-black" strokeWidth={2.5} />
               </motion.button>
@@ -276,7 +276,7 @@ export default function SettingsScreen() {
               </div>
             </div>
             {permStatus.camera !== 'granted' && (
-              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+              <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
                 onClick={async () => {
                   const ok = await permissionService.requestCamera()
                   setPermStatus(s => ({ ...s, camera: ok ? 'granted' : 'denied' }))
@@ -303,7 +303,7 @@ export default function SettingsScreen() {
               </div>
             </div>
             {permStatus.notifications !== 'granted' && (
-              <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+              <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
                 onClick={async () => {
                   if ('Notification' in window) {
                     const res = await Notification.requestPermission()
@@ -318,7 +318,7 @@ export default function SettingsScreen() {
           </div>
 
           {/* Manage in browser */}
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+          <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
             onClick={() => setToast({ id: Date.now(), type: 'info', message: 'Go to browser Settings → Site Settings → this site to revoke permissions' })}
             className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] border-t border-[#EEEEEE]">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
@@ -340,7 +340,7 @@ export default function SettingsScreen() {
               </div>
               <span className="text-[15px] font-[700] text-black tracking-tight" style={S}>{t('settings.dailyUpdates')}</span>
             </div>
-            <motion.button variants={HAPTIC_SHAKE} whileTap="tap"
+            <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
               onClick={() => updateSetting('notificationsOn', !settings?.notificationsOn)}
               className="w-12 h-7 rounded-full transition-all relative border border-[#EEEEEE]"
               style={{ background: settings?.notificationsOn ? '#000000' : '#E2E2E2' }}>
@@ -381,7 +381,7 @@ export default function SettingsScreen() {
           </div>
           <div className="grid grid-cols-1 gap-2 mt-2">
             {CURRENCIES.filter(c => c.name.toLowerCase().includes(currencySearch.toLowerCase()) || c.code.toLowerCase().includes(currencySearch.toLowerCase())).map(c => (
-                <motion.button key={c.code} variants={HAPTIC_SHAKE} whileTap="tap"
+                <motion.button key={c.code} variants={HAPTIC_TOUCH} whileTap="tap"
                   onClick={() => { updateSetting('currency', c.code); setShowCurrencyPicker(false); setCurrencySearch('') }}
                   className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all border ${settings?.currency === c.code ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
                   <span className="text-2xl">{c.flag}</span>
@@ -399,7 +399,7 @@ export default function SettingsScreen() {
       <BottomSheet show={showLockPicker} onClose={() => setShowLockPicker(false)} title="Privacy Type">
         <div className="grid grid-cols-1 gap-3">
           {LOCK_OPTIONS.map(opt => (
-            <motion.button key={opt.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleLockTypeSelect(opt.id)}
+            <motion.button key={opt.id} variants={HAPTIC_TOUCH} whileTap="tap" onClick={() => handleLockTypeSelect(opt.id)}
               className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all border ${settings?.lockType === opt.id ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
               <div className="flex items-center gap-4">
                 <span className="text-2xl">{opt.emoji}</span>
@@ -414,7 +414,7 @@ export default function SettingsScreen() {
       <BottomSheet show={showLanguagePicker} onClose={() => setShowLanguagePicker(false)} title="Preferred Language">
         <div className="grid grid-cols-1 gap-3">
           {LANGUAGE_OPTIONS.map(opt => (
-            <motion.button key={opt.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleLanguageSelect(opt.id)}
+            <motion.button key={opt.id} variants={HAPTIC_TOUCH} whileTap="tap" onClick={() => handleLanguageSelect(opt.id)}
               className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all border ${settings?.language === opt.id ? 'bg-black border-black shadow-lg' : 'bg-[#F6F6F6] border-transparent'}`}>
               <div className="flex items-center gap-4">
                 <span className="text-2xl">{opt.emoji}</span>
@@ -453,7 +453,7 @@ export default function SettingsScreen() {
                 <div className="flex flex-col gap-4">
                     <input value={exportPwd} onChange={e => setExportPwd(e.target.value)} type="password" placeholder="Set Password"
                       className="w-full py-4 px-6 rounded-2xl bg-[#F6F6F6] border border-[#EEEEEE] outline-none font-[600]" style={S} />
-                    <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={handleExport} className="w-full py-5 rounded-2xl bg-black text-white font-[800] text-[15px] shadow-lg"
+                    <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={handleExport} className="w-full py-5 rounded-2xl bg-black text-white font-[800] text-[15px] shadow-lg"
                       style={S}>Export Data</motion.button>
                 </div>
             </BottomSheet>
@@ -478,14 +478,13 @@ export default function SettingsScreen() {
                     <input value={importPwd} onChange={e => setImportPwd(e.target.value)} type="password" placeholder="Enter Password"
                       className="w-full py-4 px-6 rounded-2xl bg-[#F6F6F6] border border-[#EEEEEE] outline-none font-[600]" style={S} />
                     <div className="flex gap-3 mt-2">
-                        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleImport('replace')} className="flex-1 py-4 rounded-xl bg-black text-white font-[800] text-[14px]" style={S}>Replace & Import</motion.button>
-                        <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => handleImport('merge')} className="flex-1 py-4 rounded-xl bg-[#F6F6F6] border border-[#EEEEEE] text-black font-[800] text-[14px]" style={S}>Merge Data</motion.button>
+                        <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={() => handleImport('replace')} className="flex-1 py-4 rounded-xl bg-black text-white font-[800] text-[14px]" style={S}>Replace & Import</motion.button>
+                        <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={() => handleImport('merge')} className="flex-1 py-4 rounded-xl bg-[#F6F6F6] border border-[#EEEEEE] text-black font-[800] text-[14px]" style={S}>Merge Data</motion.button>
                     </div>
                 </div>
             </BottomSheet>
         )}
       </AnimatePresence>
-
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
     </div>
   )
