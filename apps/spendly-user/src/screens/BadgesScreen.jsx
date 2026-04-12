@@ -20,13 +20,13 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
   const { t } = useTranslation()
   const S = { fontFamily: "'Inter', sans-serif" }
   return (
-    <AnimatePresence>
+    <>
       <motion.div key="badge-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} className="fixed inset-0 z-[70]" style={{ background: 'rgba(0,0,0,0.4)' }} />
+        onClick={onClose} className="fixed inset-0 z-[100]" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
       <motion.div key="badge-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-        className="fixed bottom-0 left-0 right-0 z-[71] pb-safe bg-white flex flex-col items-center text-center px-8"
-        style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        className="fixed bottom-0 left-0 right-0 z-[101] pb-safe bg-white flex flex-col items-center text-center px-8"
+        style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.2)' }}>
         
         <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-10" />
         <motion.button variants={HAPTIC_TOUCH} whileTap="tap" onClick={onClose} 
@@ -61,7 +61,7 @@ function BadgeDetailSheet({ badge, isEarned, earnedDate, onClose }) {
           </div>
         )}
       </motion.div>
-    </AnimatePresence>
+    </>
   )
 }
 
