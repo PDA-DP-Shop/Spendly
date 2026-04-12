@@ -8,7 +8,7 @@ import { useGoalStore } from '../store/goalStore'
 import { useExpenses } from '../hooks/useExpenses'
 import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
-import { Plus, X, Trophy, Target, Calendar, Flame, ChevronRight, Trash2, Star, Sparkles } from 'lucide-react'
+import { Plus, X, Trophy, Target, Calendar, Flame, ChevronRight, Trash2, Star, Sparkles, Lock } from 'lucide-react'
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 
 const GOAL_EMOJIS = ['🏖️','🚗','📱','💻','🏠','✈️','💍','🎓','💰','🎯','⛽','🛍️','🎮','📸','🌍']
