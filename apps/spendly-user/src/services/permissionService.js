@@ -92,14 +92,23 @@ export const permissionService = {
     if (navigator.permissions?.query) {
       try {
         const cam = await navigator.permissions.query({ name: 'camera' })
-        result.camera = cam.state
-        savePerm('camera', cam.state)
-      } catch {}
+        if (cam && cam.state) {
+          result.camera = cam.state
+          savePerm('camera', cam.state)
+        }
+      } catch (e) {
+        console.log('[PermissionService] Camera query not supported')
+      }
+      
       try {
         const notif = await navigator.permissions.query({ name: 'notifications' })
-        result.notifications = notif.state
-        savePerm('notifications', notif.state)
-      } catch {}
+        if (notif && notif.state) {
+          result.notifications = notif.state
+          savePerm('notifications', notif.state)
+        }
+      } catch (e) {
+        console.log('[PermissionService] Notifications query not supported')
+      }
     }
 
     if ('Notification' in window && Notification.permission !== 'default') {

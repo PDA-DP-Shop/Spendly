@@ -15,10 +15,14 @@ export const exportAllData = async (password) => {
   const goals = await db.goals.toArray()
   const splits = await db.splits.toArray()
   const badges = await db.badges.toArray()
+  const deletedExpenses = await db.deletedExpenses.toArray()
+  const backupHistory = await db.backupHistory.toArray()
+  const browserInfo = await db.browserInfo.toArray()
+  const storageInfo = await db.storageInfo.toArray()
   const festivals = JSON.parse(localStorage.getItem('spendly_festivals') || '[]')
 
   const payload = {
-    version: '1.1',
+    version: '1.2',
     exportedAt: new Date().toISOString(),
     expenses,
     budgets,
@@ -31,6 +35,10 @@ export const exportAllData = async (password) => {
     goals,
     splits,
     badges,
+    deletedExpenses,
+    backupHistory,
+    browserInfo,
+    storageInfo,
     festivals,
   }
 

@@ -1,193 +1,216 @@
 /**
- * SmartScanner Component - White Premium Edition
- * Integrated high-end scan experience with luminous HUD
+ * SmartScanner Component — Integrated Premium Edition
+ * Google Pay-inspired high-perf scanner with 4 modes
  */
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Zap, ZapOff, Camera, Package, ScanBarcode, Cpu } from 'lucide-react'
-import { useCamera } from '../../hooks/useCamera'
-import { useSmartScanner } from '../../hooks/useSmartScanner'
-import ScannerOverlay from './ScannerOverlay'
-import ScanResultCard from './ScanResultCard'
+import { 
+  X, Zap, ZapOff, Camera, Package, ScanBarcode, QrCode, Receipt, FileText, 
+  Clock, Check, AlertCircle, ShoppingBag, Landmark 
+} from 'lucide-react'
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library'
+
+const S = { fontFamily: "'Inter', sans-serif" }
+
+const MODES = [
+  { id: 'bill',    label: 'Bill',    Icon: Receipt,  hint: 'Scan Spendly Shop QR' },
+  { id: 'barcode', label: 'Barcode', Icon: ScanBarcode, hint: 'Scan product barcode' },
+  { id: 'payment', label: 'Payment', Icon: QrCode,   hint: 'Scan UPI / Payment QR' },
+  { id: 'receipt', label: 'Receipt', Icon: FileText, hint: 'Point at bill & tap' },
+]
 
 export default function SmartScanner({ onResult, onClose }) {
-  const { videoRef, startCamera, stopCamera, toggleTorch, torch, isReady, setIsReady } = useCamera()
-  const [result, setResult] = useState(null)
-  const [activeTab, setActiveTab] = useState('SCAN') // 'SCAN' or 'BARCODE'
-  const S = { fontFamily: "'Plus Jakarta Sans', sans-serif" }
+  const [activeTab, setActiveTab] = useState('bill')
+  const [isReady, setIsReady] = useState(false)
+  const [torch, setTorch] = useState(false)
+  
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const streamRef = useRef(null)
+  const rafRef = useRef(null)
+  const zxingRef = useRef(null)
+  const lastResult = useRef(null)
 
-  const handleScanResult = useCallback((res) => {
-    if (res.instant) {
-      if (window.navigator.vibrate) window.navigator.vibrate([50, 30, 50])
-      onResult(res)
-      return
+  // ── Initialize Camera ──
+  const startCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      })
+      streamRef.current = stream
+      const video = videoRef.current
+      if (video) {
+        video.srcObject = stream
+        const playPromise = video.play()
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => setIsReady(true))
+            .catch(() => { /* Interrupted */ })
+        }
+      }
+    } catch (e) {
+      console.error('Camera failed', e)
     }
-    setResult(res)
-    if (window.navigator.vibrate) window.navigator.vibrate(100)
-  }, [onResult])
+  }, [])
 
-  const { scanStatus, isScanning, isProcessing, setIsScanning, capturePhoto } = useSmartScanner(videoRef, handleScanResult, activeTab)
+  const stopCamera = useCallback(() => {
+    cancelAnimationFrame(rafRef.current)
+    streamRef.current?.getTracks().forEach(t => t.stop())
+    streamRef.current = null
+  }, [])
+
+  const toggleTorch = async () => {
+    const track = streamRef.current?.getVideoTracks()[0]
+    if (track && 'applyConstraints' in track) {
+      try {
+        await track.applyConstraints({ advanced: [{ torch: !torch }] })
+        setTorch(!torch)
+      } catch {}
+    }
+  }
 
   useEffect(() => {
+    const hints = new Map()
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.QR_CODE, BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, 
+      BarcodeFormat.CODE_128, BarcodeFormat.UPC_A
+    ])
+    zxingRef.current = new BrowserMultiFormatReader(hints)
     startCamera()
-    setIsScanning(true)
-    const timer = setTimeout(() => setIsReady(true), 2000)
-    return () => {
-      clearTimeout(timer)
-      stopCamera()
-      setIsScanning(false)
+    return stopCamera
+  }, [startCamera, stopCamera])
+
+  // ── Scan Loop ──
+  useEffect(() => {
+    if (!isReady || activeTab === 'receipt') return
+
+    const tick = async () => {
+      rafRef.current = requestAnimationFrame(tick)
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      if (!video || !canvas || video.readyState < 2) return
+
+      // Throttled processing
+      canvas.width = 640
+      canvas.height = 360
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.drawImage(video, 0, 0, 640, 360)
+
+      try {
+        const res = await zxingRef.current.decodeFromCanvas(canvas)
+        if (res && res.getText() !== lastResult.current) {
+          lastResult.current = res.getText()
+          handleDetected(res.getText())
+        }
+      } catch {}
     }
-  }, [startCamera, stopCamera, setIsScanning, setIsReady])
 
-  const handleConfirm = () => {
-    if (!result) return
-    onResult(result)
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [isReady, activeTab])
+
+  const handleDetected = (text) => {
+    if (window.navigator.vibrate) window.navigator.vibrate(60)
+    
+    // Logic for routing based on detection
+    if (text.startsWith('upi://')) {
+      onResult({ type: 'payment-qr', text, instant: true })
+    } else if (text.includes('spendly') || text.trim().startsWith('{')) {
+      onResult({ type: 'spendly-bill', text, instant: true })
+    } else if (/^[0-9]{8,13}$/.test(text)) {
+      onResult({ type: 'product-barcode', barcode: text, instant: true })
+    } else {
+      // Generic fallback
+      onResult({ type: 'generic', text, instant: true })
+    }
   }
 
-  const handleEdit = () => {
-    if (!result) return
-    onResult({ ...result, forceEdit: true })
-  }
-
-  const handleCancel = () => {
-    setResult(null)
-    setIsScanning(true)
+  const handleCaptureReceipt = async () => {
+    // Basic animation to simulate capture
+    if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100])
+    onResult({ type: 'receipt-ocr', instant: true })
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-white flex flex-col overflow-hidden safe-area-padding"
-    >
-      <div className="absolute inset-0 bg-black/5" />
-      {/* Live Camera Feed */}
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        onLoadedData={() => setIsReady(true)}
-        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-      />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black flex flex-col overflow-hidden">
+      
+      {/* Viewfinder Background */}
+      <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" autoPlay playsInline muted />
+      <canvas ref={canvasRef} className="hidden" />
 
-      {/* Initialization Loader (White Premium) */}
-      <AnimatePresence>
-        {!isReady && (
-          <motion.div 
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 bg-white flex flex-col items-center justify-center"
-          >
-            <div className="w-14 h-14 border-[5px] border-gray-50 border-t-indigo-600 rounded-full animate-spin mb-6 shadow-sm" />
-            <h2 className="text-black text-[14px] font-[900] uppercase tracking-[0.3em]" style={S}>
-                AI_Insight Hub
-            </h2>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Top Bar Controls (Premium Frost) */}
-      <div className="absolute top-0 left-0 right-0 px-6 pt-[env(safe-area-inset-top,24px)] flex items-center justify-between z-30">
-        <button 
-          onClick={onClose} 
-          className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-2xl flex items-center justify-center border border-white/40 shadow-xl active:scale-95 transition-all"
-        >
-          <X className="w-6 h-6 text-gray-900" strokeWidth={3} />
+      {/* Mask and Overlay */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+      
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-30 pt-[env(safe-area-inset-top,24px)]">
+        <button onClick={onClose} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+          <X className="w-6 h-6 text-white" />
         </button>
-        
-        <button 
-          onClick={toggleTorch} 
-          className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-2xl flex items-center justify-center border border-white/40 shadow-xl active:scale-95 transition-all"
-        >
-          {torch ? <Zap className="w-5 h-5 text-indigo-600 fill-indigo-600" /> : <ZapOff className="w-5 h-5 text-gray-900/40" />}
+        <div className="bg-black/20 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+           <span className="text-white text-[11px] font-[900] uppercase tracking-widest">{activeTab}_MODE</span>
+        </div>
+        <button onClick={toggleTorch} className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+          {torch ? <Zap className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : <ZapOff className="w-5 h-5 text-white/50" />}
         </button>
       </div>
 
-      {/* Neurall Processing Overlay (White Wash) */}
+      {/* Viewfinder Frame */}
+      <div className="flex-1 flex items-center justify-center relative z-20">
+         <div className={`relative transition-all duration-500 ${activeTab === 'barcode' ? 'w-[300px] h-[140px]' : 'w-[260px] h-[260px]'}`}>
+            <div className="absolute inset-0 border-2 border-white/30 rounded-[32px]" />
+            <div className="absolute -inset-1 border-t-4 border-l-4 border-white w-10 h-10 rounded-tl-[32px]" />
+            <div className="absolute -inset-1 border-t-4 border-r-4 border-white w-10 h-10 rounded-tr-[32px]" style={{left:'auto'}} />
+            <div className="absolute -inset-1 border-b-4 border-l-4 border-white w-10 h-10 rounded-bl-[32px]" style={{top:'auto'}} />
+            <div className="absolute -inset-1 border-b-4 border-r-4 border-white w-10 h-10 rounded-br-[32px]" style={{top:'auto', left:'auto'}} />
+            
+            <motion.div className="absolute left-4 right-4 h-1 bg-white/50 blur-sm brightness-150 rounded-full"
+              animate={{ top: ['10%', '90%', '10%'] }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} />
+         </div>
+         
+         <p className="absolute bottom-[20%] text-white/60 text-[12px] font-[800] uppercase tracking-widest text-center px-12">
+           {MODES.find(m => m.id === activeTab)?.hint}
+         </p>
+      </div>
+
+      {/* Mode Selector */}
+      <div className="absolute bottom-0 left-0 right-0 p-8 pb-[env(safe-area-inset-bottom,40px)] z-30">
+        <div className="max-w-[360px] mx-auto">
+           {activeTab === 'receipt' && (
+             <div className="flex justify-center mb-10">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={handleCaptureReceipt}
+                  className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 backdrop-blur-md">
+                   <div className="w-16 h-16 rounded-full bg-white" />
+                </motion.button>
+             </div>
+           )}
+           
+           <div className="bg-black/40 backdrop-blur-2xl p-2 rounded-[32px] border border-white/10 flex items-center justify-between">
+              {MODES.map(mode => {
+                const Icon = mode.Icon
+                const isSel = activeTab === mode.id
+                return (
+                  <button key={mode.id} onClick={() => setActiveTab(mode.id)}
+                    className={`flex-1 flex flex-col items-center gap-2 py-3 rounded-[24px] transition-all ${isSel ? 'bg-white text-black shadow-2xl scale-105' : 'text-white/40 active:text-white'}`}>
+                    <Icon className={`w-5 h-5 ${isSel ? 'text-black' : 'text-current'}`} strokeWidth={isSel ? 3 : 2} />
+                    <span className="text-[9px] font-[900] uppercase tracking-tighter">{mode.label}</span>
+                  </button>
+                )
+              })}
+           </div>
+        </div>
+      </div>
+
+      {/* Boot Loader */}
       <AnimatePresence>
-        {isProcessing && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 bg-white/60 backdrop-blur-xl flex flex-col items-center justify-center p-12 text-center"
-          >
-            <div className="w-16 h-16 border-[6px] border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8 shadow-2xl" />
-            <h3 className="text-black text-[20px] font-[950] tracking-tighter mb-2" style={S}>
-                Neural Shield Active
-            </h3>
-            <p className="text-gray-500 text-[11px] font-[850] uppercase tracking-[0.2em]" style={S}>
-                Pixel-level precision lock enabled
-            </p>
+        {!isReady && (
+          <motion.div exit={{ opacity: 0 }} className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+             <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin mb-6" />
+             <p className="text-white text-[11px] font-[900] uppercase tracking-[0.4em]">Optimizing Lens</p>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Viewfinder UI */}
-      <AnimatePresence>
-        {!result && <ScannerOverlay status={scanStatus} mode={activeTab} />}
-      </AnimatePresence>
-
-      {/* Result Confirmation Card */}
-      <AnimatePresence>
-        {result && (
-          <ScanResultCard 
-            result={result} 
-            onConfirm={handleConfirm}
-            onEdit={handleEdit}
-            onCancel={handleCancel}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Controls Area (White Premium) */}
-      {!result && (
-        <div className="absolute bottom-0 left-0 right-0 pb-[env(safe-area-inset-bottom,40px)] flex flex-col items-center gap-8 z-40">
-          
-          {/* Capture Button (Premium White Edition) */}
-          {activeTab === 'SCAN' && (
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={capturePhoto}
-              className="group relative w-20 h-20 rounded-full border-[6px] border-white/50 backdrop-blur-sm flex items-center justify-center shadow-2xl overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-white group-active:bg-gray-100 transition-colors" />
-              <Camera className="w-8 h-8 text-indigo-600 relative z-10" strokeWidth={2.5} />
-              <div className="absolute inset-0 border-[2px] border-indigo-500/10 rounded-full" />
-            </motion.button>
-          )}
-
-          {/* Mode Selector Tabs (White Premium Style) */}
-          <div className="flex bg-white/80 backdrop-blur-3xl p-1.5 rounded-[32px] border border-white/60 shadow-[0_20px_60px_rgba(0,0,0,0.15)] mx-6">
-            <button 
-              onClick={() => setActiveTab('SCAN')}
-              className={`px-8 py-3 rounded-[24px] text-[11px] font-[900] tracking-[0.1em] uppercase transition-all flex items-center gap-2.5 ${activeTab === 'SCAN' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
-              style={S}
-            >
-              <Package className="w-4 h-4" strokeWidth={3} />
-              Smart Scan
-            </button>
-            <button 
-              onClick={() => setActiveTab('BARCODE')}
-              className={`px-8 py-3 rounded-[24px] text-[11px] font-[900] tracking-[0.1em] uppercase transition-all flex items-center gap-2.5 ${activeTab === 'BARCODE' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
-              style={S}
-            >
-              <ScanBarcode className="w-4 h-4" strokeWidth={3} />
-              Barcode
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Branding Footer */}
-      {!result && (
-        <div className="absolute bottom-6 left-0 right-0 text-center opacity-30">
-          <p className="text-gray-900 text-[9px] font-[900] uppercase tracking-[0.4em]" style={S}>
-             Spendly_AI Powered
-          </p>
-        </div>
-      )}
     </motion.div>
   )
 }

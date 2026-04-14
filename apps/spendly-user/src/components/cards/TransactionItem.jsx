@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { m as motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import { Trash2, Edit2 } from 'lucide-react'
+import { Trash2, Edit2, Eye } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatDate, formatTime } from '../../utils/formatDate'
 import { getCategoryById } from '../../constants/categories'
@@ -14,12 +15,15 @@ const HAPTIC_SHAKE = {
 }
 
 export default function TransactionItem({ expense, currency = 'USD', onDelete, onEdit, index = 0 }) {
+  const navigate = useNavigate()
   const { hideBalances } = useSecurityStore()
   const category = getCategoryById(expense.category) || { emoji: '💰', name: 'Other' }
   const isSpent = expense.type === 'spent'
   const x = useMotionValue(0)
   const [isOpen, setIsOpen] = useState(false)
   const S = { fontFamily: "'Inter', sans-serif" }
+
+  const isDigitalBill = expense.source === 'spendly-shop' || expense.billId
 
   const rightScale = useTransform(x, [0, 80], [0, 1])
   const leftScale = useTransform(x, [0, -80], [0, 1])
@@ -33,6 +37,18 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
 
   const closeActions = () => { animate(x, 0); setIsOpen(false) }
 
+  const handleAction = () => {
+    if (isOpen) {
+        closeActions()
+        return
+    }
+    if (isDigitalBill) {
+        navigate(`/view-bill/${expense.id}`)
+    } else {
+        onEdit?.(expense)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -42,9 +58,9 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
     >
       <div className="absolute inset-0 flex items-center justify-between px-10 h-full">
         <motion.div style={{ scale: rightScale }} className="flex gap-3">
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { closeActions(); onEdit?.(expense) }} 
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
-            <Edit2 className="w-4 h-4 text-black" strokeWidth={3} />
+          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={handleAction} 
+            className={`w-10 h-10 rounded-full flex items-center justify-center border border-[#EEEEEE] ${isDigitalBill ? 'bg-black/5' : 'bg-[#F6F6F6]'}`}>
+            {isDigitalBill ? <Eye className="w-4 h-4 text-black" strokeWidth={3} /> : <Edit2 className="w-4 h-4 text-black" strokeWidth={3} />}
           </motion.button>
           <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { closeActions(); onDelete?.(expense.id) }}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white">
@@ -68,7 +84,7 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         whileTap="tap"
         className="relative z-10 flex items-center gap-4 px-5 py-4 cursor-grab active:cursor-grabbing bg-white rounded-[24px] border border-[#EEEEEE] shadow-sm"
         style={{ x }}
-        onClick={() => { if (isOpen) closeActions(); else onEdit?.(expense) }}
+        onClick={handleAction}
       >
         <div className="w-12 h-12 rounded-full flex items-center justify-center text-[22px] flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
           {category.emoji}
@@ -82,6 +98,7 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
             <p className="text-[11px] font-[500] text-[#AFAFAF] uppercase tracking-wide" style={S}>
               {formatDate(expense.date)}
             </p>
+            {isDigitalBill && <span className="text-[7px] bg-black text-white px-1.5 py-0.5 rounded-full font-[900] tracking-tighter uppercase">Verified</span>}
           </div>
         </div>
 

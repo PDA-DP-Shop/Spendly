@@ -1,223 +1,284 @@
-// Home screen — white premium main dashboard
-import { useState, useEffect } from 'react'
+// Home screen — Updated with wallet refund intelligence
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { Bell, TrendingUp, TrendingDown, Wallet, LayoutGrid, Zap, PieChart, ShieldCheck, KeyRound } from 'lucide-react'
-import BalanceCard from '../components/cards/BalanceCard'
-import BudgetProgressCard from '../components/cards/BudgetProgressCard'
-import InsightCard from '../components/cards/InsightCard'
-import TransactionItem from '../components/cards/TransactionItem'
-import AnalyticsBarChart from '../components/charts/AnalyticsBarChart'
-import AlertBanner from '../components/shared/AlertBanner'
-import CategoryChips from '../components/shared/CategoryChips'
-import ToastMessage from '../components/shared/ToastMessage'
-import EmptyState from '../components/shared/EmptyState'
+import { useNavigate } from 'react-router-dom'
+import { Bell, Flame, Plus, ChevronUp, History, Target, Zap, Info, AlertCircle, TrendingUp, Receipt, Landmark, Banknote } from 'lucide-react'
 import { useExpenses } from '../hooks/useExpenses'
 import { useSettingsStore } from '../store/settingsStore'
 import { useBudgetStore } from '../store/budgetStore'
-import { calculateSpent, calculateReceived, calculateBalance } from '../utils/calculateTotal'
-import { groupByMonth } from '../utils/groupByCategory'
+import { calculateSpent, calculateBalance } from '../utils/calculateTotal'
 import { formatMoney } from '../utils/formatMoney'
-import { format, subMonths } from 'date-fns'
-import { useSecurityStore } from '../store/securityStore'
-import SpendingScore from '../components/gamification/SpendingScore'
-import { calculateScore } from '../utils/scoreCalculator'
+import { useExpenseStore } from '../store/expenseStore'
+import { useWalletStore } from '../store/walletStore'
+import TransactionItem from '../components/cards/TransactionItem'
+import ToastMessage from '../components/shared/ToastMessage'
 import { useUIStore } from '../store/uiStore'
-
-const HAPTIC_SHAKE = {
-  tap: { 
-    x: [0, -3, 3, -3, 3, 0],
-    transition: { duration: 0.35, ease: "easeInOut" }
-  }
-}
+import SuperDeleteModal from '../components/modals/SuperDeleteModal'
+import WalletDeleteModal from '../components/modals/WalletDeleteModal'
+import RecoveryBanner from '../components/shared/RecoveryBanner'
+import { walletTransactionService } from '../services/database'
 
 export default function HomeScreen() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { expenses, deleteExpense, restoreExpense, getThisMonth, getRecent, isLoading } = useExpenses()
+  const { getToday, getThisMonth, getRecent, deleteExpense, loadExpenses, expenses } = useExpenses()
+  const { getStreak } = useExpenseStore()
   const { settings } = useSettingsStore()
   const { overallBudget, loadBudgets } = useBudgetStore()
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [toast, setToast] = useState(null)
   const { toggleNotifications } = useUIStore()
-
+  const { cashWallet, bankAccounts, loadCashWallet, loadBankAccounts, refundToCash, refundToBank } = useWalletStore()
+  
+  const [hideAmounts, setHideAmounts] = useState(false)
+  const [toast, setToast] = useState(null)
+  const [touchStart, setTouchStart] = useState(0)
+  const [deleteId, setDeleteId] = useState(null)
+  const [walletTx, setWalletTx] = useState(null)
+  
   const currency = settings?.currency || 'USD'
   const name = settings?.profileName || 'User'
   const S = { fontFamily: "'Inter', sans-serif" }
 
-  useEffect(() => { loadBudgets() }, [])
+  useEffect(() => { 
+    loadBudgets()
+    loadCashWallet()
+    loadBankAccounts()
+  }, [])
 
-  useEffect(() => {
-    if (searchParams.get('action') === 'add') {
-      navigate('/add', { replace: true })
-    }
-  }, [searchParams, navigate])
-
-  const thisMonth = getThisMonth()
-  const spent = calculateSpent(thisMonth)
-  const received = calculateReceived(thisMonth)
-  const balance = calculateBalance(expenses)
-  const budgetPct = overallBudget > 0 ? (spent / overallBudget) * 100 : 0
-
-  const scoreData = calculateScore(expenses, overallBudget, spent)
-  const recentExpenses = getRecent(8).filter(e =>
-    selectedCategory === 'all' || e.category === selectedCategory
-  )
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good Morning'
+    if (hour < 17) return 'Good Afternoon'
+    return 'Good Evening'
+  }, [])
 
   const handleDelete = async (id) => {
-    const deleted = await deleteExpense(id)
-    setToast({
-      id: Date.now(), type: 'success', message: t('common.delete') + ' ' + t('common.done'), duration: 4000,
-      action: { label: t('common.undo'), fn: async () => { await restoreExpense(deleted); setToast(null) } },
+    const tx = await walletTransactionService.getByExpenseId(id)
+    if (tx) {
+      setWalletTx(tx)
+      setDeleteId(id)
+    } else {
+      setDeleteId(id)
+    }
+  }
+
+  const confirmRealDelete = async () => {
+    if (!deleteId) return
+    const id = deleteId
+    setDeleteId(null)
+    
+    const timer = setTimeout(async () => {
+       await deleteExpense(id)
+       setToast({
+         id: Date.now(),
+         message: 'Recycled. Recover in Settings if needed.',
+         type: 'info',
+         duration: 4000
+       })
+       navigate('/')
+    }, 5000)
+
+    setToast({ 
+      id: Date.now(),
+      message: 'Processing deletion...', 
+      type: 'delete', 
+      duration: 5000,
+      action: { 
+        label: 'STOP', 
+        fn: () => {
+          clearTimeout(timer)
+          loadExpenses()
+          setToast({ message: 'Stopped!', type: 'success' })
+        } 
+      }
     })
   }
 
-  const getInsight = () => {
-    if (budgetPct > 100) return "🚨 " + t('budget.overLimit')
-    if (budgetPct > 80) return "⚠️ " + t('budget.closeToLimit')
-    return "💡 " + t('budget.healthy')
+  const handleWalletPaid = async () => {
+    const id = deleteId
+    setWalletTx(null); setDeleteId(null)
+    await deleteExpense(id)
+    await walletTransactionService.removeByExpenseId(id)
+    setToast({ message: 'Expense deleted', type: 'success' })
   }
 
+  const handleWalletMistake = async () => {
+    const id = deleteId
+    const tx = walletTx
+    const expense = expenses.find(e => e.id === id)
+    setWalletTx(null); setDeleteId(null)
+    
+    await deleteExpense(id)
+    await walletTransactionService.removeByExpenseId(id)
+    
+    if (tx.walletType === 'cash') {
+      await refundToCash(expense.amount)
+      setToast({ message: `${currency}${expense.amount.toLocaleString()} refunded to Cash`, type: 'success' })
+    } else if (tx.walletType === 'bank' && tx.bankAccountId) {
+      await refundToBank(tx.bankAccountId, expense.amount)
+      const bank = bankAccounts.find(b => b.id === tx.bankAccountId)
+      setToast({ message: `${currency}${expense.amount.toLocaleString()} refunded to ${bank?.bankName || 'Bank'}`, type: 'success' })
+    }
+  }
+
+  const todayExpenses = getToday()
+  const monthExpenses = getThisMonth()
+  const spentToday = calculateSpent(todayExpenses)
+  const spentThisMonth = calculateSpent(monthExpenses)
+  const totalBalance = calculateBalance(expenses)
+  const isBudgetSet = overallBudget > 0
+  const isOverBudget = isBudgetSet && spentThisMonth > overallBudget
+  const moneyLeft = isBudgetSet ? overallBudget - spentThisMonth : totalBalance
+  const streak = getStreak()
+  const recent3 = getRecent(3)
+  const budgetStatus = isBudgetSet ? (spentThisMonth / overallBudget) * 100 : 0
+  
+  const getStatusLabel = () => {
+    if (!isBudgetSet) return { label: 'Total Savings', color: 'bg-emerald-500/10 text-emerald-600', icon: TrendingUp }
+    if (budgetStatus > 100) return { label: 'Over Budget', color: 'bg-red-500/20 text-red-500', icon: AlertCircle }
+    if (budgetStatus > 80) return { label: 'Warning', color: 'bg-orange-500/20 text-orange-500', icon: Info }
+    return { label: 'Safe', color: 'bg-white/10 text-white/60', icon: Target }
+  }
+  const status = getStatusLabel()
+
   return (
-    <div className="flex flex-col min-h-dvh mb-tab bg-white overflow-x-hidden">
-      <div className="relative pt-12 pb-6 px-7">
-        <div className="absolute top-0 left-0 w-full h-[300px] opacity-30 pointer-events-none bg-gradient-to-b from-[#F6F6F6] to-transparent" />
-        
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="sr-only">Spendly - Private Offline Expense Tracker & Budget Manager</h1>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-widest mb-1" style={S}>
-              Spendly
-            </motion.p>
-            <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-[32px] font-[800] text-black tracking-tight" style={S}>
-              {t('home.greeting', { name: name.split(' ')[0] })}
-            </motion.h2>
+    <div className="flex flex-col min-h-dvh bg-white overflow-hidden safe-top pb-tab">
+      <RecoveryBanner />
+      <div className="px-7 pt-8 pb-4 flex justify-between items-center">
+        <div>
+           <p className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-widest" style={S}>{greeting},</p>
+           <h2 className="text-[28px] font-[800] text-black tracking-tight" style={S}>{name.split(' ')[0]}</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-100 mr-2">
+             <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
+             <span className="text-[13px] font-[800] text-orange-600" style={S}>{streak}</span>
           </div>
-          
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={toggleNotifications}
-            className="w-11 h-11 rounded-full flex items-center justify-center bg-white border border-[#EEEEEE] relative">
-            <Bell className="w-5 h-5 text-black" strokeWidth={2.5} />
-            {budgetPct >= 80 && <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-black ring-2 ring-white" />}
-          </motion.button>
+          <button onClick={toggleNotifications} className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] active:scale-95 transition-transform">
+             <Bell className="w-5 h-5 text-black" strokeWidth={2.5} />
+          </button>
         </div>
       </div>
 
-      <div className="px-6 -mt-1">
-        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative h-[200px] rounded-[28px] bg-black overflow-hidden shadow-2xl">
-          <div className="absolute top-[-40px] left-[-40px] w-40 h-40 rounded-full bg-white/5 blur-3xl" />
-          <div className="relative h-full p-8 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-white/40 text-[11px] font-[700] uppercase tracking-wider mb-1" style={S}>{t('home.title')}</p>
-                <h2 className="text-white text-[38px] font-[800] tracking-tight" style={S}>{formatMoney(balance, currency)}</h2>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/5">
-                <Wallet className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1 bg-white/5 rounded-2xl p-4 border border-white/5 backdrop-blur-sm">
-                <p className="text-white/30 text-[9px] font-[700] uppercase tracking-wide mb-1" style={S}>{t('home.inflow')}</p>
-                <p className="text-white text-[15px] font-[700]" style={S}>{formatMoney(received, currency)}</p>
-              </div>
-              <div className="flex-1 bg-white/5 rounded-2xl p-4 border border-white/5 backdrop-blur-sm">
-                <p className="text-white/30 text-[9px] font-[700] uppercase tracking-wide mb-1" style={S}>{t('home.spent')}</p>
-                <p className="text-white text-[15px] font-[700]" style={S}>{formatMoney(spent, currency)}</p>
-              </div>
-            </div>
+      <div className="px-6 py-4 grid grid-cols-2 gap-4">
+        <motion.div 
+          onDoubleClick={() => setHideAmounts(!hideAmounts)}
+          className={`col-span-2 rounded-[32px] p-8 shadow-2xl relative overflow-hidden transition-colors duration-500 ${isOverBudget ? 'bg-red-950' : 'bg-black'}`}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+          <p className="text-white/40 text-[11px] font-[700] uppercase tracking-wider mb-2" style={S}>
+            {!isBudgetSet ? 'Total Balance' : (isOverBudget ? 'Budget Exceeded By' : 'Money Left This Month')}
+          </p>
+          <h1 className="text-white text-[42px] font-[900] tracking-tighter mb-6 transition-all" style={S}>
+            {hideAmounts ? '••••••' : formatMoney(Math.abs(moneyLeft), currency)}
+          </h1>
+          <div className="flex items-center justify-between">
+             <div className={`px-4 py-2 rounded-full flex items-center gap-2 transition-colors ${status.color}`}>
+                <status.icon className="w-4 h-4" />
+                <span className="text-[11px] font-[800] uppercase tracking-wider" style={S}>{status.label}</span>
+             </div>
+             {isBudgetSet && (
+               <div className="h-1.5 flex-1 mx-4 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(budgetStatus, 100)}%`, backgroundColor: isOverBudget ? '#EF4444' : '#FFFFFF' }} className="h-full rounded-full" />
+               </div>
+             )}
           </div>
+        </motion.div>
+
+        <div className="bg-[#F6F6F6] rounded-[28px] p-6 border border-[#EEEEEE] flex flex-col justify-center">
+           <p className="text-[#AFAFAF] text-[10px] font-[700] uppercase tracking-wider mb-1" style={S}>Spent Today</p>
+           <h3 className="text-black text-[20px] font-[800]" style={S}>{hideAmounts ? '•••' : formatMoney(spentToday, currency)}</h3>
+        </div>
+
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          className="bg-black rounded-[32px] p-1 flex flex-col shadow-lg shadow-black/10"
+        >
+           <button onClick={() => navigate('/add')} className="h-full w-full rounded-[31px] flex flex-col justify-center items-center gap-1 bg-white/0 text-white p-5">
+              <Plus className="w-6 h-6" strokeWidth={3} />
+              <span className="text-[10px] font-[900] uppercase tracking-[0.2em]" style={S}>Quick Add</span>
+           </button>
+        </motion.div>
+
+        <motion.button 
+          whileTap={{ scale: 0.98 }} onClick={() => navigate('/bill-code')}
+          className="col-span-2 bg-white border border-[#EEEEEE] rounded-[28px] p-5 flex items-center justify-between shadow-sm active:bg-[#F6F6F6] transition-colors"
+        >
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+                 <Receipt className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                 <h4 className="text-[14px] font-[800] text-black" style={S}>Enter Bill Code</h4>
+                 <p className="text-[11px] font-[500] text-[#AFAFAF]" style={S}>Add digital bill from shopkeepers</p>
+              </div>
+           </div>
+           <ChevronUp className="w-5 h-5 text-[#D8D8D8] rotate-90" />
+        </motion.button>
+
+        {/* Wallet Overview Selection — Redesigned for White Premium Design */}
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          className="col-span-1 rounded-[32px] bg-white border border-[#EEEEEE] p-6 flex flex-col gap-5 group active:bg-[#F8FAFC] transition-all cursor-pointer shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
+          onClick={() => navigate('/cash-wallet')}
+        >
+           <div className="w-11 h-11 rounded-2xl bg-black flex items-center justify-center text-xl shadow-lg shadow-black/5 group-hover:scale-110 transition-transform">
+              <Banknote className="w-5 h-5 text-white" strokeWidth={2.5} />
+           </div>
+           <div>
+              <p className="text-[10px] font-[802] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>Cash</p>
+              <p className="text-[18px] font-[900] text-black tracking-tight" style={{ ...S, fontFamily: "'Sora', sans-serif" }}>
+                {currency}{cashWallet?.totalCash?.toLocaleString() || 0}
+              </p>
+           </div>
+        </motion.div>
+
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          className="col-span-1 rounded-[32px] bg-white border border-[#EEEEEE] p-6 flex flex-col gap-5 group active:bg-[#F8FAFC] transition-all cursor-pointer shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
+          onClick={() => navigate('/bank-accounts')}
+        >
+           <div className="w-11 h-11 rounded-2xl bg-black flex items-center justify-center text-xl shadow-lg shadow-black/5 group-hover:scale-110 transition-transform">
+              <Landmark className="w-5 h-5 text-white" strokeWidth={2.5} />
+           </div>
+           <div>
+              <p className="text-[10px] font-[802] text-[#AFAFAF] uppercase tracking-[0.2em] mb-1" style={S}>In Banks</p>
+              <p className="text-[18px] font-[900] text-black tracking-tight" style={{ ...S, fontFamily: "'Sora', sans-serif" }}>
+                {currency}{bankAccounts.reduce((sum, b) => sum + (b.balance || 0), 0).toLocaleString()}
+              </p>
+           </div>
         </motion.div>
       </div>
 
-      <div className="px-7 mt-4 mb-2 flex justify-center">
-        <motion.button 
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/bill-code')}
-          className="text-[#AFAFAF] text-[11px] font-[700] uppercase tracking-widest flex items-center gap-2 active:opacity-60 transition-all border-b border-dashed border-slate-200 pb-1"
-        >
-          Have a bill code? Enter here
-        </motion.button>
-      </div>
+      <div className="h-[1px] mx-10 my-4 bg-[#F6F6F6]" />
 
-      <div className="px-7 mt-10">
-        <div className="flex justify-between items-center mb-5">
-           <p className="text-[13px] font-[700] uppercase tracking-wide text-black" style={S}>{t('settings.finance')}</p>
+      <div className="mt-4 px-7 flex-1">
+        <div className="flex items-center justify-between mb-6">
+           <p className="text-[13px] font-[700] uppercase tracking-wide text-black" style={S}>Latest Activity</p>
+           <button onClick={() => navigate('/expenses')} className="text-[12px] font-[700] text-[#7C3AED]" style={S}>See All</button>
         </div>
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { label: t('common.add'), icon: Zap, path: '/add' },
-            { label: t('common.reports'), icon: PieChart, path: '/reports' },
-            { label: t('settings.security'), icon: ShieldCheck, path: '/settings' },
-            { label: t('scans.title'), icon: LayoutGrid, path: '/scans' }
-          ].map((action) => (
-            <motion.button key={action.label} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => navigate(action.path)}
-              className="flex flex-col items-center gap-2">
-              <div className="w-full aspect-square rounded-[22px] flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] active:bg-[#EEEEEE] transition-colors">
-                <action.icon className="w-5 h-5 text-black" strokeWidth={2.5} />
-              </div>
-              <span className="text-[11px] font-[700] text-[#545454]" style={S}>{action.label}</span>
-            </motion.button>
+        <div className="space-y-4">
+          {recent3.map((exp, i) => (
+            <TransactionItem key={exp.id} expense={exp} currency={currency} index={i} onDelete={handleDelete} onEdit={(e) => navigate(`/add?edit=${e.id}`)} />
           ))}
         </div>
       </div>
-
-      <div className="mt-12 overflow-hidden">
-        <div className="px-7 mb-5">
-           <p className="text-[13px] font-[700] uppercase tracking-wide text-black" style={S}>{t('budget.title')}</p>
-        </div>
-        <div className="overflow-x-auto scrollbar-hide flex gap-4 px-6 pb-2">
-          <motion.div variants={HAPTIC_SHAKE} whileTap="tap" className="flex-shrink-0 w-[260px]">
-            <SpendingScore scoreData={scoreData} compact />
-          </motion.div>
-          <motion.div variants={HAPTIC_SHAKE} whileTap="tap" className="flex-shrink-0 w-[260px] bg-white rounded-[24px] p-6 border border-[#EEEEEE] shadow-sm flex flex-col justify-between">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white">
-                <TrendingUp className="w-5 h-5" strokeWidth={2.5} />
-              </div>
-              <p className="text-[14px] font-[700] text-black">{t('scans.history')}</p>
-            </div>
-            <p className="text-[14px] font-[500] text-[#545454] leading-relaxed mb-4" style={S}>{getInsight()}</p>
-            <div className="h-1.5 w-full bg-[#F6F6F6] rounded-full overflow-hidden">
-               <div className={`h-full ${budgetPct > 100 ? 'bg-black' : 'bg-black'}`} style={{ width: `${Math.min(budgetPct, 100)}%` }} />
-            </div>
-          </motion.div>
-          <motion.div variants={HAPTIC_SHAKE} whileTap="tap" className="flex-shrink-0 w-[300px]">
-             <BudgetProgressCard label={t('budget.total')} spent={spent} total={overallBudget} currency={currency} simplified />
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="mt-12">
-        <CategoryChips selected={selectedCategory} onSelect={setSelectedCategory} />
-      </div>
-
-      <div className="mt-10 pb-20">
-        <div className="flex items-center justify-between px-7 mb-6">
-          <p className="text-[13px] font-[700] uppercase tracking-wide text-black" style={S}>{t('home.recent')}</p>
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => navigate('/expenses')}
-            className="text-[12px] font-[700] text-black underline" style={S}>{t('home.seeAll')}</motion.button>
-        </div>
-
-        <div className="px-2">
-          {recentExpenses.length === 0 ? (
-            <div className="px-5">
-              <EmptyState type="expenses" title={t('common.noData')} message={t('home.empty')} />
-            </div>
-          ) : (
-            <div className="flex flex-col">
-              <AnimatePresence mode="popLayout">
-                {recentExpenses.map((exp, i) => (
-                  <TransactionItem key={exp.id} expense={exp} currency={currency} index={i} onDelete={handleDelete} onEdit={() => navigate(`/add?edit=${exp.id}`)} />
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-      </div>
-
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
+      
+      <SuperDeleteModal 
+        show={!!deleteId && !walletTx}
+        onClose={() => setDeleteId(null)}
+        onDelete={confirmRealDelete}
+        itemName={expenses.find(e => e.id === deleteId)?.shopName || 'this expense'}
+      />
+
+      <WalletDeleteModal
+        show={!!walletTx}
+        onClose={() => { setWalletTx(null); setDeleteId(null); }}
+        onPaid={handleWalletPaid}
+        onMistake={handleWalletMistake}
+        expenseAmount={expenses.find(e => e.id === deleteId)?.amount || 0}
+        walletName={walletTx?.walletType === 'cash' ? 'Cash' : (bankAccounts.find(b => b.id === walletTx?.bankAccountId)?.bankName || 'Bank')}
+        currency={currency}
+      />
     </div>
   )
 }

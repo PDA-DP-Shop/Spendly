@@ -74,6 +74,10 @@ export const importBackupFile = async (file, password, mode = 'replace') => {
         await deduplicateAndAdd(db.goals, data.goals)
         await deduplicateAndAdd(db.splits, data.splits)
         await deduplicateAndAdd(db.badges, data.badges)
+        await deduplicateAndAdd(db.deletedExpenses, data.deletedExpenses)
+        await deduplicateAndAdd(db.backupHistory, data.backupHistory)
+        await deduplicateAndAdd(db.browserInfo, data.browserInfo)
+        await deduplicateAndAdd(db.storageInfo, data.storageInfo)
 
         resolve(data.expenses.length)
       } catch (err) {

@@ -54,8 +54,8 @@ function calculateNoSpendDays(expenses) {
 
 function calculateStreakDays(expenses) {
   // Days in a row with at least 1 expense (app usage)
-  if (expenses.length === 0) return 0
-  const sorted = [...expenses].sort((a,b) => new Date(b.date) - new Date(a.date))
+  if (expenses.length === 0) return 0;
+  
   let streak = 0
   let current = new Date()
   current.setHours(0,0,0,0)

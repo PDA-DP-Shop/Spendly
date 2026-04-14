@@ -10,6 +10,7 @@ import {
 
 import { useBillStore } from '../store/billStore';
 import { useShopStore } from '../store/shopStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
 import { formatDate } from '../utils/formatDate';
 import { generateBillPDF } from '../services/pdfGenerator';
@@ -19,8 +20,10 @@ import { parseBillNumber } from '../utils/billNumber';
 const BillDetailScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { bills, updateBill } = useBillStore();
+    const { bills, updateBill, deleteBill } = useBillStore();
     const { shop } = useShopStore();
+    const { settings } = useSettingsStore();
+    const currency = settings?.currency || 'USD';
 
     const bill = bills.find(b => b.id === parseInt(id));
 
@@ -43,8 +46,15 @@ const BillDetailScreen = () => {
         await updateBill(bill.id, { status: 'paid' });
     };
 
+    const handleDeleteBill = async () => {
+        if (window.confirm('Move this bill to Recycle Bin? It will be stored for 3 days.')) {
+            await deleteBill(bill.id);
+            navigate('/bills-history');
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+        <div className="min-h-dvh bg-white pb-tab relative overflow-x-hidden font-sans">
             <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
                 <button onClick={() => navigate(-1)} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
                     <div className="p-2 bg-[#F8FAFC] rounded-xl group-hover:bg-black group-hover:text-white transition-all">
@@ -52,9 +62,17 @@ const BillDetailScreen = () => {
                     </div>
                     <span className="text-[17px]">Invoice Details</span>
                 </button>
-                <button className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8]">
-                    <Share2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={handleDeleteBill}
+                        className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 active:bg-red-100 transition-all shadow-sm border border-red-100"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                    <button className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8] shadow-sm border border-[#F1F5F9]">
+                        <Share2 className="w-5 h-5" />
+                    </button>
+                </div>
             </header>
 
             <div className="p-6 space-y-8">
@@ -114,7 +132,7 @@ const BillDetailScreen = () => {
                                         <tr key={i} className="border-b border-[#F1F5F9]/50">
                                             <td className="py-4 text-black text-[15px]">{item.name}</td>
                                             <td className="py-4 text-center text-[#94A3B8]">{item.quantity}</td>
-                                            <td className="py-4 text-right text-black font-[800]">{formatMoney(item.price * item.quantity)}</td>
+                                            <td className="py-4 text-right text-black font-[800]">{formatMoney(item.price * item.quantity, currency)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -124,23 +142,23 @@ const BillDetailScreen = () => {
                         <div className="pt-4 space-y-4">
                             <div className="flex justify-between items-center text-[#94A3B8] text-[15px] font-[800]">
                                 <span>Subtotal</span>
-                                <span>{formatMoney(bill.subtotal || bill.total)}</span>
+                                <span>{formatMoney(bill.subtotal || bill.total, currency)}</span>
                             </div>
                             {bill.gstAmount > 0 && (
                                 <div className="flex justify-between items-center text-black text-[15px] font-[800]">
                                     <span>GST ({bill.gstPercent}%)</span>
-                                    <span>+{formatMoney(bill.gstAmount)}</span>
+                                    <span>+{formatMoney(bill.gstAmount, currency)}</span>
                                 </div>
                             )}
                             {bill.discountAmount > 0 && (
                                 <div className="flex justify-between items-center text-[#EF4444] text-[15px] font-[800]">
                                     <span>Discount</span>
-                                    <span>-{formatMoney(bill.discountAmount)}</span>
+                                    <span>-{formatMoney(bill.discountAmount, currency)}</span>
                                 </div>
                             )}
                             <div className="pt-4 border-t border-[#F1F5F9] flex justify-between items-end">
                                 <span className="text-[12px] font-[800] text-black uppercase tracking-widest">Total Amount</span>
-                                <span className="text-[36px] font-[800] text-black tracking-tight">{formatMoney(bill.total)}</span>
+                                <span className="text-[36px] font-[800] text-black tracking-tight">{formatMoney(bill.total, currency)}</span>
                             </div>
                         </div>
                     </div>
@@ -216,7 +234,7 @@ const BillDetailScreen = () => {
                             <h3 className="text-[17px] font-[800] text-[#991B1B] tracking-tight">Pending Payment</h3>
                         </div>
                         <p className="text-[13px] font-[500] text-[#B91C1C] opacity-80 uppercase tracking-widest">
-                            {formatMoney(bill.total)} Outstanding
+                            {formatMoney(bill.total, currency)} Outstanding
                         </p>
                         <button 
                             onClick={handleMarkAsPaid}

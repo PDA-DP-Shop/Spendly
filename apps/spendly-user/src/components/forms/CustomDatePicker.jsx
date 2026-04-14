@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, X, Clock, Calendar as CalIcon, Check } from 'lucide-react'
 import { 
@@ -10,6 +10,52 @@ import {
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
+// iOS-style Wheel Picker component
+const WheelPicker = ({ options, value, onChange }) => {
+  const containerRef = useRef(null)
+  
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    
+    const index = options.indexOf(value)
+    if (index !== -1) {
+      el.scrollTop = index * 40
+    }
+  }, [])
+
+  const handleScroll = (e) => {
+    const el = e.target
+    const index = Math.round(el.scrollTop / 40)
+    if (options[index] !== undefined && options[index] !== value) {
+      onChange(options[index])
+    }
+  }
+
+  return (
+    <div className="relative h-[200px] w-16 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between">
+        <div className="h-[80px] w-full bg-gradient-to-b from-white to-transparent" />
+        <div className="h-10 w-full border-y border-black/5" />
+        <div className="h-[80px] w-full bg-gradient-to-t from-white to-transparent" />
+      </div>
+      <div 
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide py-[80px]"
+      >
+        {options.map((opt, i) => (
+          <div key={i} className="h-10 flex items-center justify-center snap-center">
+            <span className={`text-[20px] font-[900] transition-opacity ${value === opt ? 'text-black opacity-100' : 'text-black opacity-20'}`}>
+              {opt}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function CustomDatePicker({ value, onChange, onClose }) {
   const [currentMonth, setCurrentMonth] = useState(new Date(value))
   const [selectedDate, setSelectedDate] = useState(new Date(value))
@@ -18,6 +64,9 @@ export default function CustomDatePicker({ value, onChange, onClose }) {
     m: format(new Date(value), 'mm')
   })
   const [view, setView] = useState('date') // 'date' | 'time'
+
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
+  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
 
   const days = eachDayOfInterval({
     start: startOfWeek(startOfMonth(currentMonth)),
@@ -109,18 +158,16 @@ export default function CustomDatePicker({ value, onChange, onClose }) {
                </div>
             </>
           ) : (
-            <div className="py-10 flex flex-col items-center justify-center">
-               <div className="flex items-center gap-6">
+            <div className="py-6 flex flex-col items-center justify-center">
+               <div className="flex items-center gap-10">
                  <div className="flex flex-col items-center">
-                    <p className="text-[9px] font-[900] uppercase tracking-widest text-[#AFAFAF] mb-5">Epoch_H</p>
-                    <input type="number" value={tempTime.h} onChange={e => setTempTime({...tempTime, h: e.target.value.padStart(2, '0').slice(-2)})}
-                      className="w-20 h-24 bg-[#F6F6F6] border border-[#EEEEEE] rounded-[24px] text-center text-[42px] font-[900] text-black outline-none focus:border-black" style={S} />
+                    <p className="text-[9px] font-[900] uppercase tracking-widest text-[#AFAFAF] mb-4">Hour</p>
+                    <WheelPicker options={hours} value={tempTime.h} onChange={(h) => setTempTime(p => ({ ...p, h }))} />
                  </div>
-                 <span className="text-[32px] font-[900] text-black pt-10">:</span>
+                 <span className="text-[32px] font-[900] text-black/10 pt-4">:</span>
                  <div className="flex flex-col items-center">
-                    <p className="text-[9px] font-[900] uppercase tracking-widest text-[#AFAFAF] mb-5">Epoch_M</p>
-                    <input type="number" value={tempTime.m} onChange={e => setTempTime({...tempTime, m: e.target.value.padStart(2, '0').slice(-2)})}
-                      className="w-20 h-24 bg-[#F6F6F6] border border-[#EEEEEE] rounded-[24px] text-center text-[42px] font-[900] text-black outline-none focus:border-black" style={S} />
+                    <p className="text-[9px] font-[900] uppercase tracking-widest text-[#AFAFAF] mb-4">Minute</p>
+                    <WheelPicker options={minutes} value={tempTime.m} onChange={(m) => setTempTime(p => ({ ...p, m }))} />
                  </div>
                </div>
             </div>
@@ -140,7 +187,7 @@ export default function CustomDatePicker({ value, onChange, onClose }) {
             className="flex-1 h-16 rounded-[24px] bg-black text-white text-[13px] font-[900] uppercase tracking-[0.25em] flex items-center justify-center gap-3 active:scale-95 transition-all"
             style={S}
           >
-            <Check className="w-5 h-5 text-white" strokeWidth={4} /> Confirm_Input
+            <Check className="w-5 h-5 text-white" strokeWidth={4} /> Confirm
           </button>
         </div>
       </motion.div>

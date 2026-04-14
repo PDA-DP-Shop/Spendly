@@ -66,36 +66,28 @@ export function getNextSequence(
   shopId,
   date
 ) {
-  const key =
-    `bill_seq_${shopId}_${date}`
+  const safeShopId = String(shopId || 'SHP');
+  const key = `bill_seq_${safeShopId}_${date}`;
   
-  const current = parseInt(
-    localStorage.getItem(key) || '0'
-  )
-  const next = current + 1
+  const current = parseInt(localStorage.getItem(key) || '0');
+  const next = current + 1;
   
-  localStorage.setItem(
-    key,
-    next.toString()
-  )
+  localStorage.setItem(key, next.toString());
   
   // Clean up old date sequences
-  // to not fill up localStorage
-  cleanOldSequences(shopId, date)
+  cleanOldSequences(safeShopId, date);
   
-  return String(next).padStart(4, '0')
+  return String(next).padStart(4, '0');
 }
 
 // Remove sequence keys older than 7 days
-function cleanOldSequences(
-  shopId,
-  currentDate
-) {
+function cleanOldSequences(shopId, currentDate) {
   try {
-    const keys = Object.keys(localStorage)
+    const safeShopId = String(shopId);
+    const keys = Object.keys(localStorage);
     keys.forEach(key => {
-      if (key.startsWith(`bill_seq_${shopId}_`)) {
-        const keyDate = key.split('_').pop()
+      if (key.startsWith(`bill_seq_${safeShopId}_`)) {
+        const keyDate = key.split('_').pop();
         if (keyDate !== currentDate) {
           // Keep last 7 days only
           const keyTime = new Date(
@@ -132,7 +124,7 @@ export function generateBillNumber(
   const shopCode = getShopCode(shopName)
   const date = getTodayDate()
   const sequence = getNextSequence(
-    shopId || shopCode,
+    String(shopId || shopCode),
     date
   )
   const random = getRandomSuffix()
@@ -153,7 +145,7 @@ export function generateBillId(
     .toString(36)
     .substring(2, 9)
     .toUpperCase()
-  const shopPart = (shopId || 'SHP')
+  const shopPart = String(shopId || 'SHP')
     .substring(0, 6)
     .toUpperCase()
 

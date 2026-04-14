@@ -45,11 +45,11 @@ export default function AddBottomSheet({ show, onClose }) {
 
           {/* Sheet */}
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={{ y: '100%', x: '-50%' }}
+            animate={{ y: 0, x: '-50%' }}
+            exit={{ y: '100%', x: '-50%' }}
             transition={{ type: 'spring', stiffness: 500, damping: 50 }}
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[101] bg-white pb-safe shadow-2xl"
+            className="fixed bottom-0 left-1/2 w-full max-w-[450px] z-[101] bg-white pb-tab shadow-2xl"
             style={{
               borderRadius: '32px 32px 0 0',
               borderTop: '1px solid #EEEEEE'

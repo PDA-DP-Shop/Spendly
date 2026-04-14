@@ -3,16 +3,29 @@
  * with UTF-8 support for customer names/items.
  */
 export function encodeBillToURL(bill) {
-  const billData = {
-    ...bill,
-    type: 'SPENDLY_BILL',
-    shopCategory: bill.shopCategory || 'grocery'
+  // Minify data for lower QR density
+  const miniBill = {
+    s: bill.shopName,
+    t: bill.total,
+    c: bill.shopCategory || 'other',
+    bn: bill.billNumber,
+    bi: bill.billId,
+    ts: bill.timestamp || bill.createdAt,
+    i: (bill.items || []).slice(0, 5).map(item => ({
+      n: item.name,
+      p: item.price,
+      q: item.quantity
+    })),
+    v: 2 // Version 2 (Minified)
   };
 
-  // Safe Base64 encoding for Unicode
-  const jsonStr = JSON.stringify(billData);
+  const jsonStr = JSON.stringify(miniBill);
   const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
-  
-  // Use the production URL of the user app
-  return `https://spendly-24hrs.pages.dev/?data=${encodeURIComponent(base64)}`;
+
+  // Auto-detect environment for scanning
+  const devUrl = 'http://localhost:5173';
+  const prodUrl = 'https://spendly-24hrs.pages.dev';
+  const baseUrl = window.location.origin.includes('localhost') ? devUrl : prodUrl;
+
+  return `${baseUrl}/?data=${encodeURIComponent(base64)}`;
 }

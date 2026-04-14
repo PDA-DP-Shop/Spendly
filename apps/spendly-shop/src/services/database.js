@@ -20,6 +20,62 @@ class SpendlyShopDB extends Dexie {
       creditBook: '++id, customerId, billId, status',
       dailySales: '++id, date'
     });
+
+    this.version(3).stores({
+      shop: '++id',
+      bills: '++id, billId, billNumber, status, createdAt',
+      customers: '++id, name, phone',
+      savedItems: '++id, name, barcode, timesUsed',
+      creditBook: '++id, customerId, billId, status',
+      dailySales: '++id, date',
+      backupHistory: '++id, backedUpAt',
+      browserInfo: '++id',
+      storageInfo: '++id'
+    });
+
+    this.version(4).stores({
+      shop: '++id',
+      bills: '++id, billId, billNumber, status, createdAt, isDeleted, deletedAt',
+      deletedBills: '++id, originalId, deletedAt, billNumber, total',
+      customers: '++id, name, phone',
+      savedItems: '++id, name, barcode, timesUsed',
+      creditBook: '++id, customerId, billId, status',
+      dailySales: '++id, date',
+      backupHistory: '++id, backedUpAt',
+      browserInfo: '++id',
+      storageInfo: '++id'
+    });
+
+    this.version(5).stores({
+      shop: '++id',
+      bills: '++id, billId, billNumber, status, createdAt, isDeleted, deletedAt',
+      deletedBills: '++id, originalId, deletedAt, billNumber, total',
+      customers: '++id, name, phone',
+      savedItems: '++id, name, barcode, timesUsed',
+      creditBook: '++id, customerId, billId, status',
+      dailySales: '++id, date',
+      backupHistory: '++id, backedUpAt',
+      browserInfo: '++id',
+      storageInfo: '++id',
+      spendly_recovery_vault: '++id, deletedAt, expiresAt'
+    });
+
+    this.version(6).stores({
+      shop: '++id',
+      bills: '++id, billId, billNumber, status, createdAt, isDeleted, deletedAt',
+      deletedBills: '++id, originalId, deletedAt, billNumber, total',
+      customers: '++id, name, phone',
+      savedItems: '++id, name, barcode, timesUsed',
+      creditBook: '++id, customerId, billId, status',
+      dailySales: '++id, date',
+      backupHistory: '++id, backedUpAt',
+      browserInfo: '++id',
+      storageInfo: '++id',
+      spendly_recovery_vault: '++id, deletedAt, expiresAt',
+      cashWallet: '++id',
+      bankAccounts: '++id',
+      walletTransactions: '++id, expenseId'
+    });
   }
 }
 
@@ -84,16 +140,120 @@ const createEncryptedService = (table) => ({
 export const shopService = createEncryptedService(db.shop);
 export const billService = {
   ...createEncryptedService(db.bills),
-  async getByNumber(billNumber) {
-    const all = await this.getAll();
-    return all.find(b => b.billNumber === billNumber);
+  async getAll(currency, includeDeleted = false) {
+    const all = await db.bills.toArray();
+    const decrypted = await Promise.all(all.map(decryptRecord));
+    let filtered = decrypted.filter(Boolean);
+    
+    if (currency) {
+      filtered = filtered.filter(b => b.currency === currency);
+    }
+    
+    if (!includeDeleted) {
+      filtered = filtered.filter(b => !b.isDeleted);
+    }
+    return filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
-  async getByDateRange(start, end) {
-    const all = await this.getAll();
-    return all.filter(b => b.createdAt >= start && b.createdAt <= end);
+  async getByNumber(billNumber) {
+    // This finds by number regardless of currency as numbers should be unique
+    const all = await db.bills.toArray();
+    const decrypted = await Promise.all(all.map(decryptRecord));
+    return decrypted.find(b => b.billNumber === billNumber);
+  },
+  async add(bill, currency) {
+    const encrypted = await encryptRecord({ 
+      ...bill, 
+      currency,
+      createdAt: new Date().toISOString() 
+    });
+    return await db.bills.add(encrypted);
   }
 };
 export const customerService = createEncryptedService(db.customers);
 export const itemsService = createEncryptedService(db.savedItems);
 export const creditService = createEncryptedService(db.creditBook);
 export const salesService = createEncryptedService(db.dailySales);
+
+export const cashWalletService = {
+  ...createEncryptedService(db.cashWallet),
+  async get(currency) {
+    const all = await this.getAll();
+    return all.find(w => w && w.currency === currency) || null;
+  },
+  async update(currency, data) {
+    return await db.transaction('rw', db.cashWallet, async () => {
+      const allRaw = await db.cashWallet.toArray();
+      let existingRecord = null;
+      
+      for (const raw of allRaw) {
+        const dec = await decryptRecord(raw);
+        if (dec && dec.currency === currency) {
+          existingRecord = raw;
+          break;
+        }
+      }
+      
+      const encrypted = await encryptRecord({ ...data, currency, updatedAt: new Date().toISOString() });
+      if (existingRecord) {
+        await db.cashWallet.put({ ...encrypted, id: existingRecord.id });
+      } else {
+        await db.cashWallet.add(encrypted);
+      }
+    });
+  }
+}
+
+export const bankAccountService = {
+  ...createEncryptedService(db.bankAccounts),
+  async getAll(currency) {
+    const all = await db.bankAccounts.toArray();
+    const decrypted = await Promise.all(all.map(decryptRecord));
+    let filtered = decrypted.filter(Boolean);
+    if (currency) {
+      filtered = filtered.filter(acc => acc.currency === currency);
+    }
+    return filtered.sort((a,b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0));
+  }
+};
+
+export const walletTransactionService = {
+  ...createEncryptedService(db.walletTransactions),
+  async getAll() {
+    const all = await db.walletTransactions.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+  async getByExpenseId(expenseId) {
+    const all = await db.walletTransactions.toArray()
+    const decrypted = await Promise.all(all.map(async r => ({ ...await decryptRecord(r), _id: r.id })))
+    return decrypted.find(t => t && t.expenseId === expenseId)
+  },
+  async removeByExpenseId(expenseId) {
+    const existing = await this.getByExpenseId(expenseId)
+    if (existing) await db.walletTransactions.delete(existing._id)
+  }
+}
+
+// Secure Data Wipe — Zero Knowledge forensic deletion
+export const secureWipe = async (skipReload = false) => {
+  // 1. Clear all browser storage first
+  localStorage.clear()
+  sessionStorage.clear()
+  
+  try {
+    // 2. Try to close the connection to prevent blocking
+    if (db.isOpen()) {
+       db.close()
+    }
+
+    // 3. Global delete by name
+    await Dexie.delete('SpendlyShopDB')
+  } catch (e) {
+    console.error("IndexedDB wipe failed", e)
+  }
+
+  // 4. Final reload
+  if (!skipReload) {
+    window.location.reload()
+  }
+}

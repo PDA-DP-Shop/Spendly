@@ -15,7 +15,20 @@ import CustomerDetailScreen from './screens/CustomerDetailScreen';
 import ItemsMenuScreen from './screens/ItemsMenuScreen';
 import ReportsScreen from './screens/ReportsScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import RecentlyDeletedScreen from './screens/RecentlyDeletedScreen';
 import DesktopBlockScreen from './screens/DesktopBlockScreen';
+import CashWalletScreen from './screens/CashWalletScreen';
+import BankAccountsScreen from './screens/BankAccountsScreen';
+import WalletTransactionsScreen from './screens/WalletTransactionsScreen';
+import DeleteConfirmScreen from './screens/delete-recovery/DeleteConfirmScreen';
+import DeleteTimerScreen from './screens/delete-recovery/DeleteTimerScreen';
+import DeleteProgressScreen from './screens/delete-recovery/DeleteProgressScreen';
+import DeleteSuccessScreen from './screens/delete-recovery/DeleteSuccessScreen';
+import RecoverDataScreen from './screens/delete-recovery/RecoverDataScreen';
+import RecoverProgressScreen from './screens/delete-recovery/RecoverProgressScreen';
+import RecoverSuccessScreen from './screens/delete-recovery/RecoverSuccessScreen';
+import { useSettingsStore } from './store/settingsStore';
+import { useShopStore } from './store/shopStore';
 
 // ── Route depth for directional navigation ────────────────────────────────────
 const ROUTE_DEPTH = {
@@ -28,10 +41,21 @@ const ROUTE_DEPTH = {
   '/reports': 3,
   '/settings': 3,
   '/items': 3,
+  '/cash-wallet': 3,
+  '/bank-accounts': 3,
+  '/wallet-history': 4,
   '/create-bill': 4,
   '/send-bill': 5,
   '/bill': 4,
   '/customer': 4,
+  '/recently-deleted': 4,
+  '/delete-confirm': 4,
+  '/delete-timer': 5,
+  '/delete-progress': 6,
+  '/delete-success': 7,
+  '/recover-data': 4,
+  '/recover-progress': 5,
+  '/recover-success': 6,
 };
 
 function getDepth(pathname) {
@@ -87,6 +111,17 @@ function AnimatedRoutes() {
           <Route path="/items" element={<ItemsMenuScreen />} />
           <Route path="/reports" element={<ReportsScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/cash-wallet" element={<CashWalletScreen />} />
+          <Route path="/bank-accounts" element={<BankAccountsScreen />} />
+          <Route path="/wallet-history" element={<WalletTransactionsScreen />} />
+          <Route path="/recently-deleted" element={<RecentlyDeletedScreen />} />
+          <Route path="/delete-confirm" element={<DeleteConfirmScreen />} />
+          <Route path="/delete-timer" element={<DeleteTimerScreen />} />
+          <Route path="/delete-progress" element={<DeleteProgressScreen />} />
+          <Route path="/delete-success" element={<DeleteSuccessScreen />} />
+          <Route path="/recover-data" element={<RecoverDataScreen />} />
+          <Route path="/recover-progress" element={<RecoverProgressScreen />} />
+          <Route path="/recover-success" element={<RecoverSuccessScreen />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </motion.div>
@@ -105,8 +140,7 @@ function TabButton({ tab, isActive, onClick }) {
   const Icon = tab.icon;
   return (
     <motion.button
-      variants={HAPTIC}
-      whileTap="tap"
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className="flex flex-col items-center justify-center flex-1 h-full pointer-events-auto"
     >
@@ -158,8 +192,7 @@ function BottomTabBar() {
               return (
                 <div key="fab" className="flex-1 flex justify-center">
                   <motion.button
-                    variants={HAPTIC}
-                    whileTap="tap"
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => navigate('/create-bill')}
                     className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-black bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.08)] active:scale-90 transition-transform"
                   >
@@ -213,6 +246,15 @@ function App() {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
+    
+    const { loadSettings } = useSettingsStore.getState();
+    loadSettings();
+
+    // Maintenance check for recovery vault
+    import('./services/recoveryVault').then(({ recoveryVaultService }) => {
+      recoveryVaultService.getActiveVault(); // This triggers the expiry check & secure wipe
+    });
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 

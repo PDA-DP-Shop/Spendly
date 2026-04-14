@@ -39,30 +39,47 @@ const MODES = [
 function decodeBillUrl(text) {
   if (!text) return null
   try {
-    // Case 1: Raw JSON string (e.g. from clipboard or direct JSON QR)
+    // Case 1: Raw JSON string
     if (text.trim().startsWith('{')) {
       const data = JSON.parse(text)
+      if (data.v === 2 || data.s) return minifyToFull(data)
       if (data.type === 'SPENDLY_BILL' || data.source === 'spendly-shop') return data
     }
 
-    // Case 2: Spendly Bill URL (contains ?data=...)
+    // Case 2: Spendly Bill URL
     if (text.includes('?data=')) {
       const params = new URLSearchParams(text.split('?')[1])
       const data = params.get('data')
       if (!data) return null
       
-      // Standard UTF-8 safe base64 decode
-      const rawBase64 = data
-      const jsonStr = decodeURIComponent(escape(atob(rawBase64)))
-      const bill = JSON.parse(jsonStr)
+      const jsonStr = decodeURIComponent(escape(atob(data)))
+      const rawObj = JSON.parse(jsonStr)
       
-      return (bill?.type === 'SPENDLY_BILL' || bill?.source === 'spendly-shop') ? bill : null
+      if (rawObj.v === 2 || rawObj.s) return minifyToFull(rawObj)
+      return (rawObj?.type === 'SPENDLY_BILL' || rawObj?.source === 'spendly-shop') ? rawObj : null
     }
   } catch (e) {
     console.warn('[Scanner] Failed to decode bill data:', e)
     return null
   }
   return null
+}
+
+function minifyToFull(data) {
+  return {
+    shopName: data.s,
+    total: data.t,
+    shopCategory: data.c,
+    billNumber: data.bn,
+    billId: data.bi,
+    timestamp: data.ts,
+    items: (data.i || []).map(it => ({
+      name: it.n,
+      price: it.p,
+      quantity: it.q
+    })),
+    type: 'SPENDLY_BILL'
+  };
 }
 
 function decodeUPIUrl(text) {
@@ -129,9 +146,9 @@ function useCameraScanner({ onResult, paused }) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'environment',
-          // 640x480 is plenty for QR/barcode detection — 9× less data than 1920x1080
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          // 1280x720 (HD) for crystal clear QR detection
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         }
       })
       streamRef.current = stream
@@ -161,8 +178,8 @@ function useCameraScanner({ onResult, paused }) {
     if (!hasCamera) return
 
     const SCAN_INTERVAL = 150   // Faster scan rate
-    const SCAN_W = 640           // Higher resolution for better accuracy
-    const SCAN_H = 480
+    const SCAN_W = 1280         // HD resolution for high-density QR
+    const SCAN_H = 720
 
     let lastScanAt = 0
     let processing = false
@@ -835,11 +852,11 @@ export default function ScansScreen() {
 
   const handleRaw = useCallback((text) => {
     if (!text) return
-    console.log('[Scanner] Scanned:', text)
+    console.log('[Scanner] Scanned text:', text)
     
     // ── Tier 1: Universal Auto-Detection ──
-    // 1. Check for Spendly Bill (URL or JSON)
     const billFromUrl = decodeBillUrl(text)
+    console.log('[Scanner] Decoded Bill:', billFromUrl)
     if (billFromUrl) {
       setResult({ type: 'bill', data: billFromUrl })
       setScanning(false)
@@ -893,16 +910,19 @@ export default function ScansScreen() {
             } catch {}
           }
 
+          const isKnown = !!productName;
           setBarcodeResolving(false)
           navigate('/add', {
             state: {
               prefilled: {
                 shopName: productName ? (productBrand ? `${productName} (${productBrand})` : productName) : '',
+                productName: productName,
                 note: productName ? `${productName}${productBrand ? ' — ' + productBrand : ''}` : `Barcode: ${text}`,
                 ...(productPrice > 0 ? { amount: productPrice } : {}),
                 category: productCategory,
                 scanType: 'barcode',
                 barcodeValue: text,
+                step: isKnown ? 2 : 1
               }
             }
           })

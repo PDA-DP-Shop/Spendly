@@ -8,17 +8,24 @@ import {
 } from 'lucide-react';
 
 import { useBillStore } from '../store/billStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
 import { formatDate } from '../utils/formatDate';
 
 const BillHistoryScreen = () => {
     const navigate = useNavigate();
     const { bills, loadBills } = useBillStore();
+    const { settings } = useSettingsStore();
+    const currency = settings?.currency || 'USD';
     const [searchQuery, setSearchQuery] = useState('');
     const [dateFilter, setDateFilter] = useState('All');
 
     useEffect(() => {
         loadBills();
+        // Cleanup expired bills from recycle bin (older than 3 days)
+        import('../services/softDeleteService').then(({ softDeleteBillService }) => {
+            softDeleteBillService.cleanupExpiredDeleted();
+        });
     }, []);
 
     const filteredBills = bills.filter(b => {
@@ -44,7 +51,7 @@ const BillHistoryScreen = () => {
     const sortedDates = Object.keys(groupedBills).sort((a, b) => new Date(b) - new Date(a));
 
     return (
-        <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+        <div className="min-h-dvh bg-white pb-tab relative overflow-x-hidden font-sans">
             <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
                 <button onClick={() => navigate('/home')} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
                     <div className="p-2 bg-[#F8FAFC] rounded-xl group-hover:bg-black group-hover:text-white transition-all">
@@ -63,11 +70,11 @@ const BillHistoryScreen = () => {
                     <div className="bg-black p-8 rounded-[32px] shadow-xl text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-12 -mt-12" />
                         <div className="text-[10px] font-[800] text-white/40 uppercase tracking-widest mb-2">Total Sales</div>
-                        <div className="text-[28px] font-[800] tracking-tight">{formatMoney(totalAmount)}</div>
+                        <div className="text-[28px] font-[800] tracking-tight">{formatMoney(totalAmount, currency)}</div>
                     </div>
                     <div className="bg-[#F8FAFC] p-8 rounded-[32px] border border-transparent shadow-sm relative overflow-hidden">
                         <div className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest mb-2">Pending</div>
-                        <div className="text-[24px] font-[800] text-black tracking-tight">{formatMoney(pendingAmount)}</div>
+                        <div className="text-[24px] font-[800] text-black tracking-tight">{formatMoney(pendingAmount, currency)}</div>
                         <div className="absolute bottom-0 right-0 p-4 opacity-5">
                             <Clock className="w-10 h-10 text-black" />
                         </div>
@@ -134,7 +141,7 @@ const BillHistoryScreen = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[17px] font-[800] text-black tracking-tight">{formatMoney(bill.total)}</div>
+                                            <div className="text-[17px] font-[800] text-black tracking-tight">{formatMoney(bill.total, currency)}</div>
                                             <div className={`text-[9px] font-[800] uppercase px-2.5 py-1 rounded-full tracking-widest mt-1.5 inline-block ${
                                                 bill.paymentMethod === 'upi' ? 'bg-purple-50 text-purple-600' : 'bg-emerald-50 text-emerald-600'
                                             }`}>

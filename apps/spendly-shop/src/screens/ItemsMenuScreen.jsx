@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import { useItemsStore } from '../store/itemsStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
 
 const UNITS = ['Piece', 'Kg', 'Gram', 'Litre', 'ML', 'Dozen', 'Metre', 'Box', 'Packet', 'Service'];
@@ -23,6 +24,8 @@ const CATEGORIES = [
 const ItemsMenuScreen = () => {
     const navigate = useNavigate();
     const { items, loadItems, addItem, updateItem, deleteItem } = useItemsStore();
+    const { settings } = useSettingsStore();
+    const currency = settings?.currency || 'USD';
     
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState('grid');
@@ -148,7 +151,7 @@ const ItemsMenuScreen = () => {
                                         </div>
                                     </div>
                                     <div className={viewMode === 'list' ? 'text-right flex-shrink-0' : 'pt-4 border-t border-[#F1F5F9] flex items-center justify-between'}>
-                                        <div className="font-[800] text-black text-[16px] tracking-tight">{formatMoney(item.price)}</div>
+                                        <div className="font-[800] text-black text-[16px] tracking-tight">{formatMoney(item.price, currency)}</div>
                                         {viewMode === 'list' && <ChevronRight className="w-4 h-4 text-[#CBD5E1] mt-1" />}
                                     </div>
                                 </motion.button>
@@ -219,7 +222,7 @@ const ItemsMenuScreen = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest ml-1 block mb-1.5">Price (₹)</label>
+                                        <label className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest ml-1 block mb-1.5">Price ({currency})</label>
                                         <input
                                             type="number"
                                             className="w-full bg-[#F8FAFC] border border-[#F1F5F9] p-5 rounded-[20px] outline-none font-[800] text-black text-[16px] placeholder:text-[#CBD5E1]"

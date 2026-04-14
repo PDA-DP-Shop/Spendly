@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info, ScanLine, Camera } from 'lucide-react'
+import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info, ScanLine, Camera, RefreshCw, Landmark, History } from 'lucide-react'
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
@@ -17,6 +17,9 @@ import { importBackupFile } from '../services/importData'
 import { db, settingsService, secureWipe } from '../services/database'
 import { formatMoney } from '../utils/formatMoney'
 import { permissionService } from '../services/permissionService'
+import FactoryResetWorkflow from '../components/shared/FactoryResetWorkflow'
+import RecoveryBanner from '../components/shared/RecoveryBanner'
+import { recoveryVaultService } from '../services/recoveryVault'
 
 
 const LOCK_OPTIONS = [
@@ -90,9 +93,9 @@ function BottomSheet({ show, onClose, title, children }) {
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose} className="fixed inset-0 z-[1001] pointer-events-auto" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }} />
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+          <motion.div initial={{ y: '100%', x: '-50%' }} animate={{ y: 0, x: '-50%' }} exit={{ y: '100%', x: '-50%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[1002] pb-safe bg-white flex flex-col pointer-events-auto"
+            className="fixed bottom-0 left-1/2 w-full max-w-[450px] z-[1002] bg-white flex flex-col pointer-events-auto"
             style={{ borderRadius: '40px 40px 0 0', maxHeight: '90dvh', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
             <div className="w-12 h-1.5 bg-[#F6F6F6] rounded-full mx-auto mt-4 mb-4" />
             <div className="flex items-center justify-between px-8 mb-6 mt-2">
@@ -102,7 +105,7 @@ function BottomSheet({ show, onClose, title, children }) {
                 <X className="w-5 h-5 text-black" strokeWidth={2.5} />
               </motion.button>
             </div>
-            <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">{children}</div>
+            <div className="flex-1 overflow-y-auto px-8 pb-tab scrollbar-hide">{children}</div>
           </motion.div>
         </>
       )}
@@ -131,11 +134,13 @@ export default function SettingsScreen() {
   const [currencySearch, setCurrencySearch] = useState('')
   const [showDecoySetup, setShowDecoySetup] = useState(false)
   const [permStatus, setPermStatus] = useState({ camera: 'prompt', notifications: 'prompt' })
+  const [activeVault, setActiveVault] = useState(null)
   const S = { fontFamily: "'Inter', sans-serif" }
 
   // Load permission status on mount
   useEffect(() => {
     permissionService.checkStatus().then(s => setPermStatus(s))
+    recoveryVaultService.getActiveVault().then(v => setActiveVault(v))
   }, [])
 
   const currency = CURRENCIES.find(c => c.code === settings?.currency) || CURRENCIES[0]
@@ -206,7 +211,8 @@ export default function SettingsScreen() {
 
 
   return (
-    <div className="flex flex-col min-h-dvh mb-tab bg-white safe-top">
+    <div className="flex flex-col min-h-dvh pb-tab bg-white safe-top">
+      <RecoveryBanner />
       <div className="px-7 pt-12 pb-6 flex items-center justify-between bg-white sticky top-0 z-20 border-b border-[#F6F6F6]">
         <h1 className="text-[28px] font-[800] text-black tracking-tight" style={S}>{t('settings.title')}</h1>
         <div className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center">
@@ -233,6 +239,24 @@ export default function SettingsScreen() {
         </div>
 
         <SectionCard title={t('settings.finance')}>
+          {activeVault && (
+            <motion.button 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              onClick={() => navigate('/recover-data')}
+              className="w-full flex items-center gap-4 px-6 py-5 text-left bg-green-50/50 border-b border-[#EEEEEE] group"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 border border-green-200">
+                <RefreshCw className="w-4.5 h-4.5 text-green-600" strokeWidth={2.5} />
+              </div>
+              <div className="flex-1">
+                <span className="text-[15px] font-[802] text-green-900 block tracking-tight">Recover Deleted Data</span>
+                <span className="text-[11px] font-[600] text-green-600/70 mt-0.5 block">Restore your payment history</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-green-400" strokeWidth={3} />
+            </motion.button>
+          )}
+          <SettingRow icon={Trash2} label="Deleted Cache" onClick={() => navigate('/deleted-items')} subtitle="Stored in 3-day local cache" />
           <SettingRow icon={Wallet} label={t('common.wallets')} onClick={() => navigate('/wallets')} subtitle={t('settings.manageWallets')} />
           <SettingRow icon={CreditCard} label={t('common.emis')} onClick={() => navigate('/emis')} subtitle={t('settings.trackLoans')} />
           <SettingRow icon={Target} label={t('common.goals')} onClick={() => navigate('/goals')} subtitle={t('settings.planGoals')} />
@@ -241,7 +265,16 @@ export default function SettingsScreen() {
           <SettingRow icon={Trophy} label={t('common.badges')} onClick={() => navigate('/badges')} subtitle={t('settings.achievements')} />
         </SectionCard>
 
+        <SectionCard title="Wallet & Money">
+           <SettingRow icon={Wallet} label="Cash Wallet" onClick={() => navigate('/cash-wallet')} subtitle="Count your notes & coins" />
+           <SettingRow icon={Landmark} label="Bank Accounts" onClick={() => navigate('/bank-accounts')} subtitle="Manage multiple bank accounts" />
+           <SettingRow icon={History} label="Wallet Transactions" onClick={() => navigate('/wallet-history')} subtitle="Audit deduction history" />
+        </SectionCard>
+
+
+
         <SectionCard title={t('settings.preferences')}>
+          {/* ... */}
           <SettingRow icon={Globe} label={t('settings.language')}
             value={LANGUAGE_OPTIONS.find(o => o.id === (settings?.language || 'en'))?.label}
             onClick={() => setShowLanguagePicker(true)} />
@@ -264,70 +297,97 @@ export default function SettingsScreen() {
           <SettingRow icon={ShieldCheck} label={t('settings.privacy')} onClick={() => navigate('/privacy')} />
         </SectionCard>
 
-        <SectionCard title="Permissions">
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
-              <ScanLine className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Camera (Scanner)</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${permissionService.dotColor(permStatus.camera)}`} />
-                <span className={`text-[11px] font-[600] ${permissionService.color(permStatus.camera)}`} style={S}>
-                  {permissionService.label(permStatus.camera)}
-                </span>
+        <SectionCard title="Device Access">
+          {/* Camera Permission */}
+          <div className="flex items-center justify-between px-6 py-6 group transition-all">
+            <div className="flex items-center gap-5">
+              <div className="w-12 h-12 rounded-[22px] bg-indigo-50 flex items-center justify-center shadow-inner">
+                <Camera className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
+              </div>
+              <div>
+                <span className="text-[15px] font-[900] text-black block tracking-tight" style={S}>Camera System</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${permissionService.dotColor(permStatus.camera)} shadow-sm`} />
+                  <span className={`text-[10px] font-[800] uppercase tracking-widest ${permissionService.color(permStatus.camera)}`} style={S}>
+                    {permissionService.label(permStatus.camera)}
+                  </span>
+                </div>
               </div>
             </div>
             {permStatus.camera !== 'granted' && (
-              <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={async () => {
                   const ok = await permissionService.requestCamera()
                   setPermStatus(s => ({ ...s, camera: ok ? 'granted' : 'denied' }))
+                  if (ok) setToast({ id: Date.now(), message: 'Camera access granted', type: 'success' })
+                  else setToast({ id: Date.now(), message: 'Camera access denied', type: 'error' })
                 }}
-                className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
-                Allow
+                className="px-6 py-2.5 bg-black text-white rounded-full text-[11px] font-[900] uppercase tracking-widest shadow-lg shadow-black/10 transition-all hover:bg-slate-800"
+              >
+                Access
               </motion.button>
+            )}
+            {permStatus.camera === 'granted' && (
+              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
+                <Check className="w-4.5 h-4.5 text-emerald-600" strokeWidth={3} />
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4 px-6 py-5 border-t border-[#EEEEEE]">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE] flex-shrink-0">
-              <Bell className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Notifications</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${permissionService.dotColor(permStatus.notifications)}`} />
-                <span className={`text-[11px] font-[600] ${permissionService.color(permStatus.notifications)}`} style={S}>
-                  {permissionService.label(permStatus.notifications)}
-                </span>
+          {/* Notifications Permission */}
+          <div className="flex items-center justify-between px-6 py-6 border-t border-[#F6F6F6] group transition-all">
+            <div className="flex items-center gap-5">
+              <div className="w-12 h-12 rounded-[22px] bg-rose-50 flex items-center justify-center shadow-inner">
+                <Bell className="w-5 h-5 text-rose-600" strokeWidth={2.5} />
+              </div>
+              <div>
+                <span className="text-[15px] font-[900] text-black block tracking-tight" style={S}>Smart Alerts</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${permissionService.dotColor(permStatus.notifications)} shadow-sm`} />
+                  <span className={`text-[10px] font-[800] uppercase tracking-widest ${permissionService.color(permStatus.notifications)}`} style={S}>
+                    {permissionService.label(permStatus.notifications)}
+                  </span>
+                </div>
               </div>
             </div>
             {permStatus.notifications !== 'granted' && (
-              <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={async () => {
                   if ('Notification' in window) {
                     const res = await Notification.requestPermission()
                     setPermStatus(s => ({ ...s, notifications: res }))
+                    if (res === 'granted') setToast({ id: Date.now(), message: 'Alerts enabled', type: 'success' })
                   }
                 }}
-                className="text-[11px] font-[800] text-black uppercase tracking-widest px-4 py-2 bg-[#F6F6F6] rounded-full border border-[#EEEEEE]">
-                Allow
+                className="px-6 py-2.5 bg-black text-white rounded-full text-[11px] font-[900] uppercase tracking-widest shadow-lg shadow-black/10 transition-all hover:bg-slate-800"
+              >
+                Enable
               </motion.button>
+            )}
+            {permStatus.notifications === 'granted' && (
+              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
+                <Check className="w-4.5 h-4.5 text-emerald-600" strokeWidth={3} />
+              </div>
             )}
           </div>
 
-          <motion.button variants={HAPTIC_TOUCH} whileTap="tap"
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
             onClick={() => setToast({ id: Date.now(), type: 'info', message: 'Manage Site Settings in Browser' })}
-            className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] border-t border-[#EEEEEE]">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F6F6F6] border border-[#EEEEEE]">
-              <ShieldCheck className="w-4.5 h-4.5 text-black" strokeWidth={2.5} />
+            className="w-full flex items-center gap-5 px-6 py-6 text-left active:bg-[#F6F6F6] border-t border-[#F6F6F6] transition-all group"
+          >
+            <div className="w-12 h-12 rounded-[22px] bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-slate-100 transition-colors">
+              <ShieldCheck className="w-5 h-5 text-slate-400 group-hover:text-slate-600" strokeWidth={2.5} />
             </div>
             <div className="flex-1">
-              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Manage in Browser</span>
-              <span className="text-[11px] font-[500] text-[#AFAFAF] mt-0.5 block" style={S}>Revoke or change permissions</span>
+              <span className="text-[15px] font-[900] text-black block tracking-tight" style={S}>Advance Settings</span>
+              <span className="text-[11px] font-[600] text-[#AFAFAF] mt-0.5 block" style={S}>Manage browser-level blocks</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-[#AFAFAF]" strokeWidth={3} />
+            <ChevronRight className="w-5 h-5 text-[#D8D8D8] group-hover:text-black transition-colors" strokeWidth={3} />
           </motion.button>
         </SectionCard>
 
@@ -353,8 +413,22 @@ export default function SettingsScreen() {
            <SettingRow icon={Download} label={t('settings.export')} onClick={() => handleExport()} subtitle={t('settings.saveBackup')} />
            <SettingRow icon={Upload} label={t('settings.import')} onClick={() => setShowImportInput(true)} subtitle={t('settings.restoreBackup')} />
            <SettingRow icon={Info} label="Migration Guide" onClick={() => navigate('/migration-guide')} subtitle="How to move browser data" />
-           <SettingRow icon={Trash2} label={t('settings.clear')} onClick={() => setShowClearConfirm(true)} subtitle={t('settings.factoryReset')} />
         </SectionCard>
+
+        <div className="px-8 mt-4 mb-2">
+           <motion.button
+             whileTap={{ scale: 0.98 }}
+             onClick={() => navigate('/delete-confirm')}
+             className="w-full py-5 rounded-[28px] border-2 border-red-500/10 bg-white text-red-500 font-[802] text-[16px] flex items-center justify-center gap-3 active:bg-red-50 transition-all duration-300"
+             style={S}
+           >
+             <Trash2 className="w-5 h-5 text-red-400 group-active:text-red-600" /> 
+             <span className="tracking-tight">Delete All Payment Data</span>
+           </motion.button>
+           <p className="text-[11px] font-[600] text-[#AFAFAF] text-center mt-3 px-10 leading-relaxed uppercase tracking-widest" style={S}>
+             Safe: Settings, Categories & Budgets
+           </p>
+        </div>
 
         <div className="text-center pb-24">
           <p className="text-[12px] font-[600] text-[#AFAFAF] uppercase tracking-widest" style={S}>Build v1.0.4</p>
@@ -432,9 +506,10 @@ export default function SettingsScreen() {
       {lockSetupType && (
         <LockSetupModal lockType={lockSetupType} onSave={handleLockSave} onCancel={() => setLockSetupType(null)} />
       )}
-      <ConfirmDialog show={showClearConfirm} title="Wipe all data?" 
-        message="This will permanently delete your entire history. This action cannot be reversed."
-        confirmText="Yes, Wipe Data" onConfirm={handleClearAll} onCancel={() => setShowClearConfirm(false)} />
+      {showClearConfirm && createPortal(
+        <FactoryResetWorkflow onClose={() => setShowClearConfirm(false)} />,
+        document.body
+      )}
       
       <AnimatePresence>
         {showExportInput && (

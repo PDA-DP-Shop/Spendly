@@ -7,9 +7,14 @@ export const useBillStore = create((set, get) => ({
   isLoading: false,
 
   loadBills: async () => {
+    const { useSettingsStore } = await import('./settingsStore')
+    const currency = useSettingsStore.getState().settings?.currency || 'USD'
+    
+    // Optional: Clear or keep old state? Better to clear IF currency mismatch
+    // For now, simple reload is fine as database handles filtering
     set({ isLoading: true });
     try {
-      const bills = await billService.getAll();
+      const bills = await billService.getAll(currency);
       set({ bills: bills.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)), isLoading: false });
     } catch (err) {
       set({ isLoading: false });
@@ -21,20 +26,37 @@ export const useBillStore = create((set, get) => ({
   },
 
   saveBill: async (bill) => {
-    const id = await billService.add(bill);
-    set(s => ({ bills: [{ ...bill, id }, ...s.bills], currentBill: null }));
+    const { useSettingsStore } = await import('./settingsStore')
+    const currency = useSettingsStore.getState().settings?.currency || 'USD'
+    const id = await billService.add(bill, currency);
+    set(s => ({ bills: [{ ...bill, id, currency }, ...s.bills], currentBill: null }));
     return id;
   },
 
   updateBill: async (id, changes) => {
+    const { useSettingsStore } = await import('./settingsStore')
+    const currency = useSettingsStore.getState().settings?.currency || 'USD'
     await billService.update(id, changes);
-    const bills = await billService.getAll();
+    const bills = await billService.getAll(currency);
     set({ bills });
   },
 
   deleteBill: async (id) => {
-    await billService.delete(id);
+    const { softDeleteBillService } = await import('../services/softDeleteService');
+    await softDeleteBillService.softDeleteBill(id);
     set(s => ({ bills: s.bills.filter(b => b.id !== id) }));
+  },
+
+  restoreBill: async (id) => {
+    const { useSettingsStore } = await import('./settingsStore')
+    const currency = useSettingsStore.getState().settings?.currency || 'USD'
+    const { softDeleteBillService } = await import('../services/softDeleteService');
+    const success = await softDeleteBillService.restoreBill(id);
+    if (success) {
+      const bills = await billService.getAll(currency);
+      set({ bills });
+    }
+    return success;
   },
 
   getBillByNumber: (billNumber) => {

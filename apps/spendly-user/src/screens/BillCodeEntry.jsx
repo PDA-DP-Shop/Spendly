@@ -27,22 +27,45 @@ async function lookupBillCode(code) {
     } catch {}
   }
 
-  // Demo Mode: if code is 123456 or matches the one in user's screenshot, return mock data
-  if (code === '123456' || code === '457062') {
-    await new Promise(r => setTimeout(r, 600))
+  // Any 6-digit code is accepted. We use the code as a seed for variety.
+  if (/^[0-9]{6}$/.test(code)) {
+    await new Promise(r => setTimeout(r, 800))
+    
+    // HIERARCHICAL DECODING:
+    // [Group][Amt3][Qty][Salt]
+    const groupDigit = code[0];
+    const finalTotal = parseInt(code.slice(1, 4));
+    const qty = parseInt(code[4]);
+    const salt = code[5];
+    
+    // Group Mapping:
+    const groups = [
+      { shopName: 'Spendly Dining', category: 'food' },      // 0
+      { shopName: 'Spendly Travel', category: 'travel' },    // 1
+      { shopName: 'Spendly Shop', category: 'shopping' },    // 2
+      { shopName: 'Spendly Bills', category: 'bills' },      // 3
+      { shopName: 'Spendly Medical', category: 'health' },   // 4
+      { shopName: 'Spendly Fun', category: 'fun' },          // 5
+      { shopName: 'Spendly School', category: 'study' },     // 6
+      { shopName: 'Spendly Tech', category: 'tech' },        // 7
+      { shopName: 'Spendly Gym', category: 'gym' },          // 8
+      { shopName: 'Spendly Other', category: 'other' }       // 9
+    ];
+
+    const pick = groups[parseInt(groupDigit)] || groups[9];
+
     return {
-      type: 'SPENDLY_BILL',
+      type: 'spent', 
+      isPartial: true,
       source: 'spendly-shop',
-      billId: `DEMO-${Date.now()}`,
-      billNumber: `BILL-${Math.floor(Math.random() * 9000)}`,
-      shopName: 'Spendly Shop (Local Mock)',
-      total: 1250.75,
-      subtotal: 1100,
-      tax: 150.75,
-      items: [
-        { name: 'Alpha Coffee', price: 450.50, quantity: 2 },
-        { name: 'Premium Bean', price: 349.75, quantity: 1 }
-      ],
+      billId: `BILL-REF-${code}-${salt}`, 
+      billNumber: `BN-${code.slice(-3)}`,
+      shopName: pick.name || pick.shopName,
+      total: finalTotal,
+      subtotal: Math.floor(finalTotal * 0.92),
+      tax: Math.floor(finalTotal * 0.08),
+      items: Array(qty).fill({ name: `${pick.category} item`, price: 0, quantity: 1 }),
+      category: pick.category,
       paymentMethod: 'UPI',
       timestamp: new Date().toISOString()
     }

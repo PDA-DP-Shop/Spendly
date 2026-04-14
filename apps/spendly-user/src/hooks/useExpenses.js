@@ -10,6 +10,12 @@ export const useExpenses = () => {
     if (expenses.length === 0) loadExpenses()
   }, [])
 
+  // Get expenses for current day
+  const getToday = () => {
+    const today = new Date().toISOString().split('T')[0]
+    return expenses.filter(e => e.date?.startsWith(today))
+  }
+
   // Get expenses for current month
   const getThisMonth = () => {
     const start = startOfMonth(new Date())
@@ -34,6 +40,7 @@ export const useExpenses = () => {
     deleteExpense,
     restoreExpense,
     getThisMonth,
+    getToday,
     getRecent,
   }
 }

@@ -8,6 +8,7 @@ import OnboardingScreen from './screens/OnboardingScreen'
 import LockScreen from './screens/LockScreen'
 import ErrorBoundary from './components/shared/ErrorBoundary'
 import OfflineBanner from './components/shared/OfflineBanner'
+import { RefreshCw, AlertTriangle, AlertCircle, Database } from 'lucide-react'
 import { useSettingsStore } from './store/settingsStore'
 import { useLockStore } from './store/lockStore'
 import { useSessionStore } from './store/sessionStore'
@@ -25,6 +26,8 @@ import { useAppUpdate } from './hooks/useAppUpdate'
 import { UpdateBanner } from './components/UpdateBanner'
 import { useBadgeCheck } from './hooks/useBadgeCheck'
 import BadgeEarnedCelebration from './components/shared/BadgeEarnedCelebration'
+import PersistenceBanners from './components/shared/PersistenceBanners'
+import UndoDeleteToast from './components/shared/UndoDeleteToast'
 
 
 const BillCodeEntry = lazy(() => import('./screens/BillCodeEntry'))
@@ -46,6 +49,19 @@ const FestivalsScreen = lazy(() => import('./screens/FestivalsScreen'))
 const TermsScreen = lazy(() => import('./screens/TermsScreen'))
 const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'))
 const MigrationGuideScreen = lazy(() => import('./screens/MigrationGuideScreen'))
+const DeletedItemsScreen = lazy(() => import('./screens/DeletedItemsScreen'))
+const ViewBillScreen = lazy(() => import('./screens/ViewBillScreen'))
+const CashWalletScreen = lazy(() => import('./screens/CashWalletScreen'))
+const BankAccountsScreen = lazy(() => import('./screens/BankAccountsScreen'))
+const WalletTransactionsScreen = lazy(() => import('./screens/WalletTransactionsScreen'))
+
+const DeleteConfirmScreen = lazy(() => import('./screens/delete-recovery/DeleteConfirmScreen'))
+const DeleteTimerScreen = lazy(() => import('./screens/delete-recovery/DeleteTimerScreen'))
+const DeleteProgressScreen = lazy(() => import('./screens/delete-recovery/DeleteProgressScreen'))
+const DeleteSuccessScreen = lazy(() => import('./screens/delete-recovery/DeleteSuccessScreen'))
+const RecoverDataScreen = lazy(() => import('./screens/delete-recovery/RecoverDataScreen'))
+const RecoverProgressScreen = lazy(() => import('./screens/delete-recovery/RecoverProgressScreen'))
+const RecoverSuccessScreen = lazy(() => import('./screens/delete-recovery/RecoverSuccessScreen'))
 
 const TAB_PATHS = [
   '/', '/reports', '/search', '/settings', '/expenses', '/budget',
@@ -72,6 +88,17 @@ const ROUTE_DEPTH = {
   '/migration-guide': 3,
   '/terms': 3,
   '/privacy': 3,
+  '/view-bill': 3,
+  '/delete-confirm': 3,
+  '/delete-timer': 4,
+  '/delete-progress': 5,
+  '/delete-success': 6,
+  '/recover-data': 3,
+  '/recover-progress': 4,
+  '/recover-success': 5,
+  '/cash-wallet': 3,
+  '/bank-accounts': 3,
+  '/wallet-history': 4,
 }
 
 function getDepth(pathname) {
@@ -111,8 +138,18 @@ function ScreenSkeleton() {
   )
 }
 
+
 function AppWrapper() {
   const location = useLocation()
+  const [deletedExpense, setDeletedExpense] = useState(null)
+  const { restoreExpense } = useExpenseStore()
+
+  // Track manual deletion to show toast
+  useEffect(() => {
+    const handleDeleted = (e) => setDeletedExpense(e.detail)
+    window.addEventListener('expense-deleted', handleDeleted)
+    return () => window.removeEventListener('expense-deleted', handleDeleted)
+  }, [])
 
   // Aggressive auto scroll to top on navigation
   useEffect(() => {
@@ -122,6 +159,46 @@ function AppWrapper() {
     const appContent = document.querySelector('.app-content')
     if (appContent) appContent.scrollTo(0, 0)
   }, [location.pathname])
+
+  // URL Deep Link Handler
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const billData = params.get('data')
+    
+    if (billData) {
+      try {
+        const decoded = decodeURIComponent(billData)
+        const jsonStr = decodeURIComponent(escape(atob(decoded)))
+        const data = JSON.parse(jsonStr)
+        let bill = data;
+
+        // Handle Version 2 (Minified)
+        if (data.v === 2 || data.s) {
+          bill = {
+            shopName: data.s,
+            total: data.t,
+            shopCategory: data.c,
+            billNumber: data.bn,
+            billId: data.bi,
+            timestamp: data.ts,
+            items: (data.i || []).map(it => ({
+              name: it.n,
+              price: it.p,
+              quantity: it.q
+            })),
+            type: 'SPENDLY_BILL'
+          }
+        }
+        
+        if (bill.type === 'SPENDLY_BILL') {
+          window.dispatchEvent(new CustomEvent('bill-received', { detail: bill }))
+          window.history.replaceState({}, '', '/')
+        }
+      } catch (e) {
+        console.error('Deep Link Error:', e)
+      }
+    }
+  }, [location.search])
 
   const showTab = TAB_PATHS.includes(location.pathname)
   const [showAddSheet, setShowAddSheet] = useState(false)
@@ -147,6 +224,12 @@ function AppWrapper() {
 
   return (
     <>
+      <PersistenceBanners />
+      <UndoDeleteToast 
+        expense={deletedExpense} 
+        onUndo={() => restoreExpense(deletedExpense.id)}
+        onVisibleChange={(v) => !v && setDeletedExpense(null)}
+      />
       <ErrorBoundary>
         <Suspense fallback={<ScreenSkeleton />}>
           {/* ScansScreen MUST be outside the motion wrapper — position:fixed is
@@ -179,10 +262,22 @@ function AppWrapper() {
                   <Route path="/goals" element={<GoalsScreen />} />
                   <Route path="/trips" element={<TripsScreen />} />
                   <Route path="/badges" element={<BadgesScreen />} />
+                  <Route path="/cash-wallet" element={<CashWalletScreen />} />
+                  <Route path="/bank-accounts" element={<BankAccountsScreen />} />
+                  <Route path="/wallet-history" element={<WalletTransactionsScreen />} />
                   <Route path="/festivals" element={<FestivalsScreen />} />
                   <Route path="/terms" element={<TermsScreen />} />
                   <Route path="/privacy" element={<PrivacyPolicyScreen />} />
+                  <Route path="/deleted-items" element={<DeletedItemsScreen />} />
                   <Route path="/migration-guide" element={<MigrationGuideScreen />} />
+                  <Route path="/view-bill/:id" element={<ViewBillScreen />} />
+                  <Route path="/delete-confirm" element={<DeleteConfirmScreen />} />
+                  <Route path="/delete-timer" element={<DeleteTimerScreen />} />
+                  <Route path="/delete-progress" element={<DeleteProgressScreen />} />
+                  <Route path="/delete-success" element={<DeleteSuccessScreen />} />
+                  <Route path="/recover-data" element={<RecoverDataScreen />} />
+                  <Route path="/recover-progress" element={<RecoverProgressScreen />} />
+                  <Route path="/recover-success" element={<RecoverSuccessScreen />} />
                   <Route path="/bill-code" element={<BillCodeEntry onBillFound={bill => window.dispatchEvent(new CustomEvent('bill-received', { detail: bill }))} />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
@@ -212,6 +307,7 @@ export default function App() {
   } = useAppUpdate()
 
   const [ready, setReady] = useState(false)
+  const [initError, setInitError] = useState(null)
   const [isDesktop, setIsDesktop] = useState(false)
   const settings = useSettingsStore(state => state.settings)
   const loadSettings = useSettingsStore(state => state.loadSettings)
@@ -237,29 +333,6 @@ export default function App() {
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // URL Deep Link Handler
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const billData = params.get('data')
-    
-    if (billData) {
-      try {
-        const decoded = decodeURIComponent(billData)
-        // UTF-8 safe decoding
-        const jsonStr = decodeURIComponent(escape(atob(decoded)))
-        const bill = JSON.parse(jsonStr)
-        
-        if (bill.type === 'SPENDLY_BILL') {
-          setIncomingBill(bill)
-          setShowBillPopup(true)
-          // Clean URL
-          window.history.replaceState({}, '', '/')
-        }
-      } catch (e) {
-        console.error('Invalid bill data:', e)
-      }
-    }
-  }, [])
 
   // NFC Receiver
   useEffect(() => {
@@ -313,16 +386,60 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    initDatabase()
-      .then(() => {
-        loadSettings()
-        // Warm up AI scanning engine and Offline Product DB in background
+    const initApp = async () => {
+      try {
+        await initDatabase()
+        await loadSettings()
+        
+        // Warm up AI scanning engine
         import('./services/scanner/ocrProcessor').then(m => m.preloadOCRWorker())
         import('./services/productLookup').then(m => m.preloadLocalDb())
-      })
-      .then(() => useLockStore.getState().loadLockoutState())
-      .then(() => loadExpenses())
-      .then(() => setReady(true))
+        
+        // Initialize Data Safety Engines
+        const { browserService } = await import('./services/browserService')
+        const { persistenceService } = await import('./services/persistenceService')
+        const { softDeleteService } = await import('./services/softDeleteService')
+        const { backupService } = await import('./services/backupService')
+        const { useUIStore } = await import('./store/uiStore')
+        
+        await browserService.initTracking()
+        const bState = browserService.detect()
+        const preferred = await browserService.getPreferredBrowser()
+        
+        // Persistence check
+        const health = await persistenceService.checkStorageHealth()
+        useUIStore.getState().setStorageHealth(health)
+        
+        // Set UI banners based on logic
+        if (!preferred && !bState.isPWA) {
+          useUIStore.getState().setBanner('browser', true)
+        }
+        
+        const shouldBackup = await backupService.shouldRemind()
+        if (shouldBackup) {
+          useUIStore.getState().setBanner('backup', true)
+        }
+        
+        useUIStore.getState().setBrowserState({ ...bState, preferred, isWrong: bState.browser !== preferred && preferred && !bState.isPWA })
+        
+        // Maintenance: Cleanup old recycle bin items
+        await softDeleteService.cleanupExpiredDeleted()
+        
+        // Maintenance: Check recovery vault expiry
+        const { recoveryVaultService } = await import('./services/recoveryVault')
+        await recoveryVaultService.getActiveVault() // This internally checks expiry and deletes if needed
+        
+        await useLockStore.getState().loadLockoutState()
+        await loadExpenses()
+        setReady(true)
+      } catch (err) {
+        console.error('Spendly Initialization Failed:', err)
+        setInitError(err)
+        setReady(true)
+      }
+    }
+    
+    initApp()
   }, [])
 
   useEffect(() => {
@@ -374,18 +491,82 @@ export default function App() {
     }
   }, [setBackgrounded, clearEncryptionKey])
 
+  const [showReloadConfirm, setShowReloadConfirm] = useState(false);
+  const handleReload = () => window.location.reload();
+
   // Determine the content to render based on app state
   let content;
   if (!ready) {
     content = <GlobalLoading />;
-  } else if (isDesktop) {
-    content = <DesktopBlockScreen />;
+  } else if (initError) {
+    content = (
+      <div className="fixed inset-0 bg-[#FFFFFF] flex items-center justify-center p-8 text-center safe-area-inset">
+        <div className="w-full max-w-[400px]">
+          <div className="w-24 h-24 rounded-[32px] bg-red-50 flex items-center justify-center mx-auto mb-10 shadow-lg shadow-red-500/10">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h2 className="text-[32px] font-[900] text-black tracking-tight leading-tight mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>Database Recovery</h2>
+          <p className="text-[#64748B] text-[16px] font-[500] leading-relaxed mb-12" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Spendly encountered a critical storage conflict. To keep your app running smoothly, we need to perform a system reset.
+          </p>
+          <div className="space-y-4">
+             <motion.button 
+               whileTap={{ scale: 0.96 }}
+               onClick={async () => {
+                 const { secureWipe } = await import('./services/database')
+                 await secureWipe()
+               }}
+               className="w-full py-5 rounded-3xl bg-black text-white font-[802] text-[16px] shadow-xl flex items-center justify-center gap-3"
+               style={{ fontFamily: "'Inter', sans-serif" }}
+             >
+               <Database className="w-5 h-5" /> Full Factory Reset
+             </motion.button>
+             <p className="text-[11px] font-[800] text-[#CBD5E1] uppercase tracking-[0.2em]">This will clear all local data</p>
+          </div>
+        </div>
+      </div>
+    )
   } else if (!settings?.onboardingDone) {
     content = <OnboardingScreen />;
   } else if (isBackgrounded || (isLocked && settings?.lockType !== 'none')) {
     content = (
-      <div className="fixed inset-0 z-[999] bg-[#FFFFFF] flex items-center justify-center p-6">
-        <div className="w-full max-w-[400px]">
+      <div className="fixed inset-0 z-[999] bg-[#FFFFFF] flex items-center justify-center p-6 transition-all duration-300">
+        <div className="w-full max-w-[400px] relative">
+          {/* Troubleshooting Reload button - absolute top right of the privacy view */}
+          <div className="absolute -top-32 -right-4">
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowReloadConfirm(true)}
+              className="w-12 h-12 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center"
+            >
+              <RefreshCw className="w-5 h-5 text-black" strokeWidth={2.5} />
+            </motion.button>
+          </div>
+
+          <AnimatePresence>
+            {showReloadConfirm && (
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[1000] bg-white flex flex-col items-center justify-center p-8 text-center"
+              >
+                 <div className="w-20 h-20 rounded-[28px] bg-red-50 flex items-center justify-center mb-8">
+                   <AlertTriangle className="w-10 h-10 text-red-500" />
+                 </div>
+                 <h3 className="text-[24px] font-[900] text-black tracking-tight mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>Reload Spendly?</h3>
+                 <p className="text-[#545454] text-[15px] font-[500] leading-relaxed mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Refreshing will reset the current session UI. Your data is safely stored offline and will not be affected. 
+                 </p>
+                 <div className="w-full flex flex-col gap-3">
+                   <motion.button whileTap={{ scale: 0.96 }} onClick={handleReload}
+                     className="w-full py-5 rounded-2xl bg-black text-white font-[802] text-[16px] shadow-xl" style={{ fontFamily: "'Inter', sans-serif" }}>
+                     Yes, Refresh App
+                   </motion.button>
+                   <button onClick={() => setShowReloadConfirm(false)} className="w-full py-5 font-[800] text-[#AFAFAF] uppercase tracking-widest text-[13px]" style={{ fontFamily: "'Inter', sans-serif" }}>Cancel</button>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {isLocked && settings?.lockType !== 'none' ? (
             <LockScreen />
           ) : (

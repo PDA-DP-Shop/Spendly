@@ -128,7 +128,13 @@ export default function SearchScreen() {
             <div className="flex flex-col">
               {results.map((exp, i) => (
                 <TransactionItem key={exp.id} expense={exp} currency={currency} index={i}
-                  onDelete={handleDelete} onEdit={() => navigate(`/add?edit=${exp.id}`)} />
+                  onDelete={handleDelete} onEdit={(e) => {
+                    if (e.scanType === 'shop_bill' || e.billId) {
+                      navigate(`/view-bill/${e.id}`)
+                    } else {
+                      navigate(`/add?edit=${e.id}`)
+                    }
+                  }} />
               ))}
             </div>
           </div>

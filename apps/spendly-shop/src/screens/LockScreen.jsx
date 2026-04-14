@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Delete, ArrowRight, Lock, ShieldCheck, User, Store, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, Delete, ArrowRight, Lock, ShieldCheck, User, Store, ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useShopStore } from '../store/shopStore';
 
 const LockScreen = () => {
   const [pin, setPin] = useState('');
   const [isStaff, setIsStaff] = useState(false);
+  const [showReloadConfirm, setShowReloadConfirm] = useState(false);
   const navigate = useNavigate();
   const { shop } = useShopStore();
 
@@ -20,11 +21,50 @@ const LockScreen = () => {
     }
   };
 
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   const handleDelete = () => setPin(pin.slice(0, -1));
 
   return (
     <div className="h-screen w-full flex flex-col items-center justify-between py-16 bg-white relative overflow-hidden font-sans">
       <div className="absolute top-0 right-0 w-80 h-80 bg-black/5 rounded-full blur-[90px] -z-10 -mr-40 -mt-40" />
+      
+      {/* Troubleshooting Reload button */}
+      <div className="absolute top-12 right-6 z-50">
+        <motion.button 
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowReloadConfirm(true)}
+          className="w-12 h-12 rounded-full bg-[#F8FAFC] border border-[#F1F5F9] flex items-center justify-center"
+        >
+          <RefreshCw className="w-5 h-5 text-black" strokeWidth={2.5} />
+        </motion.button>
+      </div>
+
+      <AnimatePresence>
+        {showReloadConfirm && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center"
+          >
+             <div className="w-20 h-20 rounded-[28px] bg-red-50 flex items-center justify-center mb-8">
+               <AlertTriangle className="w-10 h-10 text-red-500" />
+             </div>
+             <h3 className="text-[24px] font-[900] text-black tracking-tight mb-4">Reload Shop App?</h3>
+             <p className="text-[#94A3B8] text-[15px] font-[600] leading-relaxed mb-10 max-w-[300px]">
+                Refreshing will restart the shop interface. Your sales records and customer books are safe.
+             </p>
+             <div className="w-full flex flex-col gap-3">
+               <motion.button whileTap={{ scale: 0.96 }} onClick={handleReload}
+                 className="w-full py-5 rounded-2xl bg-black text-white font-[800] text-[16px] shadow-xl">
+                 Yes, Refresh App
+               </motion.button>
+               <button onClick={() => setShowReloadConfirm(false)} className="w-full py-5 font-[800] text-[#94A3B8] uppercase tracking-widest text-[13px]">Cancel</button>
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.div 
         initial={{ y: -20, opacity: 0 }}

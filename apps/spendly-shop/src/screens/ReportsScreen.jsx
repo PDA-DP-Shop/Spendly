@@ -10,6 +10,7 @@ import {
 
 import { useBillStore } from '../store/billStore';
 import { useCustomerStore } from '../store/customerStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
 
 const FILTERS = ['Today', 'This Week', 'This Month', 'All Time'];
@@ -18,6 +19,8 @@ const ReportsScreen = () => {
     const navigate = useNavigate();
     const { bills, loadBills } = useBillStore();
     const { customers, loadCustomers } = useCustomerStore();
+    const { settings } = useSettingsStore();
+    const currency = settings?.currency || 'USD';
     const [filter, setFilter] = useState('This Month');
 
     useEffect(() => {
@@ -60,7 +63,7 @@ const ReportsScreen = () => {
     }, [bills]);
 
     return (
-        <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+        <div className="min-h-dvh bg-white pb-tab relative overflow-x-hidden font-sans">
             <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
                 <button onClick={() => navigate('/home')} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
                     <div className="p-2 bg-[#F8FAFC] rounded-xl group-hover:bg-black group-hover:text-white transition-all">
@@ -98,10 +101,10 @@ const ReportsScreen = () => {
                 {/* Main Metrics */}
                 <div className="grid grid-cols-2 gap-4">
                     {[
-                        { label: 'Revenue', val: formatMoney(totalSales), icon: TrendingUp, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                        { label: 'Revenue', val: formatMoney(totalSales, currency), icon: TrendingUp, color: 'text-black', bg: 'bg-[#F8FAFC]' },
                         { label: 'Bills', val: bills.length, icon: Receipt, color: 'text-black', bg: 'bg-[#F8FAFC]' },
                         { label: 'Clients', val: customers.length, icon: Users, color: 'text-black', bg: 'bg-[#F8FAFC]' },
-                        { label: 'Avg Bill', val: formatMoney(avgBill), icon: Activity, color: 'text-black', bg: 'bg-[#F8FAFC]' },
+                        { label: 'Avg Bill', val: formatMoney(avgBill, currency), icon: Activity, color: 'text-black', bg: 'bg-[#F8FAFC]' },
                     ].map((s, i) => (
                         <div 
                             key={i}
@@ -168,7 +171,7 @@ const ReportsScreen = () => {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="font-[800] text-black text-[17px] tracking-tight">{formatMoney(item.amount)}</div>
+                                    <div className="font-[800] text-black text-[17px] tracking-tight">{formatMoney(item.amount, currency)}</div>
                                 </div>
                             </div>
                         ))}

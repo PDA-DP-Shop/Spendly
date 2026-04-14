@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -9,7 +10,7 @@ import {
   Users, Moon, Sun, Plus, Download, Upload,
   Smartphone, ShieldCheck, X, Check,
   Receipt, Package, BarChart2, Phone, Percent,
-  MessageSquare
+  MessageSquare, Landmark, Wallet, History
 } from 'lucide-react';
 
 import { useShopStore } from '../store/shopStore';
@@ -17,38 +18,46 @@ import { useSettingsStore } from '../store/settingsStore';
 import { useBillStore } from '../store/billStore';
 import { useCustomerStore } from '../store/customerStore';
 import { formatMoney } from '../utils/formatMoney';
+import CURRENCY_NOTES from '../constants/currencyNotes';
 import { exportShopData, importShopData } from '../services/exportData';
 import { db } from '../services/database';
+import FactoryResetWorkflow from '../components/shared/FactoryResetWorkflow';
+import { recoveryVaultService } from '../services/recoveryVault';
+import RecoveryBanner from '../components/shared/RecoveryBanner';
+import { RefreshCw } from 'lucide-react';
 
 // ─── Reusable Bottom Sheet ───────────────────────────────────────────────────
-const BottomSheet = ({ show, onClose, title, children }) => (
-  <AnimatePresence>
-    {show && (
-      <>
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 z-[60] bg-black/40"
-        />
-        <motion.div
-          initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 32, stiffness: 350 }}
-          className="fixed bottom-0 left-0 right-0 z-[61] bg-white"
-          style={{ borderRadius: '40px 40px 0 0', maxHeight: '85dvh', display: 'flex', flexDirection: 'column' }}
-        >
-          <div className="w-12 h-1.5 bg-[#F1F5F9] rounded-full mx-auto mt-4 mb-4" />
-          <div className="flex items-center justify-between px-8 mb-5">
-            <h3 className="text-[22px] font-[800] text-black tracking-tight">{title}</h3>
-            <button onClick={onClose} className="w-10 h-10 rounded-full bg-[#F8FAFC] flex items-center justify-center border border-[#F1F5F9]">
-              <X className="w-5 h-5 text-black" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto px-8 pb-12 scrollbar-hide">{children}</div>
-        </motion.div>
-      </>
-    )}
-  </AnimatePresence>
-);
+const BottomSheet = ({ show, onClose, title, children }) => {
+  return createPortal(
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[2001] bg-black/40 backdrop-blur-[2px]"
+          />
+          <motion.div
+            initial={{ y: '100%', x: '-50%' }} animate={{ y: 0, x: '-50%' }} exit={{ y: '100%', x: '-50%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+            className="fixed bottom-0 left-1/2 w-full max-w-[450px] z-[2002] bg-white overflow-hidden pb-10"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '92dvh', display: 'flex', flexDirection: 'column' }}
+          >
+            <div className="w-12 h-1.5 bg-[#F1F5F9] rounded-full mx-auto mt-4 mb-4 flex-shrink-0" />
+            <div className="flex items-center justify-between px-8 mb-4">
+              <h3 className="text-[22px] font-[800] text-black tracking-tight">{title}</h3>
+              <button onClick={onClose} className="w-10 h-10 rounded-full bg-[#F8FAFC] flex items-center justify-center border border-[#F1F5F9] active:scale-95">
+                <X className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.getElementById('modal-root') || document.body
+  );
+};
 
 // ─── Settings Row ────────────────────────────────────────────────────────────
 const SettingsRow = ({ icon: Icon, title, subtitle, value, onClick, danger, toggle, toggled, onToggle, last }) => (
@@ -105,31 +114,64 @@ const Toast = ({ msg, onClose }) => (
   </AnimatePresence>
 );
 
-// ─── Bill Prefix Picker Options ───────────────────────────────────────────────
-const BILL_PREFIXES = ['INV', 'BILL', 'REC', 'TXN', 'ORD'];
+// ─── Shop Categories (Worldwide) ──────────────────────────────────────────────
+const SHOP_CATEGORIES = [
+  { id: 'food', name: 'Food & Dining', emoji: '🍔', group: '0' },
+  { id: 'coffee', name: 'Cafe & Coffee', emoji: '☕', group: '0' },
+  { id: 'grocery', name: 'Groceries', emoji: '🛒', group: '0' },
+  { id: 'travel', name: 'Travel & Taxi', emoji: '🚗', group: '1' },
+  { id: 'holiday', name: 'Holiday & Tours', emoji: '✈️', group: '1' },
+  { id: 'shopping', name: 'General Shop', emoji: '🛍️', group: '2' },
+  { id: 'clothes', name: 'Fashion & Wear', emoji: '👕', group: '2' },
+  { id: 'gifts', name: 'Gift Shop', emoji: '🎁', group: '2' },
+  { id: 'pets', name: 'Pet Care', emoji: '🐾', group: '2' },
+  { id: 'health', name: 'Pharmacy & Medical', emoji: '💊', group: '4' },
+  { id: 'bills', name: 'Utility Bills', emoji: '💡', group: '3' },
+  { id: 'rent', name: 'Rent & Accommodation', emoji: '🏠', group: '3' },
+  { id: 'fun', name: 'Entertainment', emoji: '🎮', group: '5' },
+  { id: 'study', name: 'Education', emoji: '📚', group: '6' },
+  { id: 'tech', name: 'Electronics & Gadgets', emoji: '💻', group: '7' },
+  { id: 'gym', name: 'Gym & Fitness', emoji: '💪', group: '8' },
+];
 
-// ─── GST Rate Presets ─────────────────────────────────────────────────────────
+const BILL_PREFIXES = ['INV', 'BILL', 'REC', 'TXN', 'ORD'];
 const GST_RATES = [0, 5, 12, 18, 28];
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const SettingsScreen = () => {
   const navigate = useNavigate();
-  const { shop, updateShop } = useShopStore();
+  const { shop, updateShop, saveShop, loadShop } = useShopStore();
   const { settings, updateSetting } = useSettingsStore();
   const { bills } = useBillStore();
   const { customers } = useCustomerStore();
 
-  // Profile form state
   const [form, setForm] = useState({
-    name: shop?.name || '',
-    ownerName: shop?.ownerName || '',
-    phone: shop?.phone || '',
-    upiId: shop?.upiId || '',
-    address: shop?.address || '',
-    gstNumber: shop?.gstNumber || '',
-    billPrefix: shop?.billPrefix || 'INV',
-    billFooterMessage: shop?.billFooterMessage || 'Thank you for your business!',
+    name: '', ownerName: '', phone: '', upiId: '', 
+    address: '', gstNumber: '', billPrefix: 'INV',
+    billFooterMessage: 'Thank you for your business!'
   });
+  const [activeVault, setActiveVault] = useState(null);
+
+  // Sync form with store data when it loads
+  React.useEffect(() => {
+    loadShop();
+    recoveryVaultService.getActiveVault().then(v => setActiveVault(v));
+  }, []);
+
+  React.useEffect(() => {
+    if (shop) {
+      setForm({
+        name: shop.name || '',
+        ownerName: shop.ownerName || '',
+        phone: shop.phone || '',
+        upiId: shop.upiId || '',
+        address: shop.address || '',
+        gstNumber: shop.gstNumber || '',
+        billPrefix: shop.billPrefix || 'INV',
+        billFooterMessage: shop.billFooterMessage || 'Thank you for your business!',
+      });
+    }
+  }, [shop]);
 
   // Bottom sheet visibility
   const [showInvoice, setShowInvoice] = useState(false);
@@ -138,7 +180,13 @@ const SettingsScreen = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [showNotifSheet, setShowNotifSheet] = useState(false);
+  const [showCurrency, setShowCurrency] = useState(false);
+  const [showCategory, setShowCategory] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+  const filteredCats = SHOP_CATEGORIES.filter(c => 
+    c.name.toLowerCase().includes(catSearch.toLowerCase()) || 
+    c.id.toLowerCase().includes(catSearch.toLowerCase())
+  );
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -153,7 +201,11 @@ const SettingsScreen = () => {
   const totalRevenue = bills.reduce((s, b) => s + (b.total || 0), 0);
 
   const handleSaveProfile = async () => {
-    await updateShop(form);
+    if (shop) {
+        await updateShop(form);
+    } else {
+        await saveShop(form);
+    }
     showToast('Profile saved ✓');
   };
 
@@ -204,7 +256,8 @@ const SettingsScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-32 relative overflow-x-hidden font-sans">
+    <div className="min-h-dvh bg-white pb-tab relative overflow-x-hidden font-sans">
+      <RecoveryBanner />
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-xl p-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-[#F1F5F9] shadow-sm">
         <button onClick={() => navigate('/home')} className="flex items-center gap-3 text-black font-[800] tracking-tight active:scale-95 transition-transform group">
@@ -225,7 +278,7 @@ const SettingsScreen = () => {
           </div>
           <p className="text-[26px] font-[800] text-black tracking-tight">{shop?.name || 'My Shop'}</p>
           <p className="text-[12px] font-[700] text-[#94A3B8] uppercase tracking-widest mt-2">
-            {bills.length} bills · {customers.length} clients · {formatMoney(totalRevenue)}
+            {bills.length} bills · {customers.length} clients · {formatMoney(totalRevenue, settings.currency)}
           </p>
         </div>
 
@@ -274,6 +327,19 @@ const SettingsScreen = () => {
                 </div>
               </div>
               <div>
+                <label className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest ml-1 block mb-1.5">Shop Category</label>
+                <button
+                  onClick={() => setShowCategory(true)}
+                  className="w-full bg-white border border-[#F1F5F9] p-4 rounded-[16px] outline-none font-[700] text-black text-[15px] flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{SHOP_CATEGORIES.find(c => c.id === (form.category || shop?.category))?.emoji || '🏪'}</span>
+                    <span>{SHOP_CATEGORIES.find(c => c.id === (form.category || shop?.category))?.name || 'Select Category'}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#CBD5E1]" />
+                </button>
+              </div>
+              <div>
                 <label className="text-[10px] font-[800] text-[#94A3B8] uppercase tracking-widest ml-1 block mb-1.5">Address</label>
                 <textarea
                   className="w-full bg-white border border-[#F1F5F9] p-4 rounded-[16px] outline-none font-[700] text-black text-[14px] placeholder:text-[#CBD5E1] resize-none"
@@ -295,10 +361,17 @@ const SettingsScreen = () => {
 
         {/* Business Section */}
         <SectionCard title="Business">
+          <SettingsRow icon={Globe} title="Currency" subtitle="Change shop currency" value={`${settings.currency} (${CURRENCY_NOTES[settings.currency]?.symbol || '$'})`} onClick={() => setShowCurrency(true)} />
           <SettingsRow icon={FileText} title="Invoice Setup" subtitle="Bill prefix, numbering & footer" onClick={() => setShowInvoice(true)} />
           <SettingsRow icon={Percent} title="Tax & GST" subtitle="Default GST rate and GSTIN" onClick={() => setShowTax(true)} />
           <SettingsRow icon={Package} title="Inventory" subtitle="Manage saved products" onClick={() => navigate('/items')} />
           <SettingsRow icon={Users} title="Clients" subtitle="Customer book" onClick={() => navigate('/customers')} last />
+        </SectionCard>
+
+        <SectionCard title="Wallet & Money">
+           <SettingsRow icon={Wallet} title="Cash Wallet" subtitle="Store cash, notes & coins" onClick={() => navigate('/cash-wallet')} />
+           <SettingsRow icon={Landmark} title="Bank Accounts" subtitle="Manage business accounts" onClick={() => navigate('/bank-accounts')} />
+           <SettingsRow icon={History} title="In/Out Transactions" subtitle="Audit wallet movements" onClick={() => navigate('/wallet-history')} last />
         </SectionCard>
 
         {/* Privacy & Security */}
@@ -346,8 +419,18 @@ const SettingsScreen = () => {
         {/* Danger Zone */}
         <div className="mx-6 mb-12">
           <p className="text-[12px] font-[700] uppercase tracking-wider text-[#94A3B8] mb-3 ml-2">Danger Zone</p>
-          <div className="overflow-hidden bg-red-50 rounded-[24px] border border-red-100">
-            <SettingsRow icon={Trash2} title="Factory Reset" subtitle="Delete ALL data permanently" onClick={() => setShowClearConfirm(true)} danger last />
+          <div className="space-y-4">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/delete-confirm')}
+              className="w-full py-5 rounded-[28px] border-2 border-red-500/10 bg-white text-red-500 font-[802] text-[16px] flex items-center justify-center gap-3 active:bg-red-50 transition-all duration-300 shadow-sm"
+            >
+              <Trash2 className="w-5 h-5 text-red-400" /> 
+              <span className="tracking-tight">Delete All Shop Data</span>
+            </motion.button>
+            <p className="text-[10px] font-[700] text-[#94A3B8] text-center px-10 leading-relaxed uppercase tracking-[0.2em]">
+              Safe: Shop Profile & Settings
+            </p>
           </div>
         </div>
 
@@ -498,7 +581,45 @@ const SettingsScreen = () => {
         </div>
       </BottomSheet>
 
-      {/* ── About Sheet ─────────────────────────────────────── */}
+      {/* ── Category Picker ─────────────────────────────────── */}
+      <BottomSheet show={showCategory} onClose={() => setShowCategory(false)} title="Worldwide Categories">
+        <div className="space-y-6">
+          <div className="relative">
+            <X className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#CBD5E1] transition-opacity ${catSearch ? 'opacity-100' : 'opacity-0'}`} onClick={() => setCatSearch('')} />
+            <input
+              className="w-full bg-[#F8FAFC] border border-[#F1F5F9] p-4 pl-12 rounded-[20px] outline-none font-[700] text-black text-[15px] placeholder:text-[#94A3B8]"
+              value={catSearch}
+              onChange={e => setCatSearch(e.target.value)}
+              placeholder="Search category (e.g. food, gym...)"
+              autoFocus
+            />
+            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#CBD5E1]" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            {filteredCats.map(c => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setForm({ ...form, category: c.id });
+                  setShowCategory(false);
+                  setCatSearch('');
+                }}
+                className={`w-full flex items-center justify-between p-4 rounded-[18px] transition-all ${form.category === c.id ? 'bg-black text-white shadow-lg' : 'bg-[#F8FAFC] active:bg-[#F1F5F9]'}`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl">{c.emoji}</span>
+                  <span className={`text-[15px] font-[700] ${form.category === c.id ? 'text-white' : 'text-black'}`}>{c.name}</span>
+                </div>
+                {form.category === c.id && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
+              </button>
+            ))}
+            {filteredCats.length === 0 && (
+              <div className="py-12 text-center text-[#94A3B8] font-[600] text-[13px]">No matching categories found</div>
+            )}
+          </div>
+        </div>
+      </BottomSheet>
       <BottomSheet show={showAbout} onClose={() => setShowAbout(false)} title="About">
         <div className="space-y-6 text-center py-4">
           <div className="w-20 h-20 bg-black rounded-[24px] flex items-center justify-center mx-auto shadow-xl">
@@ -511,7 +632,7 @@ const SettingsScreen = () => {
           {[
             { label: 'Total Bills Created', value: bills.length },
             { label: 'Total Clients', value: customers.length },
-            { label: 'Total Revenue', value: formatMoney(totalRevenue) },
+            { label: 'Total Revenue', value: formatMoney(totalRevenue, settings.currency) },
           ].map(s => (
             <div key={s.label} className="flex justify-between items-center bg-[#F8FAFC] px-6 py-5 rounded-[20px]">
               <span className="text-[14px] font-[700] text-[#64748B]">{s.label}</span>
@@ -524,30 +645,41 @@ const SettingsScreen = () => {
         </div>
       </BottomSheet>
 
-      {/* ── Factory Reset Confirm ─────────────────────────── */}
-      <AnimatePresence>
-        {showClearConfirm && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowClearConfirm(false)} className="fixed inset-0 z-[60] bg-black/40" />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="fixed inset-x-8 top-1/2 -translate-y-1/2 z-[61] bg-white rounded-[32px] p-8 shadow-2xl text-center space-y-6"
+      {/* ── Currency Sheet ────────────────────────────────── */}
+      <BottomSheet show={showCurrency} onClose={() => setShowCurrency(false)} title="Select Currency">
+        <div className="space-y-4">
+          {[
+            { id: 'INR', name: 'Indian Rupee', flag: '🇮🇳', sym: '₹' },
+            { id: 'USD', name: 'US Dollar', flag: '🇺🇸', sym: '$' },
+            { id: 'EUR', name: 'Euro', flag: '🇪🇺', sym: '€' },
+            { id: 'GBP', name: 'British Pound', flag: '🇬🇧', sym: '£' },
+          ].map(c => (
+            <button
+              key={c.id}
+              onClick={() => { updateSetting('currency', c.id); setShowCurrency(false); showToast(`Currency set to ${c.id} ✓`); }}
+              className={`w-full flex items-center justify-between px-6 py-5 rounded-[24px] border transition-all ${settings.currency === c.id ? 'bg-black border-black shadow-lg shadow-black/10' : 'bg-[#F8FAFC] border-transparent active:bg-slate-100'}`}
             >
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                <Trash2 className="w-8 h-8 text-red-500" />
+              <div className="flex items-center gap-4">
+                <span className="text-2xl">{c.flag}</span>
+                <div className="text-left">
+                  <p className={`text-[15px] font-[800] ${settings.currency === c.id ? 'text-white' : 'text-black'}`}>{c.id}</p>
+                  <p className={`text-[11px] font-[600] ${settings.currency === c.id ? 'text-white/40' : 'text-[#94A3B8]'}`}>{c.name}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-[22px] font-[800] text-black">Factory Reset?</h3>
-                <p className="text-[13px] text-[#94A3B8] font-[500] mt-2 leading-relaxed">This will permanently delete ALL bills, customers, and shop data. This action cannot be reversed.</p>
+              <div className="flex items-center gap-3">
+                <span className={`text-[18px] font-[800] ${settings.currency === c.id ? 'text-white' : 'text-slate-400'}`}>{c.sym}</span>
+                {settings.currency === c.id && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
               </div>
-              <div className="flex flex-col gap-3">
-                <button onClick={handleFactoryReset} className="w-full h-14 bg-red-500 text-white rounded-full font-[800] text-[15px] active:bg-red-700 transition-all">Yes, Delete Everything</button>
-                <button onClick={() => setShowClearConfirm(false)} className="w-full h-14 bg-[#F8FAFC] text-black rounded-full font-[800] text-[15px] active:bg-slate-100 transition-all">Cancel</button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
+
+      {/* ── Factory Reset ─────────────────────────── */}
+      {showClearConfirm && createPortal(
+        <FactoryResetWorkflow onClose={() => setShowClearConfirm(false)} />,
+        document.body
+      )}
 
       <Toast msg={toast} />
     </div>

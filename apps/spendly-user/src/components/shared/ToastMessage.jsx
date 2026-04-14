@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react'
+import { CheckCircle, XCircle, Info, AlertTriangle, X, RotateCcw } from 'lucide-react'
 
 const TYPES = {
   success: { icon: CheckCircle, color: '#000000', bg: '#F6F6F6', track: '#000000' },
   error:   { icon: XCircle,     color: '#000000', bg: '#F6F6F6', track: '#000000' },
   info:    { icon: Info,        color: '#000000', bg: '#F6F6F6', track: '#000000' },
   warning: { icon: AlertTriangle, color: '#000000', bg: '#F6F6F6', track: '#000000' },
+  delete:  { icon: RotateCcw,     color: '#000000', bg: '#F6F6F6', track: '#000000' },
 }
 
 export default function ToastMessage({ toast, onClose }) {
@@ -26,11 +27,12 @@ export default function ToastMessage({ toast, onClose }) {
       setProgress(remaining)
       if (remaining === 0) {
         clearInterval(interval)
+        toast.onTimeout?.()
         onClose?.()
       }
     }, 50)
     return () => clearInterval(interval)
-  }, [toast?.id])
+  }, [toast?.id, toast?.message])
 
   if (!toast) return null
   const type = TYPES[toast.type] || TYPES.info
