@@ -40,8 +40,8 @@ export default function SpendingHeatmap({ expenses, currency, onDayClick }) {
     '#F8F9FA', // 0
     '#EEF2FF', // 1
     '#E0E7FF', // 2
-    '#9B6FE4', // 3
-    '#7C6FF7', // 4
+    '#333333', // 3
+    '#000000', // 4
   ]
 
   // Stats

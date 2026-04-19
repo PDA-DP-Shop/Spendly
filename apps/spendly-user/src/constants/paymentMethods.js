@@ -1,8 +1,6 @@
 export const PAYMENT_METHODS = [
   { id: 'UPI', label: 'UPI', icon: '📱' },
-  { id: 'Cash', label: 'Cash', icon: '💵' },
-  { id: 'Card', label: 'Card', icon: '💳' },
-  { id: 'Bank', label: 'Bank Transfer', icon: '🏦' },
-  { id: 'BNPL', label: 'Buy Later', icon: '📦' },
-  { id: 'Voucher', label: 'Voucher', icon: '🎁' }
+  { id: 'NetBanking', label: 'Net Banking', icon: '🏦' },
+  { id: 'DebitCard', label: 'Debit Card', icon: '💳' },
+  { id: 'CreditCard', label: 'Credit Card', icon: '🏧' }
 ]

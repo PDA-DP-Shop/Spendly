@@ -7,6 +7,12 @@ export const useLockStore = create((set, get) => ({
   wrongAttempts: 0,
   lockoutUntil: null,
   autoLockTimer: null,
+  lockType: 'none',
+  biometricEnabled: false,
+  biometricFailCount: 0,
+  biometricBlocked: false,
+  pinHash: null,
+  salt: null,
 
   // Load lockout state from encrypted settings
   loadLockoutState: async () => {
@@ -14,9 +20,28 @@ export const useLockStore = create((set, get) => ({
     if (settings) {
       set({ 
         wrongAttempts: settings.wrongAttempts || 0,
-        lockoutUntil: settings.lockoutUntil || null
+        lockoutUntil: settings.lockoutUntil || null,
+        lockType: settings.lockType || 'none',
+        biometricEnabled: settings.biometricEnabled || false,
+        pinHash: settings.pinHash || null,
+        salt: settings.salt || null
       })
     }
+  },
+
+  // Setup initial lock config
+  setupLock: async (config) => {
+    const updates = {
+      lockType: config.type,
+      biometricEnabled: config.biometricEnabled,
+      pinHash: config.pinHash,
+      salt: config.salt,
+      wrongAttempts: 0,
+      lockoutUntil: null
+    }
+    await settingsService.update(updates)
+    set({ ...updates, isLocked: false })
+    if (get().startAutoLockTimer) get().startAutoLockTimer()
   },
 
   // Lock the app
@@ -30,8 +55,23 @@ export const useLockStore = create((set, get) => ({
       wrongAttempts: 0, 
       lockoutUntil: null 
     })
-    set({ isLocked: false, isDecoy: false, wrongAttempts: 0, lockoutUntil: null })
+    set({ isLocked: false, isDecoy: false, wrongAttempts: 0, lockoutUntil: null, biometricFailCount: 0, biometricBlocked: false })
     get().startAutoLockTimer()
+  },
+
+  // Record a biometric failure
+  recordBiometricFailure: () => {
+    const currentFailCount = get().biometricFailCount + 1
+    if (currentFailCount >= 3) {
+      set({ biometricFailCount: 0, biometricBlocked: true })
+    } else {
+      set({ biometricFailCount: currentFailCount })
+    }
+  },
+
+  // Reset biometric failures manually
+  resetBiometricFailures: () => {
+    set({ biometricFailCount: 0, biometricBlocked: false })
   },
 
   // Unlock in Stealth Mode

@@ -26,7 +26,7 @@ export function UpdateBanner({
             zIndex: 99999,
             padding: '12px 16px',
             paddingTop: 'calc(12px + env(safe-area-inset-top))',
-            background: 'linear-gradient(135deg,#7C6FF7,#9B6FE4)',
+            background: 'linear-gradient(135deg,#000000,#333333)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -71,7 +71,7 @@ export function UpdateBanner({
               disabled={isUpdating}
               style={{
                 background: 'white',
-                color: '#7C6FF7',
+                color: '#000000',
                 border: 'none',
                 borderRadius: 20,
                 padding: '7px 16px',

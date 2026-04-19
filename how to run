@@ -1,0 +1,10 @@
+run spendly user :
+
+cd apps/spendly-user
+npm run dev
+
+
+run spendly shop :
+
+cd apps/spendly-shop
+npm run dev

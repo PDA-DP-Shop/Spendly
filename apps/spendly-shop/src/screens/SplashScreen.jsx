@@ -33,35 +33,35 @@ const SplashScreen = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", damping: 15, stiffness: 100 }}
-          className="relative mb-10"
+          className="relative mb-12"
         >
-            <div className="w-28 h-28 bg-black rounded-[28px] shadow-2xl flex items-center justify-center relative z-20">
-                <Store className="w-12 h-12 text-white" />
+            <div className="w-40 h-40 bg-white rounded-[44px] flex items-center justify-center relative z-20">
+                <img src="/spendly-logo.png" className="w-28 h-28 object-contain" alt="Spendly" />
             </div>
 
             {/* Pulsing Aura */}
             <motion.div 
-              animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0, 0.3] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="absolute inset-[-15px] bg-black/10 rounded-[36px] blur-xl z-10"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute inset-[-10px] bg-black/5 rounded-[48px] blur-xl z-10"
             />
         </motion.div>
         
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2">
             <motion.h1 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-[32px] font-[800] text-black tracking-tight"
+                className="text-[36px] font-[900] text-black tracking-tight"
             >
-                Spendly<span className="text-[#94A3B8]">Shop</span>
+                Spendly<span className="text-black/30">Shop</span>
             </motion.h1>
 
             <motion.p 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-[11px] font-[800] text-[#94A3B8] uppercase tracking-[0.3em]"
+                className="text-[12px] font-[800] text-[#AFAFAF] uppercase tracking-[0.4em]"
             >
                 Smart Billing System
             </motion.p>

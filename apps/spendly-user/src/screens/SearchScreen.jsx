@@ -9,19 +9,25 @@ import { useExpenses } from '../hooks/useExpenses'
 import { useSettingsStore } from '../store/settingsStore'
 import { CATEGORIES } from '../constants/categories'
 import { useNavigate } from 'react-router-dom'
+import WalletRefundModal from '../components/modals/WalletRefundModal'
+import { useWalletStore } from '../store/walletStore'
+import { formatMoney } from '../utils/formatMoney'
+import { useExpenseStore } from '../store/expenseStore'
 
 const SORT_OPTIONS = ['Newest', 'Oldest', 'Most', 'Least']
 const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function SearchScreen() {
   const navigate = useNavigate()
-  const { expenses, deleteExpense, restoreExpense } = useExpenses()
+  const { expenses, deleteExpense, restoreExpense, loadExpenses } = useExpenses()
   const { settings } = useSettingsStore()
+  const { checkLinkedTransaction, refundToCash, refundToBank } = useWalletStore()
   const currency = settings?.currency || 'USD'
   const [query, setQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
   const [sort, setSort] = useState('Newest')
   const [toast, setToast] = useState(null)
+  const [refundTarget, setRefundTarget] = useState(null)
 
   const results = useMemo(() => {
     let exps = expenses
@@ -42,10 +48,71 @@ export default function SearchScreen() {
   }, [expenses, query, activeCategory, sort])
 
   const handleDelete = async (id) => {
-    const deleted = await deleteExpense(id)
-    setToast({
-      id: Date.now(), type: 'success', message: 'Activity Removed', duration: 4000,
-      action: { label: 'Undo', fn: async () => { await restoreExpense(deleted); setToast(null) } }
+    const tx = await checkLinkedTransaction(id)
+    if (tx) {
+      setRefundTarget({ expense: expenses.find(e => e.id === id), transaction: tx })
+    } else {
+      await executeProcessDelete(id, false)
+    }
+  }
+
+  const handleRefundAction = async (action) => {
+    if (!refundTarget) return
+    const { expense, transaction } = refundTarget
+    const id = expense.id
+    const refund = action === 'refund_and_delete'
+    
+    await executeProcessDelete(id, refund, transaction)
+    setRefundTarget(null)
+  }
+
+  const executeProcessDelete = async (id, shouldRefund, transaction = null) => {
+    setRefundTarget(null)
+    
+    const expense = expenses.find(e => e.id === id)
+    if (!expense) return
+
+    const amount = expense.amount || 0
+    const source = transaction?.walletType === 'bank' ? (transaction.bankName || 'Bank') : 'Cash'
+
+    // Optimistic Update
+    const previousExpenses = [...expenses]
+    useExpenseStore.setState({ expenses: expenses.filter(e => e.id !== id) })
+
+    const timer = setTimeout(async () => {
+       await deleteExpense(id)
+       
+       if (shouldRefund && transaction) {
+         if (transaction.walletType === 'cash') {
+           await refundToCash(amount)
+         } else {
+           await refundToBank(transaction.bankAccountId, amount)
+         }
+         const { walletTransactionService } = await import('../services/database')
+         await walletTransactionService.removeByExpenseId(id)
+       }
+
+       setToast({
+         id: Date.now(),
+         message: shouldRefund ? `${formatMoney(amount, currency)} added back to ${source}` : 'Activity Removed',
+         type: 'info',
+         duration: 4000
+       })
+    }, 5000)
+
+    setToast({ 
+      id: Date.now(),
+      message: 'Processing deletion...', 
+      type: 'delete', 
+      duration: 5000,
+      action: { 
+        label: 'STOP', 
+        fn: () => {
+          clearTimeout(timer)
+          useExpenseStore.setState({ expenses: previousExpenses })
+          setToast({ message: 'Deletion stopped!', type: 'success' })
+        } 
+      }
     })
   }
 
@@ -142,6 +209,15 @@ export default function SearchScreen() {
       </div>
 
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
+      
+      <WalletRefundModal
+        show={!!refundTarget}
+        expense={refundTarget?.expense}
+        transaction={refundTarget?.transaction}
+        currency={currency}
+        onAction={handleRefundAction}
+        onClose={() => setRefundTarget(null)}
+      />
     </div>
   )
 }

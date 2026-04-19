@@ -17,9 +17,9 @@ export default function NumberKeypad({ onKey }) {
       {keys.map(key => (
         <motion.button
           key={key}
-          whileTap={{ scale: 0.9, backgroundColor: '#EEF2FF', borderColor: '#7C6FF740' }}
+          whileTap={{ scale: 0.9, backgroundColor: '#EEF2FF', borderColor: '#00000040' }}
           onClick={() => onKey(key)}
-          className="flex items-center justify-center h-16 rounded-[24px] bg-white border border-[#F0F0F8] shadow-sm text-[24px] font-[800] text-[#0F172A] active:text-[#7C6FF7] transition-colors"
+          className="flex items-center justify-center h-16 rounded-[24px] bg-white border border-[#F0F0F8] shadow-sm text-[24px] font-[800] text-[#0F172A] active:text-[#000000] transition-colors"
           style={S}
         >
           {key === 'del' ? <Delete className="w-6 h-6 text-[#64748B]" /> : key}

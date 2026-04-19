@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export const useSettingsStore = create((set, get) => ({
   settings: {
     theme: 'light',
-    currency: 'USD',
+    currency: 'INR',
     language: 'en',
     fontSize: 'normal',
     notificationsEnabled: true,

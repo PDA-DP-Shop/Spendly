@@ -16,11 +16,8 @@ export const useSettingsStore = create((set, get) => ({
     // Apply dark mode if saved
     if (settings?.theme === 'dark') {
       document.documentElement.classList.add('dark')
-    } else if (settings?.theme === 'light') {
+    } else {
       document.documentElement.classList.remove('dark')
-    } else if (settings?.theme === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      if (prefersDark) document.documentElement.classList.add('dark')
     }
     // Apply language if saved
     if (settings?.language) {
@@ -38,12 +35,10 @@ export const useSettingsStore = create((set, get) => ({
     const theme = updates.theme
     if (theme) {
       localStorage.setItem('spendly-theme', theme)
-      if (theme === 'dark') document.documentElement.classList.add('dark')
-      else if (theme === 'light') document.documentElement.classList.remove('dark')
-      else if (theme === 'auto') {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (prefersDark) document.documentElement.classList.add('dark')
-        else document.documentElement.classList.remove('dark')
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
       }
     }
   },

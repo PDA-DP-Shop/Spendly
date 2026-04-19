@@ -15,9 +15,11 @@ setupSecurity()
 import('./services/productLookup.js').then(({ preloadLocalDb }) => preloadLocalDb())
 
 // Apply saved theme before render to avoid flash
-const savedTheme = localStorage.getItem('spendly-theme')
-if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+const savedTheme = localStorage.getItem('spendly-theme') || 'light' // Default to White Premium
+if (savedTheme === 'dark') {
   document.documentElement.classList.add('dark')
+} else {
+  document.documentElement.classList.remove('dark')
 }
 
 createRoot(document.getElementById('root')).render(

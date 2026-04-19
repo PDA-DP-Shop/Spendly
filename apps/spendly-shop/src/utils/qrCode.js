@@ -19,6 +19,8 @@ export function generateQRData({
   tax,
   total,
   paymentMethod,
+  paymentDetails, 
+  claimCode,
   cashierId
 }) {
 
@@ -54,6 +56,8 @@ export function generateQRData({
     
     // Payment
     paymentMethod: paymentMethod || 'cash',
+    paymentDetails: paymentDetails || null,
+    claimCode: claimCode || null,
     cashierId: cashierId || null,
 
     // Version for future compatibility
@@ -129,6 +133,8 @@ export function parseScannedQR(
         tax: data.tax,
         total: data.total,
         paymentMethod: data.paymentMethod,
+        paymentDetails: data.paymentDetails,
+        claimCode: data.claimCode,
         timestamp: data.timestamp
       },
       error: null

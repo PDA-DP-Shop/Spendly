@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function NFCGlow({ active, color = 'emerald' }) {
   const isEmerald = color === 'emerald';
-  const primaryColor = isEmerald ? 'rgba(16, 185, 129, 0.4)' : 'rgba(124, 111, 247, 0.4)';
-  const secondaryColor = isEmerald ? 'rgba(16, 185, 129, 0.1)' : 'rgba(124, 111, 247, 0.1)';
+  const primaryColor = isEmerald ? 'rgba(16, 185, 129, 0.4)' : 'rgba(0, 0, 0, 0.4)';
+  const secondaryColor = isEmerald ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
   return (
     <AnimatePresence>

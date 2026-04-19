@@ -37,7 +37,9 @@ export function parseScannedQR(qrString) {
         subtotal: data.subtotal,
         tax: data.tax,
         total: data.total,
-        paymentMethod: data.paymentMethod,
+        paymentMethod: data.paymentMethod || 'cash',
+        paymentDetails: data.paymentDetails || null,
+        claimCode: data.claimCode || null,
         timestamp: data.timestamp
       },
       error: null

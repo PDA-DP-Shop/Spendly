@@ -5,7 +5,7 @@ import { X, AlertTriangle, AlertOctagon, Info } from 'lucide-react'
 const TYPES = {
   warning: { icon: AlertTriangle, color: '#F59E0B', bg: '#FFFBEB', border: '#FCD34D', textColor: '#92400E' },
   danger:  { icon: AlertOctagon,  color: '#F43F5E', bg: '#FFF1F2', border: '#FDA4AF', textColor: '#BE123C' },
-  info:    { icon: Info,          color: '#7C6FF7', bg: '#F8F7FF', border: '#C7D2FE', textColor: '#4338CA' },
+  info:    { icon: Info,          color: '#000000', bg: '#F8F7FF', border: '#C7D2FE', textColor: '#4338CA' },
 }
 
 export default function AlertBanner({ type = 'warning', message, onClose }) {
