@@ -1,173 +1,160 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { BrowserMultiFormatReader } from '@zxing/library'
-import { X, Camera } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { lookupBarcode } from '../../services/productLookup'
-import { throttle } from '../../utils/security'
-import { useSecurityStore } from '../../store/securityStore'
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { lookupBarcode } from '../../services/barcodeService'
+import { 
+  CAMERA_CONSTRAINTS, 
+  startScanLoop, 
+  checkTorchSupport, 
+  toggleTorch,
+  tryZoom
+} from '../../services/multiScanner'
+import { Zap, ZapOff, Sparkles } from 'lucide-react'
 
-export default function BarcodeScanner({ onProductFound, onClose }) {
+export default function BarcodeScanner({ onScanComplete, onError }) {
   const videoRef = useRef(null)
-  const [error, setError] = useState(null)
-  const [scanning, setScanning] = useState(true)
-  const [loading, setLoading] = useState(false)
+  const [isReady, setIsReady] = useState(false)
+  const [status, setStatus] = useState('Initializing...')
+  const [torchSupported, setTorchSupported] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
+  const [success, setSuccess] = useState(false)
+  
+  const isProcessingRef = useRef(false)
 
   useEffect(() => {
-    useSecurityStore.getState().setPauseSecurity(true)
-    return () => useSecurityStore.getState().setPauseSecurity(false)
-  }, [])
+    let stopScanner = null
+    let localStream = null
 
-  const handleScan = useCallback(async (result) => {
-    if (!result || !scanning || loading) return
-    setScanning(false)
-    setLoading(true)
-
-    // Immediate haptic feedback that the camera caught the barcode
-    if (navigator.vibrate) navigator.vibrate(200)
-
-    // UPI QR Code check
-    if (result.text.toLowerCase().startsWith('upi://pay')) {
+    const initCamera = async () => {
       try {
-        const urlParams = new URL(result.text.toLowerCase().replace('upi://pay', 'http://localhost'))
-        const pa = urlParams.searchParams.get('pa')
-        const pn = urlParams.searchParams.get('pn')
-        const am = urlParams.searchParams.get('am')
+        const stream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS)
+        localStream = stream
         
-        const merchantName = pn ? pn.replace(/%20/g, ' ') : (pa ? pa.split('@')[0] : 'UPI Payment')
-        
-        onProductFound({ 
-          name: merchantName, 
-          brand: '', 
-          categoryTags: [], 
-          rawValue: result.text,
-          scannedAmount: am, // pass back parsed amount
-          paymentMethod: 'UPI' // default to UPI since it's a UPI QR
-        })
-        return
-      } catch (e) {
-        console.error("UPI parse error", e)
-      }
-    }
-    
-    // Normal Product Barcode
-    const product = await lookupBarcode(result.text)
-    if (product) {
-      onProductFound({ ...product, rawValue: result.text })
-    } else {
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200])
-      setError(`Not found in database. Adding raw code to expense...`)
-      setTimeout(() => {
-        onProductFound({ name: '', brand: '', categoryTags: [], rawValue: result.text })
-      }, 1500)
-    }
-  }, [scanning, loading, onProductFound])
-
-  // Throttle the actual scan processing to 1 scan per 2 seconds to prevent DOS on the lookup service
-  const throttledScan = useCallback(
-    throttle((result) => handleScan(result), 2000),
-    [handleScan]
-  )
-
-  useEffect(() => {
-    let isMounted = true
-    const codeReader = new BrowserMultiFormatReader()
-    let activeStream = null
-
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          }
-        })
-        if (!isMounted) {
-          stream.getTracks().forEach(track => track.stop())
-          return
-        }
-        activeStream = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          videoRef.current.play()
           
-          codeReader.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
-            if (result && isMounted) throttledScan(result)
-          })
+          // Wait for video to be ready
+          videoRef.current.onloadedmetadata = async () => {
+            await videoRef.current.play()
+            setIsReady(true)
+            setStatus('Scanning...')
+            
+            // Check torch support
+            const hasTorch = await checkTorchSupport(stream)
+            setTorchSupported(hasTorch)
+            
+            // Start the optimized high-speed loop
+            stopScanner = startScanLoop(
+              videoRef.current, 
+              handleScanResult,
+              setStatus
+            )
+          }
         }
-      } catch (e) {
-        if (isMounted) setError('Camera access denied or unavailable. Please enable permissions.')
+      } catch (err) {
+        console.error('Camera Init Error:', err)
+        onError?.(err)
       }
     }
 
-    startCamera()
+    const handleScanResult = async (result) => {
+      if (isProcessingRef.current) return
+      isProcessingRef.current = true
+      
+      setSuccess(true)
+      setStatus('Detected!')
+      
+      try {
+        const barcodeData = await lookupBarcode(result.text)
+        
+        setTimeout(() => {
+          onScanComplete({
+            type: 'barcode',
+            barcode: result.text,
+            name: barcodeData.name,
+            price: barcodeData.price,
+            format: result.format,
+            engine: result.engine,
+            source: barcodeData.source
+          })
+        }, 150)
+      } catch (e) {
+        isProcessingRef.current = false
+        setSuccess(false)
+      }
+    }
+
+    initCamera()
 
     return () => {
-      isMounted = false
-      codeReader.reset()
-      if (activeStream) {
-        activeStream.getTracks().forEach(track => track.stop())
+      if (stopScanner) stopScanner()
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop())
       }
     }
-  }, [handleScan, throttledScan])
+  }, [onScanComplete, onError])
+
+  const handleToggleTorch = async () => {
+    const success = await toggleTorch(videoRef.current, !torchOn)
+    if (success) setTorchOn(!torchOn)
+  }
+
+  const handleManualZoom = () => {
+    const track = videoRef.current?.srcObject?.getVideoTracks()[0]
+    if (track) tryZoom(track, false) // Reset zoom
+  }
 
   return (
-    <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[100] bg-black flex flex-col">
-      <div className="flex items-center justify-between px-4 py-4 safe-top bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 text-white">
-        <h2 className="font-sans font-semibold text-[18px] flex items-center gap-2">
-          <Camera className="w-5 h-5" /> Scan Barcode / QR
-        </h2>
-        <button onClick={onClose} className="p-2 bg-white/10 rounded-full backdrop-blur-md">
-          <X className="w-6 h-6" />
-        </button>
-      </div>
-      
-      <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
-        <video 
-          ref={videoRef} 
-          className="w-full h-full object-cover" 
-          playsInline
-          muted
-        />
-        
-        {/* Scanning frame overlay */}
-        <div className="absolute inset-0 pointer-events-none flex flex-col">
-          <div className="flex-1 bg-black/60" />
-          <div className="flex">
-            <div className="w-[10vw] sm:flex-1 bg-black/60" />
-            <div className="w-[80vw] h-[25vh] sm:w-[400px] border-2 border-green-500 rounded-2xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] overflow-hidden">
-              {scanning && (
-                <motion.div 
-                  animate={{ y: ['0%', '250px', '0%'] }} 
-                  transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-                  className="w-full h-1 bg-green-400 absolute top-0 shadow-[0_0_15px_3px_rgba(74,222,128,0.8)]" 
-                />
-              )}
-            </div>
-            <div className="w-[10vw] sm:flex-1 bg-black/60" />
-          </div>
-          <div className="flex-1 bg-black/60 flex flex-col items-center justify-center p-6">
-            {loading ? (
-              <div className="bg-purple-600/90 backdrop-blur-md px-6 py-4 rounded-2xl flex items-center gap-3">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span className="text-white font-medium">Looking up product...</span>
-              </div>
-            ) : error ? (
-              <p className="text-white bg-red-500/90 backdrop-blur-md px-5 py-3 rounded-2xl font-medium text-center">
-                {error}
-              </p>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-white/70 text-sm font-medium">Align barcode inside the frame</p>
-                <button onClick={() => onProductFound({ name: '', brand: '', categoryTags: [] })} className="px-6 py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-sm font-medium rounded-xl backdrop-blur-md transition-colors">
-                  Enter Manually Instead
-                </button>
-              </div>
+    <div className="absolute inset-0 w-full h-full bg-black overflow-hidden" onClick={handleManualZoom}>
+      {/* Video Feed */}
+      <video
+        ref={videoRef}
+        className="w-full h-full object-cover"
+        playsInline
+        muted
+      />
+
+      {/* Modern Scanning HUD */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+         {/* Success Flash */}
+         <AnimatePresence>
+            {success && (
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-green-500/30 z-20"
+              />
             )}
-          </div>
-        </div>
+         </AnimatePresence>
+
+         {/* Scanning Status */}
+         <div className="absolute bottom-[30%] px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2">
+            <motion.div 
+              animate={{ opacity: [1, 0.4, 1] }} 
+              transition={{ repeat: Infinity, duration: 1 }}
+              className={`w-1.5 h-1.5 rounded-full ${success ? 'bg-green-500' : 'bg-white'}`} 
+            />
+            <span className="text-[10px] font-bold text-white uppercase tracking-widest">{status}</span>
+         </div>
       </div>
-    </motion.div>
+
+      {/* Controls */}
+      <div className="absolute top-6 right-20 z-50 flex flex-col gap-4">
+        {torchSupported && (
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleToggleTorch(); }}
+            className={`w-11 h-11 rounded-full backdrop-blur-md border border-white/20 flex items-center justify-center transition-all ${torchOn ? 'bg-yellow-400 border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'bg-white/10'}`}
+          >
+            {torchOn ? <Zap className="w-5 h-5 text-black fill-black" /> : <ZapOff className="w-5 h-5 text-white" />}
+          </button>
+        )}
+      </div>
+
+      {/* High-Speed Indicator */}
+      <div className="absolute top-6 left-20 z-50">
+         <div className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
+            <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.2em]">High Speed WASM</span>
+         </div>
+      </div>
+    </div>
   )
 }

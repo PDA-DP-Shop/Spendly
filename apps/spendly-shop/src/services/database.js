@@ -60,7 +60,11 @@ class SpendlyShopDB extends Dexie {
       spendly_recovery_vault: '++id, deletedAt, expiresAt'
     });
 
+<<<<<<< HEAD
     this.version(6).stores({
+=======
+    this.version(7).stores({
+>>>>>>> 41f113d (upgrade scanner)
       shop: '++id',
       bills: '++id, billId, billNumber, status, createdAt, isDeleted, deletedAt',
       deletedBills: '++id, originalId, deletedAt, billNumber, total',
@@ -72,9 +76,15 @@ class SpendlyShopDB extends Dexie {
       browserInfo: '++id',
       storageInfo: '++id',
       spendly_recovery_vault: '++id, deletedAt, expiresAt',
+<<<<<<< HEAD
       cashWallet: '++id',
       bankAccounts: '++id',
       walletTransactions: '++id, expenseId'
+=======
+      cashWallet: '++id, currency',
+      bankAccounts: '++id, type, name, currency',
+      walletTransactions: '++id, referenceId, walletType, bankAccountId, date, currency'
+>>>>>>> 41f113d (upgrade scanner)
     });
   }
 }
@@ -102,10 +112,10 @@ export const decryptRecord = async (record) => {
     const key = await importKey(encryptionKeyBits);
     const iv = new Uint8Array(record.iv);
     const blob = new Uint8Array(record.blob).buffer;
-    return await decryptData(blob, key, iv);
+    return await decryptData(blob, key, iv) || record; // Fallback to record if decryption fails
   } catch (e) {
     console.error("Decryption failed", e);
-    return null;
+    return record; // Return encrypted record as fallback
   }
 };
 
@@ -126,8 +136,7 @@ const createEncryptedService = (table) => ({
   },
   async update(id, changes) {
     const existing = await table.get(id);
-    if (!existing) return;
-    const decrypted = await decryptRecord(existing);
+    const decrypted = existing ? await decryptRecord(existing) : {};
     const merged = { ...decrypted, ...changes, updatedAt: new Date().toISOString() };
     const encrypted = await encryptRecord(merged);
     await table.put({ ...encrypted, id });
@@ -140,6 +149,7 @@ const createEncryptedService = (table) => ({
 export const shopService = createEncryptedService(db.shop);
 export const billService = {
   ...createEncryptedService(db.bills),
+<<<<<<< HEAD
   async getAll(currency, includeDeleted = false) {
     const all = await db.bills.toArray();
     const decrypted = await Promise.all(all.map(decryptRecord));
@@ -149,10 +159,39 @@ export const billService = {
       filtered = filtered.filter(b => b.currency === currency);
     }
     
+=======
+  async add(data) {
+    const encrypted = await encryptRecord({ ...data, createdAt: new Date().toISOString() });
+    // Keep essential metadata searchable in plain text for ecosystem bridges (simulating a public API)
+    return await db.bills.add({ 
+      ...encrypted, 
+      claimCode: data.claimCode, 
+      billId: data.billId, 
+      billNumber: data.billNumber,
+      total: data.total,
+      shopName: data.shopName,
+      shopCategory: data.shopCategory || data.category,
+      paymentMethod: data.paymentMethod,
+      paymentDetails: data.paymentDetails,
+      items: data.items // Keep items plain for demo purposes to avoid decryption issues between apps
+    });
+  },
+  async getAll(includeDeleted = false) {
+    const all = await db.bills.toArray();
+    const decrypted = await Promise.all(all.map(decryptRecord));
+    let filtered = decrypted.filter(Boolean);
+>>>>>>> 41f113d (upgrade scanner)
     if (!includeDeleted) {
       filtered = filtered.filter(b => !b.isDeleted);
     }
     return filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+<<<<<<< HEAD
+=======
+  },
+  async getByNumber(billNumber) {
+    const all = await this.getAll();
+    return all.find(b => b.billNumber === billNumber);
+>>>>>>> 41f113d (upgrade scanner)
   },
   async getByNumber(billNumber) {
     // This finds by number regardless of currency as numbers should be unique
@@ -174,6 +213,7 @@ export const itemsService = createEncryptedService(db.savedItems);
 export const creditService = createEncryptedService(db.creditBook);
 export const salesService = createEncryptedService(db.dailySales);
 
+<<<<<<< HEAD
 export const cashWalletService = {
   ...createEncryptedService(db.cashWallet),
   async get(currency) {
@@ -233,6 +273,51 @@ export const walletTransactionService = {
     if (existing) await db.walletTransactions.delete(existing._id)
   }
 }
+=======
+// Wallet services
+export const cashWalletService = {
+  ...createEncryptedService(db.cashWallet),
+  async get(currency = 'INR') {
+    const all = await db.cashWallet.toArray();
+    const decrypted = await Promise.all(all.map(decryptRecord));
+    const found = decrypted.find(w => w && w.currency === currency);
+    if (found) return found;
+    
+    // If not exists, create new one for this currency
+    const initial = { currency, balance: 0, notes: {}, totalCash: 0 };
+    await this.add(initial);
+    return initial;
+  },
+  async update(data) {
+    if (!data.currency) return;
+    const all = await db.cashWallet.toArray();
+    const decryptedWithId = await Promise.all(all.map(async r => ({ ...await decryptRecord(r), _id: r.id })));
+    const existing = decryptedWithId.find(w => w && w.currency === data.currency);
+    
+    if (existing) {
+        return await createEncryptedService(db.cashWallet).update(existing._id, data);
+    } else {
+        return await this.add(data);
+    }
+  }
+};
+
+export const bankAccountService = {
+    ...createEncryptedService(db.bankAccounts),
+    async getAll(currency = 'INR') {
+        const all = await db.bankAccounts.toArray();
+        const decrypted = await Promise.all(all.map(decryptRecord));
+        return decrypted.filter(Boolean).filter(b => b.currency === currency);
+    }
+};
+export const walletTransactionService = {
+  ...createEncryptedService(db.walletTransactions),
+  async getByReferenceId(referenceId) {
+    const all = await this.getAll();
+    return all.filter(t => t.referenceId === referenceId);
+  }
+};
+>>>>>>> 41f113d (upgrade scanner)
 
 // Secure Data Wipe — Zero Knowledge forensic deletion
 export const secureWipe = async (skipReload = false) => {

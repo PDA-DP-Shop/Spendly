@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import CURRENCY_NOTES from '../../constants/currencyNotes';
@@ -209,3 +210,135 @@ const NoteCard = ({
 };
 
 export default memo(NoteCard);
+=======
+import React, { memo, useState } from 'react'
+import { motion } from 'framer-motion'
+import CURRENCY_NOTES from '../../constants/currencyNotes'
+
+/**
+ * NoteCard - A premium visual representation of a physical currency note or coin.
+ * Supports real-world images with a high-fidelity CSS fallback.
+ * 
+ * PLACE REAL IMAGES HERE: 
+ * public/assets/currency/[CURRENCY_CODE]/[VALUE].png
+ * Example: public/assets/currency/INR/500.png
+ */
+
+const NOTE_SIZES = {
+  sm: { width: 'w-[64px]', height: 'h-[32px]', coin: 'w-[32px] h-[32px]', fontSize: 'text-[12px]', badgeSize: 'w-4 h-4 text-[8px]' },
+  md: { width: 'w-[96px]', height: 'h-[48px]', coin: 'w-[48px] h-[48px]', fontSize: 'text-[18px]', badgeSize: 'w-5 h-5 text-[10px]' },
+  lg: { width: 'w-[140px]', height: 'h-[70px]', coin: 'w-[70px] h-[70px]', fontSize: 'text-[24px]', badgeSize: 'w-6 h-6 text-[12px]' }
+}
+
+const SPECIFIC_COLORS = {
+  INR: { 2000: "#9333EA", 500: "#3B82F6", 200: "#F59E0B", 100: "#10B981", 50: "#F97316", 20: "#14B8A6", 10: "#8B5CF6", 5: "#6B7280", 2: "#6B7280", 1: "#6B7280" },
+  USD: "#22C55E"
+}
+
+const NoteCard = memo(({ 
+  value, 
+  currency = 'INR', 
+  type = 'note', 
+  count = 0, 
+  size = 'md', 
+  showCount = true, 
+  isHighlighted = false 
+}) => {
+  const S = { fontFamily: "'Sora', sans-serif" }
+  const DM = { fontFamily: "'DM Sans', sans-serif" }
+  const [attempt, setAttempt] = useState(0) // 0: type-specific, 1: raw value, 2: failed
+
+  const config = NOTE_SIZES[size] || NOTE_SIZES.md
+  const isCoin = type === 'coin'
+  const currencyData = CURRENCY_NOTES[currency] || CURRENCY_NOTES.INR
+  const symbol = currencyData.symbol || '₹'
+
+  // Refined Path Resolution to match user's "_note" and "_coin" naming
+  const typeSuffix = isCoin ? '_coin' : '_note'
+  const valStr = value.toString()
+  const valStrAlt = value < 1 ? value.toFixed(2) : valStr
+
+  const imgPath = attempt === 0 
+    ? `/assets/currency/${currency}/${valStr}${typeSuffix}.png`
+    : (attempt === 1 && valStrAlt !== valStr)
+      ? `/assets/currency/${currency}/${valStrAlt}${typeSuffix}.png`
+      : `/assets/currency/${currency}/${valStr}.png`
+  
+  let noteColor = "#94A3B8"
+  if (currency === 'USD') noteColor = SPECIFIC_COLORS.USD
+  else if (SPECIFIC_COLORS[currency]?.[value]) noteColor = SPECIFIC_COLORS[currency][value]
+  else if (currencyData.noteColors?.[value]) noteColor = currencyData.noteColors[value]
+
+  const handleImgError = () => {
+    if (attempt === 0 && valStr === valStrAlt) setAttempt(2) // Skip to final fallback
+    else if (attempt < 2) setAttempt(prev => prev + 1)
+    else setAttempt(3)
+  }
+
+  return (
+    <div className="relative inline-block">
+      <motion.div 
+        animate={isHighlighted ? { scale: 1.05 } : { scale: 1 }}
+        className={`relative overflow-hidden shrink-0 pointer-events-none select-none ${isCoin ? config.coin + ' rounded-full' : config.width + ' ' + config.height + ' rounded-lg'} flex items-center`}
+        style={{ backgroundColor: attempt === 3 ? noteColor : 'transparent' }}
+      >
+        {attempt < 3 ? (
+          <img 
+            key={`${imgPath}-${attempt}`}
+            src={imgPath} 
+            alt={`${currency} ${value}`} 
+            className="w-full h-full object-cover" 
+            onError={handleImgError}
+          />
+        ) : (
+          <>
+            <div className="absolute inset-x-0 top-0 h-[30%] bg-white/10" />
+            <div className="absolute inset-x-0 bottom-0 h-[20%] bg-black/5" />
+            <div className={`absolute inset-0 border border-white/20 pointer-events-none ${isCoin ? 'rounded-full' : 'rounded-lg'}`} />
+
+            {isCoin ? (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-slate-400 shadow-inner">
+                <span className={`text-slate-800 font-[900] ${config.fontSize} tracking-tighter shadow-sm`} style={S}>
+                  {value < 1 ? (value * 100).toFixed(0) : value}
+                </span>
+                {value < 1 && <span className="text-[7px] font-[900] text-slate-500 uppercase tracking-tighter">Cent</span>}
+              </div>
+            ) : (
+              <>
+                <div className="w-[30%] h-full border-r border-white/10 flex flex-col items-center justify-center relative">
+                  <span className="text-white/60 font-[900] text-[10px] absolute top-1 left-1 leading-none">{symbol}</span>
+                  <div className="w-1/2 h-1/2 rounded-full border-2 border-white/10" />
+                </div>
+                <div className="flex-1 flex items-center justify-center z-10">
+                  <span className={`text-white font-[900] ${config.fontSize} tracking-tighter`} style={S}>{value}</span>
+                </div>
+                <div className="w-[20%] h-full flex flex-col items-center justify-center gap-[2px] pr-2 opacity-30">
+                  <div className="w-full h-[1px] bg-white" />
+                  <div className="w-full h-[1px] bg-white" />
+                  <div className="w-full h-[1px] bg-white" />
+                  <div className="w-full h-[1px] bg-white" />
+                  <span className="text-[6px] font-[900] text-white absolute bottom-1 right-1 leading-none">{value}</span>
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </motion.div>
+
+      {showCount && count > 0 && (
+        <motion.div 
+          initial={{ scale: 0 }} animate={{ scale: 1 }}
+          className={`absolute -top-1 -right-1 ${config.badgeSize} bg-black rounded-full flex items-center justify-center text-white font-[900] shadow-md z-20 border-2 border-white`}
+          style={DM}
+        >
+          ×{count}
+        </motion.div>
+      )}
+    </div>
+  )
+})
+
+NoteCard.displayName = 'NoteCard'
+
+export default NoteCard
+>>>>>>> 41f113d (upgrade scanner)

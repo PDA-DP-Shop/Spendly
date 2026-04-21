@@ -101,10 +101,12 @@ async function loadLocalDb() {
 async function fetchFromApi(barcode) {
   const proxy = 'https://corsproxy.io/?'
   
-  // 3-A: UPCitemdb (worldwide general products)
+  // 3-A: UPCitemdb (requires proxy for CORS)
   try {
-    const url = `${proxy}${encodeURIComponent(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`)}`
+    const targetUrl = encodeURIComponent(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`)
+    const url = `https://api.allorigins.win/raw?url=${targetUrl}`
     const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     if (data.code === 'OK' && data.items?.length > 0) {
       const item = data.items[0]
@@ -123,8 +125,9 @@ async function fetchFromApi(barcode) {
 
   // 3-B: Open Products Facts (worldwide general items)
   try {
-    const url = `${proxy}${encodeURIComponent(`https://world.openproductsfacts.org/api/v0/product/${barcode}.json`)}`
+    const url = `https://world.openproductsfacts.org/api/v0/product/${barcode}.json`
     const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     if (data.status === 1 && data.product?.product_name) {
       return {
@@ -141,8 +144,9 @@ async function fetchFromApi(barcode) {
 
   // 3-C: Open Food Facts (worldwide food & groceries)
   try {
-    const url = `${proxy}${encodeURIComponent(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)}`
+    const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
     const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     if (data.status === 1 && data.product?.product_name) {
       return {

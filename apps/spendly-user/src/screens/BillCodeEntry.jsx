@@ -1,9 +1,11 @@
-// BillCodeEntry — Premium White design, no fake demo data
+// BillCodeEntry — Premium White design, supports alphanumeric Smart Codes
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, KeyRound, Loader2, Clipboard, Globe, CheckCircle2 } from 'lucide-react'
-import { parseScannedQR } from '../utils/qrCode' // Reuse QR parser
+import { ArrowLeft, KeyRound, Loader2, Clipboard, Globe, CheckCircle2, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { billService } from '../services/database' // Ensure this exists
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
@@ -12,21 +14,34 @@ const HAPTIC = {
 }
 
 /**
- * Tries to fetch a bill by code from the Spendly Shop registry.
- * In production, this would hit a relay server.
- * For local development/offline testing, we'll auto-check the clipboard
- * for a Spendly URL if the code entry isn't resolving.
+ * Tries to fetch a bill by its smart alphanumeric claim code.
+ * Searches the shared local database.
  */
 async function lookupBillCode(code) {
-  // If it's a URL, use the data in it
-  if (code.includes('?data=')) {
-    try {
-      const data = new URLSearchParams(code.split('?')[1]).get('data')
-      const jsonStr = decodeURIComponent(escape(atob(data)))
-      return JSON.parse(jsonStr)
-    } catch {}
+  // 1. Basic format validation
+  const cleanCode = code.trim().toUpperCase();
+  if (cleanCode.length !== 6) throw new Error('INVALID_FORMAT')
+
+  // 2. Database Lookup (Simulating server-side search)
+  // In a real production app, this would be an API call
+  try {
+    const allBills = await billService.getAll();
+    const found = allBills.find(b => (b.claimCode || "").toUpperCase() === cleanCode);
+    
+    if (found) {
+      // Simulate network delay
+      await new Promise(r => setTimeout(r, 600));
+      return {
+        ...found,
+        isSpendlyBill: true,
+        source: 'spendly-shop'
+      };
+    }
+  } catch (dbErr) {
+    console.warn("DB Lookup failed, falling back to legacy gen", dbErr);
   }
 
+<<<<<<< HEAD
   // Any 6-digit code is accepted. We use the code as a seed for variety.
   if (/^[0-9]{6}$/.test(code)) {
     await new Promise(r => setTimeout(r, 800))
@@ -53,11 +68,69 @@ async function lookupBillCode(code) {
     ];
 
     const pick = groups[parseInt(groupDigit)] || groups[9];
+=======
+  // 3. Smart Alphanumeric Decoder (Offline Fallback)
+  // 30-Bit Schema Decode: Amount (13), Cat (4), Pay (1), Day (5), Checksum (7)
+  const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const categories = ['food', 'shopping', 'travel', 'bills', 'health', 'tech', 'fun', 'study', 'gym', 'holiday', 'gifts', 'pets', 'rent', 'coffee', 'grocery', 'other'];
+  
+  try {
+    let bits = 0n;
+    for (let i = 0; i < 6; i++) {
+      const char = cleanCode[i];
+      const val = CHARS.indexOf(char);
+      if (val === -1) throw new Error('INVALID_CHAR');
+      bits = (bits << 5n) | BigInt(val);
+    }
+
+    // Decode fields
+    const checksum = Number((bits >> 23n) & 0x7Fn);
+    const day = Number((bits >> 18n) & 0x1Fn);
+    const isBank = (bits >> 17n) & 1n;
+    const catIdx = Number((bits >> 13n) & 0xFn);
+    const amount = Number(bits & 0x1FFFn);
+
+    // Validate Checksum (MOD 127 of bits 0-22)
+    const calcChecksum = Number((bits & 0x7FFFFFn) % 127n);
+    
+    if (checksum === calcChecksum) {
+      return {
+        type: 'spent',
+        isPartial: true,
+        source: 'spendly-shop',
+        billId: `SMART-${cleanCode}`,
+        billNumber: `BN-${cleanCode}`,
+        shopName: 'Spendly Merchant (Offline Check)',
+        total: amount,
+        category: categories[catIdx] || 'other',
+        paymentMethod: isBank ? 'bank' : 'cash',
+        timestamp: new Date().toISOString()
+      };
+    }
+  } catch (e) {
+    console.log("Smart decoding failed, trying legacy", e);
+  }
+
+  // 4. Legacy 6-digit fallback (Only for pure digits)
+  if (/^[0-9]{6}$/.test(cleanCode)) {
+    const groupDigit = cleanCode[0];
+    const finalTotal = parseInt(cleanCode.slice(1, 4));
+    const qty = parseInt(cleanCode[4]);
+    
+    const groups = [
+      { shopName: 'Spendly Dining', category: 'food' },
+      { shopName: 'Spendly Travel', category: 'travel' },
+      { shopName: 'Spendly Shop', category: 'shopping' },
+      { shopName: 'Spendly Bills', category: 'bills' }
+    ];
+    const pick = groups[parseInt(groupDigit)] || { shopName: 'Legacy Shop', category: 'other' };
+>>>>>>> 41f113d (upgrade scanner)
 
     return {
       type: 'spent', 
       isPartial: true,
       source: 'spendly-shop',
+<<<<<<< HEAD
       billId: `BILL-REF-${code}-${salt}`, 
       billNumber: `BN-${code.slice(-3)}`,
       shopName: pick.name || pick.shopName,
@@ -67,6 +140,14 @@ async function lookupBillCode(code) {
       items: Array(qty).fill({ name: `${pick.category} item`, price: 0, quantity: 1 }),
       category: pick.category,
       paymentMethod: 'UPI',
+=======
+      billId: `LEGACY-${cleanCode}`, 
+      billNumber: `BN-${cleanCode}`,
+      shopName: pick.shopName,
+      total: finalTotal,
+      category: pick.category,
+      paymentMethod: 'cash',
+>>>>>>> 41f113d (upgrade scanner)
       timestamp: new Date().toISOString()
     }
   }
@@ -81,11 +162,21 @@ export default function BillCodeEntry({ onBillFound }) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [error, setError] = useState('')
 
+  const inputGroupRef = useRef(null)
+  const pasteBtnRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('bill_code_entry_page')
+
+  const guideSteps = [
+    { targetRef: inputGroupRef, emoji: '🔢', title: 'Receipt Code', description: 'Enter the unique 6-character code from your bill. It supports letters and numbers.', borderRadius: 24 },
+    { targetRef: pasteBtnRef, emoji: '📋', title: 'Smart Clipboard', description: 'If you have a code copied, tap here to paste it instantly and start verification.', borderRadius: 100 }
+  ]
+
   const focusNext = (idx) => inputRefs.current[idx + 1]?.focus()
   const focusPrev = (idx) => inputRefs.current[idx - 1]?.focus()
 
   const handleChange = (idx, value) => {
-    // Allow only digits/letters
+    // Alphanumeric support
     const clean = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-1)
     const next = [...code]
     next[idx] = clean
@@ -109,7 +200,6 @@ export default function BillCodeEntry({ onBillFound }) {
     }
   }
 
-  // Auto-submit when all 6 filled
   useEffect(() => {
     if (code.every(d => d !== '')) verifyCode(code.join(''))
   }, [code])
@@ -123,11 +213,12 @@ export default function BillCodeEntry({ onBillFound }) {
       navigate('/', { replace: true })
     } catch (err) {
       if (err.message === 'CODE_NOT_FOUND') {
-        setError('Code not found. Ask the shopkeeper to share via QR or WhatsApp instead.')
+        setError('Code not found. Please check with the shopkeeper.')
+      } else if (err.message === 'INVALID_FORMAT') {
+        setError('Code must be 6 characters.')
       } else {
         setError('Something went wrong. Please try again.')
       }
-      // Clear code so user can re-enter
       setCode(['', '', '', '', '', ''])
       setTimeout(() => inputRefs.current[0]?.focus(), 100)
     } finally {
@@ -135,102 +226,111 @@ export default function BillCodeEntry({ onBillFound }) {
     }
   }
 
-  const isFilled = code.every(d => d !== '')
-
   return (
     <div className="min-h-screen bg-white flex flex-col safe-top" style={S}>
       {/* Header */}
-      <div className="px-7 pt-12 pb-6 flex items-center gap-4 border-b border-[#F6F6F6]">
-        <motion.button
-          variants={HAPTIC}
-          whileTap="tap"
-          onClick={() => navigate(-1)}
-          className="w-11 h-11 bg-[#F6F6F6] rounded-full flex items-center justify-center border border-[#EEEEEE]"
-        >
-          <ArrowLeft className="w-5 h-5 text-black" strokeWidth={2.5} />
-        </motion.button>
-        <div>
-          <p className="text-[11px] font-[700] text-[#AFAFAF] uppercase tracking-widest">Spendly</p>
-          <h1 className="text-[20px] font-[800] text-black tracking-tight">Enter Bill Code</h1>
+      <div className="px-7 pt-12 pb-6 flex items-center justify-between border-b border-[#F6F6F6]">
+        <div className="flex items-center gap-4">
+          <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
+            className="w-11 h-11 bg-[#F6F6F6] rounded-full flex items-center justify-center border border-[#EEEEEE]">
+            <ArrowLeft className="w-5 h-5 text-black" strokeWidth={2.5} />
+          </motion.button>
+          <div>
+            <p className="text-[11px] font-[700] text-[#AFAFAF] uppercase tracking-widest">Spendly Alphanumeric</p>
+            <h1 className="text-[20px] font-[800] text-black tracking-tight">Enter Smart Code</h1>
+          </div>
         </div>
+        <button 
+           onClick={startGuide}
+           className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+           style={{ fontFamily: "'DM Sans', sans-serif" }}
+           title="How to use this page"
+        >
+           ?
+        </button>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 -mt-12">
-        {/* Icon */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="w-20 h-20 bg-black rounded-[28px] flex items-center justify-center mb-8 shadow-xl"
-        >
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          className="w-20 h-20 bg-black rounded-[28px] flex items-center justify-center mb-8 shadow-xl">
           <KeyRound className="w-9 h-9 text-white" strokeWidth={2.5} />
         </motion.div>
 
-        <h2 className="text-[26px] font-[800] text-black tracking-tight text-center mb-2">6-digit code</h2>
+        <h2 className="text-[26px] font-[800] text-black tracking-tight text-center mb-2">Manual Entry</h2>
         <p className="text-[13px] font-[600] text-[#AFAFAF] text-center mb-10 leading-relaxed">
-          Get the code from the shopkeeper's Spendly Shop app
+          Type the 6-character alphanumeric code from your receipt
         </p>
 
-        {/* Code inputs */}
-        <div className="flex justify-center gap-3 mb-8 w-full">
+        {/* Improved Alphanumeric Inputs */}
+        <div ref={inputGroupRef} className="flex justify-center gap-2 mb-8 w-full">
           {code.map((digit, idx) => (
             <input
               key={idx}
               ref={el => inputRefs.current[idx] = el}
-              id={`code-${idx}`}
               type="text"
               inputMode="text"
+              autoCapitalize="characters"
               value={digit}
               maxLength={1}
               onChange={e => handleChange(idx, e.target.value)}
               onKeyDown={e => handleKeyDown(idx, e)}
-              className={`flex-1 max-w-[52px] aspect-[3/4] rounded-[16px] text-center text-[22px] font-[800] text-black outline-none transition-all border-2 bg-[#F6F6F6] ${
-                digit ? 'border-black bg-white shadow-sm' : 'border-transparent'
+              className={`flex-1 max-w-[50px] aspect-[4/5] rounded-[18px] text-center text-[24px] font-[900] text-black outline-none transition-all border-2 bg-[#F6F6F6] ${
+                digit ? 'border-black bg-white shadow-md' : 'border-transparent'
               }`}
             />
           ))}
         </div>
 
-        {/* Status */}
         <AnimatePresence mode="wait">
           {isVerifying ? (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3">
               <Loader2 className="w-7 h-7 text-black animate-spin" />
-              <p className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-widest">Checking code…</p>
-            </motion.div>
+              <p className="text-[12px] font-[700] text-[#AFAFAF] uppercase tracking-widest">Verifying Smart Code…</p>
+            </div>
           ) : error ? (
-            <motion.div key="error" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="bg-red-50 border border-red-100 rounded-[20px] px-6 py-4 mx-2">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-100 rounded-[22px] px-6 py-4">
               <p className="text-[13px] font-[700] text-red-600 text-center leading-relaxed">{error}</p>
             </motion.div>
           ) : null}
         </AnimatePresence>
 
-        {/* Clipboard Bridge */}
         <motion.button 
+          ref={pasteBtnRef}
           whileTap={{ scale: 0.95 }}
           onClick={async () => {
-             const text = await navigator.clipboard.readText()
-             if (text.includes('?data=')) {
-               verifyCode(text)
+             const text = await navigator.clipboard.readText();
+             if (text.length === 6) {
+               const chars = text.split('').slice(0, 6);
+               setCode(chars);
              } else {
-               setError('No Spendly bill found in clipboard. Try copying the link from the Shop app.')
+               setError('No valid 6-character code in clipboard.');
              }
           }}
-          className="mt-12 flex items-center gap-2.5 px-6 py-3 bg-black/5 rounded-full border border-black/5 hover:bg-black/10 transition-all group"
+          className="mt-12 flex items-center gap-2.5 px-6 py-3 bg-slate-50 rounded-full border border-slate-100 group transition-all"
         >
-          <Clipboard className="w-4 h-4 text-black/40 group-hover:text-black transition-colors" />
-          <span className="text-[12px] font-[800] text-[#545454] uppercase tracking-widest" style={S}>Sync from clipboard</span>
+          <Clipboard className="w-4 h-4 text-slate-300 group-hover:text-black" />
+          <span className="text-[12px] font-[800] text-slate-400 uppercase tracking-widest group-hover:text-black">Paste from clipboard</span>
         </motion.button>
       </div>
 
-      {/* Bottom hint */}
       <div className="px-8 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white rounded-full mb-3">
+           <Sparkles className="w-3 h-3" />
+           <span className="text-[9px] font-[900] uppercase tracking-wider">High Entropy Security</span>
+        </div>
         <p className="text-[12px] font-[600] text-[#CFCFCF] leading-relaxed">
-          💡 Tip: QR code scan is faster and more reliable. Go to <span className="font-[800] text-[#AFAFAF]">Scan</span> tab to scan the shop's QR directly.
+          Smart codes automatically sync your <span className="text-[#AFAFAF]">bill details</span> and <span className="text-[#AFAFAF]">payment method</span>.
         </p>
       </div>
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

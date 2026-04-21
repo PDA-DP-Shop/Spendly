@@ -1,7 +1,11 @@
 /**
  * Deleted Items Screen — Spendly Recycle Bin
  */
+<<<<<<< HEAD
 import { useState, useEffect } from 'react'
+=======
+import { useState, useEffect, useRef } from 'react'
+>>>>>>> 41f113d (upgrade scanner)
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2, RotateCcw, AlertCircle, Info, Clock } from 'lucide-react'
@@ -10,6 +14,11 @@ import { useExpenseStore } from '../store/expenseStore'
 import EmptyState from '../components/shared/EmptyState'
 import { formatMoney } from '../utils/formatMoney'
 import { useSettingsStore } from '../store/settingsStore'
+<<<<<<< HEAD
+=======
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
+>>>>>>> 41f113d (upgrade scanner)
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
@@ -21,6 +30,19 @@ export default function DeletedItemsScreen() {
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
 
+<<<<<<< HEAD
+=======
+  const infoRef = useRef(null)
+  const firstItemRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('deleted_items_page')
+
+  const guideSteps = [
+    { targetRef: infoRef, emoji: '♻️', title: 'Safety Window', description: 'Deleted something by accident? Everything lands here first for 72 hours before being permanently erased.', borderRadius: 24 },
+    { targetRef: firstItemRef, emoji: '⏪', title: 'One-Tap Recovery', description: 'Tap Restore to put this expense back into your history as if it never left.', borderRadius: 28 }
+  ]
+
+>>>>>>> 41f113d (upgrade scanner)
   const loadItems = async () => {
     setLoading(true)
     const data = await softDeleteService.getDeletedItems()
@@ -44,6 +66,7 @@ export default function DeletedItemsScreen() {
 
   return (
     <div className="min-h-dvh bg-white safe-top">
+<<<<<<< HEAD
       <div className="flex items-center px-6 pt-10 pb-6 bg-white sticky top-0 z-20 border-b border-[#F6F6F6]">
         <button onClick={() => navigate(-1)} className="w-11 h-11 rounded-full bg-white border border-[#EEEEEE] flex items-center justify-center mr-4">
           <ChevronLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -56,6 +79,30 @@ export default function DeletedItemsScreen() {
 
       <div className="px-7 py-6">
         <div className="bg-[#F8F9FA] rounded-[24px] p-5 mb-8 flex gap-4 border border-[#EEEEEE]">
+=======
+      <div className="flex items-center justify-between px-6 pt-10 pb-6 bg-white sticky top-0 z-20 border-b border-[#F6F6F6]">
+        <div className="flex items-center">
+          <button onClick={() => navigate(-1)} className="w-11 h-11 rounded-full bg-white border border-[#EEEEEE] flex items-center justify-center mr-4">
+            <ChevronLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
+          </button>
+          <div>
+            <h1 className="text-[22px] font-[800] text-black tracking-tight" style={S}>Deleted Cache</h1>
+            <p className="text-[11px] font-[700] text-[#AFAFAF] uppercase tracking-widest mt-0.5" style={S}>3-Day Local Cache</p>
+          </div>
+        </div>
+        <button 
+           onClick={startGuide}
+           className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+           style={{ fontFamily: "'DM Sans', sans-serif" }}
+           title="How to use this page"
+        >
+           ?
+        </button>
+      </div>
+
+      <div className="px-7 py-6">
+        <div ref={infoRef} className="bg-[#F8F9FA] rounded-[24px] p-5 mb-8 flex gap-4 border border-[#EEEEEE]">
+>>>>>>> 41f113d (upgrade scanner)
           <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
              <Info className="w-5 h-5 text-white" />
           </div>
@@ -82,6 +129,10 @@ export default function DeletedItemsScreen() {
               {items.map((item, idx) => (
                 <motion.div
                   key={item.id}
+<<<<<<< HEAD
+=======
+                  ref={idx === 0 ? firstItemRef : null}
+>>>>>>> 41f113d (upgrade scanner)
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -131,6 +182,18 @@ export default function DeletedItemsScreen() {
           </div>
         )}
       </div>
+<<<<<<< HEAD
+=======
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   )
 }

@@ -10,5 +10,8 @@
     "dev:shop": "cd apps/spendly-shop && npm run dev",
     "build:user": "cd apps/spendly-user && npm run build",
     "build:shop": "cd apps/spendly-shop && npm run build"
+  },
+  "dependencies": {
+    "html5-qrcode": "^2.3.8"
   }
 }

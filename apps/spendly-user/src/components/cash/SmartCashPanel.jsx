@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -11,10 +12,16 @@ import {
   ArrowRight,
   Wallet
 } from 'lucide-react';
+=======
+import React, { useState, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Edit2, Minus, Plus, AlertCircle, CheckCircle2, Wallet, ArrowRight } from 'lucide-react'
+>>>>>>> 41f113d (upgrade scanner)
 import { 
   findBestPayment, 
   recalculateWithCustomNotes, 
   getTotalCash 
+<<<<<<< HEAD
 } from '../../utils/smartCashCalculator';
 import NoteCard from './NoteCard';
 
@@ -389,4 +396,307 @@ export default function SmartCashPanel({ expenseAmount, userNotes, currency, onP
 
     </div>
   );
+=======
+} from '../../utils/smartCashCalculator'
+import CURRENCY_NOTES from '../../constants/currencyNotes'
+import { formatMoney } from '../../utils/formatMoney'
+import NoteCard from './NoteCard'
+
+const SORA = { fontFamily: "'Sora', sans-serif" }
+const DM_SANS = { fontFamily: "'DM Sans', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
+
+const parseKey = (key) => {
+  if (!key || !key.includes('_')) return { value: Number(key), type: 'note' }
+  const [v, t] = key.split('_')
+  return { value: parseFloat(v), type: t }
+}
+
+export default function SmartCashPanel({ expenseAmount, userNotes, currency = 'INR', onPaymentConfirmed }) {
+  const [isManual, setIsManual] = useState(false)
+  const [manualNotes, setManualNotes] = useState({})
+  
+  // 1. Calculate Smart Suggestion
+  const smartSuggestion = useMemo(() => {
+    return findBestPayment(expenseAmount, userNotes, currency)
+  }, [expenseAmount, userNotes, currency])
+
+  // 2. Determine Current Results based on Mode
+  const currentResult = useMemo(() => {
+    if (isManual) {
+      return recalculateWithCustomNotes(manualNotes, expenseAmount, currency)
+    }
+    return {
+      totalGiven: smartSuggestion.totalGiven || 0,
+      changeAmount: smartSuggestion.changeAmount || 0,
+      changeNotes: smartSuggestion.changeNotes || {},
+      notesGiven: smartSuggestion.suggestedGive || {},
+      isExactChange: smartSuggestion.isExactChange,
+      isPossible: smartSuggestion.isPossible,
+      isUnderpaying: false // smartSuggestion is never underpaying if possible
+    }
+  }, [isManual, manualNotes, smartSuggestion, expenseAmount, currency])
+
+  // 3. Initialize Manual Notes when entering Manual Mode
+  const enterManualMode = () => {
+    setManualNotes(smartSuggestion.suggestedGive || {})
+    setIsManual(true)
+  }
+
+  const resetToSmart = () => {
+    setIsManual(false)
+  }
+
+  // 4. Handle Increment/Decrement in Manual Mode
+  const updateManualCount = (key, delta) => {
+    const currentCount = manualNotes[key] || 0
+    const maxCount = userNotes[key] || 0
+    const newCount = Math.max(0, Math.min(maxCount, currentCount + delta))
+    
+    setManualNotes(prev => ({
+      ...prev,
+      [key]: newCount
+    }))
+  }
+
+  const totalCashAvailable = getTotalCash(userNotes)
+  const isEnoughTotal = totalCashAvailable >= expenseAmount
+  const canConfirm = isEnoughTotal && !currentResult.isUnderpaying
+
+  const currencyConfig = CURRENCY_NOTES[currency] || CURRENCY_NOTES.INR
+  const noteColors = currencyConfig.noteColors
+
+  return (
+    <div className="flex flex-col gap-4 pb-6 max-w-full overflow-x-hidden">
+      
+      {/* SECTION 1: YOUR CASH SUMMARY */}
+      <section className="px-1">
+        <div className="bg-[#F1F5F9] rounded-[24px] p-5 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-slate-500" />
+              <p className="text-[13px] font-[700] text-slate-600" style={DM_SANS}>
+                You have {formatMoney(totalCashAvailable, currency)} in cash
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(userNotes).filter(([_, count]) => count > 0).map(([key, count]) => {
+              const { value, type } = parseKey(key)
+              return <NoteCard key={key} value={value} type={type} currency={currency} count={count} size="sm" />
+            })}
+          </div>
+        </div>
+
+        {!isEnoughTotal && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="mt-4 bg-red-50 border border-red-100 rounded-[20px] p-4 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <p className="text-[13px] font-[800] text-red-600" style={DM_SANS}>
+              Not enough cash (short by {formatMoney(expenseAmount - totalCashAvailable, currency)})
+            </p>
+          </motion.div>
+        )}
+      </section>
+
+      {/* SECTION 2 & 3: SUGGESTION / MANUAL MODE */}
+      <section className="px-1">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-base">💡</span>
+            <h3 className="text-[16px] font-[902] text-black tracking-tight" style={DM_SANS}>
+              {isManual ? 'Customize payment' : 'Smart suggestion'}
+            </h3>
+          </div>
+          {!isManual && isEnoughTotal && (
+            <button onClick={enterManualMode} className="text-[12px] font-[800] text-slate-400 uppercase tracking-wider">
+              Edit manually
+            </button>
+          )}
+          {isManual && (
+            <button onClick={() => setIsManual(false)} className="text-[12px] font-[800] text-[#7C3AED] uppercase tracking-wider">
+              Reset smart
+            </button>
+          )}
+        </div>
+
+        <AnimatePresence mode="wait">
+          {!isManual ? (
+            <motion.div 
+              key="smart"
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+              className="grid grid-cols-2 gap-4"
+            >
+              {/* YOU GIVE */}
+              <div className="bg-white border border-[#EEEEEE] rounded-[32px] p-6 flex flex-col gap-5 shadow-sm">
+                <p className="text-[10px] font-[900] text-black/40 uppercase tracking-[0.2em] text-center" style={DM_SANS}>You Give</p>
+                <div className="flex flex-col items-center gap-6">
+                  {Object.entries(currentResult.notesGiven).map(([key, count]) => {
+                    const { value, type } = parseKey(key)
+                    return (
+                      <div key={key} className="flex flex-col items-center gap-1.5">
+                        <NoteCard value={value} type={type} currency={currency} count={count} size="md" isHighlighted />
+                        <span className="text-[10px] font-[900] text-black/30 uppercase tracking-tighter" style={S}>
+                          {currencyConfig.symbol}{value} {type}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="mt-auto pt-4 border-t border-[#F1F5F9] text-center">
+                  <p className="text-[16px] font-[900] text-black" style={SORA}>
+                    Total = {formatMoney(currentResult.totalGiven, currency)}
+                  </p>
+                </div>
+              </div>
+
+              {/* YOU RECEIVE */}
+              <div className="bg-white border border-[#EEEEEE] rounded-[32px] p-6 flex flex-col gap-5 shadow-sm">
+                <p className="text-[10px] font-[900] text-black/40 uppercase tracking-[0.2em] text-center" style={DM_SANS}>You Receive</p>
+                {currentResult.isExactChange ? (
+                  <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center py-4">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    <p className="text-[14px] font-[900] text-emerald-600" style={DM_SANS}>Exact change!</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center gap-6">
+                      {Object.entries(currentResult.changeNotes).map(([note, count]) => (
+                        <div key={note} className="flex flex-col items-center gap-1.5">
+                          <NoteCard value={Number(note)} type={Number(note) <= 2 ? 'coin' : 'note'} currency={currency} count={count} size="md" />
+                          <span className="text-[10px] font-[900] text-black/30 uppercase tracking-tighter" style={S}>
+                            {currencyConfig.symbol}{note}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-auto pt-4 border-t border-[#F1F5F9] text-center">
+                      <p className="text-[16px] font-[900] text-black" style={SORA}>
+                        Change = {formatMoney(currentResult.changeAmount, currency)}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+               key="manual"
+               initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+               className="space-y-4 overflow-hidden"
+             >
+               <div className="bg-white/80 backdrop-blur-xl rounded-[32px] border border-[#EEEEEE] px-4 py-8 flex flex-col gap-6">
+                <div className="flex flex-col">
+                  {Object.entries(userNotes).filter(([_, count]) => count > 0).map(([key, max]) => {
+                    const { value, type } = parseKey(key)
+                    const count = manualNotes[key] || 0
+                    return (
+                      <div key={key} className="flex items-center justify-between py-5 border-b border-[#F8FAFC] last:border-0">
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center gap-2 min-w-[100px]">
+                            <NoteCard value={value} type={type} currency={currency} size="md" showCount={false} />
+                            <p className="text-[10px] font-[900] text-slate-400 uppercase tracking-tighter text-center" style={S}>
+                              {currencyConfig.symbol}{value} {type}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-5">
+                          <div className="flex items-center gap-3 bg-[#F6F6F6] rounded-full p-1 border border-[#EEEEEE]">
+                            <motion.button whileTap={{ scale: 0.8 }} 
+                              onClick={() => updateManualCount(key, -1)}
+                              disabled={count === 0}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${count === 0 ? 'text-black/10' : 'text-black/40 hover:text-black'}`}>
+                              <Minus className="w-3 h-3" strokeWidth={4} />
+                            </motion.button>
+                            <span className="w-4 text-center text-[14px] font-[900] text-black" style={SORA}>{count}</span>
+                            <motion.button whileTap={{ scale: 0.8 }}
+                              onClick={() => updateManualCount(key, 1)}
+                              disabled={count >= max}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${count >= max ? 'bg-black/5 text-black/10' : 'bg-black text-white shadow-lg shadow-black/10 active:scale-95'}`}>
+                              <Plus className="w-3 h-3" strokeWidth={4} />
+                            </motion.button>
+                          </div>
+                          <div className="w-16 text-right">
+                            <p className="text-[13px] font-[900] text-black" style={SORA}>
+                              {formatMoney(value * count, currency)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
+
+      {/* SECTION 4: LIVE RESULT BAR & CONFIRM BUTTON */}
+      <section className="mt-4 px-1 pb-2 flex flex-col gap-4">
+        {/* Result Summary Bar */}
+        <div className="bg-white rounded-[24px] p-5 shadow-sm border border-[#EEEEEE] flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="text-[10px] font-[802] text-[#AFAFAF] uppercase tracking-widest" style={DM_SANS}>Giving</p>
+              <motion.p key={currentResult.totalGiven} initial={{ scale: 1.1 }} animate={{ scale: 1 }}
+                className="text-[18px] font-[900] text-black" style={SORA}>
+                {formatMoney(currentResult.totalGiven, currency)}
+              </motion.p>
+            </div>
+            
+            <ArrowRight className="w-5 h-5 text-[#EEEEEE]" />
+
+            <div className="flex flex-col text-right">
+              <p className="text-[10px] font-[802] text-[#AFAFAF] uppercase tracking-widest" style={DM_SANS}>Change</p>
+              <div className="flex items-center justify-end gap-1.5">
+                <motion.p key={currentResult.changeAmount} initial={{ scale: 1.1 }} animate={{ scale: 1 }}
+                  className={`text-[18px] font-[900] ${currentResult.isExactChange ? 'text-emerald-500' : 'text-black'}`} style={SORA}>
+                  {formatMoney(currentResult.changeAmount, currency)}
+                </motion.p>
+                {currentResult.isExactChange && <span className="text-emerald-500 text-[10px]">FIXED</span>}
+              </div>
+            </div>
+          </div>
+
+          {currentResult.isUnderpaying && (
+            <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }}
+              className="bg-red-50 rounded-xl py-3 px-4 flex items-center justify-center gap-2 overflow-hidden border border-red-100">
+              <AlertCircle className="w-4 h-4 text-red-500" />
+              <p className="text-[12px] font-[802] text-red-600" style={DM_SANS}>
+                Still need {formatMoney(expenseAmount - currentResult.totalGiven, currency)} more
+              </p>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Primary Pay Button */}
+        <motion.button 
+          whileTap={{ scale: canConfirm ? 0.96 : 1 }}
+          onClick={() => {
+            if (!canConfirm) return
+            onPaymentConfirmed({
+              type: "cash",
+              expenseAmount,
+              notesGiven: currentResult.notesGiven || manualNotes,
+              totalGiven: currentResult.totalGiven,
+              changeAmount: currentResult.changeAmount,
+              changeNotes: currentResult.changeNotes
+            })
+          }}
+          disabled={!canConfirm}
+          className={`w-full py-5 rounded-[28px] text-[15px] font-[900] text-white transition-all shadow-xl px-4 flex items-center justify-center gap-2 ${
+            canConfirm 
+              ? 'bg-black active:bg-[#111111] shadow-black/10' 
+              : 'bg-[#EEEEEE] text-[#AFAFAF] shadow-none cursor-not-allowed'
+          }`}
+          style={DM_SANS}
+        >
+          PAY {formatMoney(expenseAmount, currency)} IN CASH
+        </motion.button>
+      </section>
+    </div>
+  )
+>>>>>>> 41f113d (upgrade scanner)
 }

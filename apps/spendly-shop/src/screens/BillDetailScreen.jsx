@@ -27,6 +27,14 @@ const BillDetailScreen = () => {
 
     const bill = bills.find(b => b.id === parseInt(id));
 
+    const isExpired = React.useMemo(() => {
+        if (!bill?.createdAt) return false;
+        const created = new Date(bill.createdAt).getTime();
+        const now = new Date().getTime();
+        const diff = (now - created) / (1000 * 60);
+        return diff > 10;
+    }, [bill?.createdAt]);
+
     if (!bill) return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center p-12 text-center">
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
@@ -63,6 +71,18 @@ const BillDetailScreen = () => {
                     <span className="text-[17px]">Invoice Details</span>
                 </button>
                 <div className="flex items-center gap-2">
+<<<<<<< HEAD
+=======
+                    {!isExpired && (
+                        <button 
+                            onClick={() => navigate('/create-bill', { state: { editBill: bill } })}
+                            className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 active:bg-indigo-100 transition-all shadow-sm border border-indigo-100"
+                            title="Edit Bill"
+                        >
+                            <FileText className="w-5 h-5" />
+                        </button>
+                    )}
+>>>>>>> 41f113d (upgrade scanner)
                     <button 
                         onClick={handleDeleteBill}
                         className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 active:bg-red-100 transition-all shadow-sm border border-red-100"
@@ -227,7 +247,7 @@ const BillDetailScreen = () => {
                     </div>
                 </div>
 
-                {bill.status !== 'paid' && (
+                {bill.status !== 'paid' && !isExpired && (
                     <div className="bg-[#FEF2F2] p-8 rounded-[32px] space-y-6">
                         <div className="flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-[#EF4444]" />
@@ -242,6 +262,18 @@ const BillDetailScreen = () => {
                         >
                             Mark as Paid
                         </button>
+                    </div>
+                )}
+
+                {isExpired && (
+                    <div className="bg-slate-50 p-8 rounded-[32px] flex items-center gap-4 border border-slate-100">
+                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400">
+                            <Clock className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-[14px] font-[800] text-slate-600">Bill Locked</h3>
+                            <p className="text-[11px] font-[500] text-slate-400 uppercase tracking-widest">Editing period (10m) has ended</p>
+                        </div>
                     </div>
                 )}
             </div>

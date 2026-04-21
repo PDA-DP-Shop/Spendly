@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Delete, Fingerprint } from 'lucide-react'
 
-export default function PinLock({ onVerify, onBiometric, wrongAttempts, lockoutRemaining, pinLength = 6 }) {
+export default function PinLock({ onVerify, onBiometric, wrongAttempts, lockoutRemaining, pinLength = 4 }) {
   const [pin, setPin] = useState('')
   const [shake, setShake] = useState(false)
   const S = { fontFamily: "'Inter', sans-serif" }

@@ -16,6 +16,11 @@ export function encodeBillToURL(bill) {
       p: item.price,
       q: item.quantity
     })),
+<<<<<<< HEAD
+=======
+    pm: bill.paymentMethod,
+    pd: bill.paymentDetails,
+>>>>>>> 41f113d (upgrade scanner)
     v: 2 // Version 2 (Minified)
   };
 

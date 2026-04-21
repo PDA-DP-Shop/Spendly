@@ -3,6 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, ArrowRight, X, Clock, Database, History, Camera, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { recoveryVaultService } from '../../services/recoveryVault';
+<<<<<<< HEAD
+=======
+import PageGuide from '../../components/shared/PageGuide'
+import { usePageGuide } from '../../hooks/usePageGuide'
+import { useRef } from 'react'
+>>>>>>> 41f113d (upgrade scanner)
 
 const RecoverDataScreen = () => {
   const [vault, setVault] = useState(null);
@@ -10,6 +16,21 @@ const RecoverDataScreen = () => {
   const navigate = useNavigate();
   const S = { fontFamily: "'Inter', sans-serif" };
 
+<<<<<<< HEAD
+=======
+  const summaryRef = useRef(null)
+  const timerRef = useRef(null)
+  const recoverBtnRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('recover_data_page')
+
+  const guideSteps = [
+    { targetRef: summaryRef, emoji: '📊', title: 'Data Summary', description: 'This is a high-level count of all expenses and bill scans found in your localized recovery vault.', borderRadius: 32 },
+    { targetRef: timerRef, emoji: '⏳', title: 'Rescue Window', description: 'Recovery is time-sensitive. Once the timer expires, the local cache is purged for security.', borderRadius: 40 },
+    { targetRef: recoverBtnRef, emoji: '⚡', title: 'One-Tap Recovery', description: 'Reconstruct your entire financial database instantly. All categories, stores, and receipts will be restored.', borderRadius: 32 }
+  ]
+
+>>>>>>> 41f113d (upgrade scanner)
   useEffect(() => {
     const loadVault = async () => {
       const activeVault = await recoveryVaultService.getActiveVault();
@@ -45,8 +66,23 @@ const RecoverDataScreen = () => {
   return (
     <div className="min-h-dvh bg-white flex flex-col safe-top safe-bottom">
       <div className="px-7 pt-12 pb-6 flex justify-between items-center bg-white sticky top-0 z-20">
+<<<<<<< HEAD
         <div className="w-12 h-12 rounded-[20px] bg-emerald-50 flex items-center justify-center border border-emerald-100">
           <RefreshCw className="w-6 h-6 text-emerald-600" strokeWidth={2.5} />
+=======
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[20px] bg-emerald-50 flex items-center justify-center border border-emerald-100">
+            <RefreshCw className="w-6 h-6 text-emerald-600" strokeWidth={2.5} />
+          </div>
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+>>>>>>> 41f113d (upgrade scanner)
         </div>
         <motion.button 
           whileTap={{ scale: 0.9 }}
@@ -70,7 +106,11 @@ const RecoverDataScreen = () => {
             Everything was saved in your private local vault. You can restore it all in one tap.
           </p>
 
+<<<<<<< HEAD
           <div className="space-y-4 mb-10">
+=======
+          <div ref={summaryRef} className="space-y-4 mb-10">
+>>>>>>> 41f113d (upgrade scanner)
             <div className="p-6 rounded-[32px] bg-[#F6F6F6] border border-[#EEEEEE] flex items-center gap-5">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
                 <Database className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -93,6 +133,10 @@ const RecoverDataScreen = () => {
           </div>
 
           <motion.div 
+<<<<<<< HEAD
+=======
+            ref={timerRef}
+>>>>>>> 41f113d (upgrade scanner)
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ repeat: Infinity, duration: 3 }}
             className="p-8 rounded-[40px] bg-emerald-50/50 border-2 border-emerald-100 flex flex-col items-center shadow-lg shadow-emerald-500/5"
@@ -111,6 +155,10 @@ const RecoverDataScreen = () => {
 
       <div className="p-8 pb-12 flex flex-col gap-4 bg-white sticky bottom-0">
         <motion.button
+<<<<<<< HEAD
+=======
+          ref={recoverBtnRef}
+>>>>>>> 41f113d (upgrade scanner)
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/recover-progress')}
           className="w-full py-6 rounded-[32px] bg-emerald-600 text-white font-[802] text-[18px] shadow-2xl shadow-emerald-600/20 flex items-center justify-center gap-3"
@@ -127,6 +175,17 @@ const RecoverDataScreen = () => {
           Maybe Later
         </motion.button>
       </div>
+<<<<<<< HEAD
+=======
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   );
 };

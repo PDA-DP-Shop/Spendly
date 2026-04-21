@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, LayoutGrid, List, 
-  Trash2, Package, ArrowLeft, X, ChevronRight
+  Trash2, Package, ArrowLeft, X, ChevronRight, HelpCircle
 } from 'lucide-react';
 
 import { useItemsStore } from '../store/itemsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
+import PageGuide from '../components/shared/PageGuide';
+import { usePageGuide } from '../hooks/usePageGuide';
 
 const UNITS = ['Piece', 'Kg', 'Gram', 'Litre', 'ML', 'Dozen', 'Metre', 'Box', 'Packet', 'Service'];
 
@@ -34,6 +36,18 @@ const ItemsMenuScreen = () => {
     const [formData, setFormData] = useState({
         name: '', price: '', category: 'grocery', unit: 'Piece', barcode: '', gst: 0
     });
+
+    const searchRef = useRef(null);
+    const addRef = useRef(null);
+    const firstItemRef = useRef(null);
+
+    const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('shop_items');
+
+    const guideSteps = useMemo(() => [
+        { targetRef: searchRef, emoji: '🔍', title: 'Quick Search', description: 'Find products instantly by name or by scanning their barcode using a connected scanner.', borderRadius: 24 },
+        { targetRef: addRef, emoji: '✨', title: 'Expand Catalog', description: 'Add new products with their price, tax, and unit. We\'ll remember them for fast billing.', borderRadius: 24 },
+        { targetRef: firstItemRef.current ? firstItemRef : addRef, emoji: '📦', title: 'Manage Stock', description: 'Tap any product to edit its details or delete it from your menu.', borderRadius: 28 }
+    ], [searchRef, addRef, firstItemRef]);
 
     useEffect(() => { loadItems(); }, []);
 
@@ -91,17 +105,22 @@ const ItemsMenuScreen = () => {
                     </div>
                     <span className="text-[17px]">My Items</span>
                 </button>
-                <button
-                    onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
-                    className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8] active:bg-black active:text-white transition-all"
-                >
-                    {viewMode === 'grid' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button onClick={startGuide} className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-black active:bg-black active:text-white transition-all border border-[#F1F5F9]">
+                        <HelpCircle className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
+                        className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8] active:bg-black active:text-white transition-all"
+                    >
+                        {viewMode === 'grid' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+                    </button>
+                </div>
             </header>
 
             <div className="p-6 space-y-8">
                 {/* Search */}
-                <div className="relative">
+                <div className="relative" ref={searchRef}>
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#CBD5E1]" />
                     <input
                         className="w-full bg-[#F8FAFC] border border-transparent p-5 pl-14 rounded-[24px] outline-none focus:border-[#F1F5F9] font-[700] text-black text-[15px] placeholder:text-[#CBD5E1]"
@@ -117,6 +136,7 @@ const ItemsMenuScreen = () => {
                         {filteredItems.length} Item{filteredItems.length !== 1 ? 's' : ''}
                     </div>
                     <button
+                        ref={addRef}
                         onClick={openAdd}
                         className="flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-[12px] font-[800] active:scale-95 transition-transform shadow-md"
                     >
@@ -131,6 +151,7 @@ const ItemsMenuScreen = () => {
                             {filteredItems.map((item, idx) => (
                                 <motion.button
                                     key={item.id}
+                                    ref={idx === 0 ? firstItemRef : null}
                                     layout
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -294,6 +315,14 @@ const ItemsMenuScreen = () => {
                     </div>
                 )}
             </AnimatePresence>
+            <PageGuide 
+                show={showGuide} 
+                steps={guideSteps} 
+                currentStep={currentStep} 
+                onNext={() => nextStep(guideSteps.length)} 
+                onPrev={prevStep} 
+                onSkip={skipGuide} 
+            />
         </div>
     );
 };

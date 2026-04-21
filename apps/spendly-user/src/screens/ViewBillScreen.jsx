@@ -14,6 +14,11 @@ import { getCategoryById } from '../constants/categories';
 import { useSettingsStore } from '../store/settingsStore';
 import TopHeader from '../components/shared/TopHeader';
 import { PDFReceiptTemplate } from '../components/PDFReceiptTemplate';
+<<<<<<< HEAD
+=======
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
+>>>>>>> 41f113d (upgrade scanner)
 
 const S = { fontFamily: "'Inter', sans-serif" };
 
@@ -29,6 +34,21 @@ export default function ViewBillScreen() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const pdfRef = React.useRef(null);
 
+<<<<<<< HEAD
+=======
+  const amountCardRef = React.useRef(null)
+  const itemsListRef = React.useRef(null)
+  const pdfBtnRef = React.useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('view_bill_page')
+
+  const guideSteps = [
+    { targetRef: amountCardRef, emoji: '📑', title: 'Payment Proof', description: 'This card contains the verified total and transaction metadata for this specific bill.', borderRadius: 36 },
+    { targetRef: itemsListRef, emoji: '🛒', title: 'Item Breakdown', description: 'See every individual product scanned from your physical receipt with unit pricing.', borderRadius: 32 },
+    { targetRef: pdfBtnRef, emoji: '📄', title: 'Export PDF', description: 'Need a physical copy? Generate a tax-ready PDF of this receipt in one tap.', borderRadius: 16 }
+  ]
+
+>>>>>>> 41f113d (upgrade scanner)
   useEffect(() => {
     const found = expenses.find(e => e.id === (typeof e.id === 'number' ? parseInt(id) : id));
     if (found) {
@@ -82,6 +102,7 @@ export default function ViewBillScreen() {
           </div>
           <h1 className="text-[17px] font-[900] text-black tracking-tight truncate leading-none">View Bill</h1>
         </div>
+<<<<<<< HEAD
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={() => setShowDeleteConfirm(true)}
@@ -89,6 +110,24 @@ export default function ViewBillScreen() {
         >
           <Trash2 className="w-4.5 h-4.5" strokeWidth={2.5} />
         </motion.button>
+=======
+        <div className="flex items-center gap-2">
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={startGuide}
+            className="w-11 h-11 bg-white border border-slate-100 rounded-full flex items-center justify-center font-bold text-[18px]"
+          >
+            ?
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-11 h-11 bg-red-50 rounded-full flex items-center justify-center text-red-500"
+          >
+            <Trash2 className="w-4.5 h-4.5" strokeWidth={2.5} />
+          </motion.button>
+        </div>
+>>>>>>> 41f113d (upgrade scanner)
       </div>
 
       {/* Hidden template for PDF generation */}
@@ -114,7 +153,11 @@ export default function ViewBillScreen() {
         </div>
 
         {/* Amount Card */}
+<<<<<<< HEAD
         <div className="bg-black rounded-[36px] p-8 text-white shadow-2xl mb-10 relative overflow-hidden">
+=======
+        <div ref={amountCardRef} className="bg-black rounded-[36px] p-8 text-white shadow-2xl mb-10 relative overflow-hidden">
+>>>>>>> 41f113d (upgrade scanner)
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
           <div className="relative z-10 flex flex-col items-center">
             <p className="text-white/40 text-[11px] font-[800] uppercase tracking-[0.2em] mb-3">Total Paid Amount</p>
@@ -154,7 +197,11 @@ export default function ViewBillScreen() {
 
         {/* Items List */}
         {items.length > 0 && (
+<<<<<<< HEAD
           <div className="mb-10">
+=======
+          <div ref={itemsListRef} className="mb-10">
+>>>>>>> 41f113d (upgrade scanner)
             <div className="flex items-center gap-3 px-3 mb-5">
               <ShoppingCart className="w-4 h-4 text-black" />
               <h4 className="text-[13px] font-[900] text-black uppercase tracking-wider">Bill Items ({items.length})</h4>
@@ -214,6 +261,10 @@ export default function ViewBillScreen() {
                <Share2 className="w-4 h-4" /> Share
             </button>
             <button 
+<<<<<<< HEAD
+=======
+              ref={pdfBtnRef}
+>>>>>>> 41f113d (upgrade scanner)
               onClick={handleDownloadPDF}
               disabled={isGeneratingPDF}
               className="h-16 rounded-2xl bg-[#F6F6F6] text-black font-[800] text-[13px] uppercase tracking-widest flex items-center justify-center gap-2 border border-[#EEEEEE]"
@@ -264,6 +315,17 @@ export default function ViewBillScreen() {
           </div>
         )}
       </AnimatePresence>
+<<<<<<< HEAD
+=======
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   );
 }

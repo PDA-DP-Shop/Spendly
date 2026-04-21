@@ -8,9 +8,9 @@ import { useAppLock } from '../hooks/useAppLock'
 import { useSettingsStore } from '../store/settingsStore'
 
 export default function LockScreen() {
-  const { verifyPin, verifyPattern, verifyBiometric, wrongAttempts, getLockoutRemaining } = useAppLock()
+  const { verifyPin, verifyPattern, verifyBiometric, wrongAttempts, getLockoutRemaining, biometricBlocked } = useAppLock()
   const { settings } = useSettingsStore()
-  const lockType = settings?.lockType || 'pin6'
+  const lockType = settings?.lockType || 'pin4'
   const [lockoutRemaining, setLockoutRemaining] = useState(0)
   const [showReloadConfirm, setShowReloadConfirm] = useState(false)
 
@@ -18,8 +18,22 @@ export default function LockScreen() {
     const interval = setInterval(() => {
       setLockoutRemaining(getLockoutRemaining())
     }, 1000)
-    return () => clearInterval(interval)
-  }, [getLockoutRemaining])
+    
+    let bioTimeout = null;
+    // Auto-trigger biometric on component mount if enabled and not blocked
+    if ((lockType === 'faceid' || lockType === 'fingerprint') && !biometricBlocked) {
+      bioTimeout = setTimeout(() => verifyBiometric(), 500)
+    }
+
+    return () => {
+      clearInterval(interval)
+      if (bioTimeout) clearTimeout(bioTimeout)
+    }
+  }, [getLockoutRemaining, lockType, biometricBlocked, verifyBiometric])
+
+  const handleReload = () => {
+    window.location.reload()
+  }
 
   const handleReload = () => {
     window.location.reload()
@@ -77,6 +91,7 @@ export default function LockScreen() {
                <button onClick={() => setShowReloadConfirm(false)} className="w-full py-5 font-[800] text-[#AFAFAF] uppercase tracking-widest text-[13px]" style={S}>Cancel</button>
              </div>
           </motion.div>
+<<<<<<< HEAD
         )}
       </AnimatePresence>
 
@@ -84,9 +99,23 @@ export default function LockScreen() {
         {(lockType === 'pin4' || lockType === 'pin6' || lockType === 'none') && (
           <PinLock pinLength={lockType === 'pin4' ? 4 : 6} onVerify={verifyPin}
             onBiometric={handleBiometric} wrongAttempts={wrongAttempts} lockoutRemaining={lockoutRemaining} />
+=======
+>>>>>>> 41f113d (upgrade scanner)
         )}
-        {lockType === 'pattern' && <PatternLock onVerify={verifyPattern} />}
-        {lockType === 'biometric' && <FingerprintLock onVerify={() => verifyBiometric()} />}
+      </AnimatePresence>
+
+      <div className="flex-1 flex flex-col justify-center relative z-10 -mt-16">
+        {/* If biometric is blocked, force PIN entry regardless of lockType */}
+        {(biometricBlocked || ['pin', 'pin4', 'pin6', 'none', 'faceid', 'fingerprint', 'biometric'].includes(lockType)) && (
+          <PinLock 
+            pinLength={lockType === 'pin6' ? 6 : 4} 
+            onVerify={verifyPin}
+            onBiometric={!biometricBlocked ? handleBiometric : null} 
+            wrongAttempts={wrongAttempts} 
+            lockoutRemaining={lockoutRemaining} 
+          />
+        )}
+        {lockType === 'pattern' && !biometricBlocked && <PatternLock onVerify={verifyPattern} />}
       </div>
 
       <div className="pb-16 text-center relative z-10">

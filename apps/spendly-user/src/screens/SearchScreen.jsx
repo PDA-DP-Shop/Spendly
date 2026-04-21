@@ -1,5 +1,5 @@
 // Search screen — white premium live search
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Search, X, SlidersHorizontal } from 'lucide-react'
 import TransactionItem from '../components/cards/TransactionItem'
@@ -13,6 +13,11 @@ import WalletRefundModal from '../components/modals/WalletRefundModal'
 import { useWalletStore } from '../store/walletStore'
 import { formatMoney } from '../utils/formatMoney'
 import { useExpenseStore } from '../store/expenseStore'
+<<<<<<< HEAD
+=======
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
+>>>>>>> 41f113d (upgrade scanner)
 
 const SORT_OPTIONS = ['Newest', 'Oldest', 'Most', 'Least']
 const S = { fontFamily: "'Inter', sans-serif" }
@@ -26,8 +31,26 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
   const [sort, setSort] = useState('Newest')
+<<<<<<< HEAD
   const [toast, setToast] = useState(null)
   const [refundTarget, setRefundTarget] = useState(null)
+=======
+  const [refundTarget, setRefundTarget] = useState(null)
+
+  const searchBoxRef = useRef(null)
+  const categoryScrollRef = useRef(null)
+  const sortRowRef = useRef(null)
+  const listRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('search_page')
+
+  const guideSteps = [
+    { targetRef: searchBoxRef, emoji: '🔍', title: 'Find Anything', description: 'Search through your entire spending history by shop name or even a small note you added.', borderRadius: 100 },
+    { targetRef: categoryScrollRef, emoji: '🧀', title: 'Drill Down', description: 'Filter results by specific categories to see only what you want.', borderRadius: 20 },
+    { targetRef: sortRowRef, emoji: '↕️', title: 'Total Control', description: 'Sort by newest, oldest, or amount to find patterns in your spending.', borderRadius: 20 },
+    { targetRef: listRef, emoji: '📝', title: 'Edit & Review', description: 'Found it? Tap the item to edit its details or see the full digital receipt.', borderRadius: 24 }
+  ]
+>>>>>>> 41f113d (upgrade scanner)
 
   const results = useMemo(() => {
     let exps = expenses
@@ -119,9 +142,10 @@ export default function SearchScreen() {
   return (
     <div className="flex flex-col min-h-dvh mb-tab bg-white">
       {/* Search bar */}
-      <div className="px-6 safe-top pt-8 pb-5 bg-white sticky top-0 z-20 border-b border-[#EEEEEE]">
+      <div className="px-6 safe-top pt-8 pb-5 bg-white sticky top-0 z-20 border-b border-[#EEEEEE] flex items-center gap-3">
         <div
-          className="flex items-center gap-4 px-6 py-4 rounded-full transition-all bg-[#F6F6F6] border border-[#EEEEEE]"
+          ref={searchBoxRef}
+          className="flex-1 flex items-center gap-4 px-6 py-4 rounded-full transition-all bg-[#F6F6F6] border border-[#EEEEEE]"
         >
           <Search className="w-5 h-5 text-black flex-shrink-0" strokeWidth={3} />
           <input
@@ -133,16 +157,11 @@ export default function SearchScreen() {
             className="flex-1 bg-transparent text-[16px] font-[900] text-black outline-none placeholder-[#AFAFAF]"
             style={S}
           />
-          {query.length > 0 && (
-            <button onClick={() => setQuery('')} className="w-7 h-7 flex items-center justify-center rounded-full bg-black">
-              <X className="w-4 h-4 text-white" strokeWidth={3} />
-            </button>
-          )}
         </div>
       </div>
 
       {/* Category filter chips */}
-      <div className="flex gap-3 px-6 py-6 overflow-x-auto scrollbar-hide bg-white border-b border-[#EEEEEE]">
+      <div ref={categoryScrollRef} className="flex gap-3 px-6 py-6 overflow-x-auto scrollbar-hide bg-white border-b border-[#EEEEEE]">
         {[{ id: 'all', name: 'Total', emoji: '✨' }, ...CATEGORIES].map(cat => (
           <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
             className={`flex items-center gap-2.5 px-6 py-3 rounded-full text-[13px] font-[900] whitespace-nowrap flex-shrink-0 transition-all border ${
@@ -158,7 +177,7 @@ export default function SearchScreen() {
       </div>
 
       {/* Sort row */}
-      <div className="flex items-center gap-4 px-6 py-5 overflow-x-auto scrollbar-hide bg-[#FBFBFB] border-b border-[#EEEEEE]">
+      <div ref={sortRowRef} className="flex items-center gap-4 px-6 py-5 overflow-x-auto scrollbar-hide bg-[#FBFBFB] border-b border-[#EEEEEE]">
         <div className="flex items-center gap-2 mr-2">
             <SlidersHorizontal className="w-4 h-4 text-black" strokeWidth={3} />
             <span className="text-[11px] font-[900] uppercase tracking-[0.2em] text-black flex-shrink-0" style={S}>Sort</span>
@@ -185,7 +204,7 @@ export default function SearchScreen() {
             message={query ? `No records found for "${query}" on this terminal.` : 'Enter search parameters to query the database.'}
           />
         ) : (
-          <div className="pb-tab">
+          <div ref={listRef} className="pb-tab">
             <div className="flex items-center gap-3 px-6 mb-6">
                 <div className="w-2 h-2 rounded-full bg-black shadow-[0_0_8px_rgba(0,0,0,0.3)]" />
                 <p className="text-[11px] font-[900] uppercase tracking-[0.2em] text-[#AFAFAF]" style={S}>
@@ -218,6 +237,18 @@ export default function SearchScreen() {
         onAction={handleRefundAction}
         onClose={() => setRefundTarget(null)}
       />
+<<<<<<< HEAD
+=======
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   )
 }

@@ -28,18 +28,27 @@ import { RefreshCw } from 'lucide-react';
 
 // ─── Reusable Bottom Sheet ───────────────────────────────────────────────────
 const BottomSheet = ({ show, onClose, title, children }) => {
+<<<<<<< HEAD
   return createPortal(
+=======
+  const content = (
+>>>>>>> 41f113d (upgrade scanner)
     <AnimatePresence>
       {show && (
         <>
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
+<<<<<<< HEAD
             className="fixed inset-0 z-[2001] bg-black/40 backdrop-blur-[2px]"
+=======
+            className="fixed inset-0 z-[100] bg-black/40"
+>>>>>>> 41f113d (upgrade scanner)
           />
           <motion.div
             initial={{ y: '100%', x: '-50%' }} animate={{ y: 0, x: '-50%' }} exit={{ y: '100%', x: '-50%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 350 }}
+<<<<<<< HEAD
             className="fixed bottom-0 left-1/2 w-full max-w-[450px] z-[2002] bg-white overflow-hidden pb-10"
             style={{ borderRadius: '40px 40px 0 0', maxHeight: '92dvh', display: 'flex', flexDirection: 'column' }}
           >
@@ -57,6 +66,25 @@ const BottomSheet = ({ show, onClose, title, children }) => {
     </AnimatePresence>,
     document.getElementById('modal-root') || document.body
   );
+=======
+            className="fixed bottom-0 left-1/2 w-full max-w-[450px] z-[101] bg-white"
+            style={{ borderRadius: '40px 40px 0 0', maxHeight: '85dvh', display: 'flex', flexDirection: 'column' }}
+          >
+            <div className="w-12 h-1.5 bg-[#F1F5F9] rounded-full mx-auto mt-4 mb-4" />
+            <div className="flex items-center justify-between px-8 mb-5">
+              <h3 className="text-[22px] font-[800] text-black tracking-tight">{title}</h3>
+              <button onClick={onClose} className="w-10 h-10 rounded-full bg-[#F8FAFC] flex items-center justify-center border border-[#F1F5F9]">
+                <X className="w-5 h-5 text-black" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-8 pb-12 scrollbar-hide">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+  return createPortal(content, document.body);
+>>>>>>> 41f113d (upgrade scanner)
 };
 
 // ─── Settings Row ────────────────────────────────────────────────────────────
@@ -136,6 +164,16 @@ const SHOP_CATEGORIES = [
 
 const BILL_PREFIXES = ['INV', 'BILL', 'REC', 'TXN', 'ORD'];
 const GST_RATES = [0, 5, 12, 18, 28];
+const CURRENCIES = [
+  { code: 'INR', name: 'Indian Rupee', symbol: '₹', locale: 'en-IN' },
+  { code: 'USD', name: 'US Dollar', symbol: '$', locale: 'en-US' },
+  { code: 'EUR', name: 'Euro', symbol: '€', locale: 'de-DE' },
+  { code: 'GBP', name: 'British Pound', symbol: '£', locale: 'en-GB' },
+  { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', locale: 'ar-AE' },
+  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', locale: 'ja-JP' },
+  { code: 'CAD', name: 'Canadian Dollar', symbol: '$', locale: 'en-CA' },
+  { code: 'AUD', name: 'Australian Dollar', symbol: '$', locale: 'en-AU' },
+];
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const SettingsScreen = () => {
@@ -180,8 +218,13 @@ const SettingsScreen = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+<<<<<<< HEAD
   const [showCurrency, setShowCurrency] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
+=======
+  const [showCategory, setShowCategory] = useState(false);
+  const [showCurrency, setShowCurrency] = useState(false);
+>>>>>>> 41f113d (upgrade scanner)
   const [catSearch, setCatSearch] = useState('');
   const filteredCats = SHOP_CATEGORIES.filter(c => 
     c.name.toLowerCase().includes(catSearch.toLowerCase()) || 
@@ -364,6 +407,7 @@ const SettingsScreen = () => {
           <SettingsRow icon={Globe} title="Currency" subtitle="Change shop currency" value={`${settings.currency} (${CURRENCY_NOTES[settings.currency]?.symbol || '$'})`} onClick={() => setShowCurrency(true)} />
           <SettingsRow icon={FileText} title="Invoice Setup" subtitle="Bill prefix, numbering & footer" onClick={() => setShowInvoice(true)} />
           <SettingsRow icon={Percent} title="Tax & GST" subtitle="Default GST rate and GSTIN" onClick={() => setShowTax(true)} />
+          <SettingsRow icon={Globe} title="Currency" subtitle="Shop transaction currency" value={CURRENCIES.find(c => c.code === settings.currency)?.name || settings.currency} onClick={() => setShowCurrency(true)} />
           <SettingsRow icon={Package} title="Inventory" subtitle="Manage saved products" onClick={() => navigate('/items')} />
           <SettingsRow icon={Users} title="Clients" subtitle="Customer book" onClick={() => navigate('/customers')} last />
         </SectionCard>
@@ -620,6 +664,41 @@ const SettingsScreen = () => {
           </div>
         </div>
       </BottomSheet>
+<<<<<<< HEAD
+=======
+      
+      {/* ── Currency Picker ─────────────────────────────────── */}
+      <BottomSheet show={showCurrency} onClose={() => setShowCurrency(false)} title="Select Currency">
+        <div className="space-y-4">
+          <p className="text-[13px] font-[500] text-[#94A3B8] px-1 mb-2 leading-relaxed">Choose the primary currency for your shop billing and reports.</p>
+          <div className="grid grid-cols-1 gap-2">
+            {CURRENCIES.map(c => (
+              <button
+                key={c.code}
+                onClick={() => {
+                  updateSetting('currency', c.code);
+                  setShowCurrency(false);
+                  showToast(`Currency updated to ${c.code} ✓`);
+                }}
+                className={`w-full flex items-center justify-between p-5 rounded-[22px] border transition-all ${settings.currency === c.code ? 'bg-black border-black text-white shadow-lg' : 'bg-[#F8FAFC] border-[#F1F5F9]'}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-[800] text-[18px] ${settings.currency === c.code ? 'bg-white/10' : 'bg-white border border-[#F1F5F9]'}`}>
+                    {c.symbol}
+                  </div>
+                  <div className="text-left">
+                    <span className={`text-[15px] font-[700] block ${settings.currency === c.code ? 'text-white' : 'text-black'}`}>{c.name}</span>
+                    <span className={`text-[11px] font-[600] ${settings.currency === c.code ? 'text-white/50' : 'text-[#94A3B8]'}`}>{c.code}</span>
+                  </div>
+                </div>
+                {settings.currency === c.code && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </BottomSheet>
+
+>>>>>>> 41f113d (upgrade scanner)
       <BottomSheet show={showAbout} onClose={() => setShowAbout(false)} title="About">
         <div className="space-y-6 text-center py-4">
           <div className="w-20 h-20 bg-black rounded-[24px] flex items-center justify-center mx-auto shadow-xl">
@@ -645,6 +724,7 @@ const SettingsScreen = () => {
         </div>
       </BottomSheet>
 
+<<<<<<< HEAD
       {/* ── Currency Sheet ────────────────────────────────── */}
       <BottomSheet show={showCurrency} onClose={() => setShowCurrency(false)} title="Select Currency">
         <div className="space-y-4">
@@ -675,6 +755,8 @@ const SettingsScreen = () => {
         </div>
       </BottomSheet>
 
+=======
+>>>>>>> 41f113d (upgrade scanner)
       {/* ── Factory Reset ─────────────────────────── */}
       {showClearConfirm && createPortal(
         <FactoryResetWorkflow onClose={() => setShowClearConfirm(false)} />,

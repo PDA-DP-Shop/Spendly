@@ -67,6 +67,7 @@ export const useExpenseStore = create((set, get) => ({
     const { softDeleteService } = await import('../services/softDeleteService')
     const success = await softDeleteService.restoreExpense(id)
     if (success) {
+<<<<<<< HEAD
       const { useSettingsStore } = await import('./settingsStore')
       const currency = useSettingsStore.getState().settings?.currency || 'INR'
       const { expenseService } = await import('../services/database')
@@ -74,6 +75,13 @@ export const useExpenseStore = create((set, get) => ({
       set({ expenses })
     }
     return success;
+=======
+      const { expenseService } = await import('../services/database')
+      const expenses = await expenseService.getAll()
+      set({ expenses })
+    }
+    return success
+>>>>>>> 41f113d (upgrade scanner)
   },
 
   // Get filtered + searched expenses
@@ -152,5 +160,16 @@ export const useExpenseStore = create((set, get) => ({
     }
     
     return streak
+<<<<<<< HEAD
   }
+=======
+  },
+
+  // ── Unified Scanner Bridge ────────────────────────────────────────────────
+  // Bridge between ScansScreen results and AddExpenseScreen pre-fill.
+  // Shape: { type, name, amount, date, time, category, source, rawData }
+  scannedData: null,
+  setScannedData: (data) => set({ scannedData: data }),
+  clearScannedData: () => set({ scannedData: null }),
+>>>>>>> 41f113d (upgrade scanner)
 }))

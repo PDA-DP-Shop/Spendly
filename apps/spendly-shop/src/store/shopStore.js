@@ -17,8 +17,18 @@ export const useShopStore = create((set, get) => ({
   },
 
   saveShop: async (shopData) => {
+<<<<<<< HEAD
     // If a shop already exists, update it instead of adding a new one
     const current = get().shop;
+=======
+    // Robust singleton check: even if state is null, check DB
+    let current = get().shop;
+    if (!current) {
+        const all = await shopService.getAll();
+        current = all[all.length - 1];
+    }
+
+>>>>>>> 41f113d (upgrade scanner)
     if (current?.id) {
       await shopService.update(current.id, shopData);
       set({ shop: { ...current, ...shopData } });

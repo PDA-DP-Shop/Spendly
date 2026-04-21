@@ -1,4 +1,3 @@
-// Vite build and PWA configuration file
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -10,83 +9,60 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      includeAssets: [
-        'favicon.ico',
-        'robots.txt',
-        'icon-*.png',
-        'splash.png',
-        'data/top-50000-products.json.gz'
-      ],
-      manifest: false,
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'qr-scanner-worker.min.js'],
+      manifest: {
+        name: 'Spendly',
+        short_name: 'Spendly',
+        theme_color: '#000000',
+        background_color: '#000000',
+        display: 'standalone',
+        orientation: 'portrait'
+      },
       workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm,json}'],
+        maximumFileSizeToCacheInBytes: 10000000, // 10MB to cover WASM + DB
         cleanupOutdatedCaches: true,
-        maximumFileSizeToCacheInBytes: 8000000,
-
-        globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,webp,woff2,ttf,json,gz}'
-        ],
-
-        navigateFallback: '/index.html',
-
         runtimeCaching: [
           {
-            urlPattern: /\/$/,
+            urlPattern: /^https:\/\/world\.openfoodfacts\.org\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'html-cache',
-              networkTimeoutSeconds: 3,
+              cacheName: 'product-api-cache',
               expiration: {
-                maxAgeSeconds: 86400
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 31536000
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/world\.openfoodfacts\.org/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'products-cache',
-              expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 2592000
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
               }
             }
           }
         ]
-      },
-
-      devOptions: { enabled: false }
+      }
     })
   ],
-  base: '/',
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    chunkSizeWarningLimit: 1000
-  },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'dexie',
-      'zustand',
-      'framer-motion',
-      'recharts',
-      'lucide-react',
-      'date-fns'
+    exclude: [
+      'tesseract.js',
+      '@undecaf/zbar-wasm',
+      'qr-scanner'
     ]
+  },
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          scanner: ['qr-scanner'],
+          zbar: ['@undecaf/zbar-wasm'],
+          tesseract: ['tesseract.js'],
+          react: ['react', 'react-dom'],
+          motion: ['framer-motion']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 4000
+  },
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin'
+    }
   }
 })

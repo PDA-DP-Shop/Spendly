@@ -15,12 +15,19 @@ const DM_SANS = { fontFamily: "'DM Sans', sans-serif" }
 export default function WalletRefundModal({ show, expense, transaction, currency, onAction, onClose }) {
   if (!show || !expense || !transaction) return null
 
+<<<<<<< HEAD
+=======
+  const isDigital = expense.source === 'spendly-shop' || expense.billId
+>>>>>>> 41f113d (upgrade scanner)
   const isBank = transaction.walletType === 'bank'
   const sourceName = isBank ? (transaction.bankName || 'Bank') : 'Cash'
   const amount = expense.amount
 
   const handleSelect = (action) => {
+<<<<<<< HEAD
     // action: 'delete_only' or 'refund_and_delete'
+=======
+>>>>>>> 41f113d (upgrade scanner)
     onAction(action)
     onClose()
   }
@@ -38,27 +45,49 @@ export default function WalletRefundModal({ show, expense, transaction, currency
           <div className="w-12 h-1.5 bg-[#F1F5F9] rounded-full mx-auto mb-8" />
           
           <div className="text-center mb-8">
+<<<<<<< HEAD
             <h2 className="text-[24px] font-[900] text-black tracking-tighter" style={SORA}>Delete this expense?</h2>
             <p className="text-[#64748B] text-[15px] font-[500] mt-2 px-4" style={S}>
               This record is linked to your {sourceName}. How should we handle the balance?
+=======
+            {isDigital && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white rounded-full text-[9px] font-[900] uppercase tracking-widest mb-4 mx-auto">
+                Verified Digital Bill
+              </div>
+            )}
+            <h2 className="text-[24px] font-[900] text-black tracking-tighter" style={SORA}>Handling Deletion</h2>
+            <p className="text-[#64748B] text-[15px] font-[500] mt-2 px-4" style={S}>
+              This {isDigital ? 'bill' : 'expense'} is linked to your {sourceName}. How should we proceed?
+>>>>>>> 41f113d (upgrade scanner)
             </p>
           </div>
 
           <div className="space-y-4">
+<<<<<<< HEAD
             {/* CARD 1: Paid (No Refund) */}
+=======
+            {/* ACTION 1: Permanent (Money already sent) */}
+>>>>>>> 41f113d (upgrade scanner)
             <motion.button whileTap={{ scale: 0.98 }} onClick={() => handleSelect('delete_only')}
               className="w-full p-6 bg-black text-white rounded-[32px] flex items-center gap-5 text-left group shadow-xl shadow-black/10">
               <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
                 <Trash2 className="w-6 h-6 text-white" strokeWidth={3} />
               </div>
               <div className="flex-1">
+<<<<<<< HEAD
                 <p className="text-[17px] font-[900] tracking-tight" style={SORA}>Yes, I paid this</p>
                 <p className="text-[12px] font-[600] text-white/40 mt-1 leading-tight" style={S}>
                   Money stays deducted from {sourceName}. Just remove the record.
+=======
+                <p className="text-[17px] font-[900] tracking-tight" style={SORA}>Delete Activity</p>
+                <p className="text-[12px] font-[600] text-white/40 mt-1 leading-tight" style={S}>
+                  Keeping the money deducted from {sourceName}. Just clear the record.
+>>>>>>> 41f113d (upgrade scanner)
                 </p>
               </div>
             </motion.button>
  
+<<<<<<< HEAD
             {/* CARD 2: Mistake (Refund) */}
             <motion.button whileTap={{ scale: 0.98 }} onClick={() => handleSelect('refund_and_delete')}
               className="w-full p-6 bg-white rounded-[32px] border border-[#EEEEEE] flex items-center gap-5 text-left group">
@@ -69,6 +98,18 @@ export default function WalletRefundModal({ show, expense, transaction, currency
                 <p className="text-[17px] font-[900] text-black tracking-tight" style={SORA}>It was a mistake</p>
                 <p className="text-[12px] font-[600] text-[#AFAFAF] mt-1 leading-tight" style={S}>
                   Add {formatMoney(amount, currency)} back to {sourceName} and delete record.
+=======
+            {/* ACTION 2: Correction (Mistake/Refund) */}
+            <motion.button whileTap={{ scale: 0.98 }} onClick={() => handleSelect('refund_and_delete')}
+              className="w-full p-6 bg-white rounded-[32px] border-2 border-emerald-500/20 flex items-center gap-5 text-left group shadow-lg shadow-emerald-500/5">
+              <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <RotateCcw className="w-6 h-6 text-emerald-600" strokeWidth={3} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[17px] font-[900] text-emerald-700 tracking-tight" style={SORA}>Correction / Refund</p>
+                <p className="text-[12px] font-[600] text-emerald-600/60 mt-1 leading-tight" style={S}>
+                  Add {formatMoney(amount, currency)} back to {sourceName} (Mistake).
+>>>>>>> 41f113d (upgrade scanner)
                 </p>
               </div>
             </motion.button>

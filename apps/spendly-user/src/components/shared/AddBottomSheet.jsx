@@ -1,7 +1,7 @@
 // AddBottomSheet — white premium slide-up sheet for add options
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Keyboard, ScanBarcode, Mic, X, Receipt } from 'lucide-react'
+import { Plus, Keyboard, ScanBarcode, Mic, X, Receipt, History } from 'lucide-react'
 
 const OPTIONS = [
   {
@@ -22,6 +22,15 @@ const OPTIONS = [
     bg: '#F6F6F6',
     path: '/scans',
     badge: 'NEW'
+  },
+  {
+    id: 'scans-history',
+    icon: History,
+    title: 'Bill History',
+    subtitle: 'View Past Receipt Scans',
+    color: '#000000',
+    bg: '#F6F6F6',
+    path: '/scans-history'
   }
 ]
 

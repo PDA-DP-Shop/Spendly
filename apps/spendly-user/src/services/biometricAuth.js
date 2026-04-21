@@ -142,10 +142,22 @@ export async function verifyBiometric() {
     
     return { success: false, error: 'unknown_failure' }
   } catch (error) {
+<<<<<<< HEAD
     console.error("Biometric verification error:", error)
     if (error.name === 'NotAllowedError') {
       return { success: false, error: 'cancelled' }
     }
+=======
+    if (error.name !== 'NotAllowedError' && error.name !== 'OperationError') {
+      console.error("Biometric verification error:", error)
+    }
+    if (error.name === 'NotAllowedError') {
+      return { success: false, error: 'cancelled' }
+    }
+    if (error.name === 'OperationError') {
+      return { success: false, error: 'pending' }
+    }
+>>>>>>> 41f113d (upgrade scanner)
     if (error.name === 'InvalidStateError') {
       return { success: false, error: 'invalid' }
     }

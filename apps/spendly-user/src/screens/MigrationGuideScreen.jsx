@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, Download, Smartphone, Upload, ShieldCheck, ArrowRight, Info, Share, MoreVertical, PlusSquare, Apple, Globe } from 'lucide-react'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
@@ -24,8 +26,20 @@ export default function MigrationGuideScreen() {
     else setActiveTab('ios')
   }, [])
 
+  const platformRef = useRef(null)
+  const step1Ref = useRef(null)
+  const securityRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('migration_guide_page')
+
+  const guideSteps = [
+    { targetRef: platformRef, emoji: '📱', title: 'Pick Your Device', description: 'The steps for installing Spendly vary between iPhone and Android. Choose yours first.', borderRadius: 22 },
+    { targetRef: step1Ref, emoji: '📦', title: 'Data Backup', description: 'Your data is local. To move it, you must export it as an encrypted file from your old device.', borderRadius: 24 },
+    { targetRef: securityRef, emoji: '🔒', title: 'Privacy Guaranteed', description: 'Only your personal backup file contains your data. No cloud sync means no data leaks.', borderRadius: 16 }
+  ]
+
   const StepCard = ({ icon: Icon, title, desc, children, color = 'blue' }) => (
-    <div className="flex gap-5 mb-11 relative">
+    <div ref={title === t('migration.step1_title') ? step1Ref : null} className="flex gap-5 mb-11 relative">
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${color === 'blue' ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-black text-white shadow-black/20'}`}>
         <Icon className="w-5 h-5" strokeWidth={2.5} />
       </div>
@@ -38,7 +52,7 @@ export default function MigrationGuideScreen() {
   )
 
   const PlatformSwitcher = () => (
-    <div className="flex p-1.5 bg-[#F6F6F6] rounded-[22px] border border-[#EEEEEE] mb-6">
+    <div ref={platformRef} className="flex p-1.5 bg-[#F6F6F6] rounded-[22px] border border-[#EEEEEE] mb-6">
       <button 
         onClick={() => setActiveTab('ios')}
         className={`flex-1 flex items-center justify-center gap-2.5 py-3 rounded-[18px] transition-all duration-300 ${activeTab === 'ios' ? 'bg-white shadow-sm text-black' : 'text-[#AFAFAF] opacity-60'}`}
@@ -66,15 +80,25 @@ export default function MigrationGuideScreen() {
       <div className="absolute bottom-0 left-0 w-[250px] h-[250px] bg-slate-50 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2" />
 
       {/* Header */}
-      <div className="px-7 pt-12 pb-6 flex items-center gap-5 bg-white border-b border-[#F6F6F6] sticky top-0 z-30">
-        <motion.button 
-          variants={HAPTIC_SHAKE} whileTap="tap"
-          onClick={() => navigate(-1)}
-          className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center"
+      <div className="px-7 pt-12 pb-6 flex items-center justify-between bg-white border-b border-[#F6F6F6] sticky top-0 z-30">
+        <div className="flex items-center gap-5">
+          <motion.button 
+            variants={HAPTIC_SHAKE} whileTap="tap"
+            onClick={() => navigate(-1)}
+            className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5 text-black" strokeWidth={2.5} />
+          </motion.button>
+          <h1 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{t('migration.title')}</h1>
+        </div>
+        <button 
+           onClick={startGuide}
+           className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+           style={{ fontFamily: "'DM Sans', sans-serif" }}
+           title="How to use this page"
         >
-          <ChevronLeft className="w-5 h-5 text-black" strokeWidth={2.5} />
-        </motion.button>
-        <h1 className="text-[22px] font-[800] text-black tracking-tight" style={S}>{t('migration.title')}</h1>
+           ?
+        </button>
       </div>
 
       <div className="px-8 pt-8 pb-32">
@@ -147,7 +171,7 @@ export default function MigrationGuideScreen() {
         </div>
 
         {/* Security Footer */}
-        <div className="mt-10 flex items-start gap-4 px-2">
+        <div ref={securityRef} className="mt-10 flex items-start gap-4 px-2">
           <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" strokeWidth={2.5} />
           <p className="text-[11px] font-[600] text-[#AFAFAF] leading-relaxed uppercase tracking-wider" style={S}>
             {t('migration.footer')}
@@ -166,6 +190,14 @@ export default function MigrationGuideScreen() {
           {t('migration.action_button')} <ArrowRight className="w-5 h-5" />
         </motion.button>
       </div>
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

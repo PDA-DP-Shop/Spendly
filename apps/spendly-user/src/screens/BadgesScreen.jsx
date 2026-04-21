@@ -1,5 +1,5 @@
 // BadgesScreen.jsx — Feature 18: Achievements Grid
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
@@ -8,6 +8,8 @@ import { BADGES } from '../constants/badges'
 import { useTranslation } from 'react-i18next'
 import { X, Lock, Trophy, Medal, Star, Target } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const HAPTIC_TOUCH = {
   tap: { 
@@ -72,6 +74,16 @@ export default function BadgesScreen() {
   const { earned, loadBadges, markSeen } = useBadgeStore()
   const [selectedBadge, setSelectedBadge] = useState(null)
   const S = { fontFamily: "'Inter', sans-serif" }
+
+  const heroRef = useRef(null)
+  const firstBadgeRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('badges_page')
+
+  const guideSteps = [
+    { targetRef: heroRef, emoji: '🏆', title: 'Life Stats', description: 'This tracks your overall Spendly rank. Level up by hitting savings milestones and using tools frequently!', borderRadius: 40 },
+    { targetRef: firstBadgeRef, emoji: '🎖️', title: 'Unlock Goal', description: 'Locked badges are secret! Tap them to learn how you can earn them and add focus to your spending.', borderRadius: 32 }
+  ]
   
   useEffect(() => { loadBadges() }, [])
 
@@ -88,10 +100,22 @@ export default function BadgesScreen() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-white pb-24 safe-top">
-      <TopHeader title={t('badges.title')} />
+      <TopHeader 
+        title={t('badges.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
 
       {/* Progress Hero — White Premium Style */}
-      <div className="mx-6 mb-12 mt-6 rounded-[40px] p-10 bg-blue-600 text-white relative overflow-hidden shadow-2xl shadow-blue-200">
+      <div ref={heroRef} className="mx-6 mb-12 mt-6 rounded-[40px] p-10 bg-blue-600 text-white relative overflow-hidden shadow-2xl shadow-blue-200">
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/10 -mr-32 -mt-32 blur-3xl" />
         <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/5 -ml-24 -mb-24 blur-2xl" />
         
@@ -150,18 +174,19 @@ export default function BadgesScreen() {
                   const isNew = isEarned && earnedMap[badge.id].isNew
 
                   return (
-                    <motion.button key={badge.id} 
-                      onClick={() => handleSelect(badge)}
-                      variants={HAPTIC_TOUCH}
-                      whileTap="tap"
-                      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
-                      className={`relative aspect-square rounded-[32px] border transition-all flex flex-col items-center justify-center p-4
-                        ${isEarned ? 'bg-white border-[#F6F6F6] shadow-md active:shadow-lg' : 'bg-[#F6F6F6] border-transparent opacity-40'}`}>
-                      
-                      {isNew && (
-                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} 
-                          className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg z-20" />
-                      )}
+                      <motion.button key={badge.id} 
+                        ref={i === 0 && categories[0] === category ? firstBadgeRef : null}
+                        onClick={() => handleSelect(badge)}
+                        variants={HAPTIC_TOUCH}
+                        whileTap="tap"
+                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
+                        className={`relative aspect-square rounded-[32px] border transition-all flex flex-col items-center justify-center p-4
+                          ${isEarned ? 'bg-white border-[#F6F6F6] shadow-md active:shadow-lg' : 'bg-[#F6F6F6] border-transparent opacity-40'}`}>
+                        
+                        {isNew && (
+                          <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} 
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg z-20" />
+                        )}
 
                       <div className={`w-14 h-14 flex items-center justify-center rounded-full text-3xl mb-3 transition-all ${isEarned ? 'bg-blue-50' : 'bg-transparent'}`}>
                         {isEarned ? (
@@ -193,6 +218,15 @@ export default function BadgesScreen() {
           />
         )}
       </AnimatePresence>
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

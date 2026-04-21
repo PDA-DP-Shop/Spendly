@@ -3,6 +3,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --shadow-premium: 0 10px 40px -10px rgba(124, 111, 247, 0.1);
@@ -13,9 +14,11 @@
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    width: 100%;
+    overflow: hidden;
+    width: 100vw;
+    height: 100dvh;
     position: relative;
+    margin: 0;
   }
 
   button, input, select, textarea {
@@ -69,20 +72,23 @@
   }
 
   .app-shell {
-    background-color: #F8F9FF; /* Sophisticated blue-ish white */
-    min-height: 100vh;
-    width: 100%;
+    background-color: #F8F9FF;
+    height: 100dvh;
+    width: 100vw;
     display: flex;
     justify-content: center;
+    overflow: hidden;
   }
-
   .app-content {
     width: 100%;
     max-width: 450px;
-    min-height: 100dvh;
+    height: 100%;
     background-color: #F8F9FF;
     position: relative;
     box-shadow: 0 0 100px rgba(124, 111, 247, 0.05);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   @media (max-width: 450px) {

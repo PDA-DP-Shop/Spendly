@@ -1,5 +1,5 @@
 // Budget screen — white premium per-category budget editor
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import TopHeader from '../components/shared/TopHeader'
@@ -11,6 +11,8 @@ import { calculateSpent } from '../utils/calculateTotal'
 import { formatMoney } from '../utils/formatMoney'
 import { format } from 'date-fns'
 import { Sparkles, Target, Zap } from 'lucide-react'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
@@ -45,8 +47,17 @@ export default function BudgetScreen() {
   const { getThisMonth } = useExpenses()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
-  const [editingOverall, setEditingOverall] = useState(String(overallBudget))
   const [catBudgets, setCatBudgets] = useState({})
+  const [editingOverall, setEditingOverall] = useState('')
+
+  const totalCardRef = useRef(null)
+  const catGridRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('budget_page')
+
+  const guideSteps = useMemo(() => [
+    { targetRef: totalCardRef, emoji: '🎯', title: 'Global Goal', description: 'This is your "hard ceiling" for the month. The bar turns red as you get closer to spending it all!', borderRadius: 40 },
+  ], [totalCardRef, catGridRef])
 
   const currencySymbol = settings?.currency === 'INR' ? '₹' : settings?.currency === 'EUR' ? '€' : settings?.currency === 'GBP' ? '£' : '$'
 
@@ -80,8 +91,20 @@ export default function BudgetScreen() {
   const pctUsed = overallBudget > 0 ? Math.round((spent / overallBudget) * 100) : 0
 
   return (
-    <div className="flex flex-col min-h-dvh bg-white pb-24">
-      <TopHeader title={t('budget.title')} />
+    <div className="flex flex-col min-h-dvh bg-white pb-24 safe-top">
+      <TopHeader 
+        title={t('budget.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
 
       <div className="px-6 py-4 flex items-center justify-between">
          <div className="flex items-center gap-2">
@@ -97,7 +120,7 @@ export default function BudgetScreen() {
       </div>
 
       {/* Overall budget card */}
-      <div className="mx-6 mt-2 mb-12 p-10 relative overflow-hidden shadow-2xl shadow-black/10"
+      <div ref={totalCardRef} className="mx-6 mt-2 mb-12 p-10 relative overflow-hidden shadow-2xl shadow-black/10"
         style={{ 
             background: 'black', 
             borderRadius: '40px', 
@@ -149,7 +172,7 @@ export default function BudgetScreen() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div ref={catGridRef} className="flex flex-col gap-8">
           {CATEGORIES.slice(0, 10).map(cat => {
             const catSpent = getCatSpent(cat.id)
             const catLimit = parseFloat(catBudgets[cat.id] || '0')
@@ -197,6 +220,15 @@ export default function BudgetScreen() {
           })}
         </div>
       </div>
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

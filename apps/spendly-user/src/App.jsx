@@ -38,6 +38,7 @@ const AddExpenseScreen = lazy(() => import('./screens/AddExpenseScreen'))
 const ReportsScreen = lazy(() => import('./screens/ReportsScreen'))
 const SearchScreen = lazy(() => import('./screens/SearchScreen'))
 const ScansScreen = lazy(() => import('./screens/ScansScreen'))
+const ScansHistoryScreen = lazy(() => import('./screens/ScansHistoryScreen'))
 const BudgetScreen = lazy(() => import('./screens/BudgetScreen'))
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'))
 const WalletsScreen = lazy(() => import('./screens/WalletsScreen'))
@@ -51,10 +52,16 @@ const PrivacyPolicyScreen = lazy(() => import('./screens/PrivacyPolicyScreen'))
 const MigrationGuideScreen = lazy(() => import('./screens/MigrationGuideScreen'))
 const DeletedItemsScreen = lazy(() => import('./screens/DeletedItemsScreen'))
 const ViewBillScreen = lazy(() => import('./screens/ViewBillScreen'))
+<<<<<<< HEAD
 const CashWalletScreen = lazy(() => import('./screens/CashWalletScreen'))
 const BankAccountsScreen = lazy(() => import('./screens/BankAccountsScreen'))
 const WalletTransactionsScreen = lazy(() => import('./screens/WalletTransactionsScreen'))
 
+=======
+
+const BankAccountsScreen = lazy(() => import('./screens/BankAccountsScreen'))
+const CashWalletScreen = lazy(() => import('./screens/CashWalletScreen'))
+>>>>>>> 41f113d (upgrade scanner)
 const DeleteConfirmScreen = lazy(() => import('./screens/delete-recovery/DeleteConfirmScreen'))
 const DeleteTimerScreen = lazy(() => import('./screens/delete-recovery/DeleteTimerScreen'))
 const DeleteProgressScreen = lazy(() => import('./screens/delete-recovery/DeleteProgressScreen'))
@@ -77,6 +84,7 @@ const ROUTE_DEPTH = {
   '/settings': 2,
   '/budget': 2,
   '/scans': 2,
+  '/scans-history': 3,
   '/wallets': 2,
   '/emis': 2,
   '/goals': 2,
@@ -85,6 +93,8 @@ const ROUTE_DEPTH = {
   '/festivals': 2,
   '/add': 3,
   '/bill-code': 3,
+  '/bank-accounts': 3,
+  '/cash-wallet': 3,
   '/migration-guide': 3,
   '/terms': 3,
   '/privacy': 3,
@@ -96,9 +106,12 @@ const ROUTE_DEPTH = {
   '/recover-data': 3,
   '/recover-progress': 4,
   '/recover-success': 5,
+<<<<<<< HEAD
   '/cash-wallet': 3,
   '/bank-accounts': 3,
   '/wallet-history': 4,
+=======
+>>>>>>> 41f113d (upgrade scanner)
 }
 
 function getDepth(pathname) {
@@ -186,6 +199,11 @@ function AppWrapper() {
               price: it.p,
               quantity: it.q
             })),
+<<<<<<< HEAD
+=======
+            paymentMethod: data.pm || 'CASH',
+            paymentDetails: data.pd || null,
+>>>>>>> 41f113d (upgrade scanner)
             type: 'SPENDLY_BILL'
           }
         }
@@ -257,6 +275,7 @@ function AppWrapper() {
                   <Route path="/search" element={<SearchScreen />} />
                   <Route path="/budget" element={<BudgetScreen />} />
                   <Route path="/settings" element={<SettingsScreen />} />
+                  <Route path="/scans-history" element={<ScansHistoryScreen />} />
                   <Route path="/wallets" element={<WalletsScreen />} />
                   <Route path="/emis" element={<EMIScreen />} />
                   <Route path="/goals" element={<GoalsScreen />} />
@@ -271,6 +290,11 @@ function AppWrapper() {
                   <Route path="/deleted-items" element={<DeletedItemsScreen />} />
                   <Route path="/migration-guide" element={<MigrationGuideScreen />} />
                   <Route path="/view-bill/:id" element={<ViewBillScreen />} />
+<<<<<<< HEAD
+=======
+                  <Route path="/bank-accounts" element={<BankAccountsScreen />} />
+                  <Route path="/cash-wallet" element={<CashWalletScreen />} />
+>>>>>>> 41f113d (upgrade scanner)
                   <Route path="/delete-confirm" element={<DeleteConfirmScreen />} />
                   <Route path="/delete-timer" element={<DeleteTimerScreen />} />
                   <Route path="/delete-progress" element={<DeleteProgressScreen />} />
@@ -327,7 +351,7 @@ export default function App() {
 
   // Desktop detection
   useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth > 768)
+    const checkDesktop = () => setIsDesktop(window.innerWidth > 1024)
     checkDesktop()
     window.addEventListener('resize', checkDesktop)
     return () => window.removeEventListener('resize', checkDesktop)
@@ -356,9 +380,32 @@ export default function App() {
                   try {
                     const decoded = decodeURIComponent(data)
                     const jsonStr = decodeURIComponent(escape(atob(decoded)))
-                    const bill = JSON.parse(jsonStr)
-                    setIncomingBill(bill)
-                    setShowBillPopup(true)
+                    const rawData = JSON.parse(jsonStr)
+                    let bill = rawData
+                    
+                    if (rawData.v === 2 || rawData.s) {
+                      bill = {
+                        shopName: rawData.s,
+                        total: rawData.t,
+                        shopCategory: rawData.c,
+                        billNumber: rawData.bn,
+                        billId: rawData.bi,
+                        timestamp: rawData.ts,
+                        items: (rawData.i || []).map(it => ({
+                          name: it.n,
+                          price: it.p,
+                          quantity: it.q
+                        })),
+                        paymentMethod: rawData.pm || 'CASH',
+                        paymentDetails: rawData.pd || null,
+                        type: 'SPENDLY_BILL'
+                      }
+                    }
+                    
+                    if (bill.type === 'SPENDLY_BILL') {
+                      setIncomingBill(bill)
+                      setShowBillPopup(true)
+                    }
                   } catch (e) {
                     console.error("NFC bill parse failed", e)
                   }
@@ -430,7 +477,19 @@ export default function App() {
         await recoveryVaultService.getActiveVault() // This internally checks expiry and deletes if needed
         
         await useLockStore.getState().loadLockoutState()
+<<<<<<< HEAD
         await loadExpenses()
+=======
+        const expenses = await loadExpenses()
+        
+        // Runtime Self-Healing: If user has expenses but settings say onboarding is NOT done, 
+        // it's a state corruption. Fix it immediately and skip onboarding.
+        if (useSettingsStore.getState().settings?.onboardingDone === false && expenses?.length > 0) {
+          console.warn('Spendly: Onboarding state mismatch detected. Self-healing...')
+          await useSettingsStore.getState().completeOnboarding()
+        }
+
+>>>>>>> 41f113d (upgrade scanner)
         setReady(true)
       } catch (err) {
         console.error('Spendly Initialization Failed:', err)
@@ -463,11 +522,18 @@ export default function App() {
     window.addEventListener('pagehide', () => {
       if (!useSecurityStore.getState().pauseSecurity) clearEncryptionKey()
     })
+
+    const handleFocus = () => {
+      if (!document.hidden) setBackgrounded(false)
+    }
+    window.addEventListener('focus', handleFocus)
+
     window.addEventListener('blur', () => {
       if (useSecurityStore.getState().pauseSecurity) return
       setTimeout(() => {
         if (!useSecurityStore.getState().pauseSecurity && (document.hidden || !document.hasFocus())) {
           clearEncryptionKey()
+          useLockStore.getState().lock()
           setBackgrounded(true)
         }
       }, 1000)
@@ -484,6 +550,8 @@ export default function App() {
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('pagehide', clearEncryptionKey)
       document.removeEventListener('copy', handleCopy)
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('blur', handleVisibility)
       window.removeEventListener('mousemove', resetIdle)
       window.removeEventListener('keydown', resetIdle)
       window.removeEventListener('touchstart', resetIdle)
@@ -613,13 +681,9 @@ export default function App() {
         onDismiss={dismissUpdate}
       />
       <NFCGlow active={isReceivingNFC} color="purple" />
-      {isDesktop ? (
-        <div className="w-full h-dvh bg-white overflow-hidden relative">
-          {content}
-        </div>
-      ) : (
+      {isDesktop ? <DesktopBlockScreen /> : (
         <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-dvh">
-          <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden">
+          <div className="app-content bg-white shadow-2xl shadow-black/5 relative">
             {content}
           </div>
         </div>

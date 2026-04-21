@@ -7,10 +7,11 @@
   <!-- PWA meta tags -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Spendly" />
   <meta name="application-name" content="Spendly" />
   <meta name="theme-color" content="#FFFFFF" />
+  <meta name="color-scheme" content="light" />
   
   <!-- SEO meta tags -->
   <meta name="description" content="Spendly - 100% private offline expense tracker. Manage your budget and track spending without cloud syncing, bank links, or accounts. Secure local money manager." />
@@ -82,7 +83,9 @@
       -webkit-overflow-scrolling: touch;
       margin: 0;
     }
-    #root { 
+    :root {
+    color-scheme: light;
+    --primary: #2563EB;
       min-height: 100dvh;
       max-width: 100vw;
       overflow-x: hidden;
@@ -100,7 +103,7 @@
         <img src="/spendly-logo.png" alt="Spendly" style="position: relative; z-index: 10; width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 30px 60px rgba(0,0,0,0.1); filter: grayscale(100%);" />
       </div>
       <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; color: #000000; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 8px;">Spendly</div>
-      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 9px; color: #AFAFAF; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 40px;">Neural_System_Init</div>
+      <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 9px; color: #AFAFAF; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 40px;">Fast_Scan_Active</div>
       <div style="width: 160px; height: 2px; background: #F6F6F6; border-radius: 100px; overflow: hidden;">
         <div style="height: 100%; background: #000000; border-radius: 100px; animation: load-bar 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;"></div>
       </div>
@@ -120,6 +123,7 @@
     </div>
   </noscript>
 
+  <div id="modal-root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

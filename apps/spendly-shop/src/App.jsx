@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Home, Receipt, Users, User } from 'lucide-react';
 import SplashScreen from './screens/SplashScreen';
+import { useSettingsStore } from './store/settingsStore';
+import { useLockStore } from './store/lockStore';
 import OnboardingScreen from './screens/OnboardingScreen';
 import LockScreen from './screens/LockScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -15,11 +17,19 @@ import CustomerDetailScreen from './screens/CustomerDetailScreen';
 import ItemsMenuScreen from './screens/ItemsMenuScreen';
 import ReportsScreen from './screens/ReportsScreen';
 import SettingsScreen from './screens/SettingsScreen';
+<<<<<<< HEAD
 import RecentlyDeletedScreen from './screens/RecentlyDeletedScreen';
 import DesktopBlockScreen from './screens/DesktopBlockScreen';
 import CashWalletScreen from './screens/CashWalletScreen';
 import BankAccountsScreen from './screens/BankAccountsScreen';
 import WalletTransactionsScreen from './screens/WalletTransactionsScreen';
+=======
+import CashWalletScreen from './screens/CashWalletScreen';
+import BankAccountsScreen from './screens/BankAccountsScreen';
+import WalletHistoryScreen from './screens/WalletHistoryScreen';
+import RecentlyDeletedScreen from './screens/RecentlyDeletedScreen';
+import DesktopBlockScreen from './screens/DesktopBlockScreen';
+>>>>>>> 41f113d (upgrade scanner)
 import DeleteConfirmScreen from './screens/delete-recovery/DeleteConfirmScreen';
 import DeleteTimerScreen from './screens/delete-recovery/DeleteTimerScreen';
 import DeleteProgressScreen from './screens/delete-recovery/DeleteProgressScreen';
@@ -27,8 +37,11 @@ import DeleteSuccessScreen from './screens/delete-recovery/DeleteSuccessScreen';
 import RecoverDataScreen from './screens/delete-recovery/RecoverDataScreen';
 import RecoverProgressScreen from './screens/delete-recovery/RecoverProgressScreen';
 import RecoverSuccessScreen from './screens/delete-recovery/RecoverSuccessScreen';
+<<<<<<< HEAD
 import { useSettingsStore } from './store/settingsStore';
 import { useShopStore } from './store/shopStore';
+=======
+>>>>>>> 41f113d (upgrade scanner)
 
 // ── Route depth for directional navigation ────────────────────────────────────
 const ROUTE_DEPTH = {
@@ -56,6 +69,12 @@ const ROUTE_DEPTH = {
   '/recover-data': 4,
   '/recover-progress': 5,
   '/recover-success': 6,
+<<<<<<< HEAD
+=======
+  '/cash-wallet': 3,
+  '/bank-wallet': 3,
+  '/wallet-history': 4,
+>>>>>>> 41f113d (upgrade scanner)
 };
 
 function getDepth(pathname) {
@@ -111,9 +130,12 @@ function AnimatedRoutes() {
           <Route path="/items" element={<ItemsMenuScreen />} />
           <Route path="/reports" element={<ReportsScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
+<<<<<<< HEAD
           <Route path="/cash-wallet" element={<CashWalletScreen />} />
           <Route path="/bank-accounts" element={<BankAccountsScreen />} />
           <Route path="/wallet-history" element={<WalletTransactionsScreen />} />
+=======
+>>>>>>> 41f113d (upgrade scanner)
           <Route path="/recently-deleted" element={<RecentlyDeletedScreen />} />
           <Route path="/delete-confirm" element={<DeleteConfirmScreen />} />
           <Route path="/delete-timer" element={<DeleteTimerScreen />} />
@@ -122,6 +144,12 @@ function AnimatedRoutes() {
           <Route path="/recover-data" element={<RecoverDataScreen />} />
           <Route path="/recover-progress" element={<RecoverProgressScreen />} />
           <Route path="/recover-success" element={<RecoverSuccessScreen />} />
+<<<<<<< HEAD
+=======
+          <Route path="/cash-wallet" element={<CashWalletScreen />} />
+          <Route path="/bank-wallet" element={<BankAccountsScreen />} />
+          <Route path="/wallet-history" element={<WalletHistoryScreen />} />
+>>>>>>> 41f113d (upgrade scanner)
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </motion.div>
@@ -186,7 +214,7 @@ function BottomTabBar() {
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-[50] h-[90px] pointer-events-none flex items-end pb-4 px-4">
       <div className="w-full pointer-events-auto">
-        <div className="bg-black/90 backdrop-blur-2xl rounded-[28px] flex items-center justify-between px-2 h-[68px] shadow-2xl border border-white/10 max-w-lg mx-auto">
+        <div className="bg-black/90 backdrop-blur-2xl rounded-[28px] flex items-center justify-between px-2 h-[68px] border border-white/10 max-w-lg mx-auto">
           {tabs.map((tab) => {
             if (tab.isFAB) {
               return (
@@ -194,7 +222,7 @@ function BottomTabBar() {
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => navigate('/create-bill')}
-                    className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-black bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.08)] active:scale-90 transition-transform"
+                    className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-black bg-white active:scale-90 transition-transform"
                   >
                     <Plus className="w-6 h-6" strokeWidth={3} />
                   </motion.button>
@@ -221,7 +249,15 @@ function BottomTabBar() {
 // ── App Shell ─────────────────────────────────────────────────────────────────
 function AppShell() {
   const location = useLocation();
+  const { isLocked, lockType, loadLockoutState } = useLockStore();
+  const { settings } = useSettingsStore();
+  
   const showTab = TAB_ROUTES.includes(location.pathname);
+  const isOnboarding = location.pathname === '/onboarding';
+
+  useEffect(() => {
+    loadLockoutState();
+  }, [loadLockoutState]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -230,6 +266,11 @@ function AppShell() {
     const appContent = document.querySelector('.app-content');
     if (appContent) appContent.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Global Auth Guard: If app is locked and not on onboarding, force LockScreen
+  if (settings?.onboardingDone && isLocked && lockType !== 'none' && !isOnboarding) {
+    return <LockScreen />;
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -242,14 +283,19 @@ function AppShell() {
 // ── Root App ──────────────────────────────────────────────────────────────────
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  const loadSettings = useSettingsStore(state => state.loadSettings);
 
   useEffect(() => {
+    loadSettings();
     const handleResize = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handleResize);
     
+<<<<<<< HEAD
     const { loadSettings } = useSettingsStore.getState();
     loadSettings();
 
+=======
+>>>>>>> 41f113d (upgrade scanner)
     // Maintenance check for recovery vault
     import('./services/recoveryVault').then(({ recoveryVaultService }) => {
       recoveryVaultService.getActiveVault(); // This triggers the expiry check & secure wipe
@@ -263,7 +309,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-shell flex justify-center bg-[#F8F9FA] min-h-screen">
-        <div className="app-content bg-white shadow-2xl shadow-black/5 relative overflow-x-hidden w-full max-w-[450px]">
+        <div className="app-content bg-white relative w-full max-w-[450px] border-x border-[#EEEEEE]">
           <AppShell />
         </div>
       </div>

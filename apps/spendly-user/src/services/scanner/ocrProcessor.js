@@ -1,6 +1,10 @@
 /**
  * OCR Processor Service - Neural Accuracy Shield
  * Uses Tesseract.js with Multi-Pass Image Adaptive Binarization
+ *
+ * NOTE: Tesseract.js v5+ bundles its own worker automatically.
+ * No workerPath / corePath options are needed or wanted — they
+ * caused "file not found" errors on every non-localhost device.
  */
 import { createWorker } from 'tesseract.js'
 import { applyNeuralCorrections } from './ocrCorrector'
@@ -10,20 +14,20 @@ let worker = null
 export async function getOCRWorker() {
   if (worker) return worker
 
+  // v5+ API: just pass language. Worker is auto-resolved from the npm bundle.
   worker = await createWorker('eng', 1, {
-    logger: m => console.log(m?.status, m?.progress),
-    workerBlobURL: true
+    logger: m => console.log('[OCR]', m)
   })
 
   await worker.setParameters({
-    tessedit_pageseg_mode: '1', 
+    tessedit_pageseg_mode: '1',
   })
 
   return worker
 }
 
 export async function preloadOCRWorker() {
-  try { await getOCRWorker() } catch (e) {}
+  try { await getOCRWorker() } catch (e) { console.warn('[OCR] Preload failed', e) }
 }
 
 /**

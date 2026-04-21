@@ -1,9 +1,13 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+<<<<<<< HEAD
 import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info, ScanLine, Camera, RefreshCw, Landmark, History } from 'lucide-react'
+=======
+import { ChevronRight, Moon, Sun, Laptop, Lock, Bell, Download, Upload, Trash2, X, Wallet, CreditCard, Target, Plane, Trophy, Smartphone, ShieldCheck, Globe, Calculator, Gift, Shield, Check, Plus, Search, Info, ScanLine, Camera, RefreshCw, Landmark, History, Barcode } from 'lucide-react'
+>>>>>>> 41f113d (upgrade scanner)
 import LockSetupModal from '../components/lock/LockSetupModal'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import ToastMessage from '../components/shared/ToastMessage'
@@ -20,6 +24,13 @@ import { permissionService } from '../services/permissionService'
 import FactoryResetWorkflow from '../components/shared/FactoryResetWorkflow'
 import RecoveryBanner from '../components/shared/RecoveryBanner'
 import { recoveryVaultService } from '../services/recoveryVault'
+<<<<<<< HEAD
+=======
+import SavedProductsManager from '../components/settings/SavedProductsManager'
+import { getAllLearnedBarcodes } from '../services/barcodeService'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
+>>>>>>> 41f113d (upgrade scanner)
 
 
 const LOCK_OPTIONS = [
@@ -135,12 +146,37 @@ export default function SettingsScreen() {
   const [showDecoySetup, setShowDecoySetup] = useState(false)
   const [permStatus, setPermStatus] = useState({ camera: 'prompt', notifications: 'prompt' })
   const [activeVault, setActiveVault] = useState(null)
+<<<<<<< HEAD
+=======
+  const [showSavedProducts, setShowSavedProducts] = useState(false)
+  const [learnedCount, setLearnedCount] = useState(0)
+>>>>>>> 41f113d (upgrade scanner)
   const S = { fontFamily: "'Inter', sans-serif" }
+
+  const profileRef = useRef(null)
+  const barcodeRef = useRef(null)
+  const toolsRef = useRef(null)
+  const securityRef = useRef(null)
+  const walletRef = useRef(null)
+  const dataRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('settings_page')
+
+  const guideSteps = [
+    { targetRef: profileRef, emoji: '👤', title: 'Your Profile', description: 'This is where you can change your display name and check your active currency settings.', borderRadius: 40 },
+    { targetRef: barcodeRef, emoji: '🏷️', title: 'Scan Library', description: 'See all the product barcodes you have taught the app. It makes scanning bills super fast!', borderRadius: 24 },
+    { targetRef: walletRef, emoji: '🏦', title: 'Wallet Center', description: 'Manage your physical cash wallets and individual bank balances in one organized place.', borderRadius: 24 },
+    { targetRef: dataRef, emoji: '💾', title: 'Data Backups', description: 'Export your entire history as a secure, encrypted file or restore previous backups here.', borderRadius: 24 }
+  ]
 
   // Load permission status on mount
   useEffect(() => {
     permissionService.checkStatus().then(s => setPermStatus(s))
     recoveryVaultService.getActiveVault().then(v => setActiveVault(v))
+<<<<<<< HEAD
+=======
+    getAllLearnedBarcodes().then(list => setLearnedCount(list.length))
+>>>>>>> 41f113d (upgrade scanner)
   }, [])
 
   const currency = CURRENCIES.find(c => c.code === settings?.currency) || CURRENCIES[0]
@@ -215,13 +251,23 @@ export default function SettingsScreen() {
       <RecoveryBanner />
       <div className="px-7 pt-12 pb-6 flex items-center justify-between bg-white sticky top-0 z-20 border-b border-[#F6F6F6]">
         <h1 className="text-[28px] font-[800] text-black tracking-tight" style={S}>{t('settings.title')}</h1>
-        <div className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center">
-            <Globe className="w-5 h-5 text-black" strokeWidth={2.5} />
+        <div className="flex items-center gap-2">
+           <div className="w-11 h-11 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center">
+               <Globe className="w-5 h-5 text-black" strokeWidth={2.5} />
+           </div>
+           <button 
+              onClick={startGuide}
+              className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+              title="How to use this page"
+           >
+              ?
+           </button>
         </div>
       </div>
 
       <div className="pt-8">
-        <div className="mx-6 mb-12 p-10 text-center bg-white border border-[#EEEEEE] rounded-[40px] shadow-sm relative overflow-hidden">
+        <div ref={profileRef} className="mx-6 mb-12 p-10 text-center bg-white border border-[#EEEEEE] rounded-[40px] shadow-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-black/5" />
           <div className="w-28 h-28 rounded-full bg-[#F6F6F6] border-2 border-[#EEEEEE] flex items-center justify-center text-[48px] font-[800] text-black mx-auto mb-8 shadow-inner">
             {settings?.profileName ? settings.profileName.charAt(0).toUpperCase() : <Globe className="w-12 h-12 text-[#D8D8D8]" />}
@@ -238,7 +284,37 @@ export default function SettingsScreen() {
           </p>
         </div>
 
+<<<<<<< HEAD
         <SectionCard title={t('settings.finance')}>
+=======
+
+        <div ref={barcodeRef}>
+           <SectionCard title="My Barcode Library">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowSavedProducts(true)}
+            className="w-full flex items-center gap-4 px-6 py-5 text-left active:bg-[#F6F6F6] transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-violet-50 border border-violet-100">
+              <Barcode className="w-4.5 h-4.5 text-violet-600" strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <span className="text-[15px] font-[700] text-black block tracking-tight" style={S}>Saved Products</span>
+              <span className="text-[11px] font-[500] text-[#AFAFAF] mt-0.5 block" style={S}>Barcodes you've taught the app</span>
+            </div>
+            {learnedCount > 0 && (
+              <span className="text-[11px] font-[800] text-violet-700 bg-violet-100 px-2.5 py-1 rounded-full mr-1">
+                {learnedCount}
+              </span>
+            )}
+            <ChevronRight className="w-4 h-4 text-[#AFAFAF]" strokeWidth={3} />
+          </motion.button>
+        </SectionCard>
+        </div>
+
+        <div ref={toolsRef}>
+          <SectionCard title={t('settings.finance')}>
+>>>>>>> 41f113d (upgrade scanner)
           {activeVault && (
             <motion.button 
               initial={{ opacity: 0, x: -20 }}
@@ -264,6 +340,9 @@ export default function SettingsScreen() {
           <SettingRow icon={Gift} label={t('common.festivals')} onClick={() => navigate('/festivals')} subtitle={t('settings.eventBudgets')} />
           <SettingRow icon={Trophy} label={t('common.badges')} onClick={() => navigate('/badges')} subtitle={t('settings.achievements')} />
         </SectionCard>
+        </div>
+
+
 
         <SectionCard title="Wallet & Money">
            <SettingRow icon={Wallet} label="Cash Wallet" onClick={() => navigate('/cash-wallet')} subtitle="Count your notes & coins" />
@@ -281,12 +360,21 @@ export default function SettingsScreen() {
           <SettingRow icon={Globe} label={t('settings.currency')} value={`${currency.flag} ${currency.code}`} onClick={() => setShowCurrencyPicker(true)} />
         </SectionCard>
 
+        <div ref={walletRef}>
+          <SectionCard title="Wallet & Money">
+          <SettingRow icon={Wallet} label="Cash Wallet" onClick={() => navigate('/cash-wallet')} subtitle="Manage notes and physical cash" />
+          <SettingRow icon={Landmark} label="Bank Accounts" onClick={() => navigate('/bank-accounts')} subtitle="Track individual bank balances" />
+          <SettingRow icon={History} label="Wallet Transactions" onClick={() => navigate('/wallets')} subtitle="History of automated deductions" />
+        </SectionCard>
+        </div>
+
         <SectionCard title={t('settings.limits')}>
           <SettingRow icon={Target} label={t('settings.monthlyLimit')} value={formatMoney(settings?.monthlyBudget || 2000, currency.code)} onClick={() => navigate('/budget')} />
           <SettingRow icon={Calculator} label={t('settings.gstCalc')} onClick={() => setShowGST(true)} />
         </SectionCard>
 
-        <SectionCard title={t('settings.security')}>
+        <div ref={securityRef}>
+          <SectionCard title={t('settings.security')}>
           <SettingRow icon={Shield} label={t('settings.lock')}
             value={LOCK_OPTIONS.find(o => o.id === (settings?.lockType || 'none'))?.label}
             onClick={() => setShowLockPicker(true)} />
@@ -296,6 +384,7 @@ export default function SettingsScreen() {
           <SettingRow icon={Shield} label={t('settings.terms')} onClick={() => navigate('/terms')} />
           <SettingRow icon={ShieldCheck} label={t('settings.privacy')} onClick={() => navigate('/privacy')} />
         </SectionCard>
+        </div>
 
         <SectionCard title="Device Access">
           {/* Camera Permission */}
@@ -409,11 +498,28 @@ export default function SettingsScreen() {
           </div>
         </SectionCard>
 
-        <SectionCard title={t('settings.data')}>
+        <div ref={dataRef}>
+          <SectionCard title={t('settings.data')}>
            <SettingRow icon={Download} label={t('settings.export')} onClick={() => handleExport()} subtitle={t('settings.saveBackup')} />
            <SettingRow icon={Upload} label={t('settings.import')} onClick={() => setShowImportInput(true)} subtitle={t('settings.restoreBackup')} />
            <SettingRow icon={Info} label="Migration Guide" onClick={() => navigate('/migration-guide')} subtitle="How to move browser data" />
         </SectionCard>
+        </div>
+
+        <div className="px-8 mt-4 mb-2">
+           <motion.button
+             whileTap={{ scale: 0.98 }}
+             onClick={() => navigate('/delete-confirm')}
+             className="w-full py-5 rounded-[28px] border-2 border-red-500/10 bg-white text-red-500 font-[802] text-[16px] flex items-center justify-center gap-3 active:bg-red-50 transition-all duration-300"
+             style={S}
+           >
+             <Trash2 className="w-5 h-5 text-red-400 group-active:text-red-600" /> 
+             <span className="tracking-tight">Delete All Payment Data</span>
+           </motion.button>
+           <p className="text-[11px] font-[600] text-[#AFAFAF] text-center mt-3 px-10 leading-relaxed uppercase tracking-widest" style={S}>
+             Safe: Settings, Categories & Budgets
+           </p>
+        </div>
 
         <div className="px-8 mt-4 mb-2">
            <motion.button
@@ -434,6 +540,8 @@ export default function SettingsScreen() {
           <p className="text-[12px] font-[600] text-[#AFAFAF] uppercase tracking-widest" style={S}>Build v1.0.4</p>
         </div>
       </div>
+
+
 
       <BottomSheet show={showCurrencyPicker} onClose={() => setShowCurrencyPicker(false)} title="Select Currency">
         <div className="flex flex-col gap-4">
@@ -458,6 +566,10 @@ export default function SettingsScreen() {
             ))}
           </div>
         </div>
+      </BottomSheet>
+
+      <BottomSheet show={showSavedProducts} onClose={() => { setShowSavedProducts(false); getAllLearnedBarcodes().then(l => setLearnedCount(l.length)) }} title="Saved Products">
+        <SavedProductsManager onClose={() => setShowSavedProducts(false)} />
       </BottomSheet>
 
       <BottomSheet show={showLockPicker} onClose={() => setShowLockPicker(false)} title="Privacy Type">
@@ -552,6 +664,15 @@ export default function SettingsScreen() {
       </AnimatePresence>
 
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

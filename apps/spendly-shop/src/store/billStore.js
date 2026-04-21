@@ -48,12 +48,19 @@ export const useBillStore = create((set, get) => ({
   },
 
   restoreBill: async (id) => {
+<<<<<<< HEAD
     const { useSettingsStore } = await import('./settingsStore')
     const currency = useSettingsStore.getState().settings?.currency || 'USD'
     const { softDeleteBillService } = await import('../services/softDeleteService');
     const success = await softDeleteBillService.restoreBill(id);
     if (success) {
       const bills = await billService.getAll(currency);
+=======
+    const { softDeleteBillService } = await import('../services/softDeleteService');
+    const success = await softDeleteBillService.restoreBill(id);
+    if (success) {
+      const bills = await billService.getAll();
+>>>>>>> 41f113d (upgrade scanner)
       set({ bills });
     }
     return success;

@@ -37,6 +37,7 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
 
   const closeActions = () => { animate(x, 0); setIsOpen(false) }
 
+<<<<<<< HEAD
   const handleAction = () => {
     if (isOpen) {
         closeActions()
@@ -49,6 +50,24 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
     }
   }
 
+=======
+  const triggerEdit = () => {
+    if (isDigitalBill) {
+      navigate(`/view-bill/${expense.id}`)
+    } else {
+      onEdit?.(expense)
+    }
+  }
+
+  const handleBodyTap = () => {
+    if (isOpen) {
+      closeActions()
+      return
+    }
+    triggerEdit()
+  }
+
+>>>>>>> 41f113d (upgrade scanner)
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -58,17 +77,24 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
     >
       <div className="absolute inset-0 flex items-center justify-between px-10 h-full">
         <motion.div style={{ scale: rightScale }} className="flex gap-3">
+<<<<<<< HEAD
           <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={handleAction} 
+=======
+          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" 
+            onClick={(e) => { e.stopPropagation(); triggerEdit(); }}
+>>>>>>> 41f113d (upgrade scanner)
             className={`w-10 h-10 rounded-full flex items-center justify-center border border-[#EEEEEE] ${isDigitalBill ? 'bg-black/5' : 'bg-[#F6F6F6]'}`}>
             {isDigitalBill ? <Eye className="w-4 h-4 text-black" strokeWidth={3} /> : <Edit2 className="w-4 h-4 text-black" strokeWidth={3} />}
           </motion.button>
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { closeActions(); onDelete?.(expense.id) }}
+          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" 
+            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white">
             <Trash2 className="w-4 h-4" strokeWidth={3} />
           </motion.button>
         </motion.div>
         <motion.div style={{ scale: leftScale }} className="flex gap-3">
-          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => { closeActions(); onDelete?.(expense.id) }}
+          <motion.button variants={HAPTIC_SHAKE} whileTap="tap" 
+            onClick={(e) => { e.stopPropagation(); closeActions(); onDelete?.(expense.id); }}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white">
             <Trash2 className="w-4 h-4" strokeWidth={3} />
           </motion.button>
@@ -82,20 +108,24 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         onDragEnd={handleDragEnd}
         variants={HAPTIC_SHAKE}
         whileTap="tap"
-        className="relative z-10 flex items-center gap-4 px-5 py-4 cursor-grab active:cursor-grabbing bg-white rounded-[24px] border border-[#EEEEEE] shadow-sm"
+        onClick={handleBodyTap}
+        className="relative z-10 flex items-center gap-4 px-4 py-3 cursor-grab active:cursor-grabbing bg-white rounded-[20px] border border-[#EEEEEE] shadow-sm"
         style={{ x }}
+<<<<<<< HEAD
         onClick={handleAction}
+=======
+>>>>>>> 41f113d (upgrade scanner)
       >
-        <div className="w-12 h-12 rounded-full flex items-center justify-center text-[22px] flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
+        <div className="w-11 h-11 rounded-full flex items-center justify-center text-[20px] flex-shrink-0 bg-[#F6F6F6] border border-[#EEEEEE]">
           {category.emoji}
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-[700] text-black truncate mb-0.5 tracking-tight" style={S}>
+          <p className="text-[14px] font-[700] text-black truncate mb-0.5 tracking-tight" style={S}>
             {expense.shopName || category.name}
           </p>
           <div className="flex items-center gap-2">
-            <p className="text-[11px] font-[500] text-[#AFAFAF] uppercase tracking-wide" style={S}>
+            <p className="text-[10px] font-[500] text-[#AFAFAF] uppercase tracking-wide" style={S}>
               {formatDate(expense.date)}
             </p>
             {isDigitalBill && <span className="text-[7px] bg-black text-white px-1.5 py-0.5 rounded-full font-[900] tracking-tighter uppercase">Verified</span>}
@@ -103,10 +133,10 @@ export default function TransactionItem({ expense, currency = 'USD', onDelete, o
         </div>
 
         <div className="text-right flex-shrink-0">
-          <p className={`text-[16px] font-[800] tracking-tight ${isSpent ? 'text-black' : 'text-blue-600'}`} style={S}>
+          <p className={`text-[15px] font-[800] tracking-tight ${isSpent ? 'text-black' : 'text-blue-600'}`} style={S}>
             {hideBalances ? '••••' : (isSpent ? '-' : '+') + formatMoney(expense.amount, currency)}
           </p>
-          <p className="text-[10px] font-[600] text-[#AFAFAF] uppercase tracking-wider mt-0.5" style={S}>
+          <p className="text-[9px] font-[600] text-[#AFAFAF] uppercase tracking-wider mt-0.5" style={S}>
             {expense.paymentMethod || 'CASH'}
           </p>
         </div>

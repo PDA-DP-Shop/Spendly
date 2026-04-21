@@ -1,14 +1,20 @@
+<<<<<<< HEAD
 // WalletsScreen.jsx — Updated to handle Cash Wallet and Bank Accounts
 import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+=======
+import { useEffect, useState, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight, Wallet, Landmark, ArrowRight, CreditCard, Smartphone, History, RotateCcw } from 'lucide-react'
+>>>>>>> 41f113d (upgrade scanner)
 import TopHeader from '../components/shared/TopHeader'
-import EmptyState from '../components/shared/EmptyState'
-import { useTranslation } from 'react-i18next'
 import { useWalletStore } from '../store/walletStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
+<<<<<<< HEAD
 import { Plus, Minus, PlusCircle, Trash2, X, Wallet, ChevronRight, CreditCard, Landmark } from 'lucide-react'
 
 const ACCOUNT_TYPES = [
@@ -245,6 +251,164 @@ export default function WalletsScreen() {
         onSave={addBankAccount} 
         onClose={() => setShowAdd(false)} 
       />
+=======
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
+
+const SORA = { fontFamily: "'Sora', sans-serif" }
+const DM_SANS = { fontFamily: "'DM Sans', sans-serif" }
+
+export default function WalletsScreen() {
+  const navigate = useNavigate()
+  const { cashWallet, bankAccounts, loadCashWallet, loadBankAccounts } = useWalletStore()
+  const { settings } = useSettingsStore()
+  const [transactions, setTransactions] = useState([])
+  const currency = settings?.currency || 'INR'
+
+  const totalCardRef = useRef(null)
+  const cashCardRef = useRef(null)
+  const bankCardRef = useRef(null)
+  const historyRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('wallets_page')
+
+  const guideSteps = [
+    { targetRef: totalCardRef, emoji: '💎', title: 'Net Worth', description: 'See your combined liquid assets (Cash + Bank) calculated automatically in real-time.', borderRadius: 40 },
+    { targetRef: cashCardRef, emoji: '💵', title: 'Cash Pocket', description: 'Manage your physical currency notes here. You can add notes or see change calculations.', borderRadius: 32 },
+    { targetRef: bankCardRef, emoji: '🏛️', title: 'Bank Accounts', description: 'Link and track balances for all your bank accounts to keep your digital wealth organized.', borderRadius: 32 },
+    { targetRef: historyRef, emoji: '📋', title: 'Wallet Audit', description: 'This specific log shows automated deductions and refunds as they happen in your wallets.', borderRadius: 24 }
+  ]
+
+  useEffect(() => {
+    loadCashWallet(currency)
+    loadBankAccounts(currency)
+    loadTransactions()
+  }, [currency])
+
+  const loadTransactions = async () => {
+    const { db, decryptRecord } = await import('../services/database')
+    const raw = await db.walletTransactions.reverse().limit(20).toArray()
+    const decrypted = await Promise.all(raw.map(decryptRecord))
+    setTransactions(decrypted.filter(Boolean))
+  }
+
+  const bankTotal = bankAccounts.reduce((sum, acc) => sum + (acc.balance || 0), 0)
+  const cashTotal = cashWallet?.totalCash || 0
+  const grandTotal = bankTotal + cashTotal
+
+  return (
+    <div className="flex flex-col min-h-dvh mb-tab bg-[#F5F5F5] overflow-x-hidden safe-top">
+      <TopHeader 
+        title="My Wallets" 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
+
+      {/* Grand Total Asset Card */}
+      <div ref={totalCardRef} className="px-6 py-4">
+        <div className="w-full bg-black rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-lg" />
+          
+          <div className="relative z-10">
+            <p className="text-[11px] font-[700] text-white/40 uppercase tracking-[0.3em] mb-4" style={DM_SANS}>Total Net Worth</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[20px] font-[600] text-indigo-400" style={SORA}>{currency}</span>
+              <p className="text-[48px] font-[900] tracking-tighter leading-none" style={SORA}>
+                {grandTotal.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-7 pt-6 pb-4">
+        <h2 className="text-[14px] font-[800] text-black uppercase tracking-widest pl-2" style={DM_SANS}>Financial Hub</h2>
+      </div>
+
+      <div className="px-6 space-y-4">
+        {/* Cash Wallet Shortcut */}
+        <motion.div ref={cashCardRef} whileTap={{ scale: 0.98 }} onClick={() => navigate('/cash-wallet')}
+          className="bg-white rounded-[32px] p-8 shadow-sm flex items-center justify-between border border-transparent active:border-emerald-500/20 transition-all cursor-pointer overflow-hidden relative">
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center text-3xl">💵</div>
+            <div>
+              <p className="text-[18px] font-[800] text-black tracking-tight" style={DM_SANS}>Physical Cash</p>
+              <p className="text-[22px] font-[800] text-emerald-600 mt-1" style={SORA}>{formatMoney(cashTotal, currency)}</p>
+            </div>
+          </div>
+          <ChevronRight className="w-6 h-6 text-[#AFAFAF] relative z-10" />
+          <div className="absolute top-0 right-0 w-24 h-full bg-emerald-50/20 skew-x-[20deg] translate-x-12 z-0" />
+        </motion.div>
+
+        {/* Bank Accounts Shortcut */}
+        <motion.div ref={bankCardRef} whileTap={{ scale: 0.98 }} onClick={() => navigate('/bank-accounts')}
+          className="bg-white rounded-[32px] p-8 shadow-sm flex items-center justify-between border border-transparent active:border-blue-500/20 transition-all cursor-pointer overflow-hidden relative">
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center text-3xl">🏛️</div>
+            <div>
+              <p className="text-[18px] font-[800] text-black tracking-tight" style={DM_SANS}>Bank Accounts</p>
+              <p className="text-[22px] font-[800] text-blue-600 mt-1" style={SORA}>{formatMoney(bankTotal, currency)}</p>
+            </div>
+          </div>
+          <ChevronRight className="w-6 h-6 text-[#AFAFAF] relative z-10" />
+          <div className="absolute top-0 right-0 w-24 h-full bg-blue-50/20 skew-x-[20deg] translate-x-12 z-0" />
+        </motion.div>
+      </div>
+
+      <div className="px-7 pt-12 pb-4">
+        <h2 className="text-[14px] font-[800] text-black uppercase tracking-widest pl-2" style={DM_SANS}>Transaction Audit</h2>
+      </div>
+
+      <div ref={historyRef} className="px-6 pb-24 space-y-3">
+        {transactions.map((tx, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            className="bg-white rounded-[24px] p-5 flex items-center justify-between border border-[#EEEEEE]">
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.transactionType === 'refund' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                {tx.transactionType === 'refund' ? <RotateCcw className="w-5 h-5" /> : <History className="w-5 h-5" />}
+              </div>
+              <div className="flex-1">
+                <p className="text-[14px] font-[800] text-black tracking-tight leading-tight" style={DM_SANS}>
+                  {tx.transactionType === 'refund' ? 'Refund Processed' : (tx.walletType === 'cash' ? 'Cash Payment' : tx.bankName || 'Bank Account')}
+                </p>
+                <p className="text-[10px] font-[600] text-[#AFAFAF] uppercase tracking-wider mt-0.5">
+                  {tx.walletType === 'cash' ? 'Physical Wallet' : 'Digital Banking'}
+                </p>
+              </div>
+            </div>
+            <div className="text-right ml-4">
+              <p className={`text-[15px] font-[900] ${tx.transactionType === 'refund' ? 'text-emerald-500' : 'text-black'}`} style={SORA}>
+                {tx.transactionType === 'refund' ? '+' : '-'}{formatMoney(tx.amount, currency)}
+              </p>
+               <p className="text-[9px] font-[700] text-[#CBD5E1] tracking-widest uppercase mt-0.5">Success</p>
+            </div>
+          </motion.div>
+        ))}
+        {transactions.length === 0 && (
+          <div className="py-12 text-center bg-white rounded-[32px] border border-dashed border-[#EEEEEE]">
+            <p className="text-[13px] font-[600] text-[#AFAFAF]" style={DM_SANS}>No automated transactions yet.</p>
+          </div>
+        )}
+      </div>
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   )
 }

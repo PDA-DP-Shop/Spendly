@@ -1,4 +1,5 @@
 /**
+<<<<<<< HEAD
  * Super Delete Modal — Premium Triple-Action Confirmation
  * 1. Confirm button
  * 2. Second Confirm
@@ -7,11 +8,20 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, AlertTriangle, ChevronRight, Check, X } from 'lucide-react'
+=======
+ * Super Delete Modal — Premium Single-Step Confirmation
+ * Simplified as per user request to avoid annoying 3-step process for simple bills.
+ * Still maintains premium "Aura" aesthetic.
+ */
+import { motion, AnimatePresence } from 'framer-motion'
+import { Trash2, AlertTriangle, Check, X, ShieldAlert } from 'lucide-react'
+>>>>>>> 41f113d (upgrade scanner)
 import { createPortal } from 'react-dom'
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
 export default function SuperDeleteModal({ show, onDelete, onClose, itemName = 'this expense' }) {
+<<<<<<< HEAD
   const [step, setStep] = useState(1) // 1: Initial, 2: Final Verify, 3: Type DELETE
   const [confirmValue, setConfirmValue] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -38,6 +48,8 @@ export default function SuperDeleteModal({ show, onDelete, onClose, itemName = '
     }
   }
 
+=======
+>>>>>>> 41f113d (upgrade scanner)
   if (!show) return null
 
   const content = (
@@ -59,6 +71,7 @@ export default function SuperDeleteModal({ show, onDelete, onClose, itemName = '
         >
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-8">
+<<<<<<< HEAD
             <div className={`w-20 h-20 rounded-[28px] flex items-center justify-center mb-6 transition-colors duration-500 ${step === 3 ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-500'}`}>
               <Trash2 className="w-10 h-10" />
             </div>
@@ -152,6 +165,41 @@ export default function SuperDeleteModal({ show, onDelete, onClose, itemName = '
           {/* Close Handle */}
           <div className="mt-8 flex justify-center">
              <button onClick={onClose} className="w-12 h-1.5 rounded-full bg-[#F1F5F9]" />
+=======
+            <div className="w-20 h-20 rounded-[28px] bg-red-50 text-red-500 flex items-center justify-center mb-6 shadow-inner">
+              <Trash2 className="w-10 h-10" />
+            </div>
+            <h2 className="text-[26px] font-[900] text-black tracking-tighter leading-tight" style={S}>
+                Delete this Activity?
+            </h2>
+            <p className="text-[#64748B] text-[15px] font-[500] mt-3 px-4" style={S}>
+                This will remove <span className="text-black font-[700]">{itemName}</span> from your dashboard. This is reversible for 3 days via Settings.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+              <motion.button 
+                whileTap={{ scale: 0.96 }}
+                onClick={onDelete}
+                className="w-full py-5 rounded-2xl bg-black text-white font-[900] text-[16px] flex items-center justify-center gap-3 shadow-xl shadow-black/20"
+                style={S}
+              >
+                Confirm Delete <Check className="w-5 h-5" strokeWidth={3} />
+              </motion.button>
+
+              <button 
+                onClick={onClose}
+                className="w-full py-5 rounded-2xl bg-[#F6F6F6] text-[#AFAFAF] font-[800] text-[15px] active:bg-[#EEEEEE] transition-colors" 
+                style={S}
+              >
+                Cancel
+              </button>
+          </div>
+
+          {/* Close Handle */}
+          <div className="mt-8 flex justify-center">
+             <div className="w-12 h-1.5 rounded-full bg-[#F1F5F9]" />
+>>>>>>> 41f113d (upgrade scanner)
           </div>
         </motion.div>
       </motion.div>

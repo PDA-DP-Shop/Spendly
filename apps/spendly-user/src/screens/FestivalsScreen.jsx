@@ -1,5 +1,5 @@
 // Festivals Screen — Feature 21 Seasonal Budgeting
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Calendar, Gift, ShoppingBag, Utensils, Music, Tag, ChevronRight, Trash2, PartyPopper, Sparkles } from 'lucide-react'
@@ -11,6 +11,8 @@ import TopHeader from '../components/shared/TopHeader'
 import EmptyState from '../components/shared/EmptyState'
 import { formatMoney } from '../utils/formatMoney'
 import { format, differenceInDays } from 'date-fns'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const FESTIVAL_TEMPLATES = [
   { id: 'diwali', nameKey: 'festivals.diwali', icon: '🪔', color: '#F97316', defaultBudget: 15000, categories: ['festivals.food', 'festivals.gifts', 'festivals.decor', 'festivals.clothes'] },
@@ -69,6 +71,16 @@ export default function FestivalsScreen() {
   const [budget, setBudget] = useState('')
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
 
+  const firstFestRef = useRef(null)
+  const addBtnRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('festivals_page')
+
+  const guideSteps = [
+    { targetRef: firstFestRef, emoji: '🪔', title: 'Festive Reserve', description: 'Create special pots for holidays like Diwali or Christmas to ensure you never overspend on celebrations!', borderRadius: 40 },
+    { targetRef: addBtnRef, emoji: '🎉', title: 'New Event', description: 'Tap this to select a pre-made template or define your own festive timeline and budget.', borderRadius: 100 }
+  ]
+
   useEffect(() => { loadFestivals() }, [])
 
   const handleAdd = () => {
@@ -90,20 +102,33 @@ export default function FestivalsScreen() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-white pb-24 safe-top">
-      <TopHeader title={t('festivals.title')} />
+      <TopHeader 
+        title={t('festivals.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
       
       <div className="flex-1 px-6 mt-6">
         {festivals.length === 0 ? (
           <EmptyState type="festivals" title={t('festivals.noFestivals')} message={t('festivals.noFestivalsDesc')} />
         ) : (
           <div className="flex flex-col gap-8 pb-32">
-            {festivals.sort((a,b) => new Date(a.date) - new Date(b.date)).map(fest => {
+            {festivals.sort((a,b) => new Date(a.date) - new Date(b.date)).map((fest, i) => {
               const daysLeft = differenceInDays(new Date(fest.date), new Date())
               const progress = Math.min((fest.spent / fest.budget) * 100, 100)
               
               return (
-                <motion.div key={fest.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white border border-[#F6F6F6] rounded-[40px] p-8 shadow-sm group relative overflow-hidden active:shadow-md transition-shadow">
+                <div key={fest.id} ref={i === 0 ? firstFestRef : null}>
+                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                     className="bg-white border border-[#F6F6F6] rounded-[40px] p-8 shadow-sm group relative overflow-hidden active:shadow-md transition-shadow">
                   <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-[40px] opacity-10" style={{ backgroundColor: fest.color }} />
                   
                   <div className="flex justify-between items-start mb-8">
@@ -148,6 +173,7 @@ export default function FestivalsScreen() {
                     )}
                   </div>
                 </motion.div>
+                </div>
               )
             })}
           </div>
@@ -196,6 +222,7 @@ export default function FestivalsScreen() {
       </BottomSheet>
 
       <motion.button 
+        ref={addBtnRef}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         variants={HAPTIC_SHAKE}
@@ -205,6 +232,14 @@ export default function FestivalsScreen() {
       >
         <Plus className="w-8 h-8" strokeWidth={3} />
       </motion.button>
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

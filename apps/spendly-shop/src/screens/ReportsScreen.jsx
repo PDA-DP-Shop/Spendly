@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, Receipt, Users, Clock, 
   Trophy, Download, Share2, ArrowLeft,
   ChevronRight, Banknote, CreditCard, PieChart,
-  Target, Zap, Activity, Filter, BarChart, X
+  Target, Zap, Activity, Filter, BarChart, X, HelpCircle
 } from 'lucide-react';
 
 import { useBillStore } from '../store/billStore';
 import { useCustomerStore } from '../store/customerStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { formatMoney } from '../utils/formatMoney';
+import PageGuide from '../components/shared/PageGuide';
+import { usePageGuide } from '../hooks/usePageGuide';
 
 const FILTERS = ['Today', 'This Week', 'This Month', 'All Time'];
 
@@ -22,6 +24,20 @@ const ReportsScreen = () => {
     const { settings } = useSettingsStore();
     const currency = settings?.currency || 'USD';
     const [filter, setFilter] = useState('This Month');
+
+    const filterRef = useRef(null);
+    const metricsRef = useRef(null);
+    const chartRef = useRef(null);
+    const productsRef = useRef(null);
+
+    const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('shop_reports');
+
+    const guideSteps = useMemo(() => [
+        { targetRef: filterRef, emoji: '📅', title: 'Time Range', description: 'Switch between daily, weekly, or monthly views to see how your shop is trending.', borderRadius: 32 },
+        { targetRef: metricsRef, emoji: '📊', title: 'Key Data', description: 'Quickly see total revenue, bill count, and your customer base size at a glance.', borderRadius: 32 },
+        { targetRef: chartRef, emoji: '📈', title: 'Sales Trend', description: 'A visual breakdown of your weekly performance to help you identify peak business days.', borderRadius: 32 },
+        { targetRef: productsRef, emoji: '🏆', title: 'Best Sellers', description: 'Your top 5 items by revenue. Use this to decide which inventory to restock first!', borderRadius: 32 }
+    ], [filterRef, metricsRef, chartRef, productsRef]);
 
     useEffect(() => {
         loadBills();
@@ -71,7 +87,10 @@ const ReportsScreen = () => {
                     </div>
                     <span className="text-[17px]">Sales Reports</span>
                 </button>
-                <div className="flex gap-4">
+                <div className="flex gap-2">
+                    <button onClick={startGuide} className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-black active:bg-black active:text-white transition-all border border-[#F1F5F9]">
+                        <HelpCircle className="w-5 h-5" />
+                    </button>
                     <button className="w-10 h-10 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#64748B]">
                         <Download className="w-5 h-5" />
                     </button>
@@ -84,7 +103,7 @@ const ReportsScreen = () => {
                 className="p-6 space-y-10"
             >
                 {/* Time Filter */}
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6">
+                <div ref={filterRef} className="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6">
                     {FILTERS.map((f, idx) => (
                         <button 
                             key={f} 
@@ -99,7 +118,7 @@ const ReportsScreen = () => {
                 </div>
 
                 {/* Main Metrics */}
-                <div className="grid grid-cols-2 gap-4">
+                <div ref={metricsRef} className="grid grid-cols-2 gap-4">
                     {[
                         { label: 'Revenue', val: formatMoney(totalSales, currency), icon: TrendingUp, color: 'text-black', bg: 'bg-[#F8FAFC]' },
                         { label: 'Bills', val: bills.length, icon: Receipt, color: 'text-black', bg: 'bg-[#F8FAFC]' },
@@ -122,7 +141,7 @@ const ReportsScreen = () => {
                 </div>
 
                 {/* Performance Graph */}
-                <div className="bg-black rounded-[32px] p-8 text-white shadow-xl space-y-10 relative overflow-hidden">
+                <div ref={chartRef} className="bg-black rounded-[32px] p-8 text-white shadow-xl space-y-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16" />
                     
                     <div className="flex items-center justify-between relative z-10">
@@ -153,7 +172,7 @@ const ReportsScreen = () => {
                 </div>
 
                 {/* Top Selling */}
-                <div className="bg-[#F8FAFC] rounded-[32px] p-8 space-y-8 border border-transparent">
+                <div ref={productsRef} className="bg-[#F8FAFC] rounded-[32px] p-8 space-y-8 border border-transparent">
                     <div className="flex items-center justify-between">
                         <h3 className="text-[18px] font-[800] text-black tracking-tight">Top Products</h3>
                         <Trophy className="w-5 h-5 text-black" />
@@ -190,6 +209,14 @@ const ReportsScreen = () => {
                     </button>
                 </div>
             </motion.div>
+            <PageGuide 
+                show={showGuide} 
+                steps={guideSteps} 
+                currentStep={currentStep} 
+                onNext={() => nextStep(guideSteps.length)} 
+                onPrev={prevStep} 
+                onSkip={skipGuide} 
+            />
         </div>
     );
 };

@@ -128,8 +128,13 @@ class SpendlyDB extends Dexie {
       spendly_recovery_vault: '++id, deletedAt, expiresAt'
     })
 
+<<<<<<< HEAD
     // Version 9: Cash Wallet and Bank Accounts Feature
     this.version(9).stores({
+=======
+    // Version 11: Biometric Authentication Support
+    this.version(11).stores({
+>>>>>>> 41f113d (upgrade scanner)
       expenses: '++id, type, category, date, addedAt, shopName, billId, billSource, isDeleted, deletedAt',
       deletedExpenses: '++id, originalId, deletedAt, category, type, amount',
       budgets: '++id, category, month, year',
@@ -150,9 +155,116 @@ class SpendlyDB extends Dexie {
       browserInfo: '++id, preferredBrowser, firstOpenedAt, lastOpenedAt',
       storageInfo: '++id, isPersisted, lastChecked',
       spendly_recovery_vault: '++id, deletedAt, expiresAt',
+<<<<<<< HEAD
       cashWallet: '++id, currency, lastUpdated',
       bankAccounts: '++id, bankName, accountNickname, isDefault, lastUpdated',
       walletTransactions: '++id, expenseId, walletType, bankAccountId, createdAt'
+=======
+      cashWallet: '++id, currency',
+      bankAccounts: '++id, bankName, isDefault, currency',
+      walletTransactions: '++id, expenseId, walletType, bankAccountId, currency',
+      biometric_credentials: 'id'
+    })
+
+    // Version 12: User-taught barcode → product mapping (highest lookup priority)
+    // barcode is the natural primary key — direct O(1) access, no auto-increment needed.
+    // NOT encrypted: product names & prices are public, non-personal data.
+    this.version(12).stores({
+      expenses: '++id, type, category, date, addedAt, shopName, billId, billSource, isDeleted, deletedAt',
+      deletedExpenses: '++id, originalId, deletedAt, category, type, amount',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      scannedProducts: '++id, barcode, productName, brand, category, amount',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+      backupHistory: '++id, backedUpAt, recordCount, fileName',
+      browserInfo: '++id, preferredBrowser, firstOpenedAt, lastOpenedAt',
+      storageInfo: '++id, isPersisted, lastChecked',
+      spendly_recovery_vault: '++id, deletedAt, expiresAt',
+      cashWallet: '++id, currency',
+      bankAccounts: '++id, bankName, isDefault, currency',
+      walletTransactions: '++id, expenseId, walletType, bankAccountId, currency',
+      biometric_credentials: 'id',
+      learnedBarcodes: 'barcode, addedAt',
+    })
+
+    // Version 13: Bill OCR history + shop name learning engine
+    this.version(13).stores({
+      expenses: '++id, type, category, date, addedAt, shopName, billId, billSource, isDeleted, deletedAt',
+      deletedExpenses: '++id, originalId, deletedAt, category, type, amount',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      scannedProducts: '++id, barcode, productName, brand, category, amount',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+      backupHistory: '++id, backedUpAt, recordCount, fileName',
+      browserInfo: '++id, preferredBrowser, firstOpenedAt, lastOpenedAt',
+      storageInfo: '++id, isPersisted, lastChecked',
+      spendly_recovery_vault: '++id, deletedAt, expiresAt',
+      cashWallet: '++id, currency',
+      bankAccounts: '++id, bankName, isDefault, currency',
+      walletTransactions: '++id, expenseId, walletType, bankAccountId, currency',
+      biometric_credentials: 'id',
+      learnedBarcodes: 'barcode, addedAt',
+      billScans: '++id, scannedAt, confidence, addedAsExpense, shopName',
+      shopNameCorrections: '++id, originalOCRText, correctedName',
+    })
+
+    // Version 14: Full Offline Intelligence & Learning System
+    this.version(14).stores({
+      expenses: '++id, type, category, date, addedAt, shopName, billId, billSource, isDeleted, deletedAt',
+      deletedExpenses: '++id, originalId, deletedAt, category, type, amount',
+      budgets: '++id, category, month, year',
+      settings: '++id',
+      scans: '++id, expenseId, addedAt',
+      categories: '++id',
+      productCache: 'barcode',
+      scannedProducts: '++id, barcode, productName, brand, category, amount',
+      wallets: '++id',
+      emis: '++id',
+      trips: '++id',
+      goals: '++id',
+      splits: '++id, expenseId',
+      badges: '++id, badgeId',
+      monthlyReports: '++id, month, year',
+      spendingScore: '++id, month, year',
+      backupHistory: '++id, backedUpAt, recordCount, fileName',
+      browserInfo: '++id, preferredBrowser, firstOpenedAt, lastOpenedAt',
+      storageInfo: '++id, isPersisted, lastChecked',
+      spendly_recovery_vault: '++id, deletedAt, expiresAt',
+      cashWallet: '++id, currency',
+      bankAccounts: '++id, bankName, isDefault, currency',
+      walletTransactions: '++id, expenseId, walletType, bankAccountId, currency',
+      biometric_credentials: 'id',
+      learnedBarcodes: 'barcode, addedAt',
+      billScans: '++id, scannedAt, confidence, addedAsExpense, shopName',
+      shopNameCorrections: '++id, originalOCRText, correctedName',
+      
+      // Intelligence Tables
+      categoryCorrections: '++id, productName, correctedCategory',
+      timeHabits: '++id, timeSlot, category, productName',
+      dayHabits: '++id, dayOfWeek, category, productName',
+      frequencyPatterns: '++id, productName, lastBought',
+      amountPatterns: '++id, productName, avgAmount'
+>>>>>>> 41f113d (upgrade scanner)
     })
   }
 }
@@ -184,9 +296,12 @@ export const decryptRecord = async (record) => {
     const key = await importKey(bits)
     const iv = new Uint8Array(record.iv)
     const blob = new Uint8Array(record.blob).buffer
-    return await decryptData(blob, key, iv)
+    const decrypted = await decryptData(blob, key, iv)
+    // Preserve the outer Dexie primary key (and any other unencrypted indexing keys if needed)
+    return { ...decrypted, id: record.id }
   } catch (e) {
-    console.error("Decryption failed", e)
+    // Only log actual errors, not expected "Session Key Missing" noise during reloads
+    if (bits) console.warn("Decryption failed (Stale Session?):", e.message)
     return null
   }
 }
@@ -198,6 +313,7 @@ export const initDatabase = async () => {
   }
   
   // Wrap in transaction to prevent race conditions during parallel init
+<<<<<<< HEAD
   return await db.transaction('rw', [db.settings, db.categories, db.cashWallet], async () => {
     const settingsCount = await db.settings.count()
 
@@ -206,6 +322,18 @@ export const initDatabase = async () => {
       await db.settings.put({
         id: 1,
         name: 'Friend',
+=======
+  return await db.transaction('rw', [db.settings, db.categories, db.expenses], async () => {
+    const settingsCount = await db.settings.count()
+    const expensesCount = await db.expenses.count()
+
+    if (settingsCount === 0) {
+      // First time — insert default settings
+      // Use .put() with id: 1 to ensure singleton pattern
+      await db.settings.put({
+        id: 1,
+        profileName: 'Friend',
+>>>>>>> 41f113d (upgrade scanner)
         emoji: '😊',
         currency: 'USD',
         theme: 'light',
@@ -216,6 +344,7 @@ export const initDatabase = async () => {
         reminderTime: '20:00',
         notificationsOn: false,
         monthlyBudget: 2000,
+<<<<<<< HEAD
         onboardingDone: false,
         installPromptCount: 0,
       })
@@ -251,6 +380,31 @@ export const initDatabase = async () => {
           categoryId: cat.id,
         })
         await db.categories.put(encrypted)
+=======
+        onboardingDone: expensesCount > 0, // Auto-skip if data exists (Self-healing)
+        installPromptCount: 0,
+        wrongAttempts: 0,
+        lockoutUntil: null,
+      })
+
+      // Insert default categories (Encrypted)
+      const catCount = await db.categories.count()
+      if (catCount === 0) {
+        let catIdCounter = 1
+        for (const cat of CATEGORIES) {
+          const encrypted = await encryptRecord({
+            id: catIdCounter++, // FORCE explicit ID to prevent ConstraintError
+            name: cat.name,
+            emoji: cat.emoji,
+            color: cat.color,
+            bgColor: cat.bgColor,
+            isDefault: true,
+            sortOrder: CATEGORIES.indexOf(cat),
+            categoryId: cat.id,
+          })
+          await db.categories.put(encrypted)
+        }
+>>>>>>> 41f113d (upgrade scanner)
       }
     }
   })
@@ -258,6 +412,7 @@ export const initDatabase = async () => {
 
 // Expense CRUD operations
 export const expenseService = {
+<<<<<<< HEAD
   async getAll(currency, includeDeleted = false) {
     const all = await db.expenses.toArray()
     const decrypted = await Promise.all(all.map(decryptRecord))
@@ -267,6 +422,12 @@ export const expenseService = {
       filtered = filtered.filter(e => e.currency === currency)
     }
     
+=======
+  async getAll(includeDeleted = false) {
+    const all = await db.expenses.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    let filtered = decrypted.filter(Boolean)
+>>>>>>> 41f113d (upgrade scanner)
     if (!includeDeleted) {
       filtered = filtered.filter(e => !e.isDeleted)
     }
@@ -340,7 +501,11 @@ export const settingsService = {
   async update(changes) {
     return await db.transaction('rw', db.settings, async () => {
       const all = await db.settings.toArray()
+<<<<<<< HEAD
       const current = all[0] || {}
+=======
+      const current = all[0] || { id: 1 }
+>>>>>>> 41f113d (upgrade scanner)
       
       const { lockSalt, lockPinHash, ...sensitive } = changes
       const currentDecrypted = await this.get() || {}
@@ -349,6 +514,7 @@ export const settingsService = {
       delete mergedSensitive.lockSalt
       delete mergedSensitive.lockPinHash
       delete mergedSensitive.id
+<<<<<<< HEAD
       
       const encrypted = await encryptRecord(mergedSensitive)
       const finalRecord = {
@@ -362,6 +528,18 @@ export const settingsService = {
       } else {
         await db.settings.add(finalRecord)
       }
+=======
+
+      const encrypted = await encryptRecord(mergedSensitive)
+      const finalRecord = {
+        ...encrypted,
+        id: current.id || 1, // Ensure we keep the ID for put()
+        lockSalt: lockSalt || current.lockSalt,
+        lockPinHash: lockPinHash || current.lockPinHash
+      }
+
+      await db.settings.put(finalRecord)
+>>>>>>> 41f113d (upgrade scanner)
     })
   },
 }
@@ -449,11 +627,30 @@ export const scannedProductService = {
       if (existing) {
         return await db.scannedProducts.update(existing.id, { ...product, updatedAt: new Date().toISOString() })
       }
+<<<<<<< HEAD
       return await db.scannedProducts.add({ ...product, createdAt: new Date().toISOString() })
+=======
+      // Use put to be safe against rare race conditions
+      return await db.scannedProducts.put({ ...product, createdAt: new Date().toISOString() })
+>>>>>>> 41f113d (upgrade scanner)
     })
   },
   async getAll() {
     return await db.scannedProducts.reverse().toArray()
+  }
+}
+
+// User-taught barcode mappings (Intelligence)
+export const learnedBarcodeService = {
+  async get(barcode) {
+    return await db.learnedBarcodes.get(barcode) || null
+  },
+  async add(product) {
+    // product is { barcode, name, price, learnedAt }
+    return await db.learnedBarcodes.put(product)
+  },
+  async getAll() {
+    return await db.learnedBarcodes.toArray()
   }
 }
 
@@ -679,7 +876,8 @@ export const badgeService = {
   async earn(badgeId) {
     const existing = await db.badges.where('badgeId').equals(badgeId).first()
     if (existing) return  // already earned
-    await db.badges.add({ badgeId, earnedAt: new Date().toISOString(), isNew: true })
+    // Use put even if we think it's new to avoid add() collisions
+    await db.badges.put({ badgeId, earnedAt: new Date().toISOString(), isNew: true })
   },
   async markSeen(badgeId) {
     const existing = await db.badges.where('badgeId').equals(badgeId).first()
@@ -717,10 +915,122 @@ export const scoreService = {
       if (existing) {
         await db.spendingScore.put({ ...encrypted, id: existing._id })
       } else {
+<<<<<<< HEAD
         await db.spendingScore.add(encrypted)
+=======
+        await db.spendingScore.put(encrypted)
+>>>>>>> 41f113d (upgrade scanner)
       }
     })
   },
+}
+
+// Cash Wallet operations
+export const cashWalletService = {
+  async get(currency = 'INR') {
+    const all = await db.cashWallet.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    const found = decrypted.find(w => w && w.currency === currency)
+    if (found) return found
+    
+    // Create new wallet for this currency if it doesn't exist
+    const initial = { currency, notes: {}, totalCash: 0, lastUpdated: new Date().toISOString() }
+    const encrypted = await encryptRecord(initial)
+    await db.cashWallet.put(encrypted)
+    return initial
+  },
+  async update(data) {
+    if (!data.currency) return
+    const all = await db.cashWallet.toArray()
+    const decryptedWithId = await Promise.all(all.map(async r => ({ ...await decryptRecord(r), _id: r.id })))
+    const existing = decryptedWithId.find(w => w && w.currency === data.currency)
+    
+    const encrypted = await encryptRecord({ ...data, lastUpdated: new Date().toISOString() })
+    if (existing) {
+      return await db.cashWallet.put({ ...encrypted, id: existing._id })
+    } else {
+      return await db.cashWallet.put(encrypted)
+    }
+  }
+}
+
+// Bank Account operations
+export const bankAccountService = {
+  async getAll(currency = 'INR') {
+    const all = await db.bankAccounts.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean)
+      .filter(b => b.currency === currency)
+      .sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
+  },
+  async add(account) {
+    const encrypted = await encryptRecord({ ...account, createdAt: new Date().toISOString(), lastUpdated: new Date().toISOString() })
+    return await db.bankAccounts.add(encrypted)
+  },
+  async update(id, changes) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    const existing = await db.bankAccounts.get(numId)
+    if (!existing) return
+    const decrypted = await decryptRecord(existing)
+    const merged = { ...decrypted, ...changes, lastUpdated: new Date().toISOString() }
+    const encrypted = await encryptRecord(merged)
+    await db.bankAccounts.put({ ...encrypted, id: numId })
+  },
+  async remove(id) {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id
+    return await db.bankAccounts.delete(numId)
+  }
+}
+
+// Wallet Transactions operations
+export const walletTransactionService = {
+  async add(transaction) {
+    const encrypted = await encryptRecord({ ...transaction, createdAt: new Date().toISOString() })
+    return await db.walletTransactions.add(encrypted)
+  },
+  async getAll() {
+    const all = await db.walletTransactions.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.filter(Boolean).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+  async getByExpenseId(expenseId) {
+    const all = await db.walletTransactions.toArray()
+    const decrypted = await Promise.all(all.map(decryptRecord))
+    return decrypted.find(t => t && String(t.expenseId) === String(expenseId)) || null
+  },
+  async removeByExpenseId(expenseId) {
+    const all = await db.walletTransactions.toArray()
+    const decryptedWithId = await Promise.all(all.map(async t => ({ ...await decryptRecord(t), _id: t.id })))
+    const target = decryptedWithId.find(t => t && String(t.expenseId) === String(expenseId))
+    if (target) {
+      await db.walletTransactions.delete(target._id)
+    }
+  }
+}
+
+// ── Ecosystem Bridge ─────────────────────────────────────────────────────────
+
+// This allows the User App to lookup bills from the Shop App locally
+// for demonstration/same-device sync.
+export const billService = {
+  async getAll() {
+    try {
+      const shopDb = new Dexie('SpendlyShopDB')
+      // Try to open it only if it exists
+      const exists = await Dexie.exists('SpendlyShopDB')
+      if (!exists) return []
+      
+      await shopDb.open()
+      if (!shopDb.table('bills')) return []
+      
+      const all = await shopDb.table('bills').toArray()
+      // Shop data might be encrypted too, but for POC we check claimCode
+      return all;
+    } catch (e) {
+      console.log("No SpendlyShopDB found on this device", e)
+      return []
+    }
+  }
 }
 
 // Secure Data Wipe — Zero Knowledge forensic deletion

@@ -1,10 +1,20 @@
 import { create } from 'zustand'
 import { cashWalletService, bankAccountService, walletTransactionService } from '../services/database'
+<<<<<<< HEAD
 import { getNotesByUserCurrency } from '../constants/currencyNotes'
+=======
+import { getItemsByUserCurrency, getNotesByUserCurrency } from '../constants/currencyNotes'
+
+const parseKey = (key) => {
+  const [val, type] = key.split('_')
+  return { value: parseFloat(val), type }
+}
+>>>>>>> 41f113d (upgrade scanner)
 
 export const useWalletStore = create((set, get) => ({
   cashWallet: null,
   bankAccounts: [],
+<<<<<<< HEAD
   isLoading: false,
 
   // Load cash wallet from Dexie
@@ -29,10 +39,33 @@ export const useWalletStore = create((set, get) => ({
       set({ cashWallet: wallet, isLoading: false })
     } catch (error) {
       console.error("Failed to load cash wallet:", error)
+=======
+  transactions: [],
+  isLoading: false,
+
+  loadTransactions: async () => {
+    try {
+      const all = await walletTransactionService.getAll()
+      set({ transactions: all })
+    } catch (e) {
+      console.error("Failed to load transactions", e)
+    }
+  },
+
+  loadCashWallet: async (currency) => {
+    set({ isLoading: true })
+    try {
+      const activeCurrency = currency || 'INR'
+      const cash = await cashWalletService.get(activeCurrency)
+      set({ cashWallet: cash, isLoading: false })
+    } catch (error) {
+      console.error('Failed to load cash wallet', error)
+>>>>>>> 41f113d (upgrade scanner)
       set({ isLoading: false })
     }
   },
 
+<<<<<<< HEAD
   // Load all bank accounts from Dexie (filtered by currency)
   loadBankAccounts: async () => {
     const { useSettingsStore } = await import('./settingsStore')
@@ -48,10 +81,21 @@ export const useWalletStore = create((set, get) => ({
       set({ bankAccounts: accounts, isLoading: false })
     } catch (error) {
       console.error("Failed to load bank accounts:", error)
+=======
+  loadBankAccounts: async (currency) => {
+    set({ isLoading: true })
+    try {
+      const activeCurrency = currency || 'INR'
+      const banks = await bankAccountService.getAll(activeCurrency)
+      set({ bankAccounts: banks, isLoading: false })
+    } catch (error) {
+      console.error('Failed to load bank accounts', error)
+>>>>>>> 41f113d (upgrade scanner)
       set({ isLoading: false })
     }
   },
 
+<<<<<<< HEAD
   // Update cash notes and total
   updateCashWallet: async (notesObject) => {
     const { useSettingsStore } = await import('./settingsStore')
@@ -97,10 +141,56 @@ export const useWalletStore = create((set, get) => ({
       return id
     } catch (error) {
       console.error("Failed to add bank account:", error)
+=======
+  updateCashWallet: async (notesObject) => {
+    set({ isLoading: true })
+    try {
+      const totalCash = get().calculateTotalCash(notesObject)
+      const current = get().cashWallet
+      if (!current) throw new Error('Wallet not loaded')
+      const updated = { ...current, notes: notesObject, totalCash }
+      await cashWalletService.update(updated)
+      set({ cashWallet: updated, isLoading: false })
+    } catch (error) {
+      console.error('Failed to update cash wallet', error)
       set({ isLoading: false })
     }
   },
 
+  calculateTotalCash: (notesObject) => {
+    if (!notesObject) return 0
+    return Object.entries(notesObject).reduce((sum, [key, count]) => {
+      const value = parseFloat(key.split('_')[0])
+      return sum + (value * count)
+    }, 0)
+  },
+
+  addBankAccount: async (accountData, currency) => {
+    set({ isLoading: true })
+    try {
+      const activeBanks = await bankAccountService.getAll(currency)
+      
+      // If setting this as default, unset others first
+      if (accountData.isDefault) {
+        await Promise.all(activeBanks.map(async b => {
+          if (b.isDefault) {
+            await bankAccountService.update(b.id, { isDefault: false });
+          }
+        }));
+      }
+
+      const id = await bankAccountService.add({ ...accountData, currency })
+      const banks = await bankAccountService.getAll(currency)
+      set({ bankAccounts: banks, isLoading: false })
+      return id
+    } catch (error) {
+      console.error('Failed to add bank account', error)
+>>>>>>> 41f113d (upgrade scanner)
+      set({ isLoading: false })
+    }
+  },
+
+<<<<<<< HEAD
   // Edit bank account
   updateBankAccount: async (id, data) => {
     const currency = localStorage.getItem('spendly_currency') || 'USD'
@@ -301,6 +391,256 @@ export const useWalletStore = create((set, get) => ({
     return {
       given: getNotes(givenAmount),
       change: getNotes(changeAmount)
+=======
+  updateBankAccount: async (id, data) => {
+    set({ isLoading: true })
+    try {
+      const targetCurrency = data.currency || get().cashWallet?.currency || 'INR'
+      
+      // If setting this as default, unset others first
+      if (data.isDefault) {
+        const activeBanks = await bankAccountService.getAll(targetCurrency)
+        await Promise.all(activeBanks.map(async b => {
+          if (b.isDefault && b.id !== id) {
+            await bankAccountService.update(b.id, { isDefault: false });
+          }
+        }));
+      }
+
+      await bankAccountService.update(id, data)
+      const banks = await bankAccountService.getAll(targetCurrency)
+      set({ bankAccounts: banks, isLoading: false })
+    } catch (error) {
+      console.error('Failed to update bank account', error)
+      set({ isLoading: false })
+    }
+  },
+
+  deleteBankAccount: async (id) => {
+    set({ isLoading: true })
+    try {
+      const currentCurrency = get().cashWallet?.currency || 'INR'
+      await bankAccountService.remove(id)
+      const banks = await bankAccountService.getAll(currentCurrency)
+      set({ bankAccounts: banks, isLoading: false })
+    } catch (error) {
+      console.error('Failed to delete bank account', error)
+      set({ isLoading: false })
+    }
+  },
+
+  deductFromCash: async (expenseId, amount, notesUsed, metadata = {}) => {
+    let { cashWallet, updateCashWallet, loadCashWallet } = get()
+    
+    // 1. Ensure wallet is loaded
+    if (!cashWallet) {
+      const activeCurrency = metadata.currency || 'INR'
+      await loadCashWallet(activeCurrency)
+      cashWallet = get().cashWallet
+    }
+    
+    if (!cashWallet) {
+      console.warn("Wallet deduction skipped: No cash wallet found")
+      return
+    }
+
+    // 2. Update physical notes count
+    const newNotes = { ...(cashWallet.notes || {}) }
+    
+    if (notesUsed) {
+      Object.entries(notesUsed.given || {}).forEach(([note, count]) => {
+        newNotes[note] = (newNotes[note] || 0) - count
+      })
+      Object.entries(notesUsed.received || {}).forEach(([note, count]) => {
+        newNotes[note] = (newNotes[note] || 0) + count
+      })
+    } else {
+      // SMART INVENTORY-AWARE DEDUCTION
+      const currency = cashWallet.currency || 'INR'
+      const currencyItems = getItemsByUserCurrency(currency)
+      const denominations = currencyItems.sort((a,b) => b.value - a.value)
+      
+      let amountNeeded = amount
+      const given = {}
+
+      // 1. Try to find the smallest SINGLE note/coin that the user actually HAS that covers the amount
+      const availableNotes = Object.entries(newNotes)
+        .filter(([_, count]) => count > 0)
+        .map(([key]) => ({ ...parseKey(key), key }))
+        .sort((a,b) => a.value - b.value)
+      
+      const bestCover = availableNotes.find(n => n.value >= amountNeeded)
+      
+      if (bestCover) {
+        given[bestCover.key] = 1
+      } else {
+        // 2. Multi-note deduction using actual inventory (Highest to Lowest)
+        let currentCover = 0
+        const sortedInv = Object.entries(newNotes)
+          .filter(([_, count]) => count > 0)
+          .map(([key, count]) => ({ ...parseKey(key), key, count }))
+          .sort((a,b) => b.value - a.value)
+
+        for (const item of sortedInv) {
+          let neededCount = Math.ceil((amountNeeded - currentCover) / item.value)
+          let take = Math.min(neededCount, item.count)
+          if (take > 0) {
+            given[item.key] = take
+            currentCover += item.value * take
+          }
+          if (currentCover >= amountNeeded) break
+        }
+      }
+
+      // Calculate Change and Change-Notes to receive
+      const totalGiven = Object.entries(given).reduce((s, [k, c]) => s + (parseKey(k).value * c), 0)
+      const changeAmount = Math.max(0, totalGiven - amount)
+      const received = {}
+      
+      if (changeAmount > 0) {
+        let remainingChange = changeAmount
+        for (const n of denominations) {
+          const count = Math.floor(remainingChange / n.value)
+          if (count > 0) {
+            received[`${n.value}_${n.type}`] = count
+            remainingChange -= n.value * count
+          }
+        }
+      }
+
+      // Apply to inventory
+      Object.entries(given).forEach(([k, c]) => { newNotes[k] = (newNotes[k] || 0) - c })
+      Object.entries(received).forEach(([k, c]) => { newNotes[k] = (newNotes[k] || 0) + c })
+      notesUsed = { given, received }
+    }
+
+    await updateCashWallet(newNotes)
+    
+    // Record transaction
+    await walletTransactionService.add({
+      expenseId,
+      walletType: 'cash',
+      amount,
+      transactionType: 'debit',
+      notesUsed,
+      shopName: metadata.shopName,
+      category: metadata.category,
+      currency: cashWallet.currency || 'INR',
+      date: new Date().toISOString()
+    })
+  },
+
+  deductCashNotes: async (notesGiven) => {
+    const { cashWallet, updateCashWallet } = get()
+    if (!cashWallet) return
+    const newNotes = { ...(cashWallet.notes || {}) }
+    Object.entries(notesGiven).forEach(([note, count]) => {
+      newNotes[note] = (newNotes[note] || 0) - count
+    })
+    await updateCashWallet(newNotes)
+  },
+
+  deductFromBank: async (expenseId, bankId, amount, metadata = {}) => {
+    let banks = get().bankAccounts
+    
+    if (banks.length === 0) {
+      await get().loadBankAccounts(metadata.currency)
+      banks = get().bankAccounts
+    }
+
+    // Robust ID matching (handles string vs number from different sources)
+    const bank = banks.find(b => String(b.id) === String(bankId))
+    
+    if (!bank) {
+      console.warn(`[WalletStore] Bank account ${bankId} not found for deduction.`, { banks, bankId })
+      return
+    }
+    
+    const newBalance = (bank.balance || 0) - amount
+    await get().updateBankAccount(bank.id, { balance: newBalance })
+
+    // Record transaction
+    await walletTransactionService.add({
+      expenseId,
+      walletType: 'bank',
+      bankAccountId: bankId,
+      amount,
+      transactionType: 'debit',
+      shopName: metadata.shopName,
+      category: metadata.category,
+      currency: bank.currency || 'INR',
+      date: new Date().toISOString()
+    })
+  },
+
+  refundToCash: async (amount) => {
+    const { cashWallet, updateCashWallet } = get()
+    if (!cashWallet) return
+
+    const currency = cashWallet.currency || 'INR'
+    const currencyItems = getItemsByUserCurrency(currency)
+    const denominations = currencyItems.filter(i => i.type === 'note').sort((a,b) => b.value - a.value)
+    
+    // Greedy algorithm to add back to notes using largest notes first
+    const newNotes = { ...(cashWallet.notes || {}) }
+    let remaining = amount
+    
+    for (const note of denominations) {
+      const count = Math.floor(remaining / note.value)
+      if (count > 0) {
+        const key = `${note.value}_${note.type}`
+        newNotes[key] = (newNotes[key] || 0) + count
+        remaining -= note.value * count
+      }
+    }
+
+    await updateCashWallet(newNotes)
+  },
+
+  refundToBank: async (bankId, amount) => {
+    if (!bankId) return
+    const banks = get().bankAccounts
+    const bank = banks.find(b => b.id === bankId)
+    if (!bank) return
+    
+    const newBalance = (bank.balance || 0) + amount
+    await get().updateBankAccount(bankId, { balance: newBalance })
+  },
+
+  checkLinkedTransaction: async (expenseId) => {
+    try {
+      const tx = await walletTransactionService.getByExpenseId(expenseId)
+      return tx
+    } catch (e) {
+      return null
+    }
+  },
+
+  calculateChangeNotes: (givenAmount, expenseAmount) => {
+    const currency = get().cashWallet?.currency || 'USD'
+    const denominations = getNotesByUserCurrency(currency)
+
+    const getBreakdown = (amount) => {
+      let remaining = amount
+      const breakdown = {}
+      for (const note of denominations) {
+        const count = Math.floor(remaining / note)
+        if (count > 0) {
+          breakdown[note] = count
+          remaining -= note * count
+        }
+      }
+      return breakdown
+    }
+
+    const givenNotes = getBreakdown(givenAmount)
+    const changeAmount = givenAmount - expenseAmount
+    const changeNotes = changeAmount > 0 ? getBreakdown(changeAmount) : {}
+
+    return {
+      given: givenNotes,
+      received: changeNotes // Using 'received' as requested for transaction record
+>>>>>>> 41f113d (upgrade scanner)
     }
   }
 }))

@@ -143,7 +143,7 @@ const BillHistoryScreen = () => {
                                         <div className="text-right">
                                             <div className="text-[17px] font-[800] text-black tracking-tight">{formatMoney(bill.total, currency)}</div>
                                             <div className={`text-[9px] font-[800] uppercase px-2.5 py-1 rounded-full tracking-widest mt-1.5 inline-block ${
-                                                bill.paymentMethod === 'upi' ? 'bg-purple-50 text-purple-600' : 'bg-emerald-50 text-emerald-600'
+                                                bill.paymentMethod === 'upi' ? 'bg-neutral-100 text-black' : 'bg-emerald-50 text-emerald-600'
                                             }`}>
                                                 {bill.paymentMethod}
                                             </div>

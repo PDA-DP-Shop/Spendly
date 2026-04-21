@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { 
+<<<<<<< HEAD
   Plus, Landmark, CreditCard, Smartphone, 
   Globe, Trash2, Edit3, X, Check, ChevronRight 
 } from 'lucide-react'
@@ -62,10 +63,34 @@ function BottomSheet({ show, onClose, title, children }) {
   )
 }
 
+=======
+  ChevronLeft, Plus, Landmark, CreditCard, Smartphone, 
+  Globe, Trash2, Edit2, Check, X, Star, Wallet, Trash, History
+} from 'lucide-react'
+import SuperDeleteModal from '../components/modals/SuperDeleteModal'
+import { useWalletStore } from '../store/walletStore'
+import { useSettingsStore } from '../store/settingsStore'
+import { formatMoney } from '../utils/formatMoney'
+
+const SORA = { fontFamily: "'Sora', sans-serif" }
+const DM_SANS = { fontFamily: "'DM Sans', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
+
+const POPULAR_BANKS = ['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'Yes Bank', 'PNB', 'BOB', 'Canara', 'Union']
+const PRESET_COLORS = ['#000000', '#F97316', '#22C55E', '#3B82F6', '#EF4444', '#EC4899']
+const ACCOUNT_TYPES = ['savings', 'current', 'wallet']
+const PAYMENT_MODES = [
+  { id: 'upi', label: 'UPI', icon: <Smartphone className="w-3 h-3" /> },
+  { id: 'netbanking', label: 'NetBanking', icon: <Globe className="w-3 h-3" /> },
+  { id: 'debit', label: 'Debit Card', icon: <CreditCard className="w-3 h-3" /> }
+]
+
+>>>>>>> 41f113d (upgrade scanner)
 export default function BankAccountsScreen() {
   const navigate = useNavigate()
   const { bankAccounts, loadBankAccounts, addBankAccount, updateBankAccount, deleteBankAccount, isLoading } = useWalletStore()
   const { settings } = useSettingsStore()
+<<<<<<< HEAD
   const currency = settings?.currency || 'USD'
   const popularBanks = COUNTRY_BANKS[currency] || ['My Bank', 'Savings', 'Wallet']
 
@@ -120,11 +145,62 @@ export default function BankAccountsScreen() {
       ...formData,
       balance: parseFloat(formData.balance) || 0,
       lastUpdated: new Date().toISOString()
+=======
+  const currency = settings?.currency || 'INR'
+
+  const [showAddSheet, setShowAddSheet] = useState(false)
+  const [editingAccount, setEditingAccount] = useState(null)
+  const [deleteAccount, setDeleteAccount] = useState(null)
+  
+  // Form State
+  const initialForm = {
+    bankName: '',
+    accountNickname: '',
+    balance: '',
+    accountType: 'savings',
+    paymentMethods: ['upi'],
+    upiId: '',
+    bankColor: PRESET_COLORS[0],
+    isDefault: false
+  }
+  const [form, setForm] = useState(initialForm)
+
+  useEffect(() => {
+    loadBankAccounts(currency)
+  }, [currency])
+
+  const totalInBanks = useMemo(() => {
+    return bankAccounts.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0)
+  }, [bankAccounts])
+
+  const handleOpenAdd = () => {
+    setForm(initialForm)
+    setEditingAccount(null)
+    setShowAddSheet(true)
+  }
+
+  const handleOpenEdit = (acc) => {
+    setForm({
+      ...acc,
+      balance: acc.balance.toString()
+    })
+    setEditingAccount(acc)
+    setShowAddSheet(true)
+  }
+
+  const handleSave = async () => {
+    if (!form.bankName || form.paymentMethods.length === 0) return
+    
+    const data = {
+      ...form,
+      balance: parseFloat(form.balance) || 0
+>>>>>>> 41f113d (upgrade scanner)
     }
 
     if (editingAccount) {
       await updateBankAccount(editingAccount.id, data)
     } else {
+<<<<<<< HEAD
       await addBankAccount(data)
     }
     
@@ -433,6 +509,277 @@ function BankCard({ account, currency, onEdit, onDelete }) {
           <ChevronRight className="w-4 h-4 ml-auto opacity-30" />
         </div>
       </motion.div>
+=======
+      await addBankAccount(data, currency)
+    }
+    setShowAddSheet(false)
+  }
+
+  const handleDeleteTrigger = (acc) => {
+    setDeleteAccount(acc)
+    setShowAddSheet(false)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (deleteAccount) {
+      await deleteBankAccount(deleteAccount.id)
+      setDeleteAccount(null)
+    }
+  }
+
+  return (
+    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] overflow-x-hidden safe-top pb-32">
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4 bg-transparent">
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+          <ChevronLeft className="w-6 h-6 text-black" />
+        </motion.button>
+        <h1 className="text-[17px] font-[700] text-black" style={DM_SANS}>Bank Accounts</h1>
+        <div className="flex items-center gap-2">
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate('/wallet-history')}
+              className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#F1F5F9]">
+              <History className="w-5 h-5 text-black" />
+            </motion.button>
+            <motion.button whileTap={{ scale: 0.9 }} onClick={handleOpenAdd}
+              className="w-11 h-11 rounded-full bg-black flex items-center justify-center shadow-lg shadow-black/10">
+              <Plus className="w-5 h-5 text-white" strokeWidth={3} />
+            </motion.button>
+        </div>
+      </header>
+
+      {/* Total Card */}
+      <div className="px-6 mt-2 mb-10">
+        <div className="w-full rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-black/20 bg-black flex flex-col items-center justify-center min-h-[210px]"
+          style={S}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl opacity-60" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16 blur-3xl opacity-40" />
+          
+          <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+            <p className="text-white/40 text-[10px] font-[800] uppercase tracking-[0.2em] mb-1" style={S}>Total in Banks</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[52px] font-[900] leading-none tracking-tighter" style={SORA}>
+                {formatMoney(totalInBanks, currency)}
+              </span>
+            </div>
+            <div className="mt-8 px-5 py-2 rounded-full bg-white/10 border border-white/5 text-[10px] font-[800] uppercase tracking-widest text-white/60" style={DM_SANS}>
+              {bankAccounts.length} ACTIVE ACCOUNTS
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Account List */}
+      <div className="px-6 flex flex-col gap-4">
+        <h2 className="text-[13px] font-[700] text-[#AFAFAF] uppercase tracking-widest pl-2 mb-2" style={DM_SANS}>
+          Your Linked Accounts
+        </h2>
+        
+        <AnimatePresence>
+          {bankAccounts.map((acc) => (
+            <motion.div key={acc.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+              className="relative group">
+              <motion.div onClick={() => handleOpenEdit(acc)}
+                className="w-full rounded-[28px] p-6 bg-white shadow-sm border border-[#F1F5F9] relative overflow-hidden z-10 active:scale-[0.99] transition-all cursor-pointer flex flex-col gap-6">
+                
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden" 
+                      style={{ backgroundColor: acc.bankColor }}>
+                      <div className="absolute inset-0 bg-white/10" />
+                      <Landmark className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-[10px] font-[800] text-slate-400 uppercase tracking-widest" style={DM_SANS}>{acc.bankName}</p>
+                        {acc.isDefault && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                      </div>
+                      <p className="text-[18px] font-[800] text-black tracking-tight" style={SORA}>{acc.accountNickname}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[20px] font-[900] text-black" style={SORA}>
+                      {formatMoney(acc.balance, currency)}
+                    </p>
+                    <p className="text-[9px] font-[800] text-slate-300 uppercase tracking-widest" style={DM_SANS}>Current Balance</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 relative z-10">
+                  {acc.paymentMethods.map(pmId => {
+                    const pm = PAYMENT_MODES.find(p => p.id === pmId)
+                    return (
+                      <div key={pmId} className="px-3 py-1.5 rounded-full bg-[#F6F6F6] border border-[#EEEEEE] flex items-center gap-2">
+                        <span className="text-slate-400">{pm?.icon}</span>
+                        <span className="text-[9px] font-[800] text-slate-500 tracking-widest uppercase">{pm?.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </motion.div>
+              
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
+        {bankAccounts.length === 0 && (
+          <div className="mt-10 flex flex-col items-center justify-center opacity-30 px-10 text-center">
+            <Landmark className="w-16 h-16 mb-4" />
+            <p className="text-[14px] font-[700]" style={DM_SANS}>No bank accounts found.<br/>Tap + to add your first bank.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Bottom Sheet */}
+      <AnimatePresence>
+        {showAddSheet && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowAddSheet(false)}
+              className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm" />
+            <motion.div initial={{ y: '100%', x: '-50%' }} animate={{ y: 0, x: '-50%' }} exit={{ y: '100%', x: '-50%' }}
+              className="fixed bottom-0 left-1/2 w-full max-w-[450px] bg-white rounded-t-[40px] z-[101] flex flex-col max-h-[90vh]">
+              <div className="w-12 h-1.5 bg-[#F1F5F9] rounded-full mx-auto mt-4 mb-6" />
+              
+              <div className="flex-1 overflow-y-auto px-8 pb-10">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-[22px] font-[800] text-black" style={DM_SANS}>
+                      {editingAccount ? 'Edit Bank' : 'Add New Bank'}
+                    </h3>
+                    {editingAccount && (
+                      <button onClick={() => handleDeleteTrigger(editingAccount)} 
+                        className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 active:bg-red-100 transition-colors ml-2">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <button onClick={() => setShowAddSheet(false)} className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
+                    <X className="w-5 h-5 text-black" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Bank Name */}
+                  <div>
+                    <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Bank Name</label>
+                    <input value={form.bankName} onChange={e => setForm({...form, bankName: e.target.value})}
+                      placeholder="e.g. HDFC Bank" className="w-full p-5 rounded-2xl bg-[#F8FAFC] border border-[#F1F5F9] text-[16px] font-[700] outline-none focus:border-[#00000050]" style={DM_SANS} />
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {POPULAR_BANKS.map(b => (
+                        <button key={b} onClick={() => setForm({...form, bankName: b})}
+                          className={`px-4 py-1.5 rounded-full text-[10px] font-[800] border transition-all ${form.bankName === b ? 'bg-black text-white border-black' : 'bg-white text-black border-[#F1F5F9]'}`}>
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Nickname & Balance */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Nickname</label>
+                      <input value={form.accountNickname} onChange={e => setForm({...form, accountNickname: e.target.value})}
+                        placeholder="Salary Account" className="w-full p-5 rounded-2xl bg-[#F8FAFC] border border-[#F1F5F9] text-[15px] font-[700] outline-none" style={DM_SANS} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Balance</label>
+                      <input type="number" value={form.balance} onChange={e => setForm({...form, balance: e.target.value})}
+                        placeholder="0.00" className="w-full p-5 rounded-2xl bg-[#F8FAFC] border border-[#F1F5F9] text-[15px] font-[800] outline-none" style={SORA} />
+                    </div>
+                  </div>
+
+                  {/* Account Type */}
+                  <div>
+                    <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Account Type</label>
+                    <div className="flex gap-2">
+                       {ACCOUNT_TYPES.map(type => (
+                         <button key={type} onClick={() => setForm({...form, accountType: type})}
+                          className={`flex-1 py-4 rounded-xl text-[12px] font-[800] uppercase tracking-widest border transition-all ${form.accountType === type ? 'bg-[#000000] text-white border-[#000000]' : 'bg-white text-black border-[#F1F5F9]'}`}>
+                           {type}
+                         </button>
+                       ))}
+                    </div>
+                  </div>
+
+                  {/* Payment Methods */}
+                  <div>
+                    <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Payment Methods</label>
+                    <div className="space-y-2">
+                       {PAYMENT_MODES.map(pm => (
+                         <button key={pm.id} onClick={() => {
+                           const updated = form.paymentMethods.includes(pm.id)
+                            ? form.paymentMethods.filter(id => id !== pm.id)
+                            : [...form.paymentMethods, pm.id]
+                           setForm({...form, paymentMethods: updated})
+                         }}
+                          className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${form.paymentMethods.includes(pm.id) ? 'bg-indigo-50 border-[#00000050]' : 'bg-white border-[#F1F5F9]'}`}>
+                           <div className="flex items-center gap-4">
+                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.paymentMethods.includes(pm.id) ? 'bg-[#000000] text-white' : 'bg-[#F1F5F9] text-gray-400'}`}>
+                                {pm.icon}
+                             </div>
+                             <span className="text-[14px] font-[700]">{pm.label}</span>
+                           </div>
+                           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${form.paymentMethods.includes(pm.id) ? 'bg-[#000000] border-[#000000]' : 'border-[#F1F5F9]'}`}>
+                             {form.paymentMethods.includes(pm.id) && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
+                           </div>
+                         </button>
+                       ))}
+                    </div>
+                  </div>
+
+                  {/* UPI ID */}
+                  {form.paymentMethods.includes('upi') && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                       <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">UPI ID</label>
+                       <input value={form.upiId} onChange={e => setForm({...form, upiId: e.target.value})}
+                        placeholder="yourname@bank" className="w-full p-5 rounded-2xl bg-[#F8FAFC] border border-[#F1F5F9] text-[15px] font-[700] outline-none" style={DM_SANS} />
+                    </motion.div>
+                  )}
+
+                  {/* Color Picker */}
+                  <div>
+                    <label className="text-[11px] font-[900] text-[#AFAFAF] uppercase tracking-widest ml-1 mb-3 block">Theme Color</label>
+                    <div className="flex justify-between items-center px-2">
+                       {PRESET_COLORS.map(c => (
+                         <button key={c} onClick={() => setForm({...form, bankColor: c})}
+                          className={`w-10 h-10 rounded-full border-4 transition-all ${form.bankColor === c ? 'border-black scale-110 shadow-lg' : 'border-white'}`}
+                          style={{ backgroundColor: c }} />
+                       ))}
+                    </div>
+                  </div>
+
+                  {/* Default Toggle */}
+                  <div className="flex items-center justify-between p-5 rounded-2xl bg-[#F8FAFC] border border-[#F1F5F9]">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                        <Star className={`w-5 h-5 ${form.isDefault ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                      </div>
+                      <span className="text-[14px] font-[800]">Set as Primary Account</span>
+                    </div>
+                    <button onClick={() => setForm({...form, isDefault: !form.isDefault})}
+                      className={`w-14 h-8 rounded-full transition-all p-1 ${form.isDefault ? 'bg-[#000000]' : 'bg-[#E2E8F0]'}`}>
+                      <div className={`w-6 h-6 bg-white rounded-full transition-all ${form.isDefault ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave}
+                    className="w-full py-6 rounded-3xl bg-black text-white font-[900] text-[16px] uppercase tracking-widest shadow-2xl flex items-center justify-center gap-3">
+                    {editingAccount ? 'Update Account' : 'Confirm Account'}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      <SuperDeleteModal 
+        show={!!deleteAccount}
+        onClose={() => setDeleteAccount(null)}
+        onDelete={handleConfirmDelete}
+        itemName={deleteAccount?.bankName || 'this bank account'}
+      />
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   )
 }

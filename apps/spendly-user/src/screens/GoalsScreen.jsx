@@ -1,5 +1,5 @@
 // GoalsScreen.jsx — Features 8 (Savings Goals) + 9 (No-Spend Challenge)
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
@@ -11,6 +11,8 @@ import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
 import { Plus, X, Trophy, Target, Calendar, Flame, ChevronRight, Trash2, Star, Sparkles, Lock } from 'lucide-react'
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const GOAL_EMOJIS = ['🏖️','🚗','📱','💻','🏠','✈️','💍','🎓','💰','🎯','⛽','🛍️','🎮','📸','🌍']
 const NO_SPEND_OPTIONS = [5, 10, 15, 20]
@@ -292,20 +294,44 @@ function NoSpendTab() {
 export default function GoalsScreen() {
   const { t } = useTranslation()
   const S = { fontFamily: "'Inter', sans-serif" }
-  const [tab, setTab] = useState('goals')
-  const [showAdd, setShowAdd] = useState(false)
-  const [savingsTarget, setSavingsTarget] = useState(null)
   const { goals, loadGoals, addGoal, addSavings, removeGoal } = useGoalStore()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
+
+  const [tab, setTab] = useState('goals')
+  const [showAdd, setShowAdd] = useState(false)
+  const [savingsTarget, setSavingsTarget] = useState(null)
+  const tabRef = useRef(null)
+  const addBtnRef = useRef(null)
+  const firstGoalRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('goals_page')
+
+  const guideSteps = useMemo(() => [
+    { targetRef: tabRef, emoji: '📑', title: 'Focus Area', description: 'Switch between long-term Savings Goals and the No-Spend Challenge streaks.', borderRadius: 100 },
+    { targetRef: addBtnRef, emoji: '➕', title: 'Start Dreaming', description: 'Tap this button to set a new financial milestone with a custom emoji and name.', borderRadius: 100 },
+    { targetRef: firstGoalRef, emoji: '📈', title: 'Progress Tracker', description: 'Watch the bar grow as you save money. We will calculate exactly how much you need daily!', borderRadius: 36 }
+  ], [tabRef, addBtnRef, firstGoalRef])
 
   useEffect(() => { loadGoals() }, [])
 
   return (
     <div className="flex flex-col min-h-dvh bg-white pb-20 safe-top">
-      <TopHeader title={t('goals.title')} />
+      <TopHeader 
+        title={t('goals.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
       
-      <div className="flex p-2 bg-[#F6F6F6] border border-[#EEEEEE] rounded-full mx-6 mb-10 mt-6 shadow-inner">
+      <div ref={tabRef} className="flex p-2 bg-[#F6F6F6] border border-[#EEEEEE] rounded-full mx-6 mb-10 mt-6 shadow-inner">
         {[{ id: 'goals', label: t('goals.saved') || 'Savings' }, { id: 'nospend', label: t('common.challenge') || 'Challenge' }].map(t => (
           <motion.button key={t.id} variants={HAPTIC_SHAKE} whileTap="tap" onClick={() => setTab(t.id)}
             className={`flex-1 py-3.5 rounded-full text-[14px] font-[800] tracking-tight transition-all ${tab === t.id ? 'bg-white text-black shadow-lg border border-[#EEEEEE]' : 'text-[#AFAFAF]'}`} style={S}>
@@ -319,8 +345,10 @@ export default function GoalsScreen() {
           <EmptyState type="goals" title={t('goals.title') || 'No goals set'} message={t('goals.addGoal') || 'Start saving for your next big purchase by setting a milestone.'} />
         ) : (
           <div className="px-6 flex flex-col gap-8 pb-32">
-            {goals.map(goal => (
-              <GoalCard key={goal.id} goal={goal} currency={currency} onAddSavings={setSavingsTarget} onDelete={removeGoal} />
+            {goals.map((goal, i) => (
+              <div key={goal.id} ref={i === 0 ? firstGoalRef : null}>
+                 <GoalCard goal={goal} currency={currency} onAddSavings={setSavingsTarget} onDelete={removeGoal} />
+              </div>
             ))}
           </div>
         )
@@ -330,6 +358,7 @@ export default function GoalsScreen() {
 
       {tab === 'goals' && (
         <motion.button 
+          ref={addBtnRef}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           variants={HAPTIC_SHAKE}
@@ -343,6 +372,15 @@ export default function GoalsScreen() {
 
       <AddGoalSheet show={showAdd} onSave={addGoal} onClose={() => setShowAdd(false)} />
       <AddSavingsSheet show={!!savingsTarget} goal={savingsTarget} currency={currency} onAdd={addSavings} onClose={() => setSavingsTarget(null)} />
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

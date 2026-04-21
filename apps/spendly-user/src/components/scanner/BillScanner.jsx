@@ -1,228 +1,128 @@
-import { useEffect, useRef, useState } from 'react'
-import { X, Camera } from 'lucide-react'
-import { motion } from 'framer-motion'
-import Tesseract from 'tesseract.js'
-import { useSecurityStore } from '../../store/securityStore'
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Camera as CameraIcon, FileText, CheckCircle2, AlertCircle } from 'lucide-react'
+import { runOCR } from '../../services/ocrService'
 
-export default function BillScanner({ onBillScanned, onClose }) {
-  const videoRef = useRef(null)
-  const [error, setError] = useState(null)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+export default function BillScanner({ onScanComplete }) {
   const [loading, setLoading] = useState(false)
-  const [stream, setStream] = useState(null)
+  const [tipIndex, setTipIndex] = useState(0)
+  const fileInputRef = useRef(null)
+  
+  const tips = [
+    "Good lighting helps accuracy",
+    "Make sure total amount is visible",
+    "Hold camera steady for best results"
+  ]
 
-  const startCamera = async (isMounted) => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: 'environment',
-          width: { ideal: 2560 },
-          height: { ideal: 1440 }
-        }
-      })
-      if (!isMounted) {
-        s.getTracks().forEach(track => track.stop())
-        return
-      }
-      setStream(s)
-      if (videoRef.current) {
-        videoRef.current.srcObject = s
-        videoRef.current.play()
-      }
-    } catch (e) {
-      if (isMounted) setError('Camera access denied or unavailable.')
+  useEffect(() => {
+    if (loading) {
+      const interval = setInterval(() => {
+        setTipIndex(prev => (prev + 1) % tips.length)
+      }, 2000)
+      return () => clearInterval(interval)
+    }
+  }, [loading])
+
+  const handleCapture = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
     }
   }
 
-  useEffect(() => {
-    let isMounted = true
-    useSecurityStore.getState().setPauseSecurity(true)
-    startCamera(isMounted)
-    return () => {
-      isMounted = false
-      useSecurityStore.getState().setPauseSecurity(false)
-      setStream(s => {
-        if (s) s.getTracks().forEach(track => track.stop())
-        return null
-      })
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const handleBillImage = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const captureAndScan = async () => {
-    if (!videoRef.current || loading) return
     setLoading(true)
-
-    const canvas = document.createElement('canvas')
-    canvas.width = videoRef.current.videoWidth
-    canvas.height = videoRef.current.videoHeight
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
-    
-    // OCR Pre-Processing: Grayscale and High Contrast
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const data = imgData.data
-    const contrast = 120 // high contrast
-    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast))
-    for (let i = 0; i < data.length; i += 4) {
-      let grayscale = 0.3 * data[i] + 0.59 * data[i+1] + 0.11 * data[i+2]
-      let c = factor * (grayscale - 128) + 128
-      c = Math.max(0, Math.min(255, c))
-      data[i] = c; data[i+1] = c; data[i+2] = c;
-    }
-    ctx.putImageData(imgData, 0, 0)
-    
-    if (stream) stream.getTracks().forEach(t => t.stop())
-
     try {
-      const result = await Tesseract.recognize(canvas, 'eng')
-      const rawText = result.data.text
-      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 2)
-      
-      // 1. EXTRACT SHOP NAME (Usually the first few clear non-numeric lines)
-      const junkWords = ['TAX', 'TOTAL', 'SUBTOTAL', 'CASH', 'VISA', 'DATE', 'TIME', 'RECEIPT', 'INVOICE', 'TEL', 'PHONE', 'WWW', 'WELCOME', 'THANK', 'ITEMS', 'REGISTER', 'STORE']
-      let shopName = ''
-      for (let line of lines) {
-         const cleanLine = line.toUpperCase()
-         if (!junkWords.some(j => cleanLine.includes(j)) && !/\d{5,}/.test(line) && !/^\d+[.,]\d{2}$/.test(line)) {
-            shopName = line
-            break
-         }
-      }
-
-      // 2. EXTRACT DATE & TIME
-      // Regex for common date formats: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD
-      const dateMatch = rawText.match(/(\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4})/g)
-      const timeMatch = rawText.match(/(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)/gi)
-      
-      let detectedDate = null
-      if (dateMatch) {
-         // Attempt to parse the first date found
-         const d = new Date(dateMatch[0].replace(/\//g, '-'))
-         if (!isNaN(d.getTime())) detectedDate = d
-      }
-      if (timeMatch && detectedDate) {
-         // If we have a date and found a time, try to merge them or just trust the string
-      }
-
-      // 3. EXTRACT TOTAL AMOUNT (Advanced Keyword-Distance Logic)
-      let detectedAmount = 0
-      const totalKeywords = ['TOTAL', 'GRAND TOTAL', 'AMOUNT DUE', 'NET TOTAL', 'BALANCE', 'DUE']
-      
-      // First pass: look for keywords and pick the sum on that line or next line
-      for (let i = 0; i < lines.length; i++) {
-         const line = lines[i].toUpperCase()
-         if (totalKeywords.some(k => line.includes(k))) {
-            // Find the first decimal number in this line or the next
-            const combinedText = line + ' ' + (lines[i+1] || '')
-            const matches = combinedText.match(/\d+[.,]\d{2}(?!\d)/g)
-            if (matches) {
-               let clean = matches[0].replace(/[^\d.,]/g, '')
-               let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
-               if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
-               detectedAmount = parseFloat(clean)
-               if (detectedAmount > 0) break 
-            }
-         }
-      }
-
-      // Second pass: if no keyword match, fall back to smartest max logic
-      if (detectedAmount === 0) {
-         const normalizedText = rawText.replace(/\n| /g, ' ').toUpperCase()
-         const rawAmounts = normalizedText.match(/\d{1,3}(?:[.,\s]\d{3})*[.,\s]\d{2}(?!\d)/g) || []
-         let validAmounts = rawAmounts.map(a => {
-           let clean = a.replace(/[^\d.,]/g, '')
-           let lastSep = Math.max(clean.lastIndexOf('.'), clean.lastIndexOf(','))
-           if(lastSep > -1) clean = clean.substring(0, lastSep).replace(/[.,]/g, '') + '.' + clean.substring(lastSep + 1)
-           return parseFloat(clean)
-         }).filter(n => !isNaN(n) && n > 0 && n < 15000)
-         detectedAmount = validAmounts.length > 0 ? Math.max(...validAmounts) : 0
-      }
-
-      // 4. CLEAN NOTES (Filter out junk, keep items)
-      const cleanedNotes = lines
-         .filter(l => l.length > 4)
-         .filter(l => !junkWords.some(j => l.toUpperCase().includes(j)))
-         .filter(l => !/\d{10,}/.test(l)) // Filter phone numbers / large IDs
-         .slice(1, 6) // Take first few items but skip name
-         .join('\n')
-
-      onBillScanned({ 
-         name: shopName, 
-         amount: detectedAmount, 
-         date: detectedDate,
-         notes: cleanedNotes,
-         fullText: rawText 
-      })
-    } catch (e) {
-      setError('Failed to read receipt. Please try again.')
+      const result = await runOCR(file)
+      // Small delay for UI smoothness
+      setTimeout(() => {
+        onScanComplete({
+          type: 'bill',
+          ...result,
+          source: 'OCR'
+        })
+        setLoading(false)
+      }, 500)
+    } catch (err) {
+      console.error('OCR Process error:', err)
       setLoading(false)
     }
   }
 
-  const handleClose = () => {
-    if (stream) stream.getTracks().forEach(t => t.stop())
-    onClose()
-  }
-
   return (
-    <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[100] bg-black flex flex-col">
-      <div className="flex items-center justify-between px-4 py-4 safe-top bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 text-white">
-        <h2 className="font-sans font-semibold text-[18px] flex items-center gap-2">
-          <Camera className="w-5 h-5" /> Scan Receipt
-        </h2>
-        <button onClick={handleClose} className="p-2 bg-white/10 rounded-full backdrop-blur-md">
-          <X className="w-6 h-6" />
-        </button>
-      </div>
-      
-      <div className="flex-1 relative bg-black flex flex-col items-center justify-center overflow-hidden pt-12">
-        {!loading && !error && (
-          <video 
-            ref={videoRef} 
-            className="w-full h-full object-cover" 
-            playsInline
-            muted
-          />
-        )}
-        
-        {/* Scanning frame overlay */}
-        {!loading && !error && (
-          <div className="absolute inset-0 pointer-events-none flex flex-col">
-            <div className="flex-1 bg-black/60" />
-            <div className="flex h-[60vh]">
-              <div className="w-[10vw] sm:flex-1 bg-black/60" />
-              <div className="w-[80vw] h-full sm:w-[400px] border-2 border-white/50 rounded-2xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] overflow-hidden" />
-              <div className="w-[10vw] sm:flex-1 bg-black/60" />
-            </div>
-            <div className="flex-1 bg-black/60 flex items-center justify-center pb-8">
-               <button onClick={captureAndScan} className="w-[72px] h-[72px] rounded-full border-4 border-white/50 flex items-center justify-center pointer-events-auto active:scale-95 transition-transform">
-                  <div className="w-14 h-14 bg-white rounded-full shadow-lg" />
-               </button>
-            </div>
-          </div>
-        )}
+    <div className="absolute inset-0 w-full h-full bg-black flex flex-col items-center justify-center p-8">
+      {/* Hidden File Input for iOS/Android camera trigger */}
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        ref={fileInputRef}
+        onChange={handleBillImage}
+        className="hidden"
+      />
 
-        {loading && (
-          <div className="flex flex-col items-center justify-center gap-5">
-             <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-             <div className="text-center">
-               <p className="text-white font-sans font-bold text-lg mb-1">Reading Receipt...</p>
-               <p className="text-white/60 text-sm">This might take a few seconds</p>
-             </div>
+      {!loading ? (
+        <div className="flex flex-col items-center gap-8 text-center">
+          <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+            <Receipt className="w-12 h-12 text-white" />
           </div>
-        )}
+          <div>
+            <h2 className="text-white text-xl font-bold mb-2 font-['DM_Sans']">Bill Receipt Scan</h2>
+            <p className="text-white/40 text-sm font-['DM_Sans'] max-w-[240px]">
+              {isIOS 
+                ? "Tap the button to take a clear photo of your paper bill" 
+                : "Point your camera at the receipt and tap capture"}
+            </p>
+          </div>
+          
+          <button 
+            onClick={handleCapture}
+            className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 backdrop-blur-md active:scale-95 transition-transform"
+          >
+            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+              <CameraIcon className="w-8 h-8 text-black" />
+            </div>
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-8 text-center animate-in fade-in duration-500">
+           <div className="relative">
+              <div className="w-20 h-20 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <FileText className="w-8 h-8 text-white" />
+              </div>
+           </div>
+           
+           <div className="space-y-2">
+             <h3 className="text-white font-bold font-['Inter',sans-serif]">Reading your bill...</h3>
+             <AnimatePresence mode="wait">
+               <motion.p 
+                 key={tipIndex}
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}
+                 className="text-[#9CA3AF] text-xs italic font-['DM_Sans'] h-4"
+               >
+                 "{tips[tipIndex]}"
+               </motion.p>
+             </AnimatePresence>
+           </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
-        {error && (
-          <div className="flex flex-col items-center px-6">
-             <p className="text-white bg-red-500/90 px-6 py-4 rounded-2xl font-medium text-center mb-6">
-               {error}
-             </p>
-             <button onClick={() => { setError(null); startCamera(); }} className="px-8 py-3 bg-white text-black font-semibold rounded-xl">
-               Try Again
-             </button>
-          </div>
-        )}
-      </div>
-    </motion.div>
+function Receipt({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+      <path d="M12 17.5v-11"/>
+    </svg>
   )
 }

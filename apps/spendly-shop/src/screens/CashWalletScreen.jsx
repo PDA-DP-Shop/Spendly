@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+<<<<<<< HEAD
 import { ArrowLeft, Pencil, Plus, Minus, Save, Wallet } from 'lucide-react'
 import { useWalletStore } from '../store/walletStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -64,10 +65,80 @@ export default function CashWalletScreen() {
       setNotes(prev => ({ ...prev, [denom]: newCount }))
       setHasChanges(true)
       if (navigator.vibrate) navigator.vibrate(10)
+=======
+import { ChevronLeft, Edit2, Plus, Minus, CheckCircle, Save, History } from 'lucide-react'
+import { useWalletStore } from '../store/walletStore'
+import { useSettingsStore } from '../store/settingsStore'
+import CURRENCY_NOTES, { getItemsByUserCurrency } from '../constants/currencyNotes'
+import { formatMoney } from '../utils/formatMoney'
+import NoteCard from '../components/cash/NoteCard'
+
+const SORA = { fontFamily: "'Sora', sans-serif" }
+const DM_SANS = { fontFamily: "'DM Sans', sans-serif" }
+const S = { fontFamily: "'Inter', sans-serif" }
+
+export default function CashWalletScreen() {
+  const navigate = useNavigate()
+  const { cashWallet, loadCashWallet, updateCashWallet, calculateTotalCash, isLoading } = useWalletStore()
+  const { settings } = useSettingsStore()
+  
+  const currencyCode = settings?.currency || 'INR'
+  const currencyData = CURRENCY_NOTES[currencyCode] || CURRENCY_NOTES.INR
+  
+  // Local state for counts to make interaction instant
+  const [counts, setCounts] = useState({})
+  const [showToast, setShowToast] = useState(false)
+
+  const currencyItems = useMemo(() => getItemsByUserCurrency(currencyCode), [currencyCode])
+  const notesList = useMemo(() => currencyItems.filter(i => i.type === 'note'), [currencyItems])
+  const coinsList = useMemo(() => currencyItems.filter(i => i.type === 'coin'), [currencyItems])
+
+  // Initialize local state from store
+  useEffect(() => {
+    loadCashWallet(currencyCode)
+  }, [currencyCode])
+
+  useEffect(() => {
+    if (cashWallet?.notes) {
+      // Migrate legacy keys or use new ones
+      const normalized = {}
+      Object.entries(cashWallet.notes).forEach(([key, val]) => {
+        if (!key.includes('_')) {
+          normalized[`${key}_note`] = val
+        } else {
+          normalized[key] = val
+        }
+      })
+      setCounts(normalized)
+    } else {
+      const initial = {}
+      currencyItems.forEach(item => initial[`${item.value}_${item.type}`] = 0)
+      setCounts(initial)
+    }
+  }, [cashWallet, currencyCode, currencyItems])
+
+  const totalCash = useMemo(() => {
+    return Object.entries(counts).reduce((sum, [key, count]) => {
+      const value = parseFloat(key.split('_')[0])
+      return sum + (value * count)
+    }, 0)
+  }, [counts])
+  
+  const totalNotes = useMemo(() => Object.values(counts).reduce((s, c) => s + c, 0), [counts])
+
+  const handleAdjust = (value, type, delta) => {
+    const key = `${value}_${type}`
+    const current = counts[key] || 0
+    const next = Math.max(0, current + delta)
+    if (next !== current) {
+      if (typeof navigator.vibrate === 'function') navigator.vibrate(10)
+      setCounts(prev => ({ ...prev, [key]: next }))
+>>>>>>> 41f113d (upgrade scanner)
     }
   }
 
   const handleSave = async () => {
+<<<<<<< HEAD
     await updateCashNotes(notes, totalCash)
     setHasChanges(false)
     window.dispatchEvent(new CustomEvent('toast', { 
@@ -199,6 +270,151 @@ export default function CashWalletScreen() {
           <span>Save Changes</span>
         </motion.button>
       </div>
+=======
+    await updateCashWallet(counts)
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 3000)
+  }
+
+  const formatValue = (val, type) => {
+    if (type === 'coin' && val < 1) {
+       if (currencyCode === 'USD') return `${(val * 100).toFixed(0)}¢`
+       if (currencyCode === 'EUR' || currencyCode === 'GBP') return `${(val * 100).toFixed(0)}c`
+       return val.toString()
+    }
+    return val.toString()
+  }
+
+  const renderItem = (item, i) => {
+    const key = `${item.value}_${item.type}`
+    const count = counts[key] || 0
+    
+    return (
+      <motion.div key={key} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+        className="flex items-center justify-between bg-white rounded-[24px] p-4 shadow-sm border border-[#F1F5F9] active:scale-[0.99] transition-all">
+        
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+            <NoteCard value={item.value} currency={currencyCode} type={item.type} size="md" showCount={false} />
+            <p className="text-[10px] font-[900] text-slate-400 uppercase tracking-tighter" style={S}>
+              {currencyData.symbol}{formatValue(item.value, item.type)} {item.type}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-[900] text-black" style={SORA}>
+              {formatMoney(item.value * count, currencyCode)}
+            </p>
+            <p className="text-[9px] font-[800] text-[#CBD5E1] uppercase tracking-widest" style={DM_SANS}>Subtotal</p>
+          </div>
+        </div>
+
+        <div className="flex items-center bg-[#F6F6F6] rounded-full p-1 border border-[#EEEEEE]">
+          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleAdjust(item.value, item.type, -1)}
+            disabled={count === 0}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${count === 0 ? 'text-slate-200' : 'text-slate-500 active:bg-slate-200'}`}>
+            <Minus className="w-4 h-4" strokeWidth={3} />
+          </motion.button>
+          <span className="w-10 text-center text-[16px] font-[900] text-black" style={SORA}>{count}</span>
+          <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleAdjust(item.value, item.type, 1)}
+            className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95">
+            <Plus className="w-4 h-4" strokeWidth={3} />
+          </motion.button>
+        </div>
+      </motion.div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col min-h-dvh bg-[#F5F5F5] overflow-x-hidden safe-top pb-48">
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4 bg-transparent">
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+          <ChevronLeft className="w-6 h-6 text-black" />
+        </motion.button>
+        <h1 className="text-[17px] font-[700] text-black" style={DM_SANS}>My Cash</h1>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate('/wallet-history')}
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#F1F5F9]">
+          <History className="w-5 h-5 text-black" />
+        </motion.button>
+      </header>
+
+      {/* Total Cash Card */}
+      <div className="px-6 mt-2 mb-10">
+        <div className="w-full rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-black/20 bg-black flex flex-col items-center justify-center min-h-[210px]"
+          style={S}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16 blur-3xl opacity-50" />
+          
+          <div className="relative z-10 flex flex-col items-center gap-2">
+            <p className="text-white/40 text-[10px] font-[800] uppercase tracking-[0.2em] mb-1" style={S}>Cash in pocket</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[28px] font-[600] text-white/30" style={SORA}>{currencyData.symbol}</span>
+              <span className="text-[52px] font-[900] leading-none tracking-tighter" style={SORA}>
+                {totalCash.toLocaleString()}
+              </span>
+            </div>
+            <div className="mt-8 px-5 py-2 rounded-full bg-white/10 border border-white/5 text-[10px] font-[800] uppercase tracking-widest text-white/60" style={DM_SANS}>
+              {totalNotes} NOTES TOTAL
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Virtual Notes & Coins Section */}
+      <div className="flex-1 px-6 pb-10">
+        <h2 className="text-[12px] font-[800] text-black uppercase tracking-[0.2em] mb-6 px-2 flex items-center gap-3" style={DM_SANS}>
+          <div className="w-2 h-2 rounded-full bg-black" />
+          Cash Banknotes
+        </h2>
+        <div className="flex flex-col gap-5 mb-12">
+          {notesList.map((item, i) => renderItem(item, i))}
+        </div>
+
+        {coinsList.length > 0 && (
+          <>
+            <h2 className="text-[12px] font-[800] text-black uppercase tracking-[0.2em] mb-6 px-2 flex items-center gap-3" style={DM_SANS}>
+              <div className="w-2 h-2 rounded-full bg-black" />
+              Metal Coins
+            </h2>
+            <div className="flex flex-col gap-5">
+              {coinsList.map((item, i) => renderItem(item, i + notesList.length))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Summary Tab Bar (Fixed Bottom) */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] bg-white/95 backdrop-blur-lg border-t border-[#F1F5F9] px-6 pt-5 pb-9 z-50 rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center justify-between mb-5 px-2">
+          <div className="flex flex-col">
+            <p className="text-[10px] font-[700] text-[#AFAFAF] uppercase tracking-widest mb-0.5" style={DM_SANS}>Notes Count</p>
+            <p className="text-[18px] font-[800] text-black" style={SORA}>{totalNotes}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-[700] text-[#AFAFAF] uppercase tracking-widest mb-0.5" style={DM_SANS}>Grand Total</p>
+            <p className="text-[18px] font-[800] text-[#000000]" style={SORA}>{formatMoney(totalCash, currencyCode)}</p>
+          </div>
+        </div>
+        
+        <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={isLoading}
+          className={`w-full py-5 rounded-[24px] bg-black text-white font-[800] text-[15px] shadow-xl shadow-black/10 flex items-center justify-center gap-3 active:bg-[#111111] transition-all ${isLoading ? 'opacity-70' : ''}`} style={DM_SANS}>
+          <Save className="w-5 h-5" /> 
+          {isLoading ? 'Saving...' : 'SAVE INVENTORY'}
+        </motion.button>
+      </div>
+
+      {/* Success Toast */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed bottom-36 left-1/2 -translate-x-1/2 w-fit px-6 py-3 bg-black text-white rounded-full flex items-center gap-3 shadow-2xl z-[60]">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="text-[13px] font-[700]" style={DM_SANS}>Cash inventory updated successfully!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+>>>>>>> 41f113d (upgrade scanner)
     </div>
   )
 }

@@ -73,5 +73,8 @@
     }
   ],
   "related_applications": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "permissions": ["camera"],
+  "display": "standalone",
+  "display_override": ["standalone", "browser"]
 }

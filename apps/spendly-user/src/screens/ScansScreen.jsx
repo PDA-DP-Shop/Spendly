@@ -1,31 +1,32 @@
-/**
- * SmartScanScreen — Spendly User
- * Google Pay-inspired full-screen scanner with 3 modes:
- *  1. Bill     — Spendly Shop QR bill
- *  2. Barcode  — Product barcode lookup
- *  3. Payment  — UPI QR / payment QR
- */
-
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  ScanLine, Barcode, QrCode,
-  Receipt, CheckCircle2, AlertCircle,
-  Copy, Check, ExternalLink,
-  Wallet, ArrowLeft, CreditCard, Clock,
-  Tag, ShoppingCart, FileText, Camera, Loader2, ChevronRight
-} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { formatMoney } from '../utils/formatMoney'
-import { useSettingsStore } from '../store/settingsStore'
-import { useExpenseStore } from '../store/expenseStore'
-import { lookupBarcode } from '../services/productLookup'
-import { scannedProductService, expenseService } from '../services/database'
-import { parseScannedQR } from '../utils/qrCode'
-import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library'
+import { 
+  ChevronLeft, Receipt, ScanBarcode, 
+  QrCode, Zap, AlertCircle, Sparkles
+} from 'lucide-react'
+
+// Components
+import BarcodeScanner from '../components/scanner/BarcodeScanner'
+import BillScanner from '../components/scanner/BillScanner'
+import PaymentQRScanner from '../components/scanner/PaymentQRScanner'
+import SpendlyQRScanner from '../components/scanner/SpendlyQRScanner'
+import ScanResultSheet from '../components/scanner/ScanResultSheet'
+import BillReceivedPopup from '../components/BillReceivedPopup'
+
+// Intelligence
+import { enhanceScanResult } from '../services/scanIntelligence'
+
+const TABS = [
+  { id: 'barcode', label: 'BARCODE', icon: ScanBarcode, hint: 'Point at any product barcode' },
+  { id: 'spendly', label: 'RECEIPT', icon: Receipt, hint: 'Point at Spendly Shop QR' },
+  { id: 'payment', label: 'PAYMENT', icon: QrCode, hint: 'Google Pay / Paytm QR' },
+  { id: 'receipt', label: 'BILL', icon: QrCode, hint: 'Point at physical paper bill' },
+]
 
 const S = { fontFamily: "'Inter', sans-serif" }
 
+<<<<<<< HEAD
 // ─── Mode config ────────────────────────────────────────────────────────────
 const MODES = [
   { id: 'bill',    label: 'Bill',    Icon: Receipt,  hint: 'Scan Spendly Shop QR',     viewfinder: 'square' },
@@ -836,11 +837,16 @@ function ReceiptOCRCapture({ videoRef }) {
 }
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
+=======
+>>>>>>> 41f113d (upgrade scanner)
 export default function ScansScreen() {
   const navigate = useNavigate()
-  const { settings } = useSettingsStore()
-  const currency = settings?.currency || 'INR'
+  const [activeTab, setActiveTab] = useState('barcode')
+  const [scanResult, setScanResult] = useState(null)
+  const [error, setError] = useState(null)
+  const [isProcessing, setIsProcessing] = useState(false)
 
+<<<<<<< HEAD
   const [mode, setMode] = useState('bill')   // 'bill' | 'barcode' | 'payment' | 'receipt'
   const [result, setResult] = useState(null)
   const [rawText, setRawText] = useState('')
@@ -942,232 +948,128 @@ export default function ScansScreen() {
   const handleModeChange = (newMode) => {
     dismiss()
     setMode(newMode)
+=======
+  const handleScanResult = async (result) => {
+    try {
+      setIsProcessing(true)
+      let enhanced = await enhanceScanResult(result)
+      setScanResult(enhanced || result)
+      
+      // Background history only (no UI display as requested)
+      const saved = JSON.parse(localStorage.getItem('recent_scans') || '[]')
+      const name = enhanced?.name || enhanced?.shopName || result.name || result.shopName
+      const newRecents = [{ ...result, ...enhanced, displayName: name || 'Scan' }, ...saved].slice(0, 5)
+      localStorage.setItem('recent_scans', JSON.stringify(newRecents))
+    } catch (err) {
+      console.error(err)
+      setError("Processing failed.")
+    } finally {
+      setIsProcessing(false)
+    }
+>>>>>>> 41f113d (upgrade scanner)
   }
 
-  // Log UPI payment as expense in Add Expense
-  const handleLogUPIExpense = (upi) => {
-    navigate('/add?mode=type', {
-      state: {
-        prefilled: {
-          shopName: upi.pn !== 'Unknown' ? upi.pn : upi.pa,
-          amount: upi.am > 0 ? upi.am : undefined,
-          category: 'bills',
-          note: upi.tn || `UPI payment to ${upi.pa}`,
-          scanType: 'payment_qr',
-        }
-      }
-    })
-    dismiss()
+  const handleReset = () => {
+    setScanResult(null)
+    setError(null)
+    setIsProcessing(false)
   }
 
-  const { videoRef, canvasRef, hasCamera, resetScan } = useCameraScanner({
-    onResult: handleRaw,
-    paused: !!result || mode === 'receipt',
-  })
-
-  // Handle dismiss with cache reset
-  const dismiss = () => {
-    setResult(null)
-    setError('')
-    setRawText('')
-    setScanning(true)
-    resetScan()
-  }
-
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[60] bg-black flex flex-col overflow-hidden">
-      {/* Camera */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        muted
-      />
-      <canvas ref={canvasRef} className="hidden" />
-
-      {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-6 pt-14 pb-4">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => navigate(-1)}
-          className="w-11 h-11 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2.5} />
-        </motion.button>
-
-        <div className="text-center">
-          <p className="text-white text-[17px] font-[800] tracking-tight" style={S}>Smart Scan</p>
-          <div className="flex items-center justify-center gap-1.5 mt-0.5">
-            <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" />
-            <span className="text-white/50 text-[10px] font-[700] uppercase tracking-widest" style={S}>Auto-detecting</span>
-          </div>
-        </div>
-
-        {/* Torch placeholder */}
-        <div className="w-11 h-11" />
+    <div className="h-dvh bg-black overflow-hidden relative" style={S}>
+      
+      {/* ── FULLSCREEN CAMERA ── */}
+      <div className="absolute inset-0 z-0 bg-black">
+         {!scanResult ? (
+           <AnimatePresence mode="wait">
+             <motion.div 
+               key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+               className="w-full h-full"
+             >
+               {activeTab === 'barcode' && <BarcodeScanner onScanComplete={handleScanResult} onError={setError} />}
+               {activeTab === 'spendly' && <SpendlyQRScanner onScanComplete={handleScanResult} onError={setError} />}
+               {activeTab === 'payment' && <PaymentQRScanner onScanComplete={handleScanResult} onError={setError} />}
+               {activeTab === 'receipt' && <BillScanner onScanComplete={handleScanResult} />}
+             </motion.div>
+           </AnimatePresence>
+         ) : (
+           <div className="w-full h-full bg-[#0F0F1A]" />
+         )}
       </div>
 
-      {/* ── Camera not available ── */}
-      {hasCamera === false && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60 px-10 text-center z-10">
-          <div className="w-20 h-20 bg-white/10 rounded-[28px] flex items-center justify-center mb-6">
-            <ScanLine className="w-10 h-10 text-white/40" />
-          </div>
-          <p className="text-[17px] font-[800] text-white mb-2" style={S}>Camera Access Needed</p>
-          <p className="text-[13px] font-[600] text-white/50 leading-relaxed" style={S}>
-            Allow camera access in your browser settings to use Smart Scan.
-          </p>
+      {/* ── SIMPLE HEADER ── */}
+      <header className="absolute top-0 left-0 right-0 z-50 p-6 pt-[env(safe-area-inset-top,24px)] flex items-center justify-between pointer-events-none">
+        <button 
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-90 transition-transform pointer-events-auto"
+        >
+          <ChevronLeft className="w-6 h-6 text-white" />
+        </button>
+
+        <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2">
+          <Zap className="w-3.5 h-3.5 text-white fill-white" />
+          <span className="text-white text-[10px] font-black uppercase tracking-wider">Fast Scan 2.0</span>
         </div>
-      )}
 
-      {/* ── Viewfinder area ── */}
-      {hasCamera && (
-        <div className="flex-1 flex flex-col items-center justify-center relative">
-          {/* Animated hint label above viewfinder */}
-          <motion.div
-            key={mode}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 px-5 py-2 bg-black/40 backdrop-blur-sm rounded-full border border-white/10"
-          >
-            <span className="text-white text-[12px] font-[700] uppercase tracking-widest" style={S}>
-              {currentMode?.hint}
-            </span>
-          </motion.div>
+        <div className="w-10 h-10" /> {/* Spacer */}
+      </header>
 
-          {/* Viewfinder — hidden in receipt mode (full-frame capture instead) */}
-          {mode !== 'receipt' && (
-            <AnimatePresence mode="wait">
-              {barcodeResolving ? (
-                <motion.div key="resolving"
-                  initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                  className="w-64 h-32 border-2 border-white/40 rounded-3xl flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-8 h-8 text-white animate-spin" />
-                    <span className="text-white text-[11px] font-[800] uppercase tracking-widest mt-2" style={S}>Looking up...</span>
-                  </div>
-                </motion.div>
-              ) : currentMode?.viewfinder === 'wide' ? (
-                <motion.div key="wide"
-                  initial={{ opacity: 0, scaleX: 0.8 }} animate={{ opacity: 1, scaleX: 1 }}
-                  exit={{ opacity: 0, scaleX: 0.8 }}>
-                  <WideViewfinder scanning={scanning} />
-                </motion.div>
-              ) : (
-                <motion.div key="square"
-                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}>
-                  <SquareViewfinder scanning={scanning} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
-
-          {/* Receipt OCR shutter UI */}
-          {mode === 'receipt' && (
-            <ReceiptOCRCapture videoRef={videoRef} />
-          )}
-
-          {/* Success flash — not for receipt mode */}
-          {mode !== 'receipt' && (
-            <AnimatePresence>
-              {result && !error && (
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="mt-6 flex items-center gap-2 bg-white/20 backdrop-blur-md px-5 py-3 rounded-full border border-white/20"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
-                  <span className="text-white text-[13px] font-[800]" style={S}>Scanned!</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
-
-          {/* Error toast */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                className="mt-6 flex items-center gap-2 bg-black/70 backdrop-blur-md px-5 py-3 rounded-full border border-red-400/30"
-              >
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span className="text-white text-[12px] font-[700]" style={S}>{error}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
-      {/* ── Mode tabs at bottom ── */}
-      <div className="relative z-10 pb-8">
-        <div className="mx-5 bg-black/70 backdrop-blur-2xl rounded-[28px] border border-white/10 p-2 flex items-center gap-1">
-          {MODES.map((m) => {
-            const Icon = m.Icon
-            const active = mode === m.id
+      {/* ── MINIMAL TABS (NO ACTIVITY LIST) ── */}
+      <footer className="absolute bottom-0 left-0 right-0 z-40 px-6 pb-[env(safe-area-inset-bottom,24px)]">
+        <div className="bg-white rounded-[32px] p-1 flex items-center shadow-2xl border border-white/10 overflow-hidden">
+          {TABS.map(tab => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
             return (
-              <motion.button
-                key={m.id}
-                whileTap={{ scale: 0.93 }}
-                onClick={() => handleModeChange(m.id)}
-                className={`relative flex-1 flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-[20px] overflow-hidden transition-colors duration-200 ${
-                  active ? 'bg-white' : 'bg-transparent'
-                }`}
+              <button 
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); handleReset(); }}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-4 rounded-[26px] transition-all ${isActive ? 'bg-black text-white' : 'text-gray-400'}`}
               >
-                <Icon
-                  className={`w-5 h-5 relative z-10 transition-all duration-200 ${active ? 'text-black' : 'text-white/50'}`}
-                  strokeWidth={active ? 2.5 : 2}
-                />
-                <span
-                  className={`text-[10px] font-[800] uppercase tracking-wide relative z-10 transition-all duration-200 ${active ? 'text-black' : 'text-white/50'}`}
-                  style={S}
-                >
-                  {m.label}
+                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                <span className={`text-[8px] font-black uppercase tracking-[0.1em] ${isActive ? 'text-white' : 'text-gray-400'}`}>
+                  {tab.label}
                 </span>
-              </motion.button>
+              </button>
             )
           })}
         </div>
-      </div>
-
-
-      {/* ── Result sheets ── */}
-      <AnimatePresence>
-        {result?.type === 'bill' && (
-          <>
-            <motion.div
-              key="overlay-bill"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black z-10"
-              onClick={dismiss}
-            />
-            <BillSheet
-              key="bill-sheet"
-              bill={result.data}
-              currency={currency}
-              onClose={dismiss}
-            />
-          </>
+        
+        {!scanResult && !error && (
+          <p className="mt-4 text-center text-white/30 text-[8px] font-black uppercase tracking-[0.2em] animate-pulse">
+            {TABS.find(t => t.id === activeTab)?.hint}
+          </p>
         )}
-        {result?.type === 'payment' && (
-          <>
-            <motion.div
-              key="overlay-payment"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black z-10"
-              onClick={dismiss}
-            />
-            <PaymentSheet
-              key="payment-sheet"
-              upi={result.data}
-              onClose={dismiss}
-              onLogExpense={handleLogUPIExpense}
-            />
-          </>
+      </footer>
+
+      {/* ── PROCESSING OVERLAY ── */}
+      <AnimatePresence>
+        {isProcessing && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center"
+          >
+             <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+          </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── RESULT SHEET / BILL POPUP ── */}
+      <AnimatePresence mode="wait">
+        {scanResult && (
+          scanResult.type.includes('spendly') ? (
+            <BillReceivedPopup 
+              bill={scanResult} 
+              onClose={handleReset} 
+            />
+          ) : (
+            <ScanResultSheet 
+              result={scanResult} 
+              onReset={handleReset} 
+            />
+          )
+        )}
+      </AnimatePresence>
+
     </div>
   )
 }

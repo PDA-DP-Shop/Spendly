@@ -1,5 +1,5 @@
 // EMIScreen.jsx — Feature 2: EMI & Loan Tracker
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import TopHeader from '../components/shared/TopHeader'
 import EmptyState from '../components/shared/EmptyState'
@@ -9,6 +9,8 @@ import { useSettingsStore } from '../store/settingsStore'
 import { formatMoney } from '../utils/formatMoney'
 import { Plus, X, CheckCircle, AlertCircle, Trash2, Calendar, Banknote, CreditCard } from 'lucide-react'
 import { format, parseISO, differenceInDays } from 'date-fns'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const HAPTIC_SHAKE = {
   tap: { 
@@ -163,11 +165,23 @@ function EMICard({ emi, currency, onMarkPaid, onDelete }) {
 
 export default function EMIScreen() {
   const { t } = useTranslation()
-  const { emis, loadEMIs, markPaid, removeEMI, thisMonthTotal } = useEMIStore()
+  const { emis, loadEMIs, markPaid, removeEMI, addEMI, thisMonthTotal } = useEMIStore()
   const { settings } = useSettingsStore()
   const currency = settings?.currency || 'USD'
   const [showAdd, setShowAdd] = useState(false)
   const S = { fontFamily: "'Inter', sans-serif" }
+
+  const duesCardRef = useRef(null)
+  const firstEmiRef = useRef(null)
+  const addBtnRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('emi_page')
+
+  const guideSteps = useMemo(() => [
+    { targetRef: duesCardRef, emoji: '📉', title: 'Monthly Burn', description: 'See the total sum of all EMIs you need to settle this month in one glance.', borderRadius: 40 },
+    { targetRef: firstEmiRef, emoji: '🏦', title: 'Loan Detail', description: 'Track payments left, principal remaining, and exactly when the next installment is due.', borderRadius: 36 },
+    { targetRef: addBtnRef, emoji: '➕', title: 'Add Debt', description: 'Bought a new car or iPhone on EMI? Add it here to let Spendly manage the timeline for you.', borderRadius: 100 }
+  ], [duesCardRef, firstEmiRef, addBtnRef])
 
   useEffect(() => { loadEMIs() }, [])
 
@@ -175,10 +189,22 @@ export default function EMIScreen() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-white pb-24 safe-top">
-      <TopHeader title={t('emis.title')} />
+      <TopHeader 
+        title={t('emis.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
 
       {emis.length > 0 && (
-        <div className="mx-6 mb-10 mt-6 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-red-500/10 bg-red-500">
+        <div ref={duesCardRef} className="mx-6 mb-10 mt-6 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-red-500/10 bg-red-500">
           <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 -mr-16 -mt-16" />
           <p className="text-[13px] font-[700] text-red-100 uppercase tracking-widest mb-4" style={S}>Current Dues</p>
           <div className="flex items-baseline gap-2">
@@ -198,14 +224,17 @@ export default function EMIScreen() {
         <EmptyState type="emis" title={t('emis.activeLoans')} message={t('emis.paymentSuccess') || 'No active loans'} />
       ) : (
         <div className="px-6 flex flex-col gap-8 pb-32">
-          {emis.map(emi => (
-            <EMICard key={emi.id} emi={emi} currency={currency} onMarkPaid={markPaid} onDelete={removeEMI} />
+          {emis.map((emi, i) => (
+            <div key={emi.id} ref={i === 0 ? firstEmiRef : null}>
+              <EMICard emi={emi} currency={currency} onMarkPaid={markPaid} onDelete={removeEMI} />
+            </div>
           ))}
         </div>
       )}
 
       {/* FAB */}
       <motion.button 
+        ref={addBtnRef}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         variants={HAPTIC_SHAKE}
@@ -217,6 +246,15 @@ export default function EMIScreen() {
       </motion.button>
 
       <AddEMISheet show={showAdd} onSave={addEMI} onClose={() => setShowAdd(false)} />
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }

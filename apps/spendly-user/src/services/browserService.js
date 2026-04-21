@@ -32,6 +32,7 @@ export const browserService = {
     const { browser } = this.detect()
     const info = await db.browserInfo.get(1)
     
+<<<<<<< HEAD
     if (!info) {
       await db.browserInfo.add({
         id: 1,
@@ -44,6 +45,15 @@ export const browserService = {
         lastOpenedAt: new Date().toISOString()
       })
     }
+=======
+    // Always use .put() with id: 1 to ensure singleton pattern
+    await db.browserInfo.put({
+      id: 1,
+      firstOpenedAt: info?.firstOpenedAt || new Date().toISOString(),
+      lastOpenedAt: new Date().toISOString(),
+      preferredBrowser: info?.preferredBrowser || null
+    })
+>>>>>>> 41f113d (upgrade scanner)
   },
 
   /**

@@ -1,5 +1,5 @@
 // TripsScreen.jsx — Feature 10: Trip Budget Planner
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTripStore } from '../store/tripStore'
@@ -10,6 +10,8 @@ import EmptyState from '../components/shared/EmptyState'
 import { formatMoney } from '../utils/formatMoney'
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { Plus, X, MapPin, Plane, Calendar, ChevronRight, Trash2, Globe, Compass } from 'lucide-react'
+import PageGuide from '../components/shared/PageGuide'
+import { usePageGuide } from '../hooks/usePageGuide'
 
 const TRIP_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
 const TRIP_EMOJIS = ['✈️','🏖️','🚗','🗼','🗽','🏔️','🏰','🌇','🏕️','🚢','🌴','🍹','🚲']
@@ -198,6 +200,16 @@ export default function TripsScreen() {
   const [showAdd, setShowAdd] = useState(false)
   const S = { fontFamily: "'Inter', sans-serif" }
 
+  const firstTripRef = useRef(null)
+  const addBtnRef = useRef(null)
+
+  const { showGuide, currentStep, startGuide, nextStep, prevStep, skipGuide } = usePageGuide('trips_page')
+
+  const guideSteps = [
+    { targetRef: firstTripRef, emoji: '✈️', title: 'Voyage Tracker', description: 'Group all your travel expenses under specific trips to see where your vacation money goes.', borderRadius: 40 },
+    { targetRef: addBtnRef, emoji: '🏝️', title: 'Plan New Trip', description: 'Heading to Bali or Tokyo? Set a dedicated budget and date range for your next journey.', borderRadius: 100 }
+  ]
+
   useEffect(() => { loadTrips() }, [])
 
   const handleActivate = (id) => {
@@ -209,20 +221,35 @@ export default function TripsScreen() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-white pb-20 safe-top">
-      <TopHeader title={t('trips.title')} />
+      <TopHeader 
+        title={t('trips.title')} 
+        rightElement={
+          <button 
+             onClick={startGuide}
+             className="w-[34px] h-[34px] rounded-full bg-black text-white flex items-center justify-center font-bold text-[16px] leading-none active:scale-95 transition-transform"
+             style={{ fontFamily: "'DM Sans', sans-serif" }}
+             title="How to use this page"
+          >
+             ?
+          </button>
+        }
+      />
 
       {trips.length === 0 ? (
         <EmptyState type="trips" title={t('trips.activeTrips') || 'No trips planned'} message={t('trips.addTrip') || 'Plan your next trip and manage your travel expenses with precision.'} />
       ) : (
         <div className="px-6 flex flex-col gap-10 pb-32 mt-6">
-          {trips.map(trip => (
-            <TripCard key={trip.id} trip={trip} currency={currency} onDelete={removeTrip} onActivate={handleActivate} />
+          {trips.map((trip, i) => (
+            <div key={trip.id} ref={i === 0 ? firstTripRef : null}>
+              <TripCard trip={trip} currency={currency} onDelete={removeTrip} onActivate={handleActivate} />
+            </div>
           ))}
         </div>
       )}
 
       {/* FAB */}
       <motion.button 
+        ref={addBtnRef}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         variants={HAPTIC_SHAKE}
@@ -234,6 +261,15 @@ export default function TripsScreen() {
       </motion.button>
 
       <AddTripSheet show={showAdd} onSave={addTrip} onClose={() => setShowAdd(false)} />
+
+      <PageGuide 
+        show={showGuide} 
+        steps={guideSteps} 
+        currentStep={currentStep} 
+        onNext={nextStep} 
+        onPrev={prevStep} 
+        onSkip={skipGuide} 
+      />
     </div>
   )
 }
