@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spendly Micro Project Report Viewer</title>
+  <title>Spendly Project Report & Guide</title>
   <!-- Tailwind CSS for styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Marked JS to parse markdown -->
@@ -104,8 +104,8 @@
   <div class="max-w-4xl mx-auto">
     <header class="mb-8 border-b border-zinc-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-extrabold tracking-tight text-white">📑 Spendly Project Report Viewer</h1>
-        <p class="text-zinc-400 text-sm mt-1">Interactive Academic Report rendering directly from local markdown data.</p>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white">📑 Spendly Project Report & Guide</h1>
+        <p class="text-zinc-400 text-sm mt-1">Simple guide and full report for college friends and reviewers.</p>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="window.print()" class="px-4 py-2 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
@@ -127,6 +127,29 @@
 
 ---
 
+## 🚦 Simple Step-by-Step Guide: How to Run and Use Spendly
+*Hey friends! If you want to run and test all three Spendly applications together on your browser, just follow these simple steps:*
+
+### Step 1: Open all three apps
+*   Open the **Spendly Radar** app, **Spendly Shop** app, and **Spendly User** app in different tabs of your browser.
+
+### Step 2: Connect the Shop Register to the Radar Hub
+*   Look at the **Spendly Radar** screen. You will see a 6-character Pairing Code (for example: `K4N9X3`).
+*   Now, open the **Spendly Shop** app. It will ask you to connect to a nearby Radar. Type in that 6-character code and click **Connect**.
+*   *What happened?* The two tabs will automatically establish a direct WebRTC connection. Now, the shop register can fetch item details directly from the Radar database.
+
+### Step 3: Scan items and compile the Bill
+*   Add some items (like biscuits, soda, bread) to the inventory on the **Radar** dashboard.
+*   Go to the **Shop** cashier screen. Click "Scan Barcode" or pick items from the quick catalog list. The Shop app will query Radar and fetch the prices.
+*   Enter CGST/SGST taxes, click complete checkout, and a bill summary will be generated.
+
+### Step 4: Beam the bill to your User Wallet
+*   On the **Shop** bill screen, click **Beam Bill**. It will display a dynamic QR code on the screen.
+*   Open your **Spendly User** app on your phone, click **Receive Invoice**, and scan that QR code.
+*   *Boom!* The invoice payload is sent directly over the local network and saved inside your consumer expense manager.
+
+---
+
 ## 🎓 Viva Quick Study Guide (Cheat Sheet)
 *If you are asked these questions by your professor/examiner, here is how you answer:*
 
@@ -145,19 +168,9 @@
 
 ## 1. 🎯 Why We Built Spendly (The Motivation)
 
-Modern fintech platforms operate on a centralized model. This introduces several major problems that Spendly solves:
+Centralized fintech apps read all our personal financial details. When we install standard expense trackers, they ask for background permissions to scan our private bank alert SMS notifications and banking records. This data is sent to central cloud databases, which can be leaked or sold.
 
-### 1.1 The Privacy Problem
-Apps like expense trackers scan your SMS notifications, bank balances, and receipts, sending that data to central cloud databases. This sensitive financial information is often sold to advertisers or exposed in security breaches.  
-**Spendly's Solution:** It uses a **Zero-Knowledge Architecture**. The developer has no access to transaction histories; all databases remain inside the user's device.
-
-### 1.2 The Cost Problem
-Merchants pay monthly fees for Point-of-Sale (POS) software, catalog hosting, and database upkeep.  
-**Spendly's Solution:** By using client-side browser storage and WebRTC, the merchant pays **zero server fees**.
-
-### 1.3 The Internet Dependency Problem
-If a store loses internet access, its POS systems can shut down.  
-**Spendly's Solution:** Spendly runs offline. When internet is unavailable, apps fall back to same-device local storage bridging or local P2P networks.
+Spendly solves this privacy issue using a **Zero-Knowledge Sandbox**. All transaction details, budgets, and files stay locked inside the user's own browser folder. There are no server databases, meaning the merchant and customer pay **zero server hosting fees**.
 
 ---
 
@@ -188,8 +201,8 @@ The ecosystem is split into three main client PWAs (Progressive Web Apps) and a 
 ```
 
 ### 2.1 Storage Layer: IndexedDB (Dexie.js)
-*   **What it is:** A local, transactional object-oriented database built into the browser.
-*   **Why we use it:** Unlike `localStorage` (which is limited to 5MB and blocks the main execution thread), IndexedDB can store gigabytes of structured data asynchronously. We wrap it in **Dexie.js** for simple querying, schema version upgrades, and relations.
+*   **What it is:** A local database built into the browser.
+*   **Why we use it:** Unlike normal browser localStorage (which is limited to 5MB), IndexedDB can store gigabytes of data asynchronously without slowing down the app. We wrap it in **Dexie.js** for easy queries.
 
 ### 2.2 Direct Network Layer: WebRTC (PeerJS)
 *   **What it is:** Web Real-Time Communication allows browsers to establish direct, peer-to-peer data streams without going through an intermediate application server.
@@ -197,7 +210,7 @@ The ecosystem is split into three main client PWAs (Progressive Web Apps) and a 
 
 ### 2.3 Pairing Network Layer: ntfy.sh WebSocket Bridge
 *   **What it is:** A free, public pub/sub signaling channel.
-*   **Why we use it:** Standard WebRTC requires exchanging "session descriptions" (SDPs) between devices. We use `ntfy.sh` as a lightweight bridge topic (`spendly_bridge_${Id1}_${Id2}`) to exchange these connection handshake packets instantly.
+*   **Why we use it:** We use `ntfy.sh` as a lightweight bridge topic (`spendly_bridge_${Id1}_${Id2}`) to exchange connection handshake packets instantly.
 
 ### 2.4 Serverless Layer: Cloudflare Worker & KV
 *   **What it is:** A globally distributed, serverless code framework.
@@ -366,7 +379,7 @@ Instead of requesting backend SMS permissions, Spendly parses transaction alerts
 ```javascript
 const smsText = "Amt debited: Rs.1,500.00 at STAR BAZAR using card xx4321.";
 const parseSMS = (text) => {
-  const amt = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i)?.[1];
+  const amt = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d.2)?)/i)?.[1];
   const isDebit = /(debited|spent|withdrawn)/i.test(text);
   const merchant = text.match(/(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i)?.[1];
   return { amount: amt, isDebit, merchant };
