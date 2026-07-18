@@ -48,54 +48,59 @@ You must answer all queries regarding the Spendly system using the technical spe
 ========================================================================
 1. GENERAL OVERVIEW & MOTIVATION
 ========================================================================
-Spendly is an offline-first, zero-knowledge, hardware-secured peer-to-peer billing and finance ecosystem. It is designed to replace centralized fintech apps that scan bank messages and send user data to cloud servers. Spendly operates entirely on the user's local hardware sandbox without server fees or cloud databases.
-
-The system is split into three Progressive Web Applications (PWAs):
+Spendly is an offline-first, zero-knowledge, hardware-secured peer-to-peer billing and finance tracking system split into three Progressive Web Applications (PWAs):
 1. Spendly User (Consumer App): An origin-sandboxed personal expense tracking wallet.
 2. Spendly Shop (Merchant POS App): An offline cash register for point-of-sale checkout billing.
 3. Spendly Radar (Local Market Hub App): An analytical node for local merchant campaigns and anonymous trend trackers.
 
+Traditional fintech applications collect sensitive transactional histories, bank accounts, and geolocated shopping routines, uploading them to centralized cloud databases. This centralized model compromises user privacy, risks data breaches, and imposes monthly database subscription costs on merchants. Spendly is designed to solve these issues. It replaces centralized server storage with local, sandbox storage models and implements peer-to-peer WebRTC connections, ensuring that sensitive data never leaves the owner's hardware profiles. There is no central server instance, meaning the merchant and consumer incur exactly zero server hosting fees.
+
 ========================================================================
 2. SPENDLY USER (CONSUMER EXPENSE APP)
 ========================================================================
-- Role: Allows consumers to manage finances, track cash wallets, parse clipboard transactions, and receive secure invoices.
-- Database: Browser-native IndexedDB managed via Dexie.js (Origin sandboxed).
-- Cash Wallet: Features a note tracker. Users manually input physical denomination counts (₹500, ₹200, ₹100, and ₹50 bills). The system calculates the physical balance dynamically:
-  Total Cash = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
-- Clipboard SMS Parser: A secure local regex processor. Instead of asking for OS background SMS permissions, it parses copied alerts:
-  Regex for Amount: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
-  Regex for Debit Flag: /(debited|spent|withdrawn|paid)/i
-  Regex for Merchant: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
-  This runs in memory locally, keeping transaction scan files out of external network calls.
-- WebAuthn Lock: Secures local databases. The app calls the WebAuthn API to register/assert cryptographic credentials, linking local Dexie.js decryption keys to the hardware Secure Enclave (Touch ID / Face ID / PIN code).
-- Shagun Gifts Ledger: Tracks given/received gift amounts for weddings/festivals, maintaining balance lists.
-- EMI Alerts: Triggers calendar schedule notifications for upcoming EMIs.
+The Spendly User application serves as the consumer interface for expense tracking and personal cash ledger operations.
+- Local Storage Layer: Operates on IndexedDB using the Dexie.js wrapper. All tables are local and origin-sandboxed.
+- Database Schema:
+  * expenses: "++id, category, amount, date, shopName, isSoftDeleted" (stores core expense logs).
+  * wallets: "++id, name, type, balance" (tracks digital, card, and cash accounts).
+  * emiAlerts: "++id, title, amount, dueDate, isPaid" (schedules upcoming EMI triggers).
+  * shagunRegistry: "++id, personName, eventName, amount, type" (logs given/received traditional gift values).
+- Cash Wallet Tracker: Tracks physical cash by note denominations. Users enter counts for ₹500, ₹200, ₹100, and ₹50 bills. The wallet balance is calculated dynamically: Balance = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
+- Clipboard SMS Parser: Parses bank transaction messages without requesting OS background SMS reading permissions. When the user copies an SMS to the clipboard, a local regex processor parses the text in memory:
+  * Amount Extract: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
+  * Debit Check: /(debited|spent|withdrawn|paid)/i
+  * Merchant Name: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
+  This logic avoids external API calls or server processing, preserving user privacy.
+- WebAuthn Cryptography: Secures IndexedDB files. Rather than using vulnerable local passwords, Spendly User registers biometric passkeys using the WebAuthn API. Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code), ensuring the database remains encrypted on the device when the app is locked.
+- Shagun Gift Tracker: Maintains lists of physical cash gifts exchanged during weddings and social festivals, tracking reciprocal balances.
+- EMI Alerts: Schedules upcoming payments and triggers calendar notifications when payments are due.
 
 ========================================================================
 3. SPENDLY SHOP (MERCHANT POS APP)
 ========================================================================
-- Role: An offline cash register used by checkout cashiers.
-- Core Flow: Cashier scans product barcodes -> sends direct WebRTC messages (PRODUCT_REQUEST) to Radar -> Radar returns details -> Shop computes VAT/GST, adds items to invoice, and completes checkout.
-- Stock Reduction: Upon checkout complete, Shop sends a STOCK_REDUCE packet to the local Radar node, updating stock quantities.
+The Spendly Shop application is an offline point-of-sale register used by cashiers for product checkouts and billing.
+- Core Flow: When a product is scanned, the POS app sends a WebRTC packet (PRODUCT_REQUEST) containing the barcode to the paired Spendly Radar hub. The Radar hub queries its database and returns the product catalog details (PRODUCT_RESPONSE).
+- Checkout & Invoicing: The POS app calculates tax variables (VAT/GST), subtracts promotional discounts, and generates a formatted invoice object.
+- Stock Reduction: Upon checkout completion, the Shop app beams a STOCK_REDUCE packet to the local Radar node to reduce stock counts.
 - Billing Beam Fallback Pipeline:
-  - Transport A (Web NFC Beam): Employs Web NFC API. Customer taps device to register screen; the invoice payload is transmitted directly via browser NFC tags.
-  - Transport B (Paired WebRTC): If devices are already paired, the invoice payload is encrypted via AES-256-GCM and sent directly over the data channel.
-  - Transport C (Dynamic QR Code): Generates a high-contrast QR code on the register screen containing the raw invoice data, which the customer scans.
+  * Transport A (Web NFC Beam): Uses the Web NFC API. When a customer taps their device on the register screen, the invoice JSON payload is written to the device's NFC tags.
+  * Transport B (Paired WebRTC): If the merchant and customer are already paired, the invoice payload is encrypted using AES-256-GCM and sent directly over the WebRTC data channel.
+  * Transport C (Dynamic QR Code): Generates a high-contrast QR code on the POS screen containing the raw invoice data, which the customer scans.
 
 ========================================================================
 4. SPENDLY RADAR (LOCAL MARKET HUB APP)
 ========================================================================
-- Role: Runs on a merchant hub tablet/PC to manage catalog records, offer validation claims, and display trends.
+Spendly Radar is run by merchants on a tablet or PC to manage inventory directories, validate offers, and track localized market trends.
 - Database Schema:
-  - db.radarStock: Stores items, catalog barcodes, wholesale prices, and retail counts.
-  - db.radarOffers: Stores active campaigns, discount parameters, and validation codes.
-  - db.areaIntelligence: Logs privacy-preserving spending statistics.
+  * db.radarStock: Stores "++id, barcode, name, price, quantity" (inventory directories).
+  * db.radarOffers: Stores "++id, title, discountPercent, expiresAt, category" (promotional campaigns).
+  * db.areaIntelligence: Logs privacy-preserving spending statistics.
 - Offers Validation Loop:
-  - User claims a discount code from Radar (generating a 6-digit verification pin).
-  - Cashier enters the pin on Shop screen.
-  - Shop sends P2P validation request to Radar (OFFER_VALIDATE_REQUEST).
-  - Radar verifies key, marks it used, and returns confirmation (OFFER_VALIDATE_RESPONSE).
-- Privacy-Preserving Area Intelligence: Compiles localized spending trends. Consumer apps reverse-geocode their position (e.g. "Mumbai, Powai"), strip names/details, and post category/sum data anonymously over randomized shard brokers. Radar logs this data to db.areaIntelligence and displays local chart graphics (built with Recharts).
+  * Customers claim discount codes from Radar, generating a 6-digit claim code.
+  * The cashier inputs the code on the POS Shop screen.
+  * The Shop app sends a P2P request (OFFER_VALIDATE_REQUEST) to Radar.
+  * Radar verifies the code, marks it as used, and returns confirmation (OFFER_VALIDATE_RESPONSE).
+- Privacy-Preserving Area Intelligence: Compiles localized spending trends. Consumer apps reverse-geocode their position (e.g. "Mumbai, Powai"), strip user names, and post category/sum data anonymously over randomized shard brokers. Radar logs this data to db.areaIntelligence and displays local chart graphics (built with Recharts).
 
 ========================================================================
 5. INFRASTRUCTURE & CONNECTION PROTOCOLS
