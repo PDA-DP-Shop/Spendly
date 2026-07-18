@@ -146,7 +146,7 @@
     <!-- Viva Q&A Prep Guide -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span>👩‍🏫</span> Mam's Viva Question Bank (Simple Language)
+        <span>👩‍🏫</span> Mam's Expected Viva Question Bank (22 Simple Q&As)
       </h2>
       <div class="space-y-4">
         <!-- Question 1 -->
@@ -158,7 +158,7 @@
         <!-- Question 2 -->
         <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
           <h4 class="text-white font-bold text-sm mb-1">Q2. What database did you use and where is it located?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">We used **IndexedDB** with the **Dexie.js** library. The database sits directly inside the web browser's storage space on your phone or computer.</p>
+          <p class="text-zinc-500 text-xs leading-relaxed">We used **IndexedDB** with the **Dexie.js** library wrapper. The database sits directly inside the web browser's storage space on your phone or computer.</p>
         </div>
 
         <!-- Question 3 -->
@@ -183,6 +183,102 @@
         <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
           <h4 class="text-white font-bold text-sm mb-1">Q6. What is the role of Cloudflare Workers in this project?</h4>
           <p class="text-zinc-500 text-xs leading-relaxed">Cloudflare Workers KV helps pair registers via a temporary 6-digit connection code. Once the WebRTC connection is opened, we remove the pairing keys from KV storage.</p>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q7. What is WebAuthn and why did you use it?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">WebAuthn is a browser API that lets us lock the local app behind fingerprint or face lock (Passkeys). It generates local decryption keys inside your device's Secure Enclave.</p>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q8. What is the ntfy.sh WebSocket used for?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">WebRTC requires phones to exchange setup messages called SDP keys to connect. Since we have no server, we use ntfy.sh's public WebSocket topics as a mailbox to swap these keys.</p>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q9. Why React and Vite instead of simple HTML/JS files?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Vite compiles and loads files with hot-reloads during coding, and React lets us write clean component templates to reuse menus, buttons, and lockscreens.</p>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q10. How does the stock count decrement in Radar on checkout?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">When the Shop POS completes checkout, it sends a JSON message packet `STOCK_UPDATE` directly to Radar over the open WebRTC data channel, updating its database counts.</p>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q11. What is the storage limit of IndexedDB?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Unlike LocalStorage which blocks you after 5MB, IndexedDB has no small limit. It can use up to 50% of your device's free disk space, allowing gigabytes of offline history.</p>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q12. What is a PWA (Progressive Web App)?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">It is a website that behaves like a mobile application. It has a manifest file to let you install it on your home screen, and uses service workers to run offline.</p>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q13. Why did you separate this project into three apps?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">To separate roles. Customer wallets belong to shoppers, registers belong to cashiers, and Radar stock portals belong to managers. They only connect when necessary.</p>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q14. How does the store credit system work offline?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">If checkout is done on credit, the POS register logs it to its local ledger, and beams a credit record to the customer's app, syncing balances without central systems.</p>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q15. What is the difference between WebSockets and WebRTC?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">WebSockets require data to constantly pass through a server relay. WebRTC connects the browsers directly, beaming data directly between phones.</p>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q16. How does geocoded area analytics work without tracking users?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">The User app geolocates coordinates locally (e.g. Mumbai, Powai), strips all personal names or identifiers, and posts transaction totals anonymously to Radar.</p>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q17. What happens if WebRTC connections fail?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">If P2P tunnels fail, the system falls back to dynamic QR code scans or manual 6-digit invoice code typing to complete checkouts.</p>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q18. Why Zustand instead of Redux?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Redux is complex and requires too much setup code. Zustand is very lightweight, faster, and matches our serverless offline architecture perfectly.</p>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q19. How does the Cash Counter calculate totals?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">It multiplies note counts by note values (₹500 * count500 + ₹200 * count200, etc.) and sums them up locally on the fly.</p>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q20. What is a Service Worker?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">It is a background script that intercepts network queries and serves cached files, allowing the app to run offline even without internet access.</p>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q21. How do you handle soft deletes in the database?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Instead of deleting records permanently, we flag them with `isSoftDeleted: true` so the user can restore items from a trash bin.</p>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q22. What library runs the charts on Radar?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">We use **Recharts**, which renders clean, responsive SVG analytics curves on screen from IndexedDB arrays.</p>
         </div>
       </div>
     </section>
