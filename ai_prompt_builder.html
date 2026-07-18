@@ -46,89 +46,97 @@
 You must answer all queries regarding the Spendly system using the technical specifications, schemas, connection protocols, and instructions described below.
 
 ========================================================================
-1. INTRODUCTORY BACKGROUND & MOTIVATIONS
+1. GENERAL OVERVIEW, ARCHITECTURE MOTIVATIONS & ECOSYSTEM GOALS
 ========================================================================
 Spendly represents a zero-knowledge, offline-first, hardware-secured peer-to-peer billing and finance tracking ecosystem. In modern consumer finance, standard utility applications actively scan user notifications, parse transactional SMS bank alerts, and catalog receipt records, transmitting this granular information to centralized company databases. This centralized structure poses significant risks to user privacy, increases exposure to third-party data breaches, and forces merchants to pay ongoing database synchronization fees to sustain POS infrastructure.
 
 To address these concerns, Spendly eliminates centralized database nodes completely. Instead, it relies on browser-native storage enclaves and peer-to-peer networking channels. All sensitive consumer transactions, wallets, and merchant catalogs are stored inside sandboxed, origin-isolated storage on the physical client hardware. The ecosystem consists of three Progressive Web Applications (PWAs): Spendly User (the consumer wallet tracker), Spendly Shop (the merchant point-of-sale register), and Spendly Radar (the analytical local market hub). By deploying serverless API routers for pairing matchmaking, the ecosystem runs with zero ongoing server maintenance costs.
 
-========================================================================
-2. SPENDLY USER: THE CONSUMER FINANCE COMPONENT
-========================================================================
-The Spendly User application is designed to run locally inside the consumer's web browser as an offline-first PWA.
-- Storage Layer: Integratesbrowser-native IndexedDB wrapped inside the Dexie.js library to execute fast, asynchronous transaction queries on the main execution thread.
-- Database Schema and Relational Layout:
-  * db.expenses: Schema structure is "++id, category, amount, date, shopName, isSoftDeleted". This table indexes every transaction. The isSoftDeleted flag enables temporary trash storage, allowing users to restore mistakenly deleted items without server backups.
-  * db.wallets: Schema structure is "++id, name, type, balance". The type field supports digital, card, and physical cash wallets.
-  * db.emiAlerts: Schema structure is "++id, title, amount, dueDate, isPaid", used for tracking and scheduling monthly payments.
-  * db.shagunRegistry: Schema structure is "++id, personName, eventName, amount, type", logging given/received traditional gift values.
-- Cash Wallet Logic: Tracks physical currency notes manually. Users enter individual counts of ₹500, ₹200, ₹100, and ₹50 notes in the cash note counter. The app computes total balance in memory using a simple multipliers algorithm: Balance = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
-- Clipboard SMS Parser: Rather than asking for OS background SMS permissions, Spendly parses transaction alerts copied to the clipboard. The regex-based parser extracts transaction details locally using the following patterns:
-  * Amount Extract: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
-  * Debit Check: /(debited|spent|withdrawn|paid)/i
-  * Merchant Name: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
-  This runs in memory locally, keeping transaction scan files out of external network calls.
-- WebAuthn Secure Enclave Integration: To protect database files on-device, Spendly does not rely on weak user passwords. It uses the browser's hardware-backed WebAuthn API to lock IndexedDB files. Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code), ensuring the database remains encrypted on the device when the app is locked.
+The target audience for Spendly is split into:
+1. Individual Shoppers who want complete privacy over their transaction history, cash ledger records, and personal budget metrics.
+2. Independent Merchants/Cashiers who need a free, lightweight checkout POS billing solution that operates without monthly cloud hosting subscriptions.
+3. Retail Stores that require local offers catalogs and inventory tracking systems that work reliably when internet access is unavailable.
 
 ========================================================================
-3. SPENDLY SHOP: THE POINT-OF-SALE (POS) COMPONENT
+2. DETAILED APP WORKINGS & FEATURE WORKFLOWS
 ========================================================================
-Spendly Shop is designed as an offline register panel used by merchant cashiers for billing.
-- Core Flow: When a product is scanned, the POS app sends a WebRTC packet (PRODUCT_REQUEST) containing the barcode to the paired Spendly Radar hub. The Radar hub queries its database and returns the product catalog details (PRODUCT_RESPONSE).
-- Invoicing Engine: Upon receiving the details, the POS app calculates base prices, applies CGST/SGST tax brackets, subtracts active promotional discounts, and generates a formatted JSON invoice payload.
-- Stock Reduction: On checkout completion, the Shop app sends a STOCK_REDUCE packet to the paired Radar node, updating inventory quantities.
-- Billing Beam Fallback Pipeline:
-  * Transport A (Web NFC Beam): Employs the Web NFC API. When a cashier taps the register device against the shopper's phone, the invoice payload is transmitted directly over browser NFC tags.
-  * Transport B (Paired WebRTC): If the merchant and customer are already paired, the invoice payload is encrypted using AES-256-GCM and sent directly over the WebRTC data channel.
-  * Transport C (Dynamic QR Code): Generates a high-contrast QR code on the POS screen containing the raw invoice data, which the customer scans.
+SPENDLY USER (CONSUMER WALLET APP):
+- Goal: Allows users to log personal expenditures, manage notes in a cash wallet, parse transaction text alerts, and secure databases.
+- Screen & Feature Flow:
+  * HomeScreen: Shows overall balance metrics, category-wise expenditure charts, and quick shortcut actions.
+  * Cash Wallet: A physical cash note tracker. Users manually click counter buttons to update the counts of their physical cash notes (₹500, ₹200, ₹100, and ₹50 notes). The app calculates balances locally: (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
+  * SMS Parser Console: Users paste text alerts copied from the clipboard. A regex utility automatically extracts:
+    - Amount: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
+    - Debit status: /(debited|spent|withdrawn|paid)/i
+    - Merchant name: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
+    The data is formatted into an expense object and saved directly to the local IndexedDB.
+  * Shagun gifts tracker: A separate tab where users log cash gifts given to or received from relatives during traditional ceremonies (e.g. weddings, Diwali) to track reciprocal balances.
+  * LockScreen: When opened, the app requests credential validation using the WebAuthn API. If successful, the app decrypts the database credentials and allows user access.
+
+SPENDLY SHOP (POS BILLING APP):
+- Goal: Used by merchant cashiers on a register device to manage checkouts.
+- Screen & Feature Flow:
+  * POS Register Panel: The cashier scans barcode labels using the device camera. The shop app queries the paired Spendly Radar hub via WebRTC to fetch item descriptions and retail prices.
+  * Tax & GST Calculator: Automatically calculates tax rates (CGST/SGST/IGST) based on item categories and compiles total invoices.
+  * Beam Invoice screen: Triggers the billing beam transmission. Cashiers tap the shopper's device (Web NFC Beam), send data over paired WebRTC channels, or generate a dynamic checkout QR code for shoppers to scan.
+
+SPENDLY RADAR (LOCAL HUB APP):
+- Goal: Managed by store owners to configure store inventory, update catalogs, issue offers, and display transaction analytics.
+- Screen & Feature Flow:
+  * Stock Panel: Stores list of items, item barcodes, retail prices, and wholesale purchase costs.
+  * Offers Panel: Displays active discount codes, claims list, and validity parameters.
+  * Analytics Console: Renders charts showing overall store sales and area intelligence graphs (built using Recharts).
 
 ========================================================================
-4. SPENDLY RADAR: THE LOCAL MARKET HUB COMPONENT
+3. THE CONNECTION MATRIX: WHY AND HOW THEY CONNECT
 ========================================================================
-Spendly Radar is run by merchants on a tablet or PC to manage inventory directories, validate offers, and track localized market trends.
-- Database Schema:
-  * db.radarStock: Stores "++id, barcode, name, price, quantity" (inventory directories).
-  * db.radarOffers: Stores "++id, title, discountPercent, expiresAt, category" (promotional campaigns).
-  * db.areaIntelligence: Logs privacy-preserving spending statistics.
-- Offers Validation Loop:
-  * Customers claim discount codes from Radar, generating a 6-digit claim code.
-  * The cashier inputs the code on the POS Shop screen.
-  * The Shop app sends a P2P request (OFFER_VALIDATE_REQUEST) to Radar.
-  * Radar verifies the code, marks it as used, and returns confirmation (OFFER_VALIDATE_RESPONSE).
-- Privacy-Preserving Area Intelligence: Compiles localized spending trends. Consumer apps reverse-geocode their position (e.g. "Mumbai, Powai"), strip user names, and post category/sum data anonymously over randomized shard brokers. Radar logs this data to db.areaIntelligence and displays local chart graphics (built with Recharts).
+WHY THEY CONNECT:
+The apps must communicate to exchange billing records, inventory catalog prices, and discount validations. In standard POS environments, this sync is managed by a centralized cloud database. In Spendly, this sync happens directly between local devices. This architecture ensures complete user privacy (data is never sent to third-party servers) and removes merchant server operating costs.
+
+HOW THEY CONNECT:
+- Network Layer A (Direct WebRTC): Browser-to-browser P2P communication. Coordinated via the PeerJS client library, letting Spendly Shop establish direct, bi-directional streams with Spendly Radar and Spendly User.
+- Network Layer B (ntfy.sh WebSocket Broker): Acts as the signaling broker for WebRTC. Standard WebRTC requires exchanging Session Description Protocol (SDP) configurations. Since there are no custom backend servers, the apps establish WebRTC handshakes by posting encrypted SDP keys over ntfy.sh WebSocket bridge topics (`spendly_bridge_${smallerPeerId}_${largerPeerId}`). Connection integrity is maintained with a 10s ping interval and 25s timeout threshold.
+- Network Layer C (LocalStorage same-device bridge): If the apps are opened in different tabs on the same browser window, they share states with $0 latency by listening to browser Window 'StorageEvents' on key 'spendly_bridge_msg'.
+- Network Layer D (Cloudflare Worker KV pairing): To pair devices, Radar generates a temporary 6-digit pin and posts it along with its Peer ID to the Cloudflare Worker API. Shop inputs the pin, queries the Worker to retrieve the Peer ID, and deletes the entry from KV storage.
 
 ========================================================================
-5. INFRASTRUCTURE & NETWORK PIPELINE
+4. HOW LOCAL STORAGE WORKS & SANDBOX MECHANICS
 ========================================================================
-- Same-Device Local Sync: If apps are opened in tabs on the same browser, they share states with $0 latency by listening to browser Window 'StorageEvents' on key 'spendly_bridge_msg'.
-- Cross-Device direct sync: Connects browsers peer-to-peer using WebRTC DataChannels (PeerJS library wrapper).
-- Signaling Broker: Exchages SDP connection headers via lightweight pub/sub WebSocket channels on ntfy.sh (spendly_bridge_${id1}_${id2} topics). Includes 10s ping / 25s timeout heartbeats.
-- Serverless Backups: A Cloudflare Worker hosts matchmaking keys (stored in Worker KV namespaces) and stores encrypted merchant stock directory copies.
+HOW DATA IS STORED:
+- Database Engine: Browser-native IndexedDB wrapped inside the Dexie.js library to execute fast, asynchronous transaction queries on the main execution thread.
+- Sandbox Mechanics: Browser security enforces origin isolation. This sandbox means that `spendly-shop` cannot query tables generated by `spendly-user`, keeping consumer and retailer databases completely separated.
+- Directory Paths of Sandbox Databases:
+  * macOS (Chrome path): ~/Library/Application Support/Google/Chrome/Default/IndexedDB/
+  * Windows (Chrome path): %LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB\
+  * Android (Chrome path): /data/data/com.android.chrome/app_chrome/Default/IndexedDB/
+- Backup File Format: Local databases can be exported as custom `.spendly` JSON files encrypted on the client side using AES-256-GCM.
 
 ========================================================================
-6. PHYSICAL DATA STORAGE DIRECTORY MAPS
+5. FRONTEND & BACKEND LANGUAGES & TECHNOLOGIES
 ========================================================================
-- macOS (Chrome path): ~/Library/Application Support/Google/Chrome/Default/IndexedDB/
-- Windows (Chrome path): %LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB\
-- Android (Chrome path): /data/data/com.android.chrome/app_chrome/Default/IndexedDB/
-- iOS (Safari path): Isolated inside Apple's WebKit container directory structures.
+FRONTEND STACK:
+- React (v18/19): Single Page Application (SPA) framework.
+- Vite: Compiler and bundler for fast development builds.
+- Zustand: Asynchronous client-side state store.
+- Tailwind CSS & PostCSS: Responsive utility styling.
+- Framer Motion: Micro-animations and page transitions.
+
+BACKEND STACK (Serverless):
+- Cloudflare Workers: Serverless V8 runtimes hosting matchmaking REST endpoints (`/api/bridge/code`, `/api/bridge/verify`, `/app-version`).
+- Cloudflare KV Namespaces: Distributed key-value stores (`SPENDLY_STOCK` and `SPENDLY_DATA`) for database caching.
+- ntfy.sh WebSocket Broker: Public broker running over `wss://ntfy.sh/` to handle connection signals.
 
 ========================================================================
-7. PROGRESSIVE WEB APP (PWA) LIFECYCLE
+6. INTER-APP WORKFLOW & TRANSACTION LIFECYCLE
 ========================================================================
-- Service Worker: Custom sw.js utilizes Workbox plugins to cache static assets (Vite JS bundles, SVG icons, Google fonts) on-device during the initial installation.
-- Cache Strategy: Employs a Cache-First strategy for static assets, and a Network-First strategy for critical API updates.
-- Emergency Force-Update Channel: Client apps check `/app-version` on the Cloudflare Worker once daily. If forceUpdate is true, the PWA displays a dialog locking the app until the service worker updates.
-
-========================================================================
-8. SYSTEM IMPLEMENTATION LOGIC WALKTHROUGH
-========================================================================
-- Pairing Phase: Merchant initializes Radar, which POSTs a 6-digit key to the Cloudflare Worker. Shop enters the code, fetches the pairing key from the Worker, and deletes the record from KV.
-- Query Phase: During item barcode scans, Shop sends PRODUCT_REQUEST to Radar. Radar queries db.radarStock and returns product details.
-- Validate Phase: If an offer is present, Shop sends OFFER_VALIDATE_REQUEST. Radar validates the claim and returns confirmation.
-- Beam Phase: Shop compiles the final invoice and transmits it via Web NFC, WebRTC, or dynamic QR code.
-- Save Phase: User imports the invoice into their local expenses database.
-- Analytics Phase: User's device reverse-geocodes location, strips identifiers, and sends category and amount anonymously to Radar.
+When a customer checks out at a store, the transaction executes through the following steps:
+1. Product Scanning: The cashier scans an item barcode on Spendly Shop.
+2. Catalog Lookup: Shop sends a `PRODUCT_REQUEST` query to Radar. Radar reads `db.radarStock` and returns product details.
+3. Offer Validation: If the customer presents a claimed discount code, Shop sends an `OFFER_VALIDATE_REQUEST` to Radar. Radar checks its claims database, invalidates the code, and returns discount confirmations.
+4. Stock Reduction: Shop compiles the invoice and sends a `STOCK_REDUCE` query to Radar to update inventory stock counts.
+5. Billing Beam: Shop beams the completed invoice to the shopper's device via Web NFC beam taps, direct WebRTC, or screen QR code scans.
+6. DB Save: The shopper imports the invoice into their local expenses database.
+7. Anonymous Analytics: The shopper's device reverse-geocodes its location, strips user names, and sends only the category and amount anonymously to Radar to compile Recharts market trend charts.
 
 ========================================================================
 INSTRUCTIONS FOR YOUR RESPONSE:
@@ -138,7 +146,7 @@ INSTRUCTIONS FOR YOUR RESPONSE:
 3. Provide deep, paragraphs-based detailed explanations suitable for copy-pasting directly into a micro project report.
 4. Keep the terminology highly professional and appropriate for a university computer engineering project document.
 5. Focus on the zero-knowledge offline-first capabilities of the system.
-6. Provide an exhaustive explanation exceeding 2000 words covering all aspects of the architecture.</textarea>
+6. Provide an exhaustive explanation exceeding 2500 words covering all aspects of the architecture.</textarea>
     </div>
 
   </div>
