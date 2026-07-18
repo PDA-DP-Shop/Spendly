@@ -1,169 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spendly Project Report & Guide</title>
-  <!-- Tailwind CSS for styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Marked JS to parse markdown -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    body {
-      background-color: #0b0b0b;
-      color: #e4e4e7;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    .prose h1 {
-      color: #ffffff;
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin-top: 2.5rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid #27272a;
-      padding-bottom: 0.5rem;
-    }
-    .prose h2 {
-      color: #ffffff;
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #1f1f22;
-      padding-bottom: 0.25rem;
-    }
-    .prose h3 {
-      color: #e4e4e7;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
-    }
-    .prose p {
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-      line-height: 1.75;
-      color: #a1a1aa;
-    }
-    .prose ul {
-      list-style-type: disc;
-      padding-left: 1.5rem;
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-    .prose li {
-      margin-top: 0.25rem;
-      margin-bottom: 0.25rem;
-      color: #a1a1aa;
-    }
-    .prose table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .prose th {
-      background-color: #18181b;
-      color: #ffffff;
-      font-weight: 600;
-      text-align: left;
-      padding: 0.75rem;
-      border: 1px solid #27272a;
-    }
-    .prose td {
-      padding: 0.75rem;
-      border: 1px solid #27272a;
-      color: #a1a1aa;
-    }
-    .prose pre {
-      background-color: #121212;
-      padding: 1rem;
-      border-radius: 0.375rem;
-      border: 1px solid #27272a;
-      overflow-x: auto;
-      margin-top: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-    .prose code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.875rem;
-      color: #f4f4f5;
-    }
-    .prose a {
-      color: #3b82f6;
-      text-decoration: underline;
-    }
-    .prose hr {
-      border-color: #27272a;
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-    }
-  </style>
-</head>
-<body class="p-4 md:p-8">
-  <div class="max-w-4xl mx-auto">
-    <!-- Navbar Component -->
-    <nav class="flex flex-wrap items-center justify-between py-4 border-b border-zinc-800 mb-8 gap-4">
-      <div class="flex items-center gap-2">
-        <span class="text-xl">💳</span>
-        <span class="font-bold text-white text-lg tracking-wider">SPENDLY HUB</span>
-      </div>
-      <div class="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-zinc-400">
-        <a href="index.html" class="hover:text-white px-3 py-1.5 rounded transition">Home</a>
-        <a href="report_viewer.html" class="bg-zinc-800 text-white px-3 py-1.5 rounded font-semibold transition">Report</a>
-        <a href="diagram_viewer.html" class="hover:text-white px-3 py-1.5 rounded transition">Diagrams</a>
-        <a href="ai_prompt_builder.html" class="hover:text-white px-3 py-1.5 rounded transition">AI Prompt</a>
-        <a href="presentation_guide.html" class="hover:text-white px-3 py-1.5 rounded transition">Presentation Guide</a>
-        <a href="how_to_use.html" class="hover:text-white px-3 py-1.5 rounded transition">How to Use</a>
-        <a href="languages.html" class="hover:text-white px-3 py-1.5 rounded transition">Languages</a>
-      </div>
-    </nav>
-
-    <header class="mb-8 border-b border-zinc-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-3xl font-extrabold tracking-tight text-white">📑 Spendly Project Report & Guide</h1>
-        <p class="text-zinc-400 text-sm mt-1">Simple guide and full report for college friends and reviewers.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="window.print()" class="px-4 py-2 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
-          🖨️ Print / Save PDF
-        </button>
-      </div>
-    </header>
-
-    <!-- Main dynamic markdown container -->
-    <article id="report-content" class="prose max-w-none"></article>
-  </div>
-
-  <!-- Raw Markdown content of the report -->
-  <script id="markdown-data" type="text/markdown"># SPENDLY: A ZERO-KNOWLEDGE, HARDWARE-SECURED P2P BILLING AND EXPENSE ECOSYSTEM
+# SPENDLY: A ZERO-KNOWLEDGE, HARDWARE-SECURED P2P BILLING AND EXPENSE ECOSYSTEM
 ### Semester VII Micro Project Report
 **Course:** Bachelor of Technology in Information Technology  
 **Developer:** Patel Devansh  
 **Academic Session:** 2026-2027  
-
----
-
-## 🚦 Simple Step-by-Step Guide: How to Run and Use Spendly
-*Hey friends! If you want to run and test all three Spendly applications together on your browser, just follow these simple steps:*
-
-### Step 1: Open all three apps
-*   Open the **Spendly Radar** app, **Spendly Shop** app, and **Spendly User** app in different tabs of your browser.
-
-### Step 2: Connect the Shop Register to the Radar Hub
-*   Look at the **Spendly Radar** screen. You will see a 6-character Pairing Code (for example: `K4N9X3`).
-*   Now, open the **Spendly Shop** app. It will ask you to connect to a nearby Radar. Type in that 6-character code and click **Connect**.
-*   *What happened?* The two tabs will automatically establish a direct WebRTC connection. Now, the shop register can fetch item details directly from the Radar database.
-
-### Step 3: Scan items and compile the Bill
-*   Add some items (like biscuits, soda, bread) to the inventory on the **Radar** dashboard.
-*   Go to the **Shop** cashier screen. Click "Scan Barcode" or pick items from the quick catalog list. The Shop app will query Radar and fetch the prices.
-*   Enter CGST/SGST taxes, click complete checkout, and a bill summary will be generated.
-
-### Step 4: Beam the bill to your User Wallet
-*   On the **Shop** bill screen, click **Beam Bill**. It will display a dynamic QR code on the screen.
-*   Open your **Spendly User** app on your phone, click **Receive Invoice**, and scan that QR code.
-*   *Boom!* The invoice payload is sent directly over the local network and saved inside your consumer expense manager.
 
 ---
 
@@ -185,9 +24,19 @@
 
 ## 1. 🎯 Why We Built Spendly (The Motivation)
 
-Centralized fintech apps read all our personal financial details. When we install standard expense trackers, they ask for background permissions to scan our private bank alert SMS notifications and banking records. This data is sent to central cloud databases, which can be leaked or sold.
+Modern fintech platforms operate on a centralized model. This introduces several major problems that Spendly solves:
 
-Spendly solves this privacy issue using a **Zero-Knowledge Sandbox**. All transaction details, budgets, and files stay locked inside the user's own browser folder. There are no server databases, meaning the merchant and customer pay **zero server hosting fees**.
+### 1.1 The Privacy Problem
+Apps like expense trackers scan your SMS notifications, bank balances, and receipts, sending that data to central cloud databases. This sensitive financial information is often sold to advertisers or exposed in security breaches.  
+**Spendly's Solution:** It uses a **Zero-Knowledge Architecture**. The developer has no access to transaction histories; all databases remain inside the user's device.
+
+### 1.2 The Cost Problem
+Merchants pay monthly fees for Point-of-Sale (POS) software, catalog hosting, and database upkeep.  
+**Spendly's Solution:** By using client-side browser storage and WebRTC, the merchant pays **zero server fees**.
+
+### 1.3 The Internet Dependency Problem
+If a store loses internet access, its POS systems can shut down.  
+**Spendly's Solution:** Spendly runs offline. When internet is unavailable, apps fall back to same-device local storage bridging or local P2P networks.
 
 ---
 
@@ -218,8 +67,8 @@ The ecosystem is split into three main client PWAs (Progressive Web Apps) and a 
 ```
 
 ### 2.1 Storage Layer: IndexedDB (Dexie.js)
-*   **What it is:** A local database built into the browser.
-*   **Why we use it:** Unlike normal browser localStorage (which is limited to 5MB), IndexedDB can store gigabytes of data asynchronously without slowing down the app. We wrap it in **Dexie.js** for easy queries.
+*   **What it is:** A local, transactional object-oriented database built into the browser.
+*   **Why we use it:** Unlike `localStorage` (which is limited to 5MB and blocks the main execution thread), IndexedDB can store gigabytes of structured data asynchronously. We wrap it in **Dexie.js** for simple querying, schema version upgrades, and relations.
 
 ### 2.2 Direct Network Layer: WebRTC (PeerJS)
 *   **What it is:** Web Real-Time Communication allows browsers to establish direct, peer-to-peer data streams without going through an intermediate application server.
@@ -227,7 +76,7 @@ The ecosystem is split into three main client PWAs (Progressive Web Apps) and a 
 
 ### 2.3 Pairing Network Layer: ntfy.sh WebSocket Bridge
 *   **What it is:** A free, public pub/sub signaling channel.
-*   **Why we use it:** We use `ntfy.sh` as a lightweight bridge topic (`spendly_bridge_${Id1}_${Id2}`) to exchange connection handshake packets instantly.
+*   **Why we use it:** Standard WebRTC requires exchanging "session descriptions" (SDPs) between devices. We use `ntfy.sh` as a lightweight bridge topic (`spendly_bridge_${Id1}_${Id2}`) to exchange these connection handshake packets instantly.
 
 ### 2.4 Serverless Layer: Cloudflare Worker & KV
 *   **What it is:** A globally distributed, serverless code framework.
@@ -396,7 +245,7 @@ Instead of requesting backend SMS permissions, Spendly parses transaction alerts
 ```javascript
 const smsText = "Amt debited: Rs.1,500.00 at STAR BAZAR using card xx4321.";
 const parseSMS = (text) => {
-  const amt = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d.2)?)/i)?.[1];
+  const amt = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i)?.[1];
   const isDebit = /(debited|spent|withdrawn)/i.test(text);
   const merchant = text.match(/(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i)?.[1];
   return { amount: amt, isDebit, merchant };
@@ -495,136 +344,3 @@ Spendly proves that financial apps can be built without high cloud hosting fees 
 ### Future Objectives
 1.  **Web Bluetooth Integration**: Allow devices to pair using Bluetooth Low Energy when local Wi-Fi or mobile data are completely unavailable.
 2.  **On-Device AI Assistant**: Integrate lightweight local models (WebGPU-accelerated) to analyze spending trends on-device, preserving user privacy.
-  </script>
-
-  <!-- Marked and Mermaid rendering scripts -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-    
-    // Parse Markdown text
-    const mdText = document.getElementById('markdown-data').text;
-    
-    // Custom post-processing logic to inject download buttons under each Mermaid diagram card
-    document.getElementById('report-content').innerHTML = marked.parse(mdText);
-
-    // Convert <pre><code class="language-mermaid"> to structured cards with download panels and anti-shrink sizing
-    const codeBlocks = document.querySelectorAll('pre code.language-mermaid');
-    codeBlocks.forEach((block, index) => {
-      const pre = block.parentNode;
-      const diagramId = `diagram-auto-${index}`;
-      
-      const card = document.createElement('div');
-      card.className = 'rounded-lg p-4 my-6 bg-zinc-950 border border-zinc-900';
-      
-      const controls = document.createElement('div');
-      controls.className = 'flex justify-end gap-2 mb-3 pb-2 border-b border-zinc-900';
-      controls.innerHTML = `
-        <button onclick="downloadPNG('${diagramId}', 'Spendly_Report_Diagram_${index}')" class="px-2.5 py-1 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-[10px] rounded transition">
-          💾 Download PNG (HD)
-        </button>
-        <button onclick="downloadSVG('${diagramId}', 'Spendly_Report_Diagram_${index}')" class="px-2.5 py-1 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-[10px] rounded transition">
-          📐 Download SVG
-        </button>
-      `;
-      
-      // Scroll wrapper to handle large screen size on small devices without shrinking the diagram
-      const scrollWrapper = document.createElement('div');
-      scrollWrapper.className = 'overflow-x-auto w-full flex justify-start';
-
-      const diagramBody = document.createElement('div');
-      diagramBody.id = diagramId;
-      diagramBody.className = 'min-w-[950px] w-full flex justify-center py-2';
-      
-      const mermaidPre = document.createElement('pre');
-      mermaidPre.className = 'mermaid';
-      mermaidPre.textContent = block.textContent;
-      
-      diagramBody.appendChild(mermaidPre);
-      scrollWrapper.appendChild(diagramBody);
-      card.appendChild(controls);
-      card.appendChild(scrollWrapper);
-      
-      pre.parentNode.replaceChild(card, pre);
-    });
-
-    // Initialize Mermaid
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: 'dark',
-      securityLevel: 'loose'
-    });
-  </script>
-
-  <!-- Client-side Exporter Engine (SVG to PNG/SVG Exporters) -->
-  <script>
-    // 📐 SVG EXPORTER
-    function downloadSVG(containerId, fileName) {
-      const container = document.getElementById(containerId);
-      const svgElement = container.querySelector('svg');
-      if (!svgElement) {
-        alert("Diagram is still compiling! Give it a second.");
-        return;
-      }
-      
-      const serializer = new XMLSerializer();
-      let source = serializer.serializeToString(svgElement);
-      
-      if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
-        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-      }
-      if(!source.match(/^<svg[^>]+viewBox/)){
-        const width = svgElement.getAttribute('width') || svgElement.getBoundingClientRect().width;
-        const height = svgElement.getAttribute('height') || svgElement.getBoundingClientRect().height;
-        source = source.replace(/^<svg/, `<svg viewBox="0 0 ${width} ${height}"`);
-      }
-      
-      const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${fileName}.svg`;
-      link.click();
-    }
-
-    // 💾 PNG EXPORTER (3x scale for high-DPI crisp print quality)
-    function downloadPNG(containerId, fileName) {
-      const container = document.getElementById(containerId);
-      const svgElement = container.querySelector('svg');
-      if (!svgElement) {
-        alert("Diagram is still compiling! Give it a second.");
-        return;
-      }
-
-      const svgString = new XMLSerializer().serializeToString(svgElement);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const URL = window.URL || window.webkitURL || window;
-      const blobURL = URL.createObjectURL(svgBlob);
-      
-      const image = new Image();
-      image.onload = () => {
-        const canvas = document.createElement('canvas');
-        const bbox = svgElement.getBoundingClientRect();
-        
-        const scale = 3;
-        canvas.width = bbox.width * scale;
-        canvas.height = bbox.height * scale;
-        
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#0f0f11';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        
-        context.scale(scale, scale);
-        context.drawImage(image, 0, 0, bbox.width, bbox.height);
-        
-        const pngURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = pngURL;
-        link.download = `${fileName}.png`;
-        link.click();
-        
-        URL.revokeObjectURL(blobURL);
-      };
-      image.src = blobURL;
-    }
-  </script>
-</body>
-</html>

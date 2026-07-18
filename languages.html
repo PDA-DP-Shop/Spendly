@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendly - Language & Technology Directory</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #e4e4e7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .panel-card {
+      background-color: #121212;
+      border: 1px solid #27272a;
+    }
+    .badge {
+      background-color: #1e1b4b;
+      color: #c7d2fe;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+  <div class="max-w-5xl mx-auto">
+    <!-- Navbar Component -->
+    <nav class="flex flex-wrap items-center justify-between py-4 border-b border-zinc-800 mb-8 gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">💳</span>
+        <span class="font-bold text-white text-lg tracking-wider">SPENDLY HUB</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-zinc-400">
+        <a href="index.html" class="hover:text-white px-3 py-1.5 rounded transition">Home</a>
+        <a href="report_viewer.html" class="hover:text-white px-3 py-1.5 rounded transition">Report</a>
+        <a href="diagram_viewer.html" class="hover:text-white px-3 py-1.5 rounded transition">Diagrams</a>
+        <a href="ai_prompt_builder.html" class="hover:text-white px-3 py-1.5 rounded transition">AI Prompt</a>
+        <a href="presentation_guide.html" class="hover:text-white px-3 py-1.5 rounded transition">Presentation Guide</a>
+        <a href="how_to_use.html" class="hover:text-white px-3 py-1.5 rounded transition">How to Use</a>
+        <a href="languages.html" class="bg-zinc-800 text-white px-3 py-1.5 rounded font-semibold transition">Languages</a>
+      </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10">
+      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Tech Stack Overview</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">💻 Language & Technology Directory</h1>
+      <p class="text-zinc-400 text-sm">An exhaustive analysis of all languages, frontend libraries, serverless backend engines, databases, and APIs running in the Spendly ecosystem.</p>
+    </header>
+
+    <!-- Tech Stack Categorized Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      <!-- Languages -->
+      <div class="panel-card rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>🔤</span> Core Languages & Formats
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">JS (ES6+)</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Runs all ecosystem logic, including direct WebRTC PeerJS channels, Dexie.js database transactions, and Cloudflare Worker endpoints.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">HTML5 / CSS3</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Provides semantic structures and responsive styling using custom Tailwind configurations.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">JSON</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Standard format for billing transfers, inventory catalogs, and IndexedDB encryption exports.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">RegExp</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Executes on-device clipboard regex parsing to log debited amounts, merchants, and categories from bank SMS alerts.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frontend -->
+      <div class="panel-card rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>🖥️</span> Frontend Libraries & Frameworks
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">React (v18)</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Hosts all UI screens using modular Single Page Application (SPA) configurations built on Vite.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Zustand</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Provides lightweight, asynchronous client-side store states to prevent layout lag.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Framer Motion</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Controls micro-animations and slide transitions between tabs.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Recharts</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Compiles geocoded area spending intelligence data into responsive trend lines and graphs on Spendly Radar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database -->
+      <div class="panel-card rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>💾</span> Databases & Local Storage
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">IndexedDB</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">The browser's native client-side database. It bypasses localStorage storage limits (up to 5MB) to store gigabytes of transactions on disk.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Dexie.js</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">A database wrapper that enables fast, asynchronous transaction queries on the main execution thread.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Workers KV</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Cloudflare's distributed key-value store. It stores temporary 6-digit WebRTC pairing pins and backup catalog stock files.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backend & Network -->
+      <div class="panel-card rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>🔌</span> Backend, Relays & Connection APIs
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Cloudflare Workers</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Serverless V8 execution environments. They host pairing matchmaker APIs without monthly database subscription fees.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">WebRTC (PeerJS)</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Enables direct, browser-to-browser P2P data streams between the Shop register, User wallet, and Radar hub.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">Web NFC API</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Beams invoice payloads instantly when shoppers tap their phone against the merchant register screen.</p>
+          </div>
+          <div>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded badge font-mono">WebAuthn API</span>
+            <p class="text-zinc-400 text-xs mt-1.5 leading-relaxed">Locks local client databases behind the device's hardware Secure Enclave using Passkeys biometrics.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
+      <p>© 2026-2027 Spendly Project | Department of Information Technology</p>
+    </footer>
+  </div>
+</body>
+</html>
