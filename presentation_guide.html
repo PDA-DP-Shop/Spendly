@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spendly - Cabin Presentation & Script Guide</title>
+  <title>Spendly - 3-Phone Presentation & Viva Guide</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -37,134 +37,152 @@
         <a href="ai_prompt_builder.html" class="hover:text-white px-3 py-1.5 rounded transition">AI Prompt</a>
         <a href="presentation_guide.html" class="bg-zinc-800 text-white px-3 py-1.5 rounded font-semibold transition">Presentation Guide</a>
         <a href="how_to_use.html" class="hover:text-white px-3 py-1.5 rounded transition">How to Use</a>
+        <a href="languages.html" class="hover:text-white px-3 py-1.5 rounded transition">Languages</a>
       </div>
     </nav>
 
     <!-- Header Section -->
     <header class="mb-10">
-      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Cabin Viva Blueprint</span>
-      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🎓 Live Cabin Presentation Script & Guide</h1>
-      <p class="text-zinc-400 text-sm">Follow this step-by-step team guide to demonstrate the live app directly to Mam on your laptop in her cabin.</p>
+      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Cabin Demo Script</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🎓 Simple 3-Phone Presentation Guide</h1>
+      <p class="text-zinc-400 text-sm">Use this easy-to-speak script to present the live app to Mam in her cabin using three mobile phones.</p>
     </header>
 
-    <!-- Detailed Script Section -->
+    <!-- Presentation Script Section -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span>💬</span> Interactive Cabin Presentation Script (Live App Walkthrough)
+        <span>💬</span> Cabin Presentation Dialogue (Simple Indian English)
       </h2>
 
       <div class="space-y-8">
-        <!-- Step 1: Devansh starts -->
+        <!-- Devansh's Part -->
         <div class="panel-card rounded-xl p-6">
           <div class="flex items-center gap-2 text-blue-400 font-bold mb-3">
             <span class="text-lg">👑</span>
-            <span>1. WELCOME & USER WALLET DEMO (Devansh starts)</span>
+            <span>PHONE 1: CUSTOMER APP (Devansh starts)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-blue-400 mb-2">[Live Demo Action: Devansh opens the laptop in Mam's cabin, opens the Spendly tabs, and begins speaking politely]</p>
-            "Good morning Mam. Today we are presenting our peer-to-peer offline billing ecosystem: Spendly. I am Devansh, the team leader, and my group members Udit, Meet, and Rudra are here with me. 
+            <p class="font-bold text-blue-400 mb-2">[Live Action: Devansh welcomes Mam and shows his phone screen running Spendly User app]</p>
+            "Good morning Mam. Today we will show you our project Spendly running live on three mobile phones. 
             <br><br>
-            Instead of presenting slides, we want to show you the live apps running directly on our laptop tabs. Spendly consists of three applications communicating without centralized database servers to protect user privacy and eliminate monthly hosting costs.
+            I am holding **Phone 1** with the **Spendly User** consumer app. Udit has **Phone 2** with the **Spendly Shop** POS register app. And Meet has **Phone 3** with the **Spendly Radar** store manager app.
             <br><br>
-            First, let me show you **Spendly User**, the consumer wallet. [Devansh points to the screen] When I open the tab, you can see it is locked. I will click **Unlock** and verify via fingerprint sensor (Passkey). This calls the browser's **WebAuthn API** to fetch credentials securely, unlocking access to our IndexedDB database.
+            All these three phones talk to each other directly, peer-to-peer, without using any central server!
             <br><br>
-            Now, look at our **Cash Wallet note counter**. [Devansh clicks notes counter buttons] I can manually adjust the count of my physical cash notes (₹500, ₹200, ₹100, and ₹50 notes), and the app calculates the cash total dynamically.
+            First, look at my phone. The app is locked. When I click **Unlock**, it triggers my phone's fingerprint sensor using the **WebAuthn API**. I touch the sensor, and my local database unlocks.
             <br><br>
-            Another feature is the **SMS Clipboard Parser**. [Devansh copies a sample transaction alert and pastes it into the parser] By clicking **Auto Parse**, our local regex code automatically extracts the merchant name, debit amount, and category, and logs it directly to our local history without asking for background OS SMS reading permissions.
+            Now, look at my **Cash note counter**. I can input the exact count of physical notes—like ₹500 or ₹200 notes—and the wallet adds them up instantly.
             <br><br>
-            Lastly, we have a **Shagun Gifts tab** for tracking social ceremonies gifts given and received. Now, Udit will show you the cashier checkout POS."
+            I also have an **SMS Parser**. If I copy a transaction SMS from my bank and click **Auto Parse**, our local regex extracts the merchant name and amount, logging the expense without needing background SMS reading permissions.
+            <br><br>
+            Lastly, we have a **Shagun tab** to track gift money sent or received during relatives' weddings. 
+            <br><br>
+            Now, Udit will show you how Phone 2 scans products."
           </div>
         </div>
 
-        <!-- Udit explaining Shop App -->
+        <!-- Udit's Part -->
         <div class="panel-card rounded-xl p-6">
-          <div class="flex items-center gap-3 border-b border-zinc-800 pb-3 mb-4">
-            <span class="text-2xl">🛒</span>
-            <div>
-              <h3 class="text-lg font-bold text-white">Udit</h3>
-              <span class="text-xs text-zinc-500 uppercase font-semibold tracking-wider">Merchant POS Register</span>
-            </div>
+          <div class="flex items-center gap-2 text-green-400 font-bold mb-3">
+            <span class="text-lg">🛒</span>
+            <span>PHONE 2: MERCHANT POS APP (Udit continues)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Udit takes the mouse or laptop, showing Mam the Spendly Shop register tab]</p>
-            "Thank you, Devansh. Hello Mam, I am Udit, and I will demonstrate the cashier register tab: **Spendly Shop**. 
+            <p class="font-bold text-green-400 mb-2">[Live Action: Udit shows his phone screen running Spendly Shop POS app]</p>
+            "Thank you, Devansh. Hello Mam, I am Udit. I am holding **Phone 2** which acts as the shop's billing register.
             <br><br>
-            Right now, our POS register is paired with Spendly Radar. Let's scan a product. [Udit clicks "Scan Barcode" or selects an item from the quick catalog list] 
+            Meet's phone acts as the store hub. To fetch product prices, I will point my phone camera at this barcode. [Udit scans a barcode] 
             <br><br>
-            The register immediately queries the Radar hub over a WebRTC connection and retrieves item details. Shop then calculates tax lines (CGST/SGST/IGST), applies active store discounts, and compiles the final invoice.
+            The register immediately queries Meet's phone over WebRTC, fetches the product details, adds CGST/SGST tax divisions, and compiles the bill.
             <br><br>
-            To share this invoice with the customer, we built a **Billing Beam** fallback pipeline. I will click **Beam Bill**. It displays a dynamic QR code on the register screen. Devansh will scan it with the User app camera, and the invoice imports instantly. If they support NFC, we tap the devices to transfer data via Web NFC.
+            Now, to send this bill to Devansh, I will click **Beam Bill**. It displays a dynamic QR code on my screen. Devansh scans it with his phone, and the bill imports instantly. We can also tap our phones together to beam it via Web NFC.
             <br><br>
-            Now, Meet will show you the central store catalog dashboard."
+            Meet will now explain the store manager dashboard."
           </div>
         </div>
 
-        <!-- Meet explaining Radar App -->
+        <!-- Meet's Part -->
         <div class="panel-card rounded-xl p-6">
-          <div class="flex items-center gap-3 border-b border-zinc-800 pb-3 mb-4">
-            <span class="text-2xl">📡</span>
-            <div>
-              <h3 class="text-lg font-bold text-white">Meet</h3>
-              <span class="text-xs text-zinc-500 uppercase font-semibold tracking-wider">Radar Hub & Promotions</span>
-            </div>
+          <div class="flex items-center gap-2 text-yellow-400 font-bold mb-3">
+            <span class="text-lg">📡</span>
+            <span>PHONE 3: CENTRAL RADAR APP (Meet continues)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Meet takes the laptop, switching to the Spendly Radar dashboard tab]</p>
-            "Thanks, Udit. Good morning Mam, I am Meet, and I will walk you through **Spendly Radar**. 
+            <p class="font-bold text-yellow-400 mb-2">[Live Action: Meet shows his phone screen running Spendly Radar app]</p>
+            "Hello Mam, I am Meet. I have **Phone 3** running **Spendly Radar**.
             <br><br>
-            Radar is run by the store manager to organize store catalog inventory lists (`db.radarStock`) and promo offer databases (`db.radarOffers`). 
+            This is used by store managers to set up stock prices and manage discount campaigns in our local IndexedDB database.
             <br><br>
-            Let's demonstrate our **Offer Validation PIN Loop**. On the User app, I will claim an active campaign discount, which generates a 6-digit verification code. Udit will enter this code on the register. The register sends a validation query to Radar, and Radar validates and marks the code as used in the database.
+            Let's show you how we validate discount coupons. Devansh claims an offer on his app, generating a 6-digit claim PIN. When Udit enters this PIN on the cashier register, it verifies the code with my phone over WebRTC, applies the discount, and updates the stock automatically.
             <br><br>
-            Additionally, Radar tracks localized store sales and displays sales trend charts (built with Recharts) from geocoded user data, stripping all personal identifiers.
+            Radar also collects anonymous geocoded transaction coordinates to display sales trend charts without tracking shopper names.
             <br><br>
-            Rudra will now show you the WebRTC and localStorage network tabs."
+            Rudra will now explain how the network connection works."
           </div>
         </div>
 
-        <!-- Rudra explaining Infrastructure & Sync -->
+        <!-- Rudra's Part -->
         <div class="panel-card rounded-xl p-6">
-          <div class="flex items-center gap-3 border-b border-zinc-800 pb-3 mb-4">
-            <span class="text-2xl">⛓️</span>
-            <div>
-              <h3 class="text-lg font-bold text-white">Rudra</h3>
-              <span class="text-xs text-zinc-500 uppercase font-semibold tracking-wider">P2P Network Infrastructure</span>
-            </div>
+          <div class="flex items-center gap-2 text-purple-400 font-bold mb-3">
+            <span class="text-lg">⛓️</span>
+            <span>SYSTEM NETWORK INFRASTRUCTURE (Rudra concludes)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Rudra presses F12 to open the Chrome DevTools network tab, showing Mam the connection logs]</p>
-            "Thank you, Meet. Hello Mam, I am Rudra. I will show you how our P2P connection channels operate under the hood. 
+            <p class="font-bold text-purple-400 mb-2">[Live Action: Rudra points to the connection logs on the screen]</p>
+            "Hello Mam, I am Rudra. I will explain the networking behind these three phones.
             <br><br>
-            Since the apps are opened in different tabs on the same browser window, we listen to browser Window StorageEvents on key 'spendly_bridge_msg' to share states with $0 latency.
+            Since we don't use server databases, the apps communicate directly over **WebRTC DataChannels**. 
             <br><br>
-            When running on separate devices, they establish a direct WebRTC connection. We use public WebSocket signaling topics on ntfy.sh to broker WebRTC handshakes, eliminating server costs.
+            To establish this peer-to-peer connection, the phones exchange pairing keys using public WebSocket topics on ntfy.sh, meaning we pay $0 in server hosting costs.
             <br><br>
-            We also use a Cloudflare Worker and Worker KV namespaces to pair devices via 6-digit connection codes.
+            We also use a Cloudflare Worker KV storage to look up peer IDs via a temporary 6-digit pairing code.
             <br><br>
-            That concludes our demonstration. Thank you, Mam, and we are ready for your questions."
+            That concludes our demonstration, Mam. We are happy to answer any questions."
           </div>
         </div>
-
       </div>
     </section>
 
-    <!-- Viva Prep Guide -->
-    <section class="mb-12 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-        <span>👩‍🏫</span> Mam's Expected Viva Question Bank
+    <!-- Viva Q&A Prep Guide -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        <span>👩‍🏫</span> Mam's Viva Question Bank (Simple Language)
       </h2>
       <div class="space-y-4">
-        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
-          <h4 class="text-white font-bold text-xs mb-1">Q1. Why are you calling it a zero-knowledge app?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">Because there is no central database server. All data stays locally inside the browser's IndexedDB origin sandbox on the user's device.</p>
+        <!-- Question 1 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q1. Why are you calling it a "Zero-Knowledge" project?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Because we do not store any customer names, phone numbers, or bills on any internet server. All transactional data stays safely inside the browser's database folder on the user's phone.</p>
         </div>
-        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
-          <h4 class="text-white font-bold text-xs mb-1">Q2. What is IndexedDB and why did you not use simple LocalStorage?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">LocalStorage is limited to 5MB and runs synchronously, blocking the main thread. IndexedDB has no strict storage limits and queries asynchronously, so it doesn't freeze the screen.</p>
+
+        <!-- Question 2 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q2. What database did you use and where is it located?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">We used **IndexedDB** with the **Dexie.js** library. The database sits directly inside the web browser's storage space on your phone or computer.</p>
         </div>
-        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
-          <h4 class="text-white font-bold text-xs mb-1">Q3. If there are no servers, how do devices exchange data?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">They communicate directly using WebRTC DataChannels (PeerJS wrapper), with handshake signaling brokered via public WebSocket topics on ntfy.sh.</p>
+
+        <!-- Question 3 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q3. If there is no backend server, how do the three phones talk to each other?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">They talk directly using **WebRTC Peer-to-Peer connection**. We use public WebSocket brokers on ntfy.sh to help the devices share connection keys initially.</p>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q4. How does the SMS Parser work?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">The user copies a transaction SMS and pastes it into the app. We use on-device **Regular Expressions (Regex)** to extract merchant name and amount locally without calling any external servers.</p>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q5. How do you share bills between Udit's and Devansh's phone?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">We display a dynamic QR code on Udit's register screen. Devansh scans it with his phone's camera, or we tap them together to beam the bill data using Web NFC.</p>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
+          <h4 class="text-white font-bold text-sm mb-1">Q6. What is the role of Cloudflare Workers in this project?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Cloudflare Workers KV helps pair registers via a temporary 6-digit connection code. Once the WebRTC connection is opened, we remove the pairing keys from KV storage.</p>
         </div>
       </div>
     </section>
