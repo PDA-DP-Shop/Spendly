@@ -65,22 +65,35 @@
   </div>
 
   <script>
-    const systemContext = `You are an expert systems engineer and technical writer. I am writing an academic report for a project named Spendly.
-Spendly is a zero-knowledge, offline-first peer-to-peer billing and finance tracking system split into three progressive web applications (PWAs):
+    const systemContext = `You are an expert systems engineer and academic technical writer. I am compiling a professional micro project report for a system named Spendly.
+Spendly is a zero-knowledge, offline-first, hardware-secured peer-to-peer billing and finance tracking system split into three progressive web applications (PWAs):
 
-1. Spendly User (Consumer App): An origin-sandboxed personal expense tracker. It stores data locally in IndexedDB (using Dexie.js). Features include cash wallets (tracking individual denominations like ₹500, ₹200), clipboard-based SMS alert parsing (using local regex matches to read bank debit messages without requesting device permissions), and passkey locks (using the WebAuthn API to lock IndexedDB access behind the hardware Secure Enclave).
-2. Spendly Shop (Merchant POS App): An offline cash register for retail checkout. Cashiers scan barcodes, lookup local inventories, compute taxes/discounts, and beam invoices to consumer devices.
-3. Spendly Radar (Local Market Hub App): An analytical hub that merchants run on a tablet or PC. It tracks store catalog lists, stores offers, processes claims codes, and compiles local transaction trends (average spending totals by region) without capturing customer identifiers.
+1. Spendly User (Consumer App): An origin-sandboxed personal expense registry. All transaction history is stored locally on the client device inside IndexedDB via Dexie.js. Features include:
+   - Cash Wallet: A physical cash denomination tracker allowing users to count and log ₹500, ₹200, ₹100, and ₹50 notes, with the wallet auto-calculating total physical cash.
+   - Clipboard SMS Parser: A local regex engine that extracts transaction values (merchant name, amount, credit/debit flag) from bank alert messages copied to the clipboard, eliminating the need to request intrusive background SMS reading permissions.
+   - Biometric Lock: Utilizes the browser's hardware-backed WebAuthn API (Passkeys) to lock the IndexedDB files behind the device's Secure Enclave chip using Face ID, Touch ID, or device PIN.
+   - Shagun Registry: A dedicated ledger for traditional cash gifts given or received during weddings and festivals to track reciprocal balances.
+   - EMI Alerts: A scheduling list with calendar triggers tracking recurring payment sums.
+
+2. Spendly Shop (Merchant POS App): An offline cash register for point-of-sale operations. Features include:
+   - Catalog Query: Scans barcodes and sends direct P2P queries (PRODUCT_REQUEST) to Spendly Radar via WebRTC to fetch catalog descriptors and retail prices.
+   - Invoicing Engine: Calculates VAT/GST parameters and processes checkout receipts.
+   - Billing Beam: Transmits invoice JSON payloads directly to user devices using Web NFC beam taps, direct WebRTC streams, or динамик QR codes shown on the screen.
+
+3. Spendly Radar (Local Market Hub App): An analytical merchant dashboard run on a shop tablet or PC. Features include:
+   - Catalog Database: Stores active store stock logs and item barcode maps.
+   - Offers Registry: Operates campaign discount records and claim codes validation tables.
+   - Privacy-Preserving Analytics: Receives local geolocated spending trends. When a purchase occurs, the consumer device reverse-geocodes its position locally, strips user names, and sends only the category and price anonymously to local Radar nodes to display Recharts market trends.
 
 Infrastructure Channels:
-- Same-Device local sync: Communicates instantly across open tabs of the same browser using LocalStorage Event listeners ("spendly_bridge_msg").
-- Peer-to-Peer network sync: Cross-device data streams are processed directly using WebRTC DataChannels coordinated via PeerJS.
-- Signaling Broker: Handshakes are exchanged using public WebSocket topics on ntfy.sh.
-- Backups: Local databases are exported as encrypted JSON files or synced to a serverless Cloudflare Worker linked to Worker KV stores.
+- Same-Device Local Sync: Synchronizes open tabs on the same browser instantly using Window StorageEvent listeners on the key 'spendly_bridge_msg', bypassing network overhead.
+- Peer-to-Peer direct sync: Cross-device data streams are processed directly using WebRTC DataChannels coordinated via PeerJS.
+- Signaling Broker: Connection handshakes and Pairing Codes are routed through public WebSocket topics on ntfy.sh.
+- Backups: Local databases are exported as AES-256-GCM encrypted JSON files or synced to a serverless Cloudflare Worker linked to Worker KV stores.
 
 Instructions for your response:
-1. Write the explanation using natural, academic human language in coherent paragraphs.
-2. Avoid bullet points, lists, or simple outline items. Do not use dashes or double dashes ("--") to start sentences.
+1. Write the explanation using natural, academic human-like language in coherent, well-structured paragraphs.
+2. Under NO circumstances should you use bullet points, lists, or simple outline items. Do NOT use dashes or double dashes ("--") to start sentences or paragraphs.
 3. Provide deep, paragraphs-based detailed explanations suitable for copy-pasting directly into a micro project report.
 4. Keep the terminology highly professional.`;
 
