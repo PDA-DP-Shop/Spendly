@@ -38,28 +38,31 @@
 
     <!-- Interactive Prompt Generation Section -->
     <div class="panel-card rounded-lg p-6 mb-8">
-      <h2 class="text-xl font-bold text-white mb-4">✍️ Build Custom Prompt</h2>
+      <h2 class="text-xl font-bold text-white mb-4">✍️ Build Prompt</h2>
       
       <label class="block text-zinc-400 text-sm font-semibold mb-2" for="user-question">
-        Enter your specific question or topic:
+        Option A: Enter a specific question (or leave blank to use the Master Prompt):
       </label>
       <textarea id="user-question" rows="4" class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded text-white text-sm focus:outline-none focus:border-zinc-700 transition placeholder-zinc-600 mb-6" placeholder="e.g. Write a detailed analysis of how database sandbox security works..."></textarea>
 
       <div class="flex flex-col md:flex-row gap-3">
-        <button onclick="generatePrompt()" class="flex-1 px-4 py-2.5 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
-          🚀 Compile Prompt
+        <button onclick="copyMasterPrompt()" class="flex-1 px-4 py-2.5 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
+          📋 Copy Master Prompt (Full Report)
         </button>
-        <button onclick="copyToClipboard()" class="px-4 py-2.5 bg-zinc-800 text-zinc-200 font-semibold text-sm rounded hover:bg-zinc-700 transition">
-          📋 Copy to Clipboard
+        <button onclick="generatePrompt()" class="px-4 py-2.5 bg-zinc-800 text-zinc-200 font-semibold text-sm rounded hover:bg-zinc-700 transition">
+          🚀 Compile Custom Prompt
+        </button>
+        <button onclick="copyToClipboard()" class="px-4 py-2.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-sm rounded transition">
+          📋 Copy Custom Preview
         </button>
       </div>
     </div>
 
     <!-- Output Code Preview -->
     <div class="panel-card rounded-lg p-6">
-      <h2 class="text-xl font-bold text-white mb-3">👁️ Prompt Preview</h2>
-      <p class="text-xs text-zinc-500 mb-4">This entire text block is formatted and ready to feed into any AI chat screen.</p>
-      <pre class="bg-zinc-950 p-4 border border-zinc-900 rounded text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap max-h-96" id="prompt-output">Select a template or compile custom text above to preview the generated prompt...</pre>
+      <h2 class="text-xl font-bold text-white mb-3">👁️ Custom Prompt Preview</h2>
+      <p class="text-xs text-zinc-500 mb-4">This preview area displays custom compiled prompts.</p>
+      <pre class="bg-zinc-950 p-4 border border-zinc-900 rounded text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap max-h-96" id="prompt-output">Type a question above and click Compile Custom Prompt to preview...</pre>
     </div>
 
   </div>
@@ -112,12 +115,19 @@ Instructions for your response:
 
     function copyToClipboard() {
       const outputText = document.getElementById('prompt-output').textContent;
-      if (outputText.startsWith("Select a template")) {
-        alert("Compile a prompt first!");
+      if (outputText.startsWith("Type a question")) {
+        alert("Compile a custom prompt first!");
         return;
       }
       navigator.clipboard.writeText(outputText)
         .then(() => alert("Prompt copied to clipboard successfully! Paste it directly into ChatGPT/Gemini/Claude."))
+        .catch(err => alert("Failed to copy text: " + err));
+    }
+
+    function copyMasterPrompt() {
+      const masterText = `Write a highly detailed, comprehensive academic system design report for my Semester VII Computer Engineering project named "Spendly". Here is the complete technology stack, architecture, database schema, and interface mechanics for the entire Spendly ecosystem: \n\n${systemContext}`;
+      navigator.clipboard.writeText(masterText)
+        .then(() => alert("Master Prompt copied to clipboard! You can paste it directly into ChatGPT/Gemini/Claude."))
         .catch(err => alert("Failed to copy text: " + err));
     }
   </script>
