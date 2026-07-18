@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spendly - Presentation & Script Guide</title>
+  <title>Spendly - Cabin Presentation & Script Guide</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -42,49 +42,37 @@
 
     <!-- Header Section -->
     <header class="mb-10">
-      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Presentation Handbook</span>
-      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🎓 Team Presentation Script & Guides</h1>
-      <p class="text-zinc-400 text-sm">Full conversational dialogue guides for Devansh, Udit, Meet, and Rudra to deliver a smooth presentation without confusion.</p>
+      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Cabin Viva Blueprint</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🎓 Live Cabin Presentation Script & Guide</h1>
+      <p class="text-zinc-400 text-sm">Follow this step-by-step team guide to demonstrate the live app directly to Mam on your laptop in her cabin.</p>
     </header>
 
     <!-- Detailed Script Section -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span>💬</span> Line-by-Line Presentation Dialogue Script
+        <span>💬</span> Interactive Cabin Presentation Script (Live App Walkthrough)
       </h2>
 
       <div class="space-y-8">
-        <!-- Introduction: Devansh starts -->
+        <!-- Step 1: Devansh starts -->
         <div class="panel-card rounded-xl p-6">
           <div class="flex items-center gap-2 text-blue-400 font-bold mb-3">
             <span class="text-lg">👑</span>
-            <span>1. INTRODUCTION & WELCOME (Devansh starts)</span>
+            <span>1. WELCOME & USER WALLET DEMO (Devansh starts)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-blue-400 mb-2">[Devansh stands up, clicks the first slide, and speaks with confidence]</p>
-            "Good morning Mam and friends. I am Devansh Patel, the team leader for our Semester 7 Computer Engineering project: Spendly. Today, my friends Udit, Meet, Rudra, and I are going to show you a system that changes how local business billing and expense management works. 
+            <p class="font-bold text-blue-400 mb-2">[Live Demo Action: Devansh opens the laptop in Mam's cabin, opens the Spendly tabs, and begins speaking politely]</p>
+            "Good morning Mam. Today we are presenting our peer-to-peer offline billing ecosystem: Spendly. I am Devansh, the team leader, and my friends Udit, Meet, and Rudra are here with me. 
             <br><br>
-            Standard financial apps read our private bank message alerts and send our transaction details to remote cloud databases. This centralized model compromises user privacy and is prone to security leaks. Additionally, small retailers have to pay monthly database subscription fees to sustain POS registers. 
+            Instead of presenting slides, we want to show you the live apps running directly on our laptop tabs. Spendly consists of three applications communicating without centralized database servers to protect user privacy and eliminate monthly hosting costs.
             <br><br>
-            To solve these challenges, we built Spendly, a zero-knowledge, offline-first peer-to-peer ecosystem. It consists of three progressive web apps: Spendly User, Spendly Shop, and Spendly Radar. All transaction history is stored locally in browser enclaves on the device. Let's look at Spendly User first."
-          </div>
-        </div>
-
-        <!-- Devansh explaining User App -->
-        <div class="panel-card rounded-xl p-6">
-          <div class="flex items-center gap-2 text-blue-400 font-bold mb-3">
-            <span class="text-lg">📱</span>
-            <span>2. SPENDLY USER DEMO (Devansh)</span>
-          </div>
-          <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-blue-400 mb-2">[Devansh transitions to the app screenshot or live screen]</p>
-            "Spendly User is the shopper's personal expense wallet. Because it is offline-first, all data is committed to a browser sandbox database using IndexedDB with the Dexie.js wrapper. To keep data secure on the device, we integrated the hardware-backed WebAuthn API (Passkeys). Users can register biometrics (Touch ID / Face ID) to decrypt local databases without cloud servers.
+            First, let me show you **Spendly User**, the consumer wallet. [Devansh points to the screen] When I open the tab, you can see it is locked. I will click **Unlock** and verify via fingerprint sensor (Passkey). This calls the browser's **WebAuthn API** to fetch credentials securely, unlocking access to our IndexedDB database.
             <br><br>
-            For cash management, we built a Cash Wallet Note Tracker. Instead of entering simple numbers, users input the count of their ₹500, ₹200, ₹100, and ₹50 notes, and the app calculates balances dynamically. 
+            Now, look at our **Cash Wallet note counter**. [Devansh clicks notes counter buttons] I can manually adjust the count of my physical cash notes (₹500, ₹200, ₹100, and ₹50 notes), and the app calculates the cash total dynamically.
             <br><br>
-            Another feature is the Clipboard SMS alert parser. Instead of requesting intrusive background SMS permissions, users copy transaction alerts to the clipboard, and our regex engine parses details (merchant, amount, debit/credit flag) locally in memory. 
+            Another feature is the **SMS Clipboard Parser**. [Devansh copies a sample transaction alert and pastes it into the parser] By clicking **Auto Parse**, our local regex code automatically extracts the merchant name, debit amount, and category, and logs it directly to our local history without asking for background OS SMS reading permissions.
             <br><br>
-            Lastly, we have a Shagun Gift Registry. It tracks reciprocal cash gifts exchanged during weddings and festivals. Now, let's look at the cashier POS billing system. Udit, please explain."
+            Lastly, we have a **Shagun Gifts tab** for tracking social ceremonies gifts given and received. Now, Udit will show you the cashier checkout POS."
           </div>
         </div>
 
@@ -98,17 +86,16 @@
             </div>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Udit takes over the slides and addresses the review panel]</p>
-            "Thank you, Devansh. Hello Mam, I am Udit, and I will demonstrate how the merchant Point-of-Sale checkout register works. 
+            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Udit takes the mouse or laptop, showing Mam the Spendly Shop register tab]</p>
+            "Thank you, Devansh. Hello Mam, I am Udit, and I will demonstrate the cashier register tab: **Spendly Shop**. 
             <br><br>
-            Spendly Shop is designed as a browser cash register used by cashiers. When the register scans a product barcode via the camera scanner, it sends a PRODUCT_REQUEST query packet to our paired Spendly Radar hub. Radar queries its catalog database and returns product descriptions and prices. Shop then calculates tax lines (CGST/SGST/IGST), applies active campaigns, and compiles the final invoice.
+            Right now, our POS register is paired with Spendly Radar. Let's scan a product. [Udit clicks "Scan Barcode" or selects an item from the quick catalog list] 
             <br><br>
-            For bill transmission, we built a Billing Beam pipeline:
-            1. Web NFC Beam: Cashier taps the register against the shopper's phone to transfer the invoice JSON payload directly.
-            2. Paired WebRTC Stream: For paired devices, invoice objects are encrypted with AES-256-GCM and sent over WebRTC.
-            3. Dynamic QR Code: If NFC is unavailable, the register displays a dynamic QR code on screen containing the raw invoice data, which the customer scans.
+            The register immediately queries the Radar hub over a WebRTC connection and retrieves item details. Shop then calculates tax lines (CGST/SGST/IGST), applies active store discounts, and compiles the final invoice.
             <br><br>
-            Let's see how Radar manages store catalogs. Meet, over to you."
+            To share this invoice with the customer, we built a **Billing Beam** fallback pipeline. I will click **Beam Bill**. It displays a dynamic QR code on the register screen. Devansh will scan it with the User app camera, and the invoice imports instantly. If they support NFC, we tap the devices to transfer data via Web NFC.
+            <br><br>
+            Now, Meet will show you the central store catalog dashboard."
           </div>
         </div>
 
@@ -122,16 +109,16 @@
             </div>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Meet steps up to demonstrate the Radar Hub screens]</p>
-            "Thanks, Udit. Good morning Mam, I am Meet, and I will walk you through Spendly Radar. 
+            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Meet takes the laptop, switching to the Spendly Radar dashboard tab]</p>
+            "Thanks, Udit. Good morning Mam, I am Meet, and I will walk you through **Spendly Radar**. 
             <br><br>
-            Radar is run by the store manager on a central tablet or PC. It manages inventory directories (db.radarStock) and store offers (db.radarOffers). 
+            Radar is run by the store manager to organize store catalog inventory lists (`db.radarStock`) and promo offer databases (`db.radarOffers`). 
             <br><br>
-            A key feature is the Offers Validation Claims loop. When a user claims an offer on their phone, they receive a 6-digit claim PIN. The cashier enters this PIN on the POS register, which sends an OFFER_VALIDATE_REQUEST to Radar. Radar verifies the code, invalidates it, and returns confirmation.
+            Let's demonstrate our **Offer Validation PIN Loop**. On the User app, I will claim an active campaign discount, which generates a 6-digit verification code. Udit will enter this code on the register. The register sends a validation query to Radar, and Radar validates and marks the code as used in the database.
             <br><br>
-            Additionally, we built a Privacy-Preserving Analytics module. Shoppers' devices reverse-geocode location locally, strip all personal details, and send transaction amounts anonymously to local Radar nodes to display area trend charts. 
+            Additionally, Radar tracks localized store sales and displays sales trend charts (built with Recharts) from geocoded user data, stripping all personal identifiers.
             <br><br>
-            Now, Rudra will explain how our P2P connection channels function."
+            Rudra will now show you the WebRTC and localStorage network tabs."
           </div>
         </div>
 
@@ -145,15 +132,16 @@
             </div>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
-            <p class="font-bold text-zinc-400 mb-2">[Rudra presents the system architecture and network connection slides]</p>
-            "Thank you, Meet. Hello Mam, I am Rudra, and I will explain the networking and infrastructure layers of Spendly. 
+            <p class="font-bold text-zinc-400 mb-2">[Live Demo Action: Rudra presses F12 to open the Chrome DevTools network tab, showing Mam the connection logs]</p>
+            "Thank you, Meet. Hello Mam, I am Rudra. I will show you how our P2P connection channels operate under the hood. 
             <br><br>
-            To keep the system zero-cost, we implemented three synchronization methods:
-            1. LocalStorage Same-Device Bridge: If the merchant open apps in different tabs on the same browser, they sync data with $0 latency by listening to browser Window StorageEvents on key 'spendly_bridge_msg'.
-            2. WebRTC PeerJS channels: When running on different devices, the apps establish peer-to-peer data channels. Handshake signaling is handled by public WebSocket topics on ntfy.sh.
-            3. Serverless Matching & Backups: A Cloudflare Worker hosts matchmaking keys in Worker KV namespaces to pair devices, clearing the keys after 10 minutes.
+            Since the apps are opened in different tabs on the same browser window, we listen to browser Window StorageEvents on key 'spendly_bridge_msg' to share states with $0 latency.
             <br><br>
-            By combining IndexedDB, WebRTC, and biometric WebAuthn keys, we built a responsive, zero-cost consumer ecosystem. That concludes our presentation. Thank you, Mam, and we are ready for your questions."
+            When running on separate devices, they establish a direct WebRTC connection. We use public WebSocket signaling topics on ntfy.sh to broker WebRTC handshakes, eliminating server costs.
+            <br><br>
+            We also use a Cloudflare Worker and Worker KV namespaces to pair devices via 6-digit connection codes.
+            <br><br>
+            That concludes our demonstration. Thank you, Mam, and we are ready for your questions."
           </div>
         </div>
 
@@ -163,14 +151,22 @@
     <!-- Viva Prep Guide -->
     <section class="mb-12 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
       <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-        <span>💡</span> Quick Presentation Tips for Team Success
+        <span>👩‍🏫</span> Mam's Expected Viva Question Bank
       </h2>
-      <ul class="list-disc list-inside text-sm text-zinc-400 space-y-2">
-        <li><strong>Practice the transitions:</strong> Practice passing the mic smoothly to Udit, Meet, and Rudra.</li>
-        <li><strong>Keep the local setup ready:</strong> Open all three tabs in one browser window before the viva begins, so you can demonstrate the localStorage bridge sync.</li>
-        <li><strong>Emphasize Security:</strong> Mention WebAuthn and IndexedDB to demonstrate on-device data safety.</li>
-        <li><strong>Emphasize Cost Savings:</strong> Explain how WebRTC and Cloudflare Workers remove database hosting costs.</li>
-      </ul>
+      <div class="space-y-4">
+        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
+          <h4 class="text-white font-bold text-xs mb-1">Q1. Why are you calling it a zero-knowledge app?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">Because there is no central database server. All data stays locally inside the browser's IndexedDB origin sandbox on the user's device.</p>
+        </div>
+        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
+          <h4 class="text-white font-bold text-xs mb-1">Q2. What is IndexedDB and why did you not use simple LocalStorage?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">LocalStorage is limited to 5MB and runs synchronously, blocking the main thread. IndexedDB has no strict storage limits and queries asynchronously, so it doesn't freeze the screen.</p>
+        </div>
+        <div class="p-3 bg-zinc-950 rounded border border-zinc-850">
+          <h4 class="text-white font-bold text-xs mb-1">Q3. If there are no servers, how do devices exchange data?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">They communicate directly using WebRTC DataChannels (PeerJS wrapper), with handshake signaling brokered via public WebSocket topics on ntfy.sh.</p>
+        </div>
+      </div>
     </section>
 
     <!-- Footer -->
