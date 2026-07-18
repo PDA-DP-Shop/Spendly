@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spendly AI Prompt Builder</title>
+  <title>Spendly Master AI Prompt Console</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -12,123 +12,135 @@
       color: #f3f4f6;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    .panel-card {
+    .console-card {
       background-color: #121212;
       border: 1px solid #262626;
     }
   </style>
 </head>
 <body class="p-6 md:p-12">
-  <div class="max-w-4xl mx-auto">
-    <header class="mb-10 border-b border-zinc-800 pb-6">
-      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">🤖 Spendly AI Prompt Builder</h1>
-      <p class="text-zinc-400 text-sm">Compile high-quality, human-style academic prompts with full context for ChatGPT, Gemini, or Claude.</p>
+  <div class="max-w-5xl mx-auto">
+    <header class="mb-10 border-b border-zinc-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">🤖 Spendly Master AI Prompt Console</h1>
+        <p class="text-zinc-400 text-sm">Copy the complete, highly-detailed project context prompt directly for ChatGPT, Gemini, or Claude.</p>
+      </div>
+      <button onclick="copyMasterPrompt()" class="px-5 py-2.5 bg-white text-black font-bold text-sm rounded shadow hover:bg-zinc-200 transition">
+        📋 Copy Master Prompt
+      </button>
     </header>
 
-    <!-- Context Overview Card -->
-    <div class="panel-card rounded-lg p-6 mb-8 text-zinc-300">
-      <h2 class="text-xl font-bold text-white mb-3">📦 Ecosystem Metadata Included</h2>
-      <ul class="list-disc list-inside text-sm text-zinc-400 space-y-2">
-        <li><strong>Spendly User:</strong> Consumer offline finance tracker with cash wallets and clipboard SMS parsers.</li>
-        <li><strong>Spendly Shop:</strong> Merchant POS registry with inventory checkout and tax/discount calculators.</li>
-        <li><strong>Spendly Radar:</strong> Regional market hub serving active campaign ledgers and anonymous spending trends.</li>
-        <li><strong>Infrastructure:</strong> WebRTC PeerJS streams, ntfy.sh WebSocket signals, local IndexedDB (Dexie.js), and Cloudflare Workers.</li>
-      </ul>
-    </div>
-
-    <!-- Interactive Prompt Generation Section -->
-    <div class="panel-card rounded-lg p-6 mb-8">
-      <h2 class="text-xl font-bold text-white mb-4">✍️ Build Prompt</h2>
-      
-      <label class="block text-zinc-400 text-sm font-semibold mb-2" for="user-question">
-        Option A: Enter a specific question (or leave blank to use the Master Prompt):
-      </label>
-      <textarea id="user-question" rows="4" class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded text-white text-sm focus:outline-none focus:border-zinc-700 transition placeholder-zinc-600 mb-6" placeholder="e.g. Write a detailed analysis of how database sandbox security works..."></textarea>
-
-      <div class="flex flex-col md:flex-row gap-3">
-        <button onclick="copyMasterPrompt()" class="flex-1 px-4 py-2.5 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
-          📋 Copy Master Prompt (Full Report)
-        </button>
-        <button onclick="generatePrompt()" class="px-4 py-2.5 bg-zinc-800 text-zinc-200 font-semibold text-sm rounded hover:bg-zinc-700 transition">
-          🚀 Compile Custom Prompt
-        </button>
-        <button onclick="copyToClipboard()" class="px-4 py-2.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-sm rounded transition">
-          📋 Copy Custom Preview
-        </button>
+    <!-- Console Terminal -->
+    <div class="console-card rounded-xl overflow-hidden shadow-2xl">
+      <div class="bg-zinc-900 px-4 py-3 border-b border-zinc-850 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-red-500"></span>
+          <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+          <span class="w-3 h-3 rounded-full bg-green-500"></span>
+          <span class="text-xs text-zinc-500 font-mono ml-2">spendly-mega-prompt.txt</span>
+        </div>
+        <span class="text-[10px] text-zinc-500 font-mono uppercase">Full Context & Guidelines</span>
       </div>
-    </div>
+      <textarea id="prompt-text-box" readonly class="w-full h-[600px] p-6 bg-zinc-950 text-zinc-300 font-mono text-xs leading-relaxed focus:outline-none resize-none overflow-y-scroll">Write a highly detailed, comprehensive academic system design report for my Semester VII Computer Engineering project named "Spendly".
 
-    <!-- Output Code Preview -->
-    <div class="panel-card rounded-lg p-6">
-      <h2 class="text-xl font-bold text-white mb-3">👁️ Custom Prompt Preview</h2>
-      <p class="text-xs text-zinc-500 mb-4">This preview area displays custom compiled prompts.</p>
-      <pre class="bg-zinc-950 p-4 border border-zinc-900 rounded text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap max-h-96" id="prompt-output">Type a question above and click Compile Custom Prompt to preview...</pre>
+You must answer all queries regarding the Spendly system using the technical specifications, schemas, connection protocols, and instructions described below.
+
+========================================================================
+1. GENERAL OVERVIEW & MOTIVATION
+========================================================================
+Spendly is an offline-first, zero-knowledge, hardware-secured peer-to-peer billing and finance ecosystem. It is designed to replace centralized fintech apps that scan bank messages and send user data to cloud servers. Spendly operates entirely on the user's local hardware sandbox without server fees or cloud databases.
+
+The system is split into three Progressive Web Applications (PWAs):
+1. Spendly User (Consumer App): An origin-sandboxed personal expense tracking wallet.
+2. Spendly Shop (Merchant POS App): An offline cash register for point-of-sale checkout billing.
+3. Spendly Radar (Local Market Hub App): An analytical node for local merchant campaigns and anonymous trend trackers.
+
+========================================================================
+2. SPENDLY USER (CONSUMER EXPENSE APP)
+========================================================================
+- Role: Allows consumers to manage finances, track cash wallets, parse clipboard transactions, and receive secure invoices.
+- Database: Browser-native IndexedDB managed via Dexie.js (Origin sandboxed).
+- Cash Wallet: Features a note tracker. Users manually input physical denomination counts (₹500, ₹200, ₹100, and ₹50 bills). The system calculates the physical balance dynamically:
+  Total Cash = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
+- Clipboard SMS Parser: A secure local regex processor. Instead of asking for OS background SMS permissions, it parses copied alerts:
+  Regex for Amount: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
+  Regex for Debit Flag: /(debited|spent|withdrawn|paid)/i
+  Regex for Merchant: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
+  This runs in memory locally, keeping transaction scan files out of external network calls.
+- WebAuthn Lock: Secures local databases. The app calls the WebAuthn API to register/assert cryptographic credentials, linking local Dexie.js decryption keys to the hardware Secure Enclave (Touch ID / Face ID / PIN code).
+- Shagun Gifts Ledger: Tracks given/received gift amounts for weddings/festivals, maintaining balance lists.
+- EMI Alerts: Triggers calendar schedule notifications for upcoming EMIs.
+
+========================================================================
+3. SPENDLY SHOP (MERCHANT POS APP)
+========================================================================
+- Role: An offline cash register used by checkout cashiers.
+- Core Flow: Cashier scans product barcodes -> sends direct WebRTC messages (PRODUCT_REQUEST) to Radar -> Radar returns details -> Shop computes VAT/GST, adds items to invoice, and completes checkout.
+- Stock Reduction: Upon checkout complete, Shop sends a STOCK_REDUCE packet to the local Radar node, updating stock quantities.
+- Billing Beam Fallback Pipeline:
+  - Transport A (Web NFC Beam): Employs Web NFC API. Customer taps device to register screen; the invoice payload is transmitted directly via browser NFC tags.
+  - Transport B (Paired WebRTC): If devices are already paired, the invoice payload is encrypted via AES-256-GCM and sent directly over the data channel.
+  - Transport C (Dynamic QR Code): Generates a high-contrast QR code on the register screen containing the raw invoice data, which the customer scans.
+
+========================================================================
+4. SPENDLY RADAR (LOCAL MARKET HUB APP)
+========================================================================
+- Role: Runs on a merchant hub tablet/PC to manage catalog records, offer validation claims, and display trends.
+- Database Schema:
+  - db.radarStock: Stores items, catalog barcodes, wholesale prices, and retail counts.
+  - db.radarOffers: Stores active campaigns, discount parameters, and validation codes.
+  - db.areaIntelligence: Logs privacy-preserving spending statistics.
+- Offers Validation Loop:
+  - User claims a discount code from Radar (generating a 6-digit verification pin).
+  - Cashier enters the pin on Shop screen.
+  - Shop sends P2P validation request to Radar (OFFER_VALIDATE_REQUEST).
+  - Radar verifies key, marks it used, and returns confirmation (OFFER_VALIDATE_RESPONSE).
+- Privacy-Preserving Area Intelligence: Compiles localized spending trends. Consumer apps reverse-geocode their position (e.g. "Mumbai, Powai"), strip names/details, and post category/sum data anonymously over randomized shard brokers. Radar logs this data to db.areaIntelligence and displays local chart graphics (built with Recharts).
+
+========================================================================
+5. INFRASTRUCTURE & CONNECTION PROTOCOLS
+========================================================================
+- Same-Device Local Sync: If apps are opened in tabs on the same browser, they share states with $0 latency by listening to browser Window 'StorageEvents' on key 'spendly_bridge_msg'.
+- Cross-Device direct sync: Connects browsers peer-to-peer using WebRTC DataChannels (PeerJS library wrapper).
+- Signaling Broker: Exchages SDP connection headers via lightweight pub/sub WebSocket channels on ntfy.sh (spendly_bridge_${id1}_${id2} topics). Includes 10s ping / 25s timeout heartbeats.
+- Serverless Backups: A Cloudflare Worker hosts matchmaking keys (stored in Worker KV namespaces) and stores encrypted merchant stock directory copies.
+
+========================================================================
+6. PROGRAMMING LANGUAGES & DIRECTORY MAPS
+========================================================================
+- Coding Languages: JavaScript (ES6+ Module style), HTML5, CSS3.
+- Directory Paths of Sandbox Databases:
+  - macOS (Chrome): ~/Library/Application Support/Google/Chrome/Default/IndexedDB/
+  - Windows (Chrome): %LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB\
+  - Android (Chrome): /data/data/com.android.chrome/app_chrome/Default/IndexedDB/
+- Data Interchange: JSON strings for settings and Webrtc transmissions.
+
+========================================================================
+INSTRUCTIONS FOR YOUR RESPONSE:
+========================================================================
+1. Write the explanation using natural, academic human-like language in coherent, well-structured paragraphs.
+2. Under NO circumstances should you use bullet points, lists, or simple outline items. Do NOT use dashes or double dashes ("--") to start sentences or paragraphs.
+3. Provide deep, paragraphs-based detailed explanations suitable for copy-pasting directly into a micro project report.
+4. Keep the terminology highly professional and appropriate for a university computer engineering project document.
+5. Focus on the zero-knowledge offline-first capabilities of the system.</textarea>
     </div>
 
   </div>
 
+  <!-- Exporter Script -->
   <script>
-    const systemContext = `You are an expert systems engineer and academic technical writer. I am compiling a professional micro project report for a system named Spendly.
-Spendly is a zero-knowledge, offline-first, hardware-secured peer-to-peer billing and finance tracking system split into three progressive web applications (PWAs):
-
-1. Spendly User (Consumer App): An origin-sandboxed personal expense registry. All transaction history is stored locally on the client device inside IndexedDB via Dexie.js. Features include:
-   - Cash Wallet: A physical cash denomination tracker allowing users to count and log ₹500, ₹200, ₹100, and ₹50 notes, with the wallet auto-calculating total physical cash.
-   - Clipboard SMS Parser: A local regex engine that extracts transaction values (merchant name, amount, credit/debit flag) from bank alert messages copied to the clipboard, eliminating the need to request intrusive background SMS reading permissions.
-   - Biometric Lock: Utilizes the browser's hardware-backed WebAuthn API (Passkeys) to lock the IndexedDB files behind the device's Secure Enclave chip using Face ID, Touch ID, or device PIN.
-   - Shagun Registry: A dedicated ledger for traditional cash gifts given or received during weddings and festivals to track reciprocal balances.
-   - EMI Alerts: A scheduling list with calendar triggers tracking recurring payment sums.
-
-2. Spendly Shop (Merchant POS App): An offline cash register for point-of-sale operations. Features include:
-   - Catalog Query: Scans barcodes and sends direct P2P queries (PRODUCT_REQUEST) to Spendly Radar via WebRTC to fetch catalog descriptors and retail prices.
-   - Invoicing Engine: Calculates VAT/GST parameters and processes checkout receipts.
-   - Billing Beam: Transmits invoice JSON payloads directly to user devices using Web NFC beam taps, direct WebRTC streams, or динамик QR codes shown on the screen.
-
-3. Spendly Radar (Local Market Hub App): An analytical merchant dashboard run on a shop tablet or PC. Features include:
-   - Catalog Database: Stores active store stock logs and item barcode maps.
-   - Offers Registry: Operates campaign discount records and claim codes validation tables.
-   - Privacy-Preserving Analytics: Receives local geolocated spending trends. When a purchase occurs, the consumer device reverse-geocodes its position locally, strips user names, and sends only the category and price anonymously to local Radar nodes to display Recharts market trends.
-
-Infrastructure Channels:
-- Same-Device Local Sync: Synchronizes open tabs on the same browser instantly using Window StorageEvent listeners on the key 'spendly_bridge_msg', bypassing network overhead.
-- Peer-to-Peer direct sync: Cross-device data streams are processed directly using WebRTC DataChannels coordinated via PeerJS.
-- Signaling Broker: Connection handshakes and Pairing Codes are routed through public WebSocket topics on ntfy.sh.
-- Backups: Local databases are exported as AES-256-GCM encrypted JSON files or synced to a serverless Cloudflare Worker linked to Worker KV stores.
-
-Instructions for your response:
-1. Write the explanation using natural, academic human-like language in coherent, well-structured paragraphs.
-2. Under NO circumstances should you use bullet points, lists, or simple outline items. Do NOT use dashes or double dashes ("--") to start sentences or paragraphs.
-3. Provide deep, paragraphs-based detailed explanations suitable for copy-pasting directly into a micro project report.
-4. Keep the terminology highly professional.`;
-
-    function generatePrompt() {
-      const question = document.getElementById('user-question').value.trim();
-      const outputArea = document.getElementById('prompt-output');
-      
-      if (!question) {
-        alert("Please write a topic or question in the box first!");
-        return;
-      }
-
-      const fullPrompt = `${systemContext}\n\nUser Question/Topic to answer:\n${question}`;
-      outputArea.textContent = fullPrompt;
-    }
-
-    function copyToClipboard() {
-      const outputText = document.getElementById('prompt-output').textContent;
-      if (outputText.startsWith("Type a question")) {
-        alert("Compile a custom prompt first!");
-        return;
-      }
-      navigator.clipboard.writeText(outputText)
-        .then(() => alert("Prompt copied to clipboard successfully! Paste it directly into ChatGPT/Gemini/Claude."))
-        .catch(err => alert("Failed to copy text: " + err));
-    }
-
     function copyMasterPrompt() {
-      const masterText = `Write a highly detailed, comprehensive academic system design report for my Semester VII Computer Engineering project named "Spendly". Here is the complete technology stack, architecture, database schema, and interface mechanics for the entire Spendly ecosystem: \n\n${systemContext}`;
-      navigator.clipboard.writeText(masterText)
-        .then(() => alert("Master Prompt copied to clipboard! You can paste it directly into ChatGPT/Gemini/Claude."))
-        .catch(err => alert("Failed to copy text: " + err));
+      const promptTextBox = document.getElementById('prompt-text-box');
+      promptTextBox.select();
+      promptTextBox.setSelectionRange(0, 99999); // For mobile devices
+      
+      navigator.clipboard.writeText(promptTextBox.value)
+        .then(() => {
+          alert("Master AI Prompt copied to clipboard successfully! Paste it into ChatGPT/Gemini/Claude.");
+        })
+        .catch(err => {
+          alert("Failed to copy text: " + err);
+        });
     }
   </script>
 </body>
