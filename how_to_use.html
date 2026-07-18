@@ -46,9 +46,9 @@
 
     <!-- Header Section -->
     <header class="mb-8">
-      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">Advanced Guide</span>
-      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🚦 Ecosystem Technical Manual & Guides</h1>
-      <p class="text-zinc-400 text-sm">Select a tab below to read in-depth analyses, learn how the apps work, and see how they sync offline.</p>
+      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">User Manual</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🚦 Step-by-Step App Walkthrough Guide</h1>
+      <p class="text-zinc-400 text-sm">Follow these screen-by-screen setup instructions to learn how to operate every single feature in the Spendly ecosystem.</p>
     </header>
 
     <!-- Responsive Tab Controls -->
@@ -76,50 +76,57 @@
       <!-- TAB 1: USER APP -->
       <div id="user-tab" class="tab-panel space-y-6">
         <div class="panel-card rounded-xl p-6">
-          <h2 class="text-2xl font-bold text-white mb-4">📱 Spendly User: Consumer Wallet Analysis</h2>
+          <h2 class="text-2xl font-bold text-white mb-4">📱 Spendly User: Consumer Wallet Manual</h2>
           <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-            Spendly User runs inside the shopper's browser origin sandbox. It manages transaction registers, budget thresholds, cash wallets, and wedding gift folders without contacting external cloud database nodes.
+            Spendly User runs inside the shopper's browser origin sandbox. All data is committed locally using IndexedDB (Dexie.js) to guarantee zero-knowledge privacy.
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Dexie Schemas -->
+          <div class="space-y-6">
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">💾 Local Database Tables (IndexedDB)</h3>
-              <ul class="text-xs text-zinc-500 space-y-2">
-                <li><strong>db.expenses</strong>: Stores daily transaction history. Fields: category, amount, date, shopName, and isSoftDeleted (enables trash recovery).</li>
-                <li><strong>db.wallets</strong>: Tracks available balances. Types: Digital, Card, and Cash Wallets.</li>
-                <li><strong>db.emiAlerts</strong>: Schedules monthly EMI triggers. Fields: title, amount, dueDate, isPaid.</li>
-                <li><strong>db.shagunRegistry</strong>: Logs wedding and festival cash gift exchanges, maintaining reciprocal balance records.</li>
+              <h3 class="text-white font-bold text-sm mb-2">1. Passkey Login Setup</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                When you launch the app, you will land on the **LockScreen**. 
+              </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1 mb-2">
+                <li>Click the **Unlock** button.</li>
+                <li>The browser will trigger your device's biometrics dialog (Fingerprint/Touch ID/Face ID/Windows Hello).</li>
+                <li>Verify your identity. The Secure Enclave derives a decryption key locally to open your IndexedDB files.</li>
               </ul>
             </div>
 
-            <!-- Notes Tracker -->
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">💵 Cash note counter math</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed mb-3">
-                Instead of typing a total cash sum, users enter counts for ₹500, ₹200, ₹100, and ₹50 notes. The app calculates physical cash balances dynamically using note values:
+              <h3 class="text-white font-bold text-sm mb-2">2. Cash Note Counter Wallet</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Navigate to the cash wallet page. This tracks physical notes in hand.
               </p>
-              <pre class="bg-zinc-900 p-2 rounded text-[10px] text-zinc-300 font-mono">Balance = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50)</pre>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>You will see input fields for ₹500, ₹200, ₹100, and ₹50 notes.</li>
+                <li>Click the **+** or **-** buttons to update note counts.</li>
+                <li>The wallet calculates the total physical cash dynamically.</li>
+              </ul>
             </div>
 
-            <!-- WebAuthn -->
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">🔐 WebAuthn Biometric Decryption</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed">
-                Spendly User does not use passwords. Instead, it calls the browser's hardware-backed **WebAuthn API** (Passkeys). Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code) on your phone or PC, ensuring the database remains encrypted on the device when the app is locked.
+              <h3 class="text-white font-bold text-sm mb-2">3. Clipboard SMS Parser</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Navigate to the parser console to log expenditures without manual entry.
               </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Copy a bank SMS alert (e.g. *"INR 500 debited at STAR BAZAR"*).</li>
+                <li>Open Spendly User, click **Paste Clipboard**, and tap **Auto Parse**.</li>
+                <li>The parser extracts the amount and merchant locally, saving it to your history.</li>
+              </ul>
             </div>
 
-            <!-- SMS Parser -->
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">✉️ Clipboard SMS Regex Utility</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed mb-3">
-                Users copy transaction SMS notifications from their bank, and Spendly parses them locally in memory without needing system background SMS permissions:
+              <h3 class="text-white font-bold text-sm mb-2">4. Shagun Gift Registry</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Go to the Shagun tab to track gift money exchanged during weddings and festivals.
               </p>
-              <ul class="text-[10px] text-zinc-500 font-mono space-y-1">
-                <li>Amount: <code class="text-zinc-300">/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i</code></li>
-                <li>Debit check: <code class="text-zinc-300">/(debited|spent|withdrawn|paid)/i</code></li>
-                <li>Merchant: <code class="text-zinc-300">/(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i</code></li>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Click **Add Shagun Gift**.</li>
+                <li>Enter the relative's name, occasion, gift amount, and select **Given** or **Received**.</li>
+                <li>The registry updates reciprocal balances to track who you owe or who owes you.</li>
               </ul>
             </div>
           </div>
@@ -129,45 +136,46 @@
       <!-- TAB 2: SHOP APP -->
       <div id="shop-tab" class="tab-panel hidden space-y-6">
         <div class="panel-card rounded-xl p-6">
-          <h2 class="text-2xl font-bold text-white mb-4">🛒 Spendly Shop: Point-of-Sale Register Analysis</h2>
+          <h2 class="text-2xl font-bold text-white mb-4">🛒 Spendly Shop: Point-of-Sale Register Manual</h2>
           <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-            Spendly Shop is designed as an offline Point-of-Sale cash register used by cashiers. It handles catalog checks, tax calculations, and billing beam fallbacks entirely peer-to-peer.
+            Spendly Shop is an offline cash register used by cashier staff to bill products, calculate taxes, and beam invoices.
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Barcode Scanner -->
+          <div class="space-y-6">
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-2">📷 Barcode scan & Pricing Queries</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed">
-                The cashier scans product barcodes using the device's camera. The Shop app then sends a `PRODUCT_REQUEST` packet over a direct WebRTC tunnel to the paired Spendly Radar hub. Radar queries its inventory database and returns product descriptions and prices (`PRODUCT_RESPONSE`), allowing the Shop app to build the invoice offline.
+              <h3 class="text-white font-bold text-sm mb-2">1. Connect Register to Radar</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                When you launch Shop POS, you must pair it with the central store database.
               </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Check the Spendly Radar dashboard screen for the 6-character Pairing Code.</li>
+                <li>Type this code in the Shop pairing screen and click **Connect**.</li>
+                <li>The app retrieves connection keys via Cloudflare Worker KV and opens a direct WebRTC tunnel.</li>
+              </ul>
             </div>
 
-            <!-- Tax Engine -->
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-2">⚖️ GST calculations</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed">
-                The POS invoicing engine separates prices into CGST (Central GST) and SGST (State GST) brackets, applies active campaign discounts, and compiles total amounts in a structured receipt object.
+              <h3 class="text-white font-bold text-sm mb-2">2. Scans Product Barcodes</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                To build an invoice, cashiers scan items directly.
               </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Click the **Scan Barcode** camera window.</li>
+                <li>Hold the product barcode in front of the lens.</li>
+                <li>The Shop app sends a `PRODUCT_REQUEST` over WebRTC to Radar and fetches the item description and price.</li>
+              </ul>
             </div>
 
-            <!-- Billing Beams -->
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 md:col-span-2">
-              <h3 class="text-white font-semibold text-sm mb-3">⚡ Billing Beam Pipeline (How invoices are shared)</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-zinc-900 p-3 rounded border border-zinc-800">
-                  <h4 class="text-zinc-300 font-bold text-xs mb-1">Transport A: Web NFC Beam</h4>
-                  <p class="text-zinc-500 text-[10px] leading-relaxed">Shopper taps their phone on the register screen. The Shop app uses Web NFC to beam the invoice JSON directly to the shopper's device.</p>
-                </div>
-                <div class="bg-zinc-900 p-3 rounded border border-zinc-800">
-                  <h4 class="text-zinc-300 font-bold text-xs mb-1">Transport B: Direct WebRTC</h4>
-                  <p class="text-zinc-500 text-[10px] leading-relaxed">If devices are already paired, the Shop app encrypts the invoice using AES-256-GCM and transmits it over the open WebRTC data channel.</p>
-                </div>
-                <div class="bg-zinc-900 p-3 rounded border border-zinc-800">
-                  <h4 class="text-zinc-300 font-bold text-xs mb-1">Transport C: Dynamic QR Code</h4>
-                  <p class="text-zinc-500 text-[10px] leading-relaxed">The register displays a dynamic QR code containing the raw invoice data, which the customer scans with their User app camera.</p>
-                </div>
-              </div>
+            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
+              <h3 class="text-white font-bold text-sm mb-2">3. GST Billing & Invoice Compilation</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Review item pricing lines, apply SGST/CGST tax splits, subtract store discounts, and finalize the check.
+              </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>The billing calculator processes CGST and SGST splits automatically.</li>
+                <li>Click **Complete Checkout** to log the transaction in your store's sales logs.</li>
+                <li>Click **Beam Invoice** to display a dynamic QR code on screen containing the raw invoice data, which the customer scans to import into their database.</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -176,36 +184,46 @@
       <!-- TAB 3: RADAR HUB -->
       <div id="radar-tab" class="tab-panel hidden space-y-6">
         <div class="panel-card rounded-xl p-6">
-          <h2 class="text-2xl font-bold text-white mb-4">📡 Spendly Radar: Local Market Hub Analysis</h2>
+          <h2 class="text-2xl font-bold text-white mb-4">📡 Spendly Radar: Store Manager Hub Manual</h2>
           <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-            Spendly Radar is run by store managers on a tablet or PC to manage stock catalogs, active promotions, claim codes validation, and local sales trends.
+            Spendly Radar is run by store owners to manage product stock registries, active promotions, and local sales trends.
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Radar Databases -->
+          <div class="space-y-6">
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">📦 Radar Local Database Schemas</h3>
-              <ul class="text-xs text-zinc-500 space-y-2">
-                <li><strong>db.radarStock</strong>: Catalog entries containing barcode values, items description, retail prices, and wholesale purchase costs.</li>
-                <li><strong>db.radarOffers</strong>: Catalog of discount campaigns and claim verification codes.</li>
-                <li><strong>db.areaIntelligence</strong>: Logs privacy-preserving spending statistics.</li>
+              <h3 class="text-white font-bold text-sm mb-2">1. Manage Inventory Catalogs</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Configure store stock logs.
+              </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Go to the **Stock Directory** tab.</li>
+                <li>Click **Add New Item**.</li>
+                <li>Enter the item name, barcode, retail price, and wholesale purchase cost. Click **Save**.</li>
+                <li>This data is stored inside IndexedDB and is queryable by paired registers over WebRTC.</li>
               </ul>
             </div>
 
-            <!-- Offers loop -->
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-semibold text-sm mb-3">🎟️ Offer Claim & Validation PIN Loop</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed">
-                When a user claims an offer, the system generates a 6-digit claim PIN. The cashier inputs the PIN on the POS register, which sends an `OFFER_VALIDATE_REQUEST` to Radar. Radar checks its database, invalidates the code, and confirms the discount.
+              <h3 class="text-white font-bold text-sm mb-2">2. Validate Promotional Claims</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Validate shopper coupon claims.
               </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Radar generates 6-digit claim PINs when shoppers select local offers on their phones.</li>
+                <li>When the cashier enters the PIN in Shop POS, Radar validates the code, applies the discount, and marks the coupon as used.</li>
+              </ul>
             </div>
 
-            <!-- Privacy Analytics -->
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 md:col-span-2">
-              <h3 class="text-white font-semibold text-sm mb-2">📊 Privacy-Preserving Area Intelligence Analytics</h3>
-              <p class="text-zinc-400 text-xs leading-relaxed">
-                Spendly compiles local spending trends without exposing user identities. The User app geolocates coordinates locally (e.g. Mumbai, Powai), strips all personal names or identifiers, and posts transaction totals anonymously over randomized sharding topics. Radar logs this data to db.areaIntelligence and displays local chart graphics (built with Recharts).
+            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
+              <h3 class="text-white font-bold text-sm mb-2">3. View Sales Trend Analytics</h3>
+              <p class="text-zinc-400 text-xs leading-relaxed mb-2">
+                Track sales intelligence metrics.
               </p>
+              <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
+                <li>Go to the **Analytics Dashboard** tab.</li>
+                <li>Analyze local store performance via Recharts trend lines.</li>
+                <li>View geocoded user data, stripped of all personal names and identifiers, to track sales by category and amount anonymously.</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -216,48 +234,29 @@
         <div class="panel-card rounded-xl p-6">
           <h2 class="text-2xl font-bold text-white mb-4">🔌 P2P Synchronization Matrix</h2>
           <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-            Because Spendly is completely serverless, the sync pathways are split across three network boundaries:
+            Spendly's sync pathways are split across three network boundaries to enable offline operation:
           </p>
 
           <div class="space-y-4">
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <h3 class="text-white font-bold text-sm mb-1">Method 1: Same-Device LocalStorage tab bridge</h3>
-                <p class="text-zinc-500 text-xs leading-relaxed">
-                  If apps are opened in tabs on the same browser window, they share states with $0 latency by listening to browser Window 'StorageEvents' on key 'spendly_bridge_msg'.
-                </p>
-              </div>
-              <span class="self-start text-[10px] font-bold bg-zinc-800 text-zinc-300 rounded px-2.5 py-1 uppercase tracking-wider">No Network overhead</span>
+            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
+              <h3 class="text-white font-bold text-sm mb-1">1. Shop POS + Radar Hub Sync</h3>
+              <p class="text-zinc-500 text-xs leading-relaxed">
+                Shop POS needs product descriptions and pricing details from Radar's stock records to prepare transactions. When checkout completes, Shop sends a stock update packet to Radar, decrementing inventory counts.
+              </p>
             </div>
 
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <h3 class="text-white font-bold text-sm mb-1">Method 2: Cross-Device WebRTC connection</h3>
-                <p class="text-zinc-500 text-xs leading-relaxed">
-                  Connects browsers peer-to-peer using WebRTC DataChannels (PeerJS library wrapper) to query product details, redeem coupons, and beam invoices directly.
-                </p>
-              </div>
-              <span class="self-start text-[10px] font-bold bg-zinc-800 text-zinc-300 rounded px-2.5 py-1 uppercase tracking-wider">Direct P2P Data streams</span>
+            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
+              <h3 class="text-white font-bold text-sm mb-1">2. Shop POS + User Wallet Billing Sync</h3>
+              <p class="text-zinc-500 text-xs leading-relaxed">
+                Shop POS beams compiled invoice payloads directly to User. Shoppers can tap their phone on the cashier screen (Web NFC Beam), receive it over paired WebRTC connections, or scan the register's dynamic QR code.
+              </p>
             </div>
 
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <h3 class="text-white font-bold text-sm mb-1">Method 3: ntfy.sh WebSocket Signaling Bridge</h3>
-                <p class="text-zinc-500 text-xs leading-relaxed">
-                  WebRTC requires exchanging Session Description Protocol (SDP) configurations. Since there are no custom backend servers, the apps establish WebRTC handshakes by posting encrypted SDP keys over ntfy.sh WebSocket bridge topics (`spendly_bridge_${smallerPeerId}_${largerPeerId}`). Connection integrity is maintained with a 10s ping interval and 25s timeout threshold.
-                </p>
-              </div>
-              <span class="self-start text-[10px] font-bold bg-zinc-800 text-zinc-300 rounded px-2.5 py-1 uppercase tracking-wider">Lightweight Broker Relays</span>
-            </div>
-
-            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950 flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <h3 class="text-white font-bold text-sm mb-1">Method 4: Cloudflare Worker Pairing Pins</h3>
-                <p class="text-zinc-500 text-xs leading-relaxed">
-                  To pair devices, Radar generates a temporary 6-digit pin and posts it along with its Peer ID to the Cloudflare Worker API. Shop inputs the pin, queries the Worker to retrieve the Peer ID, and deletes the entry from KV storage.
-                </p>
-              </div>
-              <span class="self-start text-[10px] font-bold bg-zinc-800 text-zinc-300 rounded px-2.5 py-1 uppercase tracking-wider">Serverless Matchmaker KV</span>
+            <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
+              <h3 class="text-white font-bold text-sm mb-1">3. User Wallet + Radar Trends Sync</h3>
+              <p class="text-zinc-500 text-xs leading-relaxed">
+                Shoppers discover active campaigns on local Radar hubs. After checkouts, consumer devices geocode coordinates (e.g. Mumbai, Powai), strip user identifiers, and post category/spend totals anonymously to display trend charts.
+              </p>
             </div>
           </div>
         </div>
@@ -268,14 +267,13 @@
         <div class="panel-card rounded-xl p-6">
           <h2 class="text-2xl font-bold text-white mb-6">🚀 Step-by-Step Ecosystem Walkthrough Guide</h2>
           
-          <!-- Tutorial flow list -->
           <div class="space-y-6">
             <!-- Step 1 -->
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">1</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Manager configures inventory stock in Radar</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Store owner opens Spendly Radar, enters catalog items (barcode references, retail prices, and wholesale costs) into db.radarStock database.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Configure stock in Radar</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Open Spendly Radar, go to **Stock Directory**, and add catalog items (e.g. barcode "890103", item name "Soda", price "50", wholesale cost "30").</p>
               </div>
             </div>
 
@@ -283,8 +281,8 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">2</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Radar generates a Pairing Code</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Radar dashboard generates a temporary 6-character connection code (e.g. `K4N9X3`) and posts it to the Cloudflare Worker API.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Get the Pairing Code</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Radar generates a temporary 6-character connection code (e.g. `K4N9X3`) and posts it to the Cloudflare Worker API.</p>
               </div>
             </div>
 
@@ -292,8 +290,8 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">3</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">POS Shop pairs via connection PIN</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Cashier enters `K4N9X3` in the POS Shop app. The register queries Cloudflare Workers KV, pulls the matching Peer ID, and establishes a direct WebRTC connection.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Pair POS Shop register</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Open Spendly Shop register, enter the code `K4N9X3`, and click Connect. The register queries Cloudflare Workers KV and establishes a direct WebRTC connection with Radar.</p>
               </div>
             </div>
 
@@ -301,8 +299,8 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">4</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Shopper reviews available Radar promotions</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Shopper opens Spendly User. The app discovers active campaign lists on the local Radar hub.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Discover promotions on local Radar</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Open Spendly User. The app discovers active campaign lists on the local Radar hub.</p>
               </div>
             </div>
 
@@ -310,8 +308,8 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">5</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Shopper claims promotional code</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Shopper clicks "Claim" on an offer. Radar registers the request and returns a unique 6-digit claim PIN.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Claim discount coupon</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Click "Claim" on an offer. Radar registers the request and returns a unique 6-digit claim PIN.</p>
               </div>
             </div>
 
@@ -319,7 +317,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">6</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">POS Shop scans barcode labels during checkout</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Scan item barcodes during checkout</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">Cashier scans item barcode. Shop POS queries Radar database over WebRTC and fetches item details (`PRODUCT_REQUEST` -> `PRODUCT_RESPONSE`).</p>
               </div>
             </div>
@@ -328,7 +326,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">7</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Redeeming promotional discount</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Redeem discount coupon</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">Cashier inputs the shopper's 6-digit claim PIN. Shop POS verifies the code with Radar over WebRTC (`OFFER_VALIDATE_REQUEST`). Radar confirms the code and applies the discount.</p>
               </div>
             </div>
@@ -337,7 +335,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">8</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Updating stock directories</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Update stock levels</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">Shop POS sends a stock update packet to Radar, decrementing stock levels for the checked-out items.</p>
               </div>
             </div>
@@ -346,7 +344,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">9</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Billing Beam invoice transmission</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Invoice transmission</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">Shop POS beams the invoice payload directly to User via Web NFC, WebRTC, or a dynamic QR code on the POS screen.</p>
               </div>
             </div>
@@ -355,7 +353,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">10</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Database Commit</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Save invoice</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">The shopper imports the invoice into their local expenses database.</p>
               </div>
             </div>
@@ -364,7 +362,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">11</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Store credit logging (Credit flow fallback)</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Log store credit (Credit flow fallback)</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">If checking out on credit, the transaction is logged to the merchant's local ledger and updated in the customer's personal credit tracking folder.</p>
               </div>
             </div>
@@ -373,7 +371,7 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">12</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Privacy-Preserving Area Analytics geocodes trends</h4>
+                <h4 class="text-white font-semibold text-sm mb-1">Process local area analytics</h4>
                 <p class="text-zinc-500 text-xs leading-relaxed">User app geolocates coordinates locally (e.g. Mumbai, Powai), strips all personal names or identifiers, and posts transaction totals anonymously to display local Recharts sales trend graphs on Radar.</p>
               </div>
             </div>
