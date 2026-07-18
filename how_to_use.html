@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendly - How to Use (Step-by-Step Manual)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #e4e4e7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .panel-card {
+      background-color: #121212;
+      border: 1px solid #27272a;
+    }
+    .step-number {
+      background-color: #27272a;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+  <div class="max-w-5xl mx-auto">
+    <!-- Navbar Component -->
+    <nav class="flex flex-wrap items-center justify-between py-4 border-b border-zinc-800 mb-8 gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">💳</span>
+        <span class="font-bold text-white text-lg tracking-wider">SPENDLY HUB</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-zinc-400">
+        <a href="index.html" class="hover:text-white px-3 py-1.5 rounded transition">Home</a>
+        <a href="report_viewer.html" class="hover:text-white px-3 py-1.5 rounded transition">Report</a>
+        <a href="diagram_viewer.html" class="hover:text-white px-3 py-1.5 rounded transition">Diagrams</a>
+        <a href="ai_prompt_builder.html" class="hover:text-white px-3 py-1.5 rounded transition">AI Prompt</a>
+        <a href="presentation_guide.html" class="hover:text-white px-3 py-1.5 rounded transition">Presentation Guide</a>
+        <a href="how_to_use.html" class="bg-zinc-800 text-white px-3 py-1.5 rounded font-semibold transition">How to Use</a>
+      </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10">
+      <span class="px-3 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded-full tracking-wider uppercase">User Manual</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mt-4 mb-2">🚦 Step-by-Step App Walkthrough Guide</h1>
+      <p class="text-zinc-400 text-sm">Follow these screens and setup instructions to learn how to operate the Spendly ecosystem like a pro.</p>
+    </header>
+
+    <!-- App Section: Spendly User -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-b border-zinc-800 pb-3">
+        <span>📱</span> App 1: Spendly User (The Shopper Wallet App)
+      </h2>
+      <div class="space-y-6">
+        <!-- Step 1 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">1</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Unlock with Biometrics (Passkey LockScreen)</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              When you open the app, it prompts you to log in. Click **Unlock** to trigger your phone or PC's built-in Touch ID, Face ID, or PIN window.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Secured by WebAuthn Secure Enclave</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">2</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Count notes in Cash Wallet</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              Go to the cash counter tab. Instead of just typing a random number, enter the exact count of your physical notes (e.g. ₹500, ₹200, ₹100 notes). The wallet updates the final total balance instantly.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Wallet Balance = (500 * count) + (200 * count)...</span>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">3</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Parse bank SMS transaction alerts</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              Copy a transaction SMS from your bank (e.g. *"Rs. 1,500 debited at STAR BAZAR"*), paste it into the parser box, and click **Auto Parse**. The local regex engine extracts the merchant, amount, and category, and logs it directly to your expenses history.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">No background system SMS permissions required!</span>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">4</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Log traditional cash gifts (Shagun gifts)</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              Go to the Shagun tab. Add logs for cash envelopes given to or received from relatives during weddings and festivals. This tab maintains reciprocal balances for social gifts.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Maintains balance lists: Given vs. Received</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Section: Spendly Shop -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-b border-zinc-800 pb-3">
+        <span>🛒</span> App 2: Spendly Shop (Merchant POS Cash Register)
+      </h2>
+      <div class="space-y-6">
+        <!-- Step 1 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">1</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Pair Register with local store Hub</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              On the Shop register, type in the 6-character connection code displayed on the central store's Radar screen (e.g. `K4N9X3`). Click Connect to establish direct WebRTC data sync channels.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Matchmaking code is validated on Cloudflare Worker KV</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">2</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Checkout & GST/VAT tax calculation</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              Cashier scans product barcode. Shop queries Radar database over WebRTC, fetches item prices, auto-calculates SGST/CGST tax splits, applies active store discounts, and generates a formatted invoice.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">POS query: PRODUCT_REQUEST -> PRODUCT_RESPONSE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Section: Spendly Radar -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-b border-zinc-800 pb-3">
+        <span>📡</span> App 3: Spendly Radar (Store Manager & Analytics Hub)
+      </h2>
+      <div class="space-y-6">
+        <!-- Step 1 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">1</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Configure store stock catalog directories</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              Store manager adds inventory items to `db.radarStock` database, specifying the barcode reference, item name, retail price, and wholesale cost.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Data stored locally inside IndexedDB via Dexie.js</span>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="panel-card rounded-xl p-6 flex flex-col md:flex-row gap-6">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg step-number">2</div>
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">Verify Promotional Claim Codes</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-3">
+              When a user claims an offer, the system generates a 6-digit claim PIN. The POS register sends an `OFFER_VALIDATE_REQUEST` to Radar. Radar checks its database, invalidates the code, and confirms the discount.
+            </p>
+            <span class="text-xs text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded">Automatic real-time campaign coupon check</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Inter-connectivity: How they connect -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-b border-zinc-800 pb-3">
+        <span>⛓️</span> Ecosystem Inter-App Connections (How They Work Together)
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Connection 1 -->
+        <div class="panel-card rounded-xl p-6">
+          <h3 class="text-white font-bold text-sm mb-3">1. Shop POS + Radar Hub Sync</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            Shop POS needs product descriptions and pricing details from Radar's stock records to prepare transactions. When checkout completes, Shop sends a stock update packet to Radar, decrementing inventory counts.
+          </p>
+          <span class="text-xs text-blue-400 font-mono bg-zinc-950 px-2 py-1 rounded">WebRTC Direct Connection</span>
+        </div>
+
+        <!-- Connection 2 -->
+        <div class="panel-card rounded-xl p-6">
+          <h3 class="text-white font-bold text-sm mb-3">2. Shop POS + User Wallet Billing</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            Shop POS beams compiled invoice payloads directly to User. Shoppers can tap their phone on the cashier screen (Web NFC Beam), receive it over paired WebRTC connections, or scan the register's dynamic QR code.
+          </p>
+          <span class="text-xs text-blue-400 font-mono bg-zinc-950 px-2 py-1 rounded">NFC, WebRTC, QR Codes</span>
+        </div>
+
+        <!-- Connection 3 -->
+        <div class="panel-card rounded-xl p-6">
+          <h3 class="text-white font-bold text-sm mb-3">3. User Wallet + Radar Trends</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            Shoppers discover active campaigns on local Radar hubs. After checkouts, consumer devices geocode coordinates (e.g. Mumbai, Powai), strip user identifiers, and post category/spend totals anonymously to display trend charts.
+          </p>
+          <span class="text-xs text-blue-400 font-mono bg-zinc-950 px-2 py-1 rounded">Privacy Analytics Shards</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
+      <p>© 2026-2027 Spendly Project | Computer Engineering Dept</p>
+    </footer>
+  </div>
+</body>
+</html>
