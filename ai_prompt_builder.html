@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendly AI Prompt Builder</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #f3f4f6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .panel-card {
+      background-color: #121212;
+      border: 1px solid #262626;
+    }
+  </style>
+</head>
+<body class="p-6 md:p-12">
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-10 border-b border-zinc-800 pb-6">
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">🤖 Spendly AI Prompt Builder</h1>
+      <p class="text-zinc-400 text-sm">Compile high-quality, human-style academic prompts with full context for ChatGPT, Gemini, or Claude.</p>
+    </header>
+
+    <!-- Context Overview Card -->
+    <div class="panel-card rounded-lg p-6 mb-8 text-zinc-300">
+      <h2 class="text-xl font-bold text-white mb-3">📦 Ecosystem Metadata Included</h2>
+      <ul class="list-disc list-inside text-sm text-zinc-400 space-y-2">
+        <li><strong>Spendly User:</strong> Consumer offline finance tracker with cash wallets and clipboard SMS parsers.</li>
+        <li><strong>Spendly Shop:</strong> Merchant POS registry with inventory checkout and tax/discount calculators.</li>
+        <li><strong>Spendly Radar:</strong> Regional market hub serving active campaign ledgers and anonymous spending trends.</li>
+        <li><strong>Infrastructure:</strong> WebRTC PeerJS streams, ntfy.sh WebSocket signals, local IndexedDB (Dexie.js), and Cloudflare Workers.</li>
+      </ul>
+    </div>
+
+    <!-- Interactive Prompt Generation Section -->
+    <div class="panel-card rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-bold text-white mb-4">✍️ Build Custom Prompt</h2>
+      
+      <label class="block text-zinc-400 text-sm font-semibold mb-2" for="user-question">
+        Enter your specific question or topic:
+      </label>
+      <textarea id="user-question" rows="4" class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded text-white text-sm focus:outline-none focus:border-zinc-700 transition placeholder-zinc-600 mb-6" placeholder="e.g. Write a detailed analysis of how database sandbox security works..."></textarea>
+
+      <div class="flex flex-col md:flex-row gap-3">
+        <button onclick="generatePrompt()" class="flex-1 px-4 py-2.5 bg-white text-black font-semibold text-sm rounded shadow hover:bg-zinc-200 transition">
+          🚀 Compile Prompt
+        </button>
+        <button onclick="copyToClipboard()" class="px-4 py-2.5 bg-zinc-800 text-zinc-200 font-semibold text-sm rounded hover:bg-zinc-700 transition">
+          📋 Copy to Clipboard
+        </button>
+      </div>
+    </div>
+
+    <!-- Output Code Preview -->
+    <div class="panel-card rounded-lg p-6">
+      <h2 class="text-xl font-bold text-white mb-3">👁️ Prompt Preview</h2>
+      <p class="text-xs text-zinc-500 mb-4">This entire text block is formatted and ready to feed into any AI chat screen.</p>
+      <pre class="bg-zinc-950 p-4 border border-zinc-900 rounded text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap max-h-96" id="prompt-output">Select a template or compile custom text above to preview the generated prompt...</pre>
+    </div>
+
+  </div>
+
+  <script>
+    const systemContext = `You are an expert systems engineer and technical writer. I am writing an academic report for a project named Spendly.
+Spendly is a zero-knowledge, offline-first peer-to-peer billing and finance tracking system split into three progressive web applications (PWAs):
+
+1. Spendly User (Consumer App): An origin-sandboxed personal expense tracker. It stores data locally in IndexedDB (using Dexie.js). Features include cash wallets (tracking individual denominations like ₹500, ₹200), clipboard-based SMS alert parsing (using local regex matches to read bank debit messages without requesting device permissions), and passkey locks (using the WebAuthn API to lock IndexedDB access behind the hardware Secure Enclave).
+2. Spendly Shop (Merchant POS App): An offline cash register for retail checkout. Cashiers scan barcodes, lookup local inventories, compute taxes/discounts, and beam invoices to consumer devices.
+3. Spendly Radar (Local Market Hub App): An analytical hub that merchants run on a tablet or PC. It tracks store catalog lists, stores offers, processes claims codes, and compiles local transaction trends (average spending totals by region) without capturing customer identifiers.
+
+Infrastructure Channels:
+- Same-Device local sync: Communicates instantly across open tabs of the same browser using LocalStorage Event listeners ("spendly_bridge_msg").
+- Peer-to-Peer network sync: Cross-device data streams are processed directly using WebRTC DataChannels coordinated via PeerJS.
+- Signaling Broker: Handshakes are exchanged using public WebSocket topics on ntfy.sh.
+- Backups: Local databases are exported as encrypted JSON files or synced to a serverless Cloudflare Worker linked to Worker KV stores.
+
+Instructions for your response:
+1. Write the explanation using natural, academic human language in coherent paragraphs.
+2. Avoid bullet points, lists, or simple outline items. Do not use dashes or double dashes ("--") to start sentences.
+3. Provide deep, paragraphs-based detailed explanations suitable for copy-pasting directly into a micro project report.
+4. Keep the terminology highly professional.`;
+
+    function generatePrompt() {
+      const question = document.getElementById('user-question').value.trim();
+      const outputArea = document.getElementById('prompt-output');
+      
+      if (!question) {
+        alert("Please write a topic or question in the box first!");
+        return;
+      }
+
+      const fullPrompt = `${systemContext}\n\nUser Question/Topic to answer:\n${question}`;
+      outputArea.textContent = fullPrompt;
+    }
+
+    function copyToClipboard() {
+      const outputText = document.getElementById('prompt-output').textContent;
+      if (outputText.startsWith("Select a template")) {
+        alert("Compile a prompt first!");
+        return;
+      }
+      navigator.clipboard.writeText(outputText)
+        .then(() => alert("Prompt copied to clipboard successfully! Paste it directly into ChatGPT/Gemini/Claude."))
+        .catch(err => alert("Failed to copy text: " + err));
+    }
+  </script>
+</body>
+</html>

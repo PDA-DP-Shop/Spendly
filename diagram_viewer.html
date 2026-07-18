@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendly Diagram Viewer (HD Exporter)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #f3f4f6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .diagram-card {
+      background-color: #121212;
+      border: 1px solid #262626;
+    }
+  </style>
+</head>
+<body class="p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+    <header class="mb-12 border-b border-zinc-800 pb-8">
+      <h1 class="text-4xl font-bold tracking-tight text-white mb-2">📊 Spendly System Design Diagrams</h1>
+      <p class="text-zinc-400 text-lg">Use these high-definition vector-scalable diagrams with standard system design symbols for your Semester 7 project documentation.</p>
+      <div class="mt-4 p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-zinc-300 flex flex-col gap-2">
+        <p>💡 <strong>HD Exporting instructions:</strong></p>
+        <ul class="list-disc list-inside text-zinc-400 flex flex-col gap-1">
+          <li><strong>Download PNG (HD)</strong>: Saves a clean, 3x scaled high-definition screenshot with a solid background, ready for Microsoft Word or presentation slide decks.</li>
+          <li><strong>Download SVG (Vector)</strong>: Saves a lossless vector file that scales infinitely without blurriness, ideal for professional print documents.</li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- DIAGRAM 1 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 1</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Work Breakdown Structure (WBS)</h2>
+          <p class="text-zinc-400 text-sm">Hierarchical decomposition of the project tasks and milestones.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-wbs', 'Spendly_WBS')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-wbs', 'Spendly_WBS')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-wbs" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid text-center">
+graph TD
+    Project["Spendly P2P Project"] --> P1["1. Analysis & Design"]
+    Project --> P2["2. Core App Dev"]
+    Project --> P3["3. P2P Sync Dev"]
+    Project --> P4["4. Deploy & SW Setup"]
+    Project --> P5["5. Quality Assurance"]
+
+    P1 --> P11["1.1 Design Tokens Setup"]
+    P1 --> P12["1.2 Database Schema"]
+    P1 --> P13["1.3 Security Flows"]
+
+    P2 --> P21["2.1 User Features"]
+    P2 --> P22["2.2 POS & Merchant Billing"]
+    P2 --> P23["2.3 Radar Offers Catalog"]
+
+    P3 --> P31["3.1 ntfy.sh WS Bridge"]
+    P3 --> P32["3.2 PeerJS WebRTC P2P"]
+    P3 --> P33["3.3 Same-device local sync"]
+
+    P4 --> P41["4.1 Cloudflare Deploy"]
+    P4 --> P42["4.2 SW Precaching Setup"]
+    P4 --> P43["4.3 Cloud KV backups"]
+
+    P5 --> P51["5.1 Network Stress Testing"]
+    P5 --> P52["5.2 WebAuthn Verification"]
+    P5 --> P53["5.3 Database Integrity checks"]
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 2 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 2</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Activity Diagram (Checkout & Billing)</h2>
+          <p class="text-zinc-400 text-sm">Flow diagram representing the cashier checkout matching, claim checking, and invoice transmission.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-activity', 'Spendly_Activity_Flow')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-activity', 'Spendly_Activity_Flow')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-activity" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph TD
+    Start([Start: Checkout Initiated]) --> Scan[Cashier Scans Item Barcode]
+    Scan --> Query[Query Radar via P2P PRODUCT_REQUEST]
+    Query --> CheckRadar{Item found in stock?}
+    CheckRadar -->|No| Warn[Alert Cashier: Product Not Registered]
+    CheckRadar -->|Yes| Fetch[Fetch product details & catalog price]
+    
+    Warn --> End([End Checkout])
+    
+    Fetch --> Calc[Calculate base price & apply GST / VAT]
+    Calc --> HasCoupon{Shopper has Radar offer coupon?}
+    
+    HasCoupon -->|Yes| Validate[Send claim code via P2P OFFER_VALIDATE_REQUEST]
+    Validate --> CheckValid{Coupon Code valid & unused?}
+    CheckValid -->|Yes| ApplyDiscount[Apply offer discount to invoice]
+    CheckValid -->|No| RejectCoupon[Show error: Coupon Rejected]
+    
+    ApplyDiscount --> Compile[Compile final invoice summary]
+    RejectCoupon --> Compile
+    HasCoupon -->|No| Compile
+    
+    Compile --> ReduceStock[Send P2P STOCK_REDUCE packet to Radar DB]
+    ReduceStock --> SaveSale[Save sales transaction locally in Shop IndexedDB]
+    
+    SaveSale --> SelectBeam{Select beam transport}
+    SelectBeam -->|WebRTC Direct| BeamRTC[Beam invoice JSON over paired WebRTC]
+    SelectBeam -->|Web NFC Tap| BeamNFC[Beam invoice JSON over NFC channel]
+    SelectBeam -->|Camera Scan| BeamQR[Generate Dynamic QR on screen for camera scan]
+    
+    BeamRTC --> SaveUser[User imports invoice into Wallet IndexedDB]
+    BeamNFC --> SaveUser
+    BeamQR --> SaveUser
+    
+    SaveUser --> OptIn{Is User opted-in to analytics?}
+    OptIn -->|Yes| PushTrends[POST anonymous category & amount to Radar shard]
+    OptIn -->|No| Done([Complete Purchase])
+    PushTrends --> Done
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 3 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 3</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Gantt Chart (Development Phase)</h2>
+          <p class="text-zinc-400 text-sm">Task durations and schedule mapping for the developer implementation window.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-gantt-dev', 'Spendly_Gantt_Dev')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-gantt-dev', 'Spendly_Gantt_Dev')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-gantt-dev" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+gantt
+    title Spendly Development Phase Schedule
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Planning
+    Req Gathering & UX Design       :active, p1_1, 2026-06-01, 14d
+    Dexie.js DB Architecture Layout : p1_2, after p1_1, 7d
+    section Phase 2: Core Frontend
+    User App Features Coding        : p2_1, 2026-06-15, 21d
+    Shop App POS Panel              : p2_2, 2026-06-22, 14d
+    Radar App Offer System          : p2_3, after p2_2, 10d
+    section Phase 3: Networking
+    ntfy.sh WebSocket Pairing       : p3_1, 2026-07-06, 10d
+    PeerJS WebRTC Sync Logic        : p3_2, after p3_1, 14d
+    LocalStorage Fallback Bridge    : p3_3, after p3_2, 5d
+    section Phase 4: Serverless
+    Cloudflare Worker Pairing API   : p4_1, 2026-07-20, 7d
+    Cloudflare KV Stock Backups     : p4_2, after p4_1, 5d
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 4 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 4</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Gantt Chart (Testing Phase)</h2>
+          <p class="text-zinc-400 text-sm">Schedule and validation phases of unit, integration, and security checks.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-gantt-test', 'Spendly_Gantt_Test')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-gantt-test', 'Spendly_Gantt_Test')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-gantt-test" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+gantt
+    title Spendly Quality Assurance & Testing Schedule
+    dateFormat  YYYY-MM-DD
+    section Code Quality
+    ESLint checks & static analysis  :active, t1_1, 2026-08-01, 7d
+    Unit testing (SMS / parsing)     : t1_2, after t1_1, 10d
+    section Integration Testing
+    LocalStorage local sync tests    : t2_1, 2026-08-10, 7d
+    Cross-device P2P connection tests: t2_2, after t2_1, 14d
+    WebAuthn Enclave device validation: t2_3, after t2_2, 7d
+    section Deployment & UAT
+    Service Worker caching test      : t3_1, 2026-08-25, 7d
+    PWA offline simulation tests     : t3_2, after t3_1, 7d
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 5 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 5</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Class Diagram</h2>
+          <p class="text-zinc-400 text-sm">System functions and services representing their OOP execution structures.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-class', 'Spendly_Class_Diagram')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-class', 'Spendly_Class_Diagram')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-class" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+classDiagram
+    class DatabaseService {
+        +Dexie db
+        +addExpense(expense)
+        +updateStock(barcode, quantity)
+        +saveOffer(offer)
+        +getRadarOffers()
+        +logAreaIntelligence(packet)
+    }
+
+    class PeerService {
+        +String myPeerId
+        +Object connections
+        +initPeer(appRole, customId)
+        +connectToPeer(targetPeerId)
+        +sendMessage(targetPeerId, type, data)
+        +smartSend(type, data, waitForResponse, responseType)
+        +respond(toPeerId, type, data)
+    }
+
+    class StockSyncService {
+        +syncProductToShop(product)
+        +startStockListener()
+        +syncProductToWorker(product)
+    }
+
+    class DataSharingService {
+        +pushAnonymousData(expense)
+        +fetchNearbyOffers()
+        +trackOfferInteraction(offerId, action)
+    }
+
+    class BiometricAuth {
+        +registerCredential()
+        +verifyCredential()
+        +isWebAuthnSupported()
+    }
+
+    class SMSParser {
+        +parseSMS(text)
+    }
+
+    DatabaseService <--> StockSyncService
+    PeerService <--> StockSyncService
+    PeerService <--> DataSharingService
+    DatabaseService <--> DataSharingService
+    BiometricAuth --> DatabaseService
+    SMSParser --> DatabaseService
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 6 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 6</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Use Case Diagram</h2>
+          <p class="text-zinc-400 text-sm">System capabilities and options mapped to distinct Shopper, Retailer, and Hub Actors.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-usecase', 'Spendly_Use_Case')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-usecase', 'Spendly_Use_Case')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-usecase" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph LR
+    subgraph Actors
+        Shopper["Shopper (User App)"]
+        Retailer["Retailer (Shop App)"]
+        Hub["Hub Node (Radar App)"]
+    end
+
+    subgraph Use Cases
+        UC1["Track Personal Expenses"]
+        UC2["Count Denominations"]
+        UC3["Biometric Login Unlock"]
+        UC4["Create Invoices & Taxes"]
+        UC5["Beam Bills (NFC/QR)"]
+        UC6["Claim Discount Coupons"]
+        UC7["Synchronize Inventory Stock"]
+        UC8["View Local Market Trends"]
+    end
+
+    Shopper --> UC1
+    Shopper --> UC2
+    Shopper --> UC3
+    Shopper --> UC6
+
+    Retailer --> UC4
+    Retailer --> UC5
+    Retailer --> UC3
+    Retailer --> UC7
+
+    Hub --> UC7
+    Hub --> UC8
+
+    UC5 <.->|P2P Sync| UC1
+    UC6 <.->|Validation| UC4
+    UC7 <.->|Direct P2P Link| UC4
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 7 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 7</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Sequence Diagram</h2>
+          <p class="text-zinc-400 text-sm">Chronological workflow of checkout, claim check, and data streaming.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-sequence', 'Spendly_Sequence_Flow')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-sequence', 'Spendly_Sequence_Flow')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-sequence" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Shopper as Spendly User
+    actor Retailer as Spendly Shop
+    actor Hub as Spendly Radar
+    participant Ntfy as WebSocket Bridge
+
+    Note over Shopper, Hub: All devices paired via WebRTC/ntfy.sh
+    
+    Shopper->>Hub: Query local offers (OFFERS_QUERY)
+    Hub-->>Shopper: Return active discounts (OFFERS_RESPONSE)
+    Shopper->>Shopper: Tap "Claim Coupon" -> save claim code
+    
+    Retailer->>Retailer: Scan product barcode "890103"
+    Retailer->>Hub: Query product details (PRODUCT_REQUEST)
+    Hub-->>Retailer: Return stock info (PRODUCT_RESPONSE)
+    
+    Retailer->>Retailer: Apply product to invoice
+    Shopper->>Retailer: Show claim QR code
+    Retailer->>Hub: Check validity (OFFER_VALIDATE_REQUEST)
+    Hub->>Hub: Check claim ledger DB
+    Hub-->>Retailer: Code approved (OFFER_VALIDATE_RESPONSE)
+    
+    Retailer->>Retailer: Deduct discount and compile final bill
+    Retailer->>Hub: Subtract inventory item count (STOCK_REDUCE)
+    Hub->>Hub: Update stock count in IndexedDB
+    
+    Retailer->>Shopper: Beam invoice payload (Web NFC Tap / WebRTC)
+    Shopper->>Shopper: Save invoice to expenses DB
+    
+    opt Privacy Analytics Opt-in
+        Shopper->>Ntfy: Send category & amount (Mumbai/Powai topic)
+        Ntfy-->>Hub: Relay packet anonymously to Radar
+        Hub->>Hub: Log to areaIntelligence DB for charts
+    end
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 8 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 8</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Entity Relationship Diagram (ERD)</h2>
+          <p class="text-zinc-400 text-sm">IndexedDB tables showing entity schemas, fields, and logical keys.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-erd', 'Spendly_ERD')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-erd', 'Spendly_ERD')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-erd" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+erDiagram
+    EXPENSES {
+        int id PK
+        string category
+        double amount
+        date date
+        string shopName
+        boolean isSoftDeleted
+    }
+    WALLETS {
+        int id PK
+        string name
+        string type
+        double balance
+    }
+    EMI_ALERTS {
+        int id PK
+        string title
+        double amount
+        date dueDate
+        boolean isPaid
+    }
+    SHAGUN_REGISTRY {
+        int id PK
+        string personName
+        string eventName
+        double amount
+        string type
+    }
+    INVENTORY {
+        int id PK
+        string barcode
+        string name
+        double price
+        int quantity
+        string unit
+    }
+    SALES {
+        int id PK
+        string billNumber
+        double totalAmount
+        double discount
+        double tax
+        timestamp timestamp
+    }
+    RADAR_OFFERS {
+        int id PK
+        string title
+        double discountPercent
+        date expiresAt
+        string category
+    }
+    AREA_INTELLIGENCE {
+        int id PK
+        string category
+        double amount
+        string city
+        string area
+        timestamp timestamp
+    }
+
+    EXPENSES ||--o| WALLETS : debited_from
+    SALES ||--o| INVENTORY : contains
+    RADAR_OFFERS ||--o| INVENTORY : triggers_discount
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 9 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 9</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Data Flow Diagram: Level 0 (Context Diagram)</h2>
+          <p class="text-zinc-400 text-sm font-semibold">Uses standard DFD shapes: circular bubble for process [0.0], cards for entities.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-dfd0', 'Spendly_DFD_L0')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-dfd0', 'Spendly_DFD_L0')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-dfd0" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph TD
+    Shopper["[Shopper Entity]"]
+    Retailer["[Retailer Entity]"]
+    Worker["[Cloudflare Worker backup API]"]
+    
+    System(("0.0 Spendly P2P Ecosystem"))
+    
+    Shopper -->|1. Anonymous trends / Claim queries| System
+    System -->|2. Invoices / Claimed Discounts| Shopper
+    
+    Retailer -->|3. Barcode searches / Stock changes| System
+    System -->|4. Catalog descriptions / claim validity| Retailer
+    
+    System -->|5. Pairing codes / Encrypted inventory| Worker
+    Worker -->|6. Verified connections| System
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 10 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 10</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Data Flow Diagram: Level 1 (System Processes)</h2>
+          <p class="text-zinc-400 text-sm font-semibold">Uses standard DFD shapes: circular bubbles for processes [1.0 - 4.0], open rectangles for databases.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-dfd1', 'Spendly_DFD_L1')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-dfd1', 'Spendly_DFD_L1')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-dfd1" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph TD
+    User["[Shopper Device Client]"]
+    Shop["[Retailer Device Client]"]
+    Worker["[Cloudflare KV Backups]"]
+
+    P1(("1.0 Expense tracking"))
+    P2(("2.0 POS Invoicing"))
+    P3(("3.0 Inventory & Offers"))
+    P4(("4.0 WebRTC Bridge"))
+
+    D1[("IndexedDB: User Stores")]
+    D2[("IndexedDB: Shop Stores")]
+    D3[("IndexedDB: Radar Stores")]
+
+    User -->|Transaction logs / SMS text| P1
+    P1 -->|Write data| D1
+    D1 -->|Load chart layouts| P1
+    P1 -->|Send category & sum| P4
+
+    Shop -->|Compile invoice details| P2
+    P2 -->|Log billing records| D2
+    P2 -->|Beam invoice payload| User
+
+    P3 -->|Write stock updates| D3
+    D3 -->|Fuzzy match stock lists| P3
+
+    P4 -->|Exchange pairing handshakes| Worker
+    P2 <-->|STOCK_REDUCE / PRODUCT_REQUEST| P4
+    P3 <-->|STOCK_UPDATE / OFFER_VALIDATE| P4
+    P4 -->|Push anonymous trends| P3
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 11 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 11</span>
+          <h2 class="text-2xl font-bold text-white mt-2">Data Flow Diagram: Level 2 (Invoicing Subsystem)</h2>
+          <p class="text-zinc-400 text-sm font-semibold">Exposes processes [2.1 - 2.5] (represented as bubbles), relational stores, and actors.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-dfd2', 'Spendly_DFD_L2')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-dfd2', 'Spendly_DFD_L2')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-dfd2" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph TD
+    Retailer["[Retailer Cashier]"]
+    UserDevice["[User Wallet database]"]
+
+    P21(("2.1 Scan Handler"))
+    P22(("2.2 Store Catalog Resolver"))
+    P23(("2.3 Coupon Check"))
+    P24(("2.4 Invoice Compiler"))
+    P25(("2.5 Beam Transmitter"))
+
+    D2[("IndexedDB: Shop Sales")]
+    D3[("IndexedDB: Radar Stock")]
+    D3Offers[("IndexedDB: Radar Claims")]
+    P2PChannel[("PeerJS P2P Connection")]
+
+    Retailer -->|Barcode scan scan input| P21
+    P21 -->|Lookup query| P2PChannel
+    P2PChannel -->|Read stock count| D3
+    D3 -->|Return description & price| P2PChannel
+    P2PChannel -->|Parse info| P22
+    
+    P22 -->|Add item to basket list| P24
+    Retailer -->|Provide Coupon Code| P23
+    P23 -->|Verify P2P query| P2PChannel
+    P2PChannel -->|Validate claim code status| D3Offers
+    D3Offers -->|Respond coupon valid status| P2PChannel
+    P2PChannel -->|Apply discount values| P24
+    
+    P24 -->|Deduct sales count| P2PChannel
+    P2PChannel -->|Reduce count in Radar DB| D3
+    P24 -->|Write sales record| D2
+    
+    P24 -->|Generate dynamic invoice object| P25
+    P25 -->|Beam JSON payload| UserDevice
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 12 -->
+    <section class="diagram-card rounded-lg p-6 mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-zinc-800 pb-4">
+        <div>
+          <span class="px-2.5 py-1 text-xs font-semibold bg-zinc-800 text-zinc-300 rounded">Diagram 12</span>
+          <h2 class="text-2xl font-bold text-white mt-2">System Architecture Diagram</h2>
+          <p class="text-zinc-400 text-sm">Detailed layout mapping hardware enclave layers, local databases, and public relays.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="downloadPNG('container-arch', 'Spendly_Architecture')" class="px-3.5 py-1.5 bg-zinc-800 text-white hover:bg-zinc-700 font-semibold text-xs rounded transition">
+            💾 Download PNG (HD)
+          </button>
+          <button onclick="downloadSVG('container-arch', 'Spendly_Architecture')" class="px-3.5 py-1.5 bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 font-semibold text-xs rounded transition">
+            📐 Download SVG
+          </button>
+        </div>
+      </div>
+      <div class="p-6 bg-zinc-950 rounded-lg border border-zinc-900 overflow-x-auto flex justify-start">
+        <div id="container-arch" class="min-w-[950px] w-full flex justify-center py-2">
+          <pre class="mermaid">
+graph TD
+    subgraph Client Device Layer
+        subgraph Spendly User Client
+            UI1["User Interface (Monochrome Flat)"]
+            Service1["Service Worker (Cache-first offline)"]
+            Dexie1[("IndexedDB: Local Storage")]
+            WebAuthn1["WebAuthn Lock Enclave"]
+        end
+
+        subgraph Spendly Shop Client
+            UI2["POS Billing UI (30s invoice)"]
+            Service2["Service Worker (Cache-first offline)"]
+            Dexie2[("IndexedDB: POS Storage")]
+            WebAuthn2["WebAuthn Vault Locker"]
+            NFC["Web NFC API (Tap-to-Beam)"]
+        end
+
+        subgraph Spendly Radar Client
+            UI3["Radar Hub Dashboard"]
+            Service3["Service Worker (Cache-first offline)"]
+            Dexie3[("IndexedDB: Stock & Offers")]
+        end
+    end
+
+    subgraph Public Infrastructure Layer
+        NtfyWS["ntfy.sh WebSocket broker"]
+        CFWorker["Cloudflare Worker (Verification API)"]
+        CFKV[("Cloudflare KV Backup Store")]
+    end
+
+    UI1 <--> Dexie1
+    Service1 <--> Dexie1
+    WebAuthn1 --> UI1
+    
+    UI2 <--> Dexie2
+    Service2 <--> Dexie2
+    WebAuthn2 --> UI2
+    UI2 <--> NFC
+
+    UI3 <--> Dexie3
+    Service3 <--> Dexie3
+
+    Dexie1 <-->|P2P WebRTC / Local Bridge| Dexie2
+    Dexie2 <-->|P2P WebRTC / Local Bridge| Dexie3
+    Dexie1 <-->|P2P WebRTC| Dexie3
+
+    Dexie1 <-->|SDP signaling exchange| NtfyWS
+    Dexie2 <-->|SDP signaling exchange| NtfyWS
+    Dexie3 <-->|SDP signaling exchange| NtfyWS
+
+    Dexie2 <-->|Lightweight pairing keys| CFWorker
+    Dexie3 <-->|Lightweight pairing keys| CFWorker
+    CFWorker <--> CFKV
+    Dexie3 -->|Encrypted backup push| CFWorker
+          </pre>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Load Mermaid JS from CDN to compile/render diagrams dynamically -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose',
+      gantt: {
+        useWidth: 1000
+      }
+    });
+  </script>
+
+  <!-- Client-side Exporter Engine (SVG to PNG/SVG Exporters) -->
+  <script>
+    // 📐 SVG EXPORTER
+    function downloadSVG(containerId, fileName) {
+      const container = document.getElementById(containerId);
+      const svgElement = container.querySelector('svg');
+      if (!svgElement) {
+        alert("Wait a second, diagram is still rendering! Try again in a moment.");
+        return;
+      }
+      
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svgElement);
+      
+      // Add standard namespaces
+      if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      if(!source.match(/^<svg[^>]+viewBox/)){
+        const width = svgElement.getAttribute('width') || svgElement.getBoundingClientRect().width;
+        const height = svgElement.getAttribute('height') || svgElement.getBoundingClientRect().height;
+        source = source.replace(/^<svg/, `<svg viewBox="0 0 ${width} ${height}"`);
+      }
+      
+      const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${fileName}.svg`;
+      link.click();
+    }
+
+    // 💾 PNG EXPORTER (3x Scale for ultra-crisp resolution)
+    function downloadPNG(containerId, fileName) {
+      const container = document.getElementById(containerId);
+      const svgElement = container.querySelector('svg');
+      if (!svgElement) {
+        alert("Wait a second, diagram is still rendering! Try again in a moment.");
+        return;
+      }
+
+      const svgString = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const URL = window.URL || window.webkitURL || window;
+      const blobURL = URL.createObjectURL(svgBlob);
+      
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const bbox = svgElement.getBoundingClientRect();
+        
+        // 3x Scale for ultra-crisp resolution
+        const scale = 3;
+        canvas.width = bbox.width * scale;
+        canvas.height = bbox.height * scale;
+        
+        const context = canvas.getContext('2d');
+        // Fill clean background matching card styling
+        context.fillStyle = '#0f0f11';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        context.scale(scale, scale);
+        context.drawImage(image, 0, 0, bbox.width, bbox.height);
+        
+        const pngURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngURL;
+        link.download = `${fileName}.png`;
+        link.click();
+        
+        URL.revokeObjectURL(blobURL);
+      };
+      image.src = blobURL;
+    }
+  </script>
+</body>
+</html>
