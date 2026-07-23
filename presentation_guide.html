@@ -145,6 +145,95 @@ Slide 10: Project Outcomes
       </div>
     </section>
 
+    <!-- Option B: Premium Prompt Deck -->
+    <section class="mb-12 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+        <span>🎨</span> Option B: Premium Layout Prompt (Animated Grayscale Icons & Mockups)
+      </h2>
+      <p class="text-zinc-400 text-xs mb-6">Use this prompt if you want Gamma to generate unique slides featuring vector animation icons, clean iPhone frames, and structured left-to-right explanation blocks.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Field 1: Write For -->
+        <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">1. Write For...</span>
+            <button onclick="copyText('gamma-write-for-b')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+          </div>
+          <textarea id="gamma-write-for-b" readonly class="w-full h-12 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Academic presentation for computer science evaluators. Focus on clean diagram architectures and premium UI flows.</textarea>
+        </div>
+
+        <!-- Field 2: Tone -->
+        <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">2. Tone</span>
+            <button onclick="copyText('gamma-tone-b')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+          </div>
+          <textarea id="gamma-tone-b" readonly class="w-full h-12 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Futuristic, clean, highly technical, minimal dark theme.</textarea>
+        </div>
+      </div>
+
+      <!-- Field 3: Additional Instructions -->
+      <div class="bg-zinc-950 p-4 rounded border border-zinc-800 mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">3. Additional Instructions</span>
+          <button onclick="copyText('gamma-instructions-b')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+        </div>
+        <textarea id="gamma-instructions-b" readonly class="w-full h-24 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Enforce a premium dark mode layout. Background must be flat pitch black (#0b0b0b) with container elements in charcoal gray (#121212). All icons must be clean, animated-style grayscale line vectors (no colored clip art). Each slide must display an iPhone device frame showing the application UI screen mockup on the left, with simple explanatory bullet points on the right. Avoid stock photography.</textarea>
+      </div>
+
+      <!-- Field 4: Outline Content -->
+      <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">4. Content Prompt Outline</span>
+          <button onclick="copyText('gamma-outline-b')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+        </div>
+        <textarea id="gamma-outline-b" readonly class="w-full h-80 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Create a premium, unique 10-slide deck for our P2P project "Spendly". Focus on highly visual layouts with animated icon templates.
+
+Slide Outline & Visual Mockups:
+
+Slide 1: Title Screen
+- Text: Spendly - Zero-Knowledge, Offline-First P2P Billing Ecosystem
+- Presenters: Patel Devansh, Udit, Meet, and Rudra (B.Tech in Information Technology)
+- Design: Clean central vector showing an iPhone displaying a wireless sync logo.
+
+Slide 2: Privacy Threats in Finance
+- Text: Current fintech applications scan personal banking SMS and store user data on central servers, creating leakage risks.
+- Design: A side-by-side comparison. Left shows a standard cloud database under attack, right shows our sandboxed architecture.
+
+Slide 3: Sandboxed IndexedDB Concept
+- Text: Spendly stores all invoices, wallets, and cash counts inside browser-level sandboxed IndexedDB storage.
+- Design: Grayscale icon showing local database partitions inside an iPhone browser frame.
+
+Slide 4: Spendly App (Personal Wallet)
+- Text: Biometric WebAuthn lock screen, cash note counts (₹500, ₹200 multiplier calculation), and Air Share sync pipeline.
+- Design: Visual mockup of an iPhone screen scanning a fingerprint, displaying note bundles.
+
+Slide 5: Spendly Shop POS
+- Text: Cashier register app featuring product scans, dynamic CGST/SGST breakdowns, WhatsApp Web bill relays, and receipt prints.
+- Design: Visual mockup of an iPhone POS app screen printing a receipt roll.
+
+Slide 6: Spendly Radar App
+- Text: Central stock database catalog, campaign discount schedulers, and sales analytics charts.
+- Design: Visual mockup of an iPhone showing stock inventory quantities and Recharts curves.
+
+Slide 7: Direct Peer-to-Peer Synchronization
+- Text: Direct WebRTC connection tunnels brokered by WebSocket signals on ntfy.sh. Zero server database overhead.
+- Design: Technical layout mapping connection packets streaming between three iPhone mockups.
+
+Slide 8: Air Share Pipeline Options
+- Text: Offline invoice transfer options: WebRTC DataChannels, screen QR scans, or WhatsApp chat link generators.
+- Design: Dynamic icon flowchart depicting invoice data moving directly from Shop POS screen to Shopper Wallet.
+
+Slide 9: Local Area Analytics
+- Text: Devices compute geocodes locally (Powai, Mumbai) and send anonymous totals to display charts on Radar.
+- Design: Map mockup displaying transaction density markers with names stripped.
+
+Slide 10: Summary & Advantages
+- Text: Complete offline availability, $0 hosting cost, zero database leak risk, and biometric chip-level local encryption.
+- Design: Checklist of advantages with animated-style checkmark vectors.</textarea>
+      </div>
+    </section>
+
     <!-- Presentation Script Section -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
