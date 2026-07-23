@@ -20,6 +20,14 @@
       background-color: #18181b;
       border-left: 4px solid #3b82f6;
     }
+    .copy-btn {
+      background-color: #27272a;
+      color: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .copy-btn:hover {
+      background-color: #3f3f46;
+    }
   </style>
 </head>
 <body class="p-4 md:p-8">
@@ -50,30 +58,60 @@
 
     <!-- Gamma AI Prompter Section -->
     <section class="mb-12 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-        <div>
-          <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>✨</span> Gamma.app AI Presentation Prompter
-          </h2>
-          <p class="text-zinc-400 text-xs mt-1">Copy this prompt and paste it into Gamma.app to generate your 10-slide presentation deck automatically.</p>
+      <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+        <span>✨</span> Gamma.app AI Presentation Controls
+      </h2>
+      <p class="text-zinc-400 text-xs mb-6">Copy these exact values and paste them into the respective settings blocks inside Gamma.app to generate your slides.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Field 1: Write For -->
+        <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">1. Write For...</span>
+            <button onclick="copyText('gamma-write-for')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+          </div>
+          <textarea id="gamma-write-for" readonly class="w-full h-12 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Academic evaluators in Information Technology. Keep descriptions simple, direct, and easy to read.</textarea>
         </div>
-        <button onclick="copyGammaPrompt()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded transition flex-shrink-0">
-          📋 Copy Gamma Prompt
-        </button>
+
+        <!-- Field 2: Tone -->
+        <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">2. Tone</span>
+            <button onclick="copyText('gamma-tone')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+          </div>
+          <textarea id="gamma-tone" readonly class="w-full h-12 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Professional, modern, clear, dark minimalist theme.</textarea>
+        </div>
       </div>
-      <textarea id="gamma-prompt-text" readonly class="w-full h-44 p-3 bg-zinc-950 text-zinc-400 font-mono text-xs rounded border border-zinc-800 focus:outline-none resize-none">Create a highly professional, visually stunning 10-slide presentation deck for an Information Technology academic project called "Spendly". Use a dark, premium, modern theme (like neon blue, charcoal gray, and purple tones).
+
+      <!-- Field 3: Additional Instructions -->
+      <div class="bg-zinc-950 p-4 rounded border border-zinc-800 mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">3. Additional Instructions</span>
+          <button onclick="copyText('gamma-instructions')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+        </div>
+        <textarea id="gamma-instructions" readonly class="w-full h-16 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Enforce a strict premium dark monochrome aesthetic. Background color must be deep pitch black (#0b0b0b) with container cards in clean dark gray (#121212). Use stark white (#ffffff) for all main headers and light gray (#e4e4e7) for body text. Typography must be a clean, modern sans-serif font (like Inter or system-ui).</textarea>
+      </div>
+
+      <!-- Field 4: Outline Content -->
+      <div class="bg-zinc-950 p-4 rounded border border-zinc-800">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">4. Content Prompt Outline</span>
+          <button onclick="copyText('gamma-outline')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
+        </div>
+        <textarea id="gamma-outline" readonly class="w-full h-64 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Create a highly professional, visually stunning 10-slide presentation deck for an Information Technology academic project called "Spendly". Use simple and direct language.
 
 Slide Outline:
 Slide 1: Title Slide (Spendly - Zero-Knowledge, Offline-First P2P Billing Ecosystem. Developed by Patel Devansh, Udit, Meet, and Rudra. B.Tech in Information Technology).
-Slide 2: The Core Problem (Explain how modern finance apps scan user SMS notifications, track purchase histories, and upload sensitive consumer data to central cloud databases, causing massive privacy leaks).
+Slide 2: The Core Problem (Explain how modern finance apps scan user notifications and upload sensitive consumer data to central cloud databases, causing massive privacy leaks).
 Slide 3: Our Solution & Concept (Introduce Spendly's serverless architecture. All customer files, cash wallets, and merchant catalogs are stored inside sandboxed client-side IndexedDB databases, ensuring $0 hosting costs and 100% data ownership).
-Slide 4: Spendly User App - Shopper Wallet (Detail fingerprint biometric logins via WebAuthn API, physical note-counting cash multipliers, local regex-based SMS transaction parsers, and the Shagun registry for wedding gift money tracking).
-Slide 5: Spendly Shop App - POS Register (Detail merchant cash register features, camera-based barcode scanning, real-time pricing queries, tax CGST/SGST splitting calculations, and store credit ledger logs).
+Slide 4: Spendly User App - Shopper Wallet (Detail fingerprint biometric logins via WebAuthn API, physical note-counting cash multipliers, and receiving bills offline via Air Share. Note: No NFC or Shagun registry used).
+Slide 5: Spendly Shop App - POS Register (Detail merchant cash register features, camera-based barcode scanning, real-time pricing queries, tax CGST/SGST splitting calculations, printing physical D-Mart style bills, and entering customer name and mobile to share bills via WhatsApp Web links).
 Slide 6: Spendly Radar App - Analytical Market Hub (Detail central stock directory management databases, discount campaign engines, claim codes PIN validation flow, and sales charts).
 Slide 7: Direct Peer-to-Peer Synchronization (Explain how the three apps sync over direct WebRTC DataChannels using public ntfy.sh WebSocket signaling topics to broker connections without backend server overhead).
-Slide 8: The Billing Beam Fallback Pipeline (Demonstrate invoice sharing methods: physical Web NFC beams on device taps, direct WebRTC encrypted channels, or dynamic QR code screen scans).
+Slide 8: The Air Share Billing Pipeline (Demonstrate invoice sharing methods: physical Web NFC beams on device taps, direct WebRTC encrypted channels, or dynamic QR code screen scans).
 Slide 9: Privacy-Preserving Area Analytics (Explain how customer devices coordinate geocodes locally (e.g. Powai, Mumbai) and send anonymous totals to display charts using Recharts on Radar).
 Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete offline capability, zero cloud database risk, and user biometric security).</textarea>
+      </div>
     </section>
 
     <!-- Presentation Script Section -->
@@ -87,23 +125,21 @@ Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete
         <div class="panel-card rounded-xl p-6">
           <div class="flex items-center gap-2 text-blue-400 font-bold mb-3">
             <span class="text-lg">👑</span>
-            <span>PHONE 1: CUSTOMER APP (Devansh starts)</span>
+            <span>PHONE 1: CUSTOMER WALLET APP (Devansh starts)</span>
           </div>
           <div class="script-bubble p-4 rounded-r-lg font-mono text-xs leading-relaxed text-zinc-300">
             <p class="font-bold text-blue-400 mb-2">[Live Action: Devansh welcomes Mam and shows his phone screen running Spendly User app]</p>
             "Good morning Mam. Today we will show you our project Spendly running live on three mobile phones. 
             <br><br>
-            I am holding **Phone 1** with the **Spendly User** consumer app. Udit has **Phone 2** with the **Spendly Shop** POS register app. And Meet has **Phone 3** with the **Spendly Radar** store manager app.
+            I am holding **Phone 1** with the **Spendly User** app. Udit has **Phone 2** with the **Spendly Shop** app. And Meet has **Phone 3** with the **Spendly Radar** app.
             <br><br>
-            All these three phones talk to each other directly, peer-to-peer, without using any central server!
+            All these three phones talk to each other directly, peer-to-peer, without using any central server! This protects user privacy and saves monthly hosting costs.
             <br><br>
             First, look at my phone. The app is locked. When I click **Unlock**, it triggers my phone's fingerprint sensor using the **WebAuthn API**. I touch the sensor, and my local database unlocks.
             <br><br>
             Now, look at my **Cash note counter**. I can input the exact count of physical notes—like ₹500 or ₹200 notes—and the wallet adds them up instantly.
             <br><br>
-            I also have an **SMS Parser**. If I copy a transaction SMS from my bank and click **Auto Parse**, our local regex extracts the merchant name and amount, logging the expense without needing background SMS reading permissions.
-            <br><br>
-            Lastly, we have a **Shagun tab** to track gift money sent or received during relatives' weddings. 
+            To receive bills, I use **Air Share**. When Udit completes a transaction on Phone 2, he can beam the bill data to my phone over our local peer-to-peer connection. It imports directly into my local IndexedDB database.
             <br><br>
             Now, Udit will show you how Phone 2 scans products."
           </div>
@@ -123,7 +159,11 @@ Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete
             <br><br>
             The register immediately queries Meet's phone over WebRTC, fetches the product details, adds CGST/SGST tax divisions, and compiles the bill.
             <br><br>
-            Now, to send this bill to Devansh, I will click **Beam Bill**. It displays a dynamic QR code on my screen. Devansh scans it with his phone, and the bill imports instantly. We can also tap our phones together to beam it via Web NFC.
+            Now, to send this bill to Devansh, I can use **Air Share**. But we also have two other ways:
+            <br><br>
+            First, I can enter the customer's name and mobile number. The app formats the invoice and lets me share it directly to their WhatsApp.
+            <br><br>
+            Second, we can print it out on paper. Just like you get a printed receipt at D-Mart, our app connects to a thermal receipt printer and spits out a physical paper bill.
             <br><br>
             Meet will now explain the store manager dashboard."
           </div>
@@ -197,14 +237,14 @@ Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete
 
         <!-- Question 4 -->
         <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
-          <h4 class="text-white font-bold text-sm mb-1">Q4. How does the SMS Parser work?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">The user copies a transaction SMS and pastes it into the app. We use on-device **Regular Expressions (Regex)** to extract merchant name and amount locally without calling any external servers.</p>
+          <h4 class="text-white font-bold text-sm mb-1">Q4. How does the WhatsApp billing share function work?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">When Udit enters the customer's name and mobile number, the register formats the invoice details and opens a custom link redirecting to the WhatsApp API to send the text message directly.</p>
         </div>
 
         <!-- Question 5 -->
         <div class="p-4 bg-zinc-900 border border-zinc-850 rounded-lg">
-          <h4 class="text-white font-bold text-sm mb-1">Q5. How do you share bills between Udit's and Devansh's phone?</h4>
-          <p class="text-zinc-500 text-xs leading-relaxed">We display a dynamic QR code on Udit's register screen. Devansh scans it with his phone's camera, or we tap them together to beam the bill data using Web NFC.</p>
+          <h4 class="text-white font-bold text-sm mb-1">Q5. How do you print bills like D-Mart?</h4>
+          <p class="text-zinc-500 text-xs leading-relaxed">The Shop POS app formats receipt sizes using print stylesheets (`@media print`) and connects to thermal printers via Web USB or standard device printer dialogues.</p>
         </div>
 
         <!-- Question 6 -->
@@ -315,13 +355,15 @@ Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete
     <footer class="mt-16 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
       <p>© 2026-2027 Spendly Project | Information Technology Dept</p>
     </footer>
+  </div>
+
   <script>
-    function copyGammaPrompt() {
-      const promptText = document.getElementById("gamma-prompt-text");
-      promptText.select();
-      promptText.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(promptText.value);
-      alert("Gamma AI Presentation Prompt copied to clipboard!");
+    function copyText(elementId) {
+      const copyText = document.getElementById(elementId);
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyText.value);
+      alert("Copied to clipboard!");
     }
   </script>
 </body>

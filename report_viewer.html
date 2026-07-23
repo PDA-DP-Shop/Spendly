@@ -331,23 +331,17 @@ sequenceDiagram
 ```
 
 ### 3.4 Transferring Invoices (The Billing Beam)
-To transfer invoices from the store register to the shopper's wallet, Spendly uses three fallback methods:
+To transfer invoices from the store register to the shopper's wallet, Spendly uses three fallback P2P methods:
 
 ```mermaid
 graph TD
-    Start[Checkout Complete] --> CheckNFC{Device supports NFC?}
-    
-    CheckNFC -->|Yes| NFC[1. Web NFC Beam]
-    NFC --> Tap[User taps phone to merchant screen]
-    Tap --> Sync1[Data sent directly over browser Web NFC channel]
-    
-    CheckNFC -->|No| CheckP2P{Is User paired with Shop?}
-    
-    CheckP2P -->|Yes| WebRTC[2. Direct WebRTC Message]
-    WebRTC --> Sync2[Send invoice encrypted with AES-256-GCM]
-    
-    CheckP2P -->|No| Fallback[3. Dynamic QR Code / 6-digit Bill Code]
-    Fallback --> Sync3[User scans screen QR or types bill code]
+    Start[Checkout Complete] --> Options{Invoice Sharing Options}
+    Options -->|Air Share| WebRTC[1. Air Share P2P]
+    WebRTC --> Sync1[Send encrypted JSON over WebRTC connection]
+    Options -->|WhatsApp link| WA[2. WhatsApp Share]
+    WA --> Sync2[Send invoice details to customer WhatsApp link]
+    Options -->|Thermal Printer| Print[3. D-Mart style Print]
+    Print --> Sync3[Print paper bill using thermal printer styles]
 ```
 
 ### 3.5 Privacy-Preserving Analytics (Area Intelligence)
@@ -391,20 +385,11 @@ export const sendLocalMessage = (type, data) => {
 ### 4.2 India-Centric Cash Wallet
 Unlike standard digital expense managers, Spendly supports physical cash management by tracking individual note denominations. Users can view and adjust counts for ₹500, ₹200, ₹100, and ₹50 notes, with the wallet updating overall balances automatically.
 
-### 4.3 On-Device SMS Alert Parser
-Instead of requesting backend SMS permissions, Spendly parses transaction alerts copied to the clipboard. The regex-based parser extracts transaction details locally:
-```javascript
-const smsText = "Amt debited: Rs.1,500.00 at STAR BAZAR using card xx4321.";
-const parseSMS = (text) => {
-  const amt = text.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d.2)?)/i)?.[1];
-  const isDebit = /(debited|spent|withdrawn)/i.test(text);
-  const merchant = text.match(/(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i)?.[1];
-  return { amount: amt, isDebit, merchant };
-};
-```
+### 4.3 D-Mart Style Thermal Receipt Printing
+The Shop POS register includes printer stylesheets (`@media print`) and layout templates. This allows merchants to hook up physical thermal receipt printers and print formatted paper bills for customers.
 
-### 4.4 Shagun Gifts Tracker
-A unique feature designed to track traditional Indian cash gifts given during weddings and festivals. It helps families maintain records of who gifted what amount, keeping track of social reciprocity balances.
+### 4.4 WhatsApp Web Invoice Share Link
+If the merchant enters the customer's name and mobile number during checkout, the register app formats the receipt details and builds a direct redirect link using the WhatsApp text api (`https://wa.me/91[mobile]?text=[formatted_bill]`). This allows sharing invoices over chat with zero server dependencies.
 
 ---
 
@@ -416,7 +401,6 @@ Spendly structures its local database schemas inside client-side IndexedDB files
 *   **`expenses`**: `++id, category, amount, date, shopName, isSoftDeleted`
 *   **`wallets`**: `++id, name, type, balance`
 *   **`emiAlerts`**: `++id, title, amount, dueDate, isPaid`
-*   **`shagunRegistry`**: `++id, personName, eventName, amount, type` (Given / Received)
 
 ### 5.2 Spendly Shop Database
 *   **`sales`**: `++id, billNumber, totalAmount, discount, tax, timestamp`

@@ -85,15 +85,9 @@ The Spendly User application serves as the consumer interface for expense tracki
   * db.expenses: Schema structure is "++id, category, amount, date, shopName, isSoftDeleted". This table indexes every transaction. The isSoftDeleted flag enables temporary trash storage, allowing users to restore mistakenly deleted items without server backups.
   * db.wallets: Schema structure is "++id, name, type, balance". The type field supports digital, card, and physical cash wallets.
   * db.emiAlerts: Schema structure is "++id, title, amount, dueDate, isPaid", used for tracking and scheduling monthly payments.
-  * db.shagunRegistry: Schema structure is "++id, personName, eventName, amount, type", logging given/received traditional gift values.
 - Cash Wallet Logic: Tracks physical currency notes manually. Users enter individual counts of ₹500, ₹200, ₹100, and ₹50 notes in the cash note counter. The app computes total balance in memory using a simple multipliers algorithm: Balance = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
-- Clipboard SMS Parser: Parses bank transaction messages without requesting OS background SMS reading permissions. When the user copies an SMS to the clipboard, a local regex processor parses the text in memory:
-  * Amount Extract: /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
-  * Debit Check: /(debited|spent|withdrawn|paid)/i
-  * Merchant Name: /(?:at|to|in)\s*([a-zA-Z0-9\s\-]+)/i
-  This logic avoids external API calls or server processing, preserving user privacy.
+- Air Share P2P Receive: Receives encrypted invoices directly over a paired WebRTC DataChannel connection and saves them locally to the expenses database.
 - WebAuthn Cryptography: Secures IndexedDB files. Rather than using vulnerable local passwords, Spendly User registers biometric passkeys using the WebAuthn API. Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code), ensuring the database remains encrypted on the device when the app is locked.
-- Shagun Gift Tracker: Maintains lists of physical cash gifts exchanged during weddings and social festivals, tracking reciprocal balances.
 - EMI Alerts: Schedules upcoming payments and triggers calendar notifications when payments are due.
 
 ================================================================================
@@ -103,10 +97,10 @@ The Spendly Shop application is an offline point-of-sale register used by cashie
 - Core Flow: When a product is scanned, the POS app sends a WebRTC packet (PRODUCT_REQUEST) containing the barcode to the paired Spendly Radar hub. The Radar hub queries its database and returns the product catalog details (PRODUCT_RESPONSE).
 - Invoicing Engine: Upon receiving the details, the POS app calculates base prices, applies CGST/SGST tax brackets, subtracts active promotional discounts, and generates a formatted JSON invoice payload.
 - Stock Reduction: On checkout completion, the Shop app sends a STOCK_REDUCE packet to the local Radar node, updating inventory quantities.
-- Billing Beam Fallback Pipeline:
-  * Transport A (Web NFC Beam): Employs the Web NFC API. When a cashier taps the register device against the shopper's phone, the invoice payload is transmitted directly over browser NFC tags.
-  * Transport B (Paired WebRTC): If the merchant and customer are already paired, the invoice payload is encrypted using AES-256-GCM and sent directly over the WebRTC data channel.
-  * Transport C (Dynamic QR Code): Generates a high-contrast QR code on the POS screen containing the raw invoice data, which the customer scans.
+- Invoice Sharing & Printing Fallback Pipeline:
+  * Transport A (Air Share WebRTC): If the merchant and customer are paired, the invoice payload is encrypted using AES-256-GCM and sent directly over the WebRTC P2P connection.
+  * Transport B (WhatsApp Share Link): If the merchant enters the shopper's name and mobile number during checkout, the app builds a redirect URL to send the invoice text directly via the WhatsApp API.
+  * Transport C (D-Mart Style Print Styles): The cashier register integrates print stylesheets (@media print) to render receipt outlines for connected thermal paper receipt printers.
 
 ================================================================================
 SECTION 4: SPENDLY RADAR - MERCHANT HUB SPECIFICATION

@@ -108,26 +108,25 @@
             </div>
 
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-bold text-sm mb-2">3. Clipboard SMS Parser</h3>
+              <h3 class="text-white font-bold text-sm mb-2">3. Air Share P2P Receive</h3>
               <p class="text-zinc-400 text-xs leading-relaxed mb-2">
-                Navigate to the parser console to log expenditures without manual entry.
+                Navigate to the Air Share screen to receive invoices directly from the shop register without using any internet server.
               </p>
               <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
-                <li>Copy a bank SMS alert (e.g. *"INR 500 debited at STAR BAZAR"*).</li>
-                <li>Open Spendly User, click **Paste Clipboard**, and tap **Auto Parse**.</li>
-                <li>The parser extracts the amount and merchant locally, saving it to your history.</li>
+                <li>Click **Receive Bill** on your User app screen.</li>
+                <li>The app opens an encrypted direct WebRTC channel with the paired POS shop register.</li>
+                <li>Confirm the incoming transaction. The invoice payload is automatically imported and saved to your history.</li>
               </ul>
             </div>
 
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-bold text-sm mb-2">4. Shagun Gift Registry</h3>
+              <h3 class="text-white font-bold text-sm mb-2">4. Budget Alert Settings</h3>
               <p class="text-zinc-400 text-xs leading-relaxed mb-2">
-                Go to the Shagun tab to track gift money exchanged during weddings and festivals.
+                Configure local monthly budget boundaries and payment alerts.
               </p>
               <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
-                <li>Click **Add Shagun Gift**.</li>
-                <li>Enter the relative's name, occasion, gift amount, and select **Given** or **Received**.</li>
-                <li>The registry updates reciprocal balances to track who you owe or who owes you.</li>
+                <li>Set your monthly spending limit threshold (e.g. ₹10,000).</li>
+                <li>The app calculates daily expenditure patterns and raises alert logs if your costs cross limits.</li>
               </ul>
             </div>
           </div>
@@ -168,14 +167,15 @@
             </div>
 
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
-              <h3 class="text-white font-bold text-sm mb-2">3. GST Billing & Invoice Compilation</h3>
+              <h3 class="text-white font-bold text-sm mb-2">3. GST Billing, Printed Receipts & WhatsApp Sharing</h3>
               <p class="text-zinc-400 text-xs leading-relaxed mb-2">
                 Review item pricing lines, apply SGST/CGST tax splits, subtract store discounts, and finalize the check.
               </p>
               <ul class="list-disc list-inside text-xs text-zinc-500 space-y-1">
                 <li>The billing calculator processes CGST and SGST splits automatically.</li>
-                <li>Click **Complete Checkout** to log the transaction in your store's sales logs.</li>
-                <li>Click **Beam Invoice** to display a dynamic QR code on screen containing the raw invoice data, which the customer scans to import into their database.</li>
+                <li><strong>Printed Receipts (D-Mart Style)</strong>: Click **Print Receipt** to send the layout directly to a connected physical thermal receipt printer.</li>
+                <li><strong>WhatsApp Billing Link</strong>: Enter the customer's name and mobile number. The app formats the invoice details and creates a quick link to share the invoice via WhatsApp Web.</li>
+                <li><strong>Air Share</strong>: Click **Air Share** to beam the encrypted invoice payload over your peer-to-peer connection.</li>
               </ul>
             </div>
           </div>
@@ -249,7 +249,7 @@
             <div class="border border-zinc-800 p-4 rounded-lg bg-zinc-950">
               <h3 class="text-white font-bold text-sm mb-1">2. Shop POS + User Wallet Billing Sync</h3>
               <p class="text-zinc-500 text-xs leading-relaxed">
-                Shop POS beams compiled invoice payloads directly to User. Shoppers can tap their phone on the cashier screen (Web NFC Beam), receive it over paired WebRTC connections, or scan the register's dynamic QR code.
+                Shop POS beams compiled invoice payloads directly to User. Shoppers receive invoices over direct WebRTC connections via Air Share, WhatsApp messaging redirect links, or physical printed paper bills.
               </p>
             </div>
 
@@ -345,8 +345,8 @@
             <div class="flex gap-4">
               <span class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm flex-shrink-0">9</span>
               <div>
-                <h4 class="text-white font-semibold text-sm mb-1">Invoice transmission</h4>
-                <p class="text-zinc-500 text-xs leading-relaxed">Shop POS beams the invoice payload directly to User via Web NFC, WebRTC, or a dynamic QR code on the POS screen.</p>
+                <h4 class="text-white font-semibold text-sm mb-1">Invoice sharing and printing</h4>
+                <p class="text-zinc-500 text-xs leading-relaxed">Shop POS register prints out a formatted receipt page like D-Mart, generates a share link to send via WhatsApp, or transmits the bill over Air Share.</p>
               </div>
             </div>
 
