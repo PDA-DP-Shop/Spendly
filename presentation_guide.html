@@ -296,25 +296,161 @@ A floating layered technology architecture using transparent glass panels repres
 
 ---
 
-# Slide 5
+# Slide 5 — How the Spendly Ecosystem Works
 
-## Working Flow
+## Slide Goal
 
-Explain
+Explain how each application in the Spendly ecosystem works individually while showing how they collaborate to deliver a complete offline-first financial ecosystem.
 
-- Discover Offers
-- Claim Coupon
-- Scan Product
-- Product Lookup
-- Offer Validation
-- Invoice Generation
-- Invoice Sharing
-- Local Storage
-- Analytics
+Use a clean three-column layout with premium futuristic illustrations.
 
-### Hero Image
+Do not create a traditional flowchart.
 
-A futuristic workflow visualized as holographic floating process cards connected with elegant glowing pathways instead of traditional flowcharts.
+Instead, create three premium product cards connected with elegant white glowing lines.
+
+---
+
+## 💳 Spendly
+
+### Personal Finance Application
+
+Spendly is the customer-facing Progressive Web Application designed for personal expense management and secure financial tracking.
+
+### Responsibilities
+
+- Record daily expenses
+- Manage multiple wallets
+- Store invoices locally
+- Track EMI reminders
+- Generate expense analytics
+- Maintain complete financial privacy
+
+### How it Works
+
+The user records expenses manually or receives invoices directly from Spendly Shop.
+
+Every transaction is securely stored inside IndexedDB using Dexie.js.
+
+WebAuthn protects all local financial information using biometric authentication.
+
+Expense reports, wallet balances, and dashboards update instantly without requiring an internet connection.
+
+No personal financial information is uploaded to any centralized server.
+
+---
+
+## 🛒 Spendly Shop
+
+### Merchant Billing Application
+
+Spendly Shop is the merchant's offline Point-of-Sale system used to generate invoices and manage customer billing.
+
+### Responsibilities
+
+- Scan products
+- Generate invoices
+- Calculate GST
+- Apply discounts
+- Share invoices
+- Print receipts
+
+### How it Works
+
+The cashier scans products and creates the customer's bill.
+
+Spendly Shop retrieves product details from Spendly Radar using secure peer-to-peer communication.
+
+After calculating taxes and totals, it generates a professional invoice.
+
+The invoice is delivered to the customer using encrypted WebRTC, QR Code, WhatsApp sharing, or printed receipt.
+
+---
+
+## 📡 Spendly Radar
+
+### Merchant Management Hub
+
+Spendly Radar is the merchant's business management application responsible for inventory, offers, and analytics.
+
+### Responsibilities
+
+- Product management
+- Inventory tracking
+- Stock updates
+- Offer management
+- Market analytics
+- Merchant dashboard
+
+### How it Works
+
+Radar stores all products, stock quantities, and promotional campaigns inside its local database.
+
+Whenever Spendly Shop requests product information, Radar responds immediately with pricing and inventory details.
+
+After checkout, stock quantities are updated automatically.
+
+Radar also generates anonymous local business insights without storing personal customer information.
+
+---
+
+# Ecosystem Relationship
+
+Illustrate the following relationship visually.
+
+```text
+             Spendly
+      Personal Finance
+              │
+      Receives Invoices
+      Stores Expenses
+      Manages Wallets
+              │
+──────── Secure WebRTC ────────
+              │
+        Spendly Shop
+       Merchant Billing
+              │
+Product Lookup │ Invoice Generation
+              │
+──────── Secure WebRTC ────────
+              │
+       Spendly Radar
+ Inventory • Offers • Analytics
+```
+
+---
+
+# Hero Illustration
+
+Generate one premium futuristic illustration covering the entire slide.
+
+The illustration should show:
+
+- A premium smartphone representing Spendly.
+- A futuristic POS terminal representing Spendly Shop.
+- A modern analytics dashboard representing Spendly Radar.
+- Elegant glowing communication lines connecting all three.
+- Floating holographic interfaces.
+- Black matte environment.
+- White glassmorphism UI.
+- Soft cinematic lighting.
+- Minimal composition.
+- Luxury product photography.
+- Apple WWDC presentation quality.
+- OpenAI keynote aesthetics.
+- Nothing Phone industrial design.
+- High-end enterprise software visualization.
+
+Avoid:
+
+- Clipart
+- Generic icons
+- Colorful graphics
+- Cartoon illustrations
+- Basic flowcharts
+- Stock photos
+
+This slide should immediately communicate that Spendly consists of three independent Progressive Web Applications working together through secure peer-to-peer communication while keeping all sensitive financial data stored locally on user devices.
 
 ---
 
