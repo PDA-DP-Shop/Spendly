@@ -48,6 +48,34 @@
       <p class="text-zinc-400 text-sm">Use this easy-to-speak script to present the live app to Mam in her cabin using three mobile phones.</p>
     </header>
 
+    <!-- Gamma AI Prompter Section -->
+    <section class="mb-12 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>✨</span> Gamma.app AI Presentation Prompter
+          </h2>
+          <p class="text-zinc-400 text-xs mt-1">Copy this prompt and paste it into Gamma.app to generate your 10-slide presentation deck automatically.</p>
+        </div>
+        <button onclick="copyGammaPrompt()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded transition flex-shrink-0">
+          📋 Copy Gamma Prompt
+        </button>
+      </div>
+      <textarea id="gamma-prompt-text" readonly class="w-full h-44 p-3 bg-zinc-950 text-zinc-400 font-mono text-xs rounded border border-zinc-800 focus:outline-none resize-none">Create a highly professional, visually stunning 10-slide presentation deck for an Information Technology academic project called "Spendly". Use a dark, premium, modern theme (like neon blue, charcoal gray, and purple tones).
+
+Slide Outline:
+Slide 1: Title Slide (Spendly - Zero-Knowledge, Offline-First P2P Billing Ecosystem. Developed by Patel Devansh, Udit, Meet, and Rudra. B.Tech in Information Technology).
+Slide 2: The Core Problem (Explain how modern finance apps scan user SMS notifications, track purchase histories, and upload sensitive consumer data to central cloud databases, causing massive privacy leaks).
+Slide 3: Our Solution & Concept (Introduce Spendly's serverless architecture. All customer files, cash wallets, and merchant catalogs are stored inside sandboxed client-side IndexedDB databases, ensuring $0 hosting costs and 100% data ownership).
+Slide 4: Spendly User App - Shopper Wallet (Detail fingerprint biometric logins via WebAuthn API, physical note-counting cash multipliers, local regex-based SMS transaction parsers, and the Shagun registry for wedding gift money tracking).
+Slide 5: Spendly Shop App - POS Register (Detail merchant cash register features, camera-based barcode scanning, real-time pricing queries, tax CGST/SGST splitting calculations, and store credit ledger logs).
+Slide 6: Spendly Radar App - Analytical Market Hub (Detail central stock directory management databases, discount campaign engines, claim codes PIN validation flow, and sales charts).
+Slide 7: Direct Peer-to-Peer Synchronization (Explain how the three apps sync over direct WebRTC DataChannels using public ntfy.sh WebSocket signaling topics to broker connections without backend server overhead).
+Slide 8: The Billing Beam Fallback Pipeline (Demonstrate invoice sharing methods: physical Web NFC beams on device taps, direct WebRTC encrypted channels, or dynamic QR code screen scans).
+Slide 9: Privacy-Preserving Area Analytics (Explain how customer devices coordinate geocodes locally (e.g. Powai, Mumbai) and send anonymous totals to display charts using Recharts on Radar).
+Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete offline capability, zero cloud database risk, and user biometric security).</textarea>
+    </section>
+
     <!-- Presentation Script Section -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
@@ -287,6 +315,14 @@
     <footer class="mt-16 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-500">
       <p>© 2026-2027 Spendly Project | Information Technology Dept</p>
     </footer>
-  </div>
+  <script>
+    function copyGammaPrompt() {
+      const promptText = document.getElementById("gamma-prompt-text");
+      promptText.select();
+      promptText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(promptText.value);
+      alert("Gamma AI Presentation Prompt copied to clipboard!");
+    }
+  </script>
 </body>
 </html>
