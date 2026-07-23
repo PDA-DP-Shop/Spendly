@@ -174,7 +174,24 @@
     // Load votes from LocalStorage or initialize empty arrays of voter names
     function getVotes() {
       let votes = localStorage.getItem('spendly_ppt_votes');
-      if (!votes) {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(votes);
+      } catch (e) {
+        parsed = null;
+      }
+      
+      // If votes doesn't exist, or isn't an object, or contains numbers instead of arrays
+      let needsReset = !parsed || typeof parsed !== 'object';
+      if (!needsReset) {
+        presentations.forEach(p => {
+          if (!Array.isArray(parsed[p.id])) {
+            needsReset = true;
+          }
+        });
+      }
+      
+      if (needsReset) {
         const initialVotes = {};
         presentations.forEach(p => {
           initialVotes[p.id] = []; // Array of voter names
@@ -182,7 +199,7 @@
         localStorage.setItem('spendly_ppt_votes', JSON.stringify(initialVotes));
         return initialVotes;
       }
-      return JSON.parse(votes);
+      return parsed;
     }
 
     function saveVotes(votes) {
@@ -210,11 +227,12 @@
         ranks[item.id] = index + 1;
       });
 
-      // 1. Render Leaderboard
+      // 1. Render Leaderboard (Top 3 only)
       const leaderboardEl = document.getElementById('leaderboard-list');
       leaderboardEl.innerHTML = '';
       
-      sorted.forEach((item, index) => {
+      const topThree = sorted.slice(0, 3);
+      topThree.forEach((item, index) => {
         const rank = index + 1;
         const isWinner = rank === 1;
         const votersList = item.voters.length > 0 ? item.voters.join(', ') : 'No votes';
