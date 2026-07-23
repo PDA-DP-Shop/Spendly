@@ -98,91 +98,169 @@
           <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">4. Content Prompt Outline</span>
           <button onclick="copyText('gamma-outline')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
         </div>
-        <textarea id="gamma-outline" readonly class="w-full h-96 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Create a professional college project presentation for a software engineering student presenting to their professor.
+        <textarea id="gamma-outline" readonly class="w-full h-96 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">
+          Create a modern, professional 10-slide presentation for a Semester VII Information Technology final year project titled "Spendly – Offline-First Zero-Knowledge Peer-to-Peer Finance Ecosystem".
+The presentation should have a clean blue and white theme with modern UI elements, technology icons, glassmorphism cards, gradients, and minimal text. Every slide should contain professional illustrations, diagrams, icons, and screenshots/placeholders suitable for a university project presentation.
+Slide 1 – Title
+Project Name: Spendly
+Subtitle: Offline-First Zero-Knowledge Peer-to-Peer Finance Ecosystem
+Include:
+Student Name
+Enrollment Number
+Department of Information Technology
+Semester VII
+College Name
+Modern fintech background with smartphone, security shield, cloud, and finance graphics.
+Slide 2 – Problem Statement
+Explain the problems with existing finance apps:
+User privacy concerns
+Cloud dependency
+Internet requirement
+Monthly POS subscription costs
+Centralized databases
+Data breach risks
+Use comparison graphics and security illustrations.
+Slide 3 – Proposed Solution
+Introduce Spendly ecosystem.
+Explain three applications:
+Spendly (Personal Wallet)
+Spendly Shop (Merchant POS)
+Spendly Radar (Merchant Analytics Hub)
+Highlight:
+Offline First
+Zero Knowledge
+Serverless
+Peer-to-Peer
+Secure Local Storage
+Show ecosystem diagram connecting all three applications.
+Slide 4 – System Architecture
+Create a professional architecture diagram showing:
+Spendly User App
+↔ WebRTC
+Spendly Shop
+↔ WebRTC
+Spendly Radar
+Include:
+IndexedDB
+Dexie.js
+Cloudflare Workers
+ntfy.sh Signaling
+AES-256 Encryption
+WebAuthn
+PeerJS
+Use arrows and layered architecture.
+Slide 5 – Working Flow
+Illustrate complete workflow:
+Customer opens Spendly
+↓
+Discovers Offers
+↓
+Claims Coupon
+↓
+Merchant scans Product
+↓
+Radar validates Offer
+↓
+Invoice Generated
+↓
+Invoice Shared via WebRTC/QR/WhatsApp
+↓
+Saved in Local Database
+Use animated flowchart style.
+Slide 6 – Technologies Used
+Display technology logos:
+Frontend
+React
+Vite
+Tailwind CSS
+Zustand
+Framer Motion
+Backend
+Cloudflare Workers
+Worker KV
+Database
+IndexedDB
+Dexie.js
+Networking
+WebRTC
+PeerJS
+ntfy.sh
+Security
+WebAuthn
+AES-256-GCM
+PWA
+Service Worker
+Workbox
+Slide 7 – Security & Privacy
+Explain:
+Zero-Knowledge Architecture
+Local IndexedDB Storage
+Hardware-backed Passkeys
+WebAuthn Authentication
+AES-256-GCM Encryption
+Offline Data Protection
+Secure Enclave
+Use lock, fingerprint, encryption, and shield graphics.
+Slide 8 – Key Features
+Highlight:
+Expense Tracking
+Cash Wallet
+Merchant Billing
+Inventory Management
+EMI Reminder
+QR Invoice Sharing
+WhatsApp Invoice
+Offer Claim System
+Offline Synchronization
+Area Intelligence Dashboard
+Display feature cards with colorful icons.
+Slide 9 – Advantages & Future Scope
+Advantages:
+No Monthly Server Cost
+Complete Privacy
+Offline Working
+Fast Billing
+Zero Database Maintenance
+Secure Peer-to-Peer Communication
+Future Scope:
+AI Expense Insights
+NFC Payments
+UPI Integration
+Multi-store Support
+GST Reports
+Voice Billing
+Smart Analytics
+Use roadmap graphics.
+Slide 10 – Conclusion
+Summarize Spendly as:
+"A privacy-focused, offline-first, zero-knowledge financial ecosystem that enables secure peer-to-peer billing, personal finance management, and merchant inventory management without relying on centralized cloud databases."
+End with:
+Thank You
+Questions & Answers
 
-PROJECT NAME: Spendly
-TEAM MEMBERS: Udit Rana, Rudra Modi, Mit Prajapati
-SEMESTER: 7
-SUBJECT: Web Application Development / Software Engineering Project
-
-SLIDE OUTLINE (Exactly 11 Slides):
-
-Slide 1 — Title Slide
-- Main title: SPENDLY
-- Subtitle: A Privacy-First, Offline-First Peer-to-Peer Financial Ecosystem
-- Bottom details: Presented by Devansh | Team: Codinity | Members: Udit Rana, Rudra Modi, Mit Prajapati | Semester 7 Project Presentation
-
-Slide 2 — The Core Problem
-- Title: The Problem We Solved
-- Points:
-  1. Every expense tracker app requires login and stores financial data on cloud servers.
-  2. Kirana and small shop owners have no affordable offline billing/udhar registers.
-  3. Small businesses have zero access to local market intelligence tools.
-  4. No existing solution connects personal finance, merchant billing, and business intelligence together without compromising user privacy.
-- Highlight Statement: "300 million Indians have no private, offline financial management tool."
-
-Slide 3 — The Unified Ecosystem
-- Title: Introducing Spendly
-- Columns (3 Cards Side-by-Side):
-  1. Spendly: Personal financial wallet (Zero login, zero cloud, offline expense tracker).
-  2. Spendly Shop: Merchant register (Fully offline billing, itemized invoices, udhar ledger).
-  3. Spendly Radar: Business intelligence (Anonymous, real-time analytics hub).
-- Bottom statement: "Three apps. One ecosystem. Zero servers storing your data."
-
-Slide 4 — Core Philosophy & Values
-- Title: What Makes Spendly Different
-- Grid layout (4 Statement Boxes):
-  1. NO LOGIN: "Users never create an account. Ever."
-  2. NO CLOUD: "All data stays only on the user's device."
-  3. NO TRACKING: "Zero analytics. Zero ads. Zero data selling."
-  4. NO COMPROMISE: "Not even we can access our users' financial data."
-- Bottom statement: "Privacy is not a feature. It is the architecture."
-
-Slide 5 — Spendly Personal Wallet Features
-- Title: Spendly — Personal Expense Tracker
-- Columns layout:
-  * Left: Core Features (Works 100% offline, barcode scan to log spend, receipt scanning, UPI tracking redirect, biometric Face ID/PIN lock).
-  * Right: Unique Additions (Udhar tracking ledger, digital Shagun book gift obligations registry, hyperlocal shop offers, P2P invoice receiver).
-
-Slide 6 — Spendly Shop POS Features
-- Title: Spendly Shop — Merchant Billing System
-- Columns layout:
-  * Left: POS Billing (Create itemized bills instantly, camera barcode scan, tax CGST/SGST splitting, WhatsApp receipt share links, print D-Mart style receipts).
-  * Right: Udhar Management (Scan customer Spendly QR, due date alerts/reminders, direct call/SMS/WhatsApp links, offline credit ledger).
-
-Slide 7 — Spendly Radar & BI Features
-- Title: Spendly Radar — Business Intelligence
-- Columns layout:
-  * Left: Store Hub (Real-time local trending items, demand forecasting, peak hours chart, unique EAN-13 barcode generator & printed labels).
-  * Right: Offers Engine (Hyperlocal offer creation, live discount performance metrics, weekly business reports, anonymous data only).
-
-Slide 8 — Technical Architecture
-- Title: Technical Architecture
-- Flow: Three frontend nodes [Spendly] <-> [Spendly Shop] <-> [Spendly Radar] communicating over WebRTC direct data channels. Cloudflare Worker matches connections (WebSocket broker) storing zero database records.
-- Text Blocks:
-  * Frontend: React 19/18, Vite compiler, Zustand stores, Tailwind layouts.
-  * Storage: Client IndexedDB wrapper Dexie.js, AES-256-GCM browser encryption, PBKDF2 SHA-512.
-
-Slide 9 — Security Architecture
-- Title: Security & Data Privacy
-- Center Question: "What happens when a government orders us to hand over user data?"
-- Center Answer: "We hand over everything we have. Which is nothing. Because we never stored it."
-- Details: Local AES-256-GCM storage encryption, 600,000 key iterations PBKDF2 SHA-512, zero cloud data transmissions, Content Security Policy header protection.
-
-Slide 10 — Kinetic Link & Payments
-- Title: Kinetic Link & Payments
-- Subtitle: Physics-based Peer-to-Peer pairing
-- Content:
-  * Kinetic Link: Bump two phones -> accelerometer detects impact -> maps 1-sec time bucket ID on Cloudflare Worker KV -> connects over WebRTC.
-  * Pay Through Spendly: Seamless UPI scanner, redirects to official banking apps cleanly.
-  * Key Learnings: PPWAs lifecycle, WebRTC signaling brokers, zero-knowledge architecture.
-
-Slide 11 — Conclusion & Thank You
-- Title: SPENDLY
-- Subtitle: "Your money. Your device. Your rules."
-- Team Codinity: Devansh | Udit Rana | Rudra Modi | Mit Prajapati
-- Live Apps: spendly-24hrs.pages.dev | spendly-shop.pages.dev | spendly-radar.pages.dev
-- Bottom text: Built with React, Vite, PeerJS, Dexie.js, and Cloudflare Pages.</textarea>
+IMPORTANT: This presentation must not use flat icons, clipart, stock illustrations, or basic infographics. Every slide should include custom AI-generated premium visuals that resemble Apple WWDC keynote presentations, Microsoft Build, or OpenAI launch presentations.
+Generate unique 3D isometric technology illustrations for every slide using the following style:
+Premium Apple-inspired design language
+Ultra-realistic 3D renders
+Floating layered glass architecture
+Glassmorphism panels
+Transparent acrylic layers
+Dark matte black background with subtle blue and white neon glow
+Cinematic lighting and soft reflections
+Isometric perspective
+Minimal clean labels
+Enterprise software architecture style
+Futuristic fintech aesthetic
+High-detail 8K quality
+No cartoon graphics
+No generic icons
+No flat vector illustrations
+No colorful clipart
+Every slide should contain one large hero illustration occupying 50–70% of the slide, with concise supporting text.
+For architecture and workflow slides, generate floating layered system diagrams showing technologies such as WebRTC, IndexedDB, Dexie.js, Cloudflare Workers, PeerJS, WebAuthn, AES-256-GCM, and the three applications (Spendly, Spendly Shop, Spendly Radar) connected with glowing lines. Use stacked transparent layers similar to Apple's hardware architecture presentations.
+For security slides, generate 3D cybersecurity visualizations featuring encryption shields, biometric authentication, secure enclaves, and encrypted data layers.
+For workflow slides, generate 3D process diagrams with floating cards connected by glowing arrows instead of standard flowcharts.
+Maintain a consistent premium visual identity across all slides, making the presentation look like a professional product launch by Apple, OpenAI, or Microsoft rather than a typical academic slideshow. Every illustration should be original, futuristic, realistic, and presentation-ready.</textarea>
       </div>
     </section>
 
