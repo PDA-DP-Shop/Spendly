@@ -92,12 +92,22 @@
               <p class="text-zinc-400 text-xs mt-1">Review the PDF preview below or download the original source files.</p>
             </div>
             
-            <div class="flex items-center gap-2">
-              <button onclick="castVote()" class="bg-white text-black hover:bg-zinc-200 font-bold px-4 py-2 text-xs rounded transition flex items-center gap-1.5">
+            <div class="flex items-center gap-3">
+              <div class="flex flex-col text-left">
+                <label for="voter-name" class="text-[9px] text-zinc-500 font-mono uppercase font-bold mb-1">Voter Name</label>
+                <select id="voter-name" class="bg-zinc-950 border border-zinc-800 text-white text-xs rounded p-2 focus:outline-none font-bold">
+                  <option value="Devansh">Devansh</option>
+                  <option value="Udit">Udit</option>
+                  <option value="Meet">Meet</option>
+                  <option value="Rudra">Rudra</option>
+                </select>
+              </div>
+              <button onclick="castVote()" class="bg-white text-black hover:bg-zinc-200 font-bold px-4 py-2 text-xs rounded mt-4 transition flex items-center gap-1.5 self-end">
                 <span>👍</span> Vote (<span id="active-votes-count">0</span>)
               </button>
             </div>
           </div>
+          <div id="active-votes-count-label" class="text-zinc-500 text-[10px] font-mono mt-1 mb-4">Voted by: No one yet</div>
 
           <div class="flex flex-wrap items-center gap-3 mb-6 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs">
             <span class="text-zinc-500">Downloads:</span>
@@ -146,14 +156,13 @@
 
     let currentSelectionId = null;
 
-    // Load votes from LocalStorage or initialize with random votes for realism
+    // Load votes from LocalStorage or initialize empty arrays of voter names
     function getVotes() {
       let votes = localStorage.getItem('spendly_ppt_votes');
       if (!votes) {
-        // Pre-populate with mock votes so it doesn't look empty at start
         const initialVotes = {};
         presentations.forEach(p => {
-          initialVotes[p.id] = Math.floor(Math.random() * 8) + 1; // 1 to 8 initial votes
+          initialVotes[p.id] = []; // Array of voter names
         });
         localStorage.setItem('spendly_ppt_votes', JSON.stringify(initialVotes));
         return initialVotes;
@@ -169,10 +178,10 @@
       const votes = getVotes();
       const items = presentations.map(p => ({
         ...p,
-        votes: votes[p.id] || 0
+        voters: votes[p.id] || []
       }));
-      // Sort by votes descending, then by id ascending
-      items.sort((a, b) => b.votes - a.votes || a.id - b.id);
+      // Sort by votes count descending, then by id ascending
+      items.sort((a, b) => b.voters.length - a.voters.length || a.id - b.id);
       return items;
     }
 
@@ -193,6 +202,7 @@
       sorted.forEach((item, index) => {
         const rank = index + 1;
         const isWinner = rank === 1;
+        const votersList = item.voters.length > 0 ? item.voters.join(', ') : 'No votes';
         
         const cardClass = isWinner 
           ? 'panel-card rank-gold rounded-lg p-3 flex justify-between items-center transition border border-yellow-500/30' 
@@ -203,15 +213,19 @@
           : 'px-2 py-0.5 text-[10px] font-mono text-zinc-400 bg-zinc-900 rounded mr-2';
 
         const label = isWinner ? '🏆 Final Choice' : `#${rank} Pick`;
+        const votesCountText = `${item.voters.length} ${item.voters.length === 1 ? 'vote' : 'votes'}`;
 
         leaderboardEl.innerHTML += `
           <div class="${cardClass}">
             <div class="flex items-center min-w-0 pr-2">
               <span class="${badgeClass}">${label}</span>
-              <span class="text-xs font-semibold text-white truncate">${item.name}</span>
+              <div class="truncate">
+                <span class="text-xs font-semibold text-white truncate block">${item.name}</span>
+                <span class="text-[9px] text-zinc-500 block truncate">By: ${votersList}</span>
+              </div>
             </div>
             <span class="text-xs text-zinc-400 font-mono flex items-center gap-1 shrink-0 font-bold">
-              <span>👍</span> ${item.votes} votes
+              <span>👍</span> ${votesCountText}
             </span>
           </div>
         `;
@@ -225,6 +239,8 @@
         const rank = ranks[p.id];
         const isWinner = rank === 1;
         const isActive = p.id === currentSelectionId;
+        const voters = votes[p.id] || [];
+        const votersList = voters.length > 0 ? voters.join(', ') : 'No votes';
         
         let containerClass = `w-full flex items-center justify-between p-3 rounded-lg border text-left transition ${
           isActive ? 'active-item' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
@@ -236,7 +252,8 @@
               <span class="text-base mr-3">📊</span>
               <div class="truncate">
                 <h4 class="text-xs font-bold text-white truncate">${p.name}</h4>
-                <p class="text-[10px] text-zinc-500 mt-0.5">Rank #${rank} • ${votes[p.id]} votes</p>
+                <p class="text-[10px] text-zinc-500 mt-0.5">Rank #${rank} • ${voters.length} votes</p>
+                <p class="text-[9px] text-zinc-600 truncate">By: ${votersList}</p>
               </div>
             </div>
             <span class="text-xs font-bold ${isWinner ? 'text-yellow-400' : 'text-zinc-500'}">
@@ -250,13 +267,15 @@
       if (currentSelectionId !== null) {
         const active = presentations.find(p => p.id === currentSelectionId);
         const rank = ranks[active.id];
+        const activeVoters = votes[active.id] || [];
         
         document.getElementById('active-title').innerText = active.name;
         document.getElementById('active-rank-badge').innerText = `Rank #${rank}`;
         document.getElementById('active-rank-badge').className = rank === 1 
           ? 'px-2.5 py-0.5 text-xs font-bold bg-yellow-500 text-black rounded-full uppercase mr-2'
           : 'px-2.5 py-0.5 text-xs font-bold bg-zinc-800 text-zinc-300 rounded-full uppercase mr-2';
-        document.getElementById('active-votes-count').innerText = votes[active.id];
+        document.getElementById('active-votes-count').innerText = activeVoters.length;
+        document.getElementById('active-votes-count-label').innerText = `Voted by: ${activeVoters.join(', ') || 'No one yet'}`;
         
         document.getElementById('download-pdf').href = active.pdf;
         document.getElementById('download-pptx').href = active.pptx;
@@ -280,8 +299,19 @@
         alert("Please select a presentation first!");
         return;
       }
+      const voterSelect = document.getElementById('voter-name');
+      const voterName = voterSelect.value;
+      
       const votes = getVotes();
-      votes[currentSelectionId] = (votes[currentSelectionId] || 0) + 1;
+      const voters = votes[currentSelectionId] || [];
+      
+      if (voters.includes(voterName)) {
+        alert(`${voterName} has already voted for this presentation!`);
+        return;
+      }
+      
+      voters.push(voterName);
+      votes[currentSelectionId] = voters;
       saveVotes(votes);
       updateUI();
     }
@@ -290,7 +320,7 @@
       if (confirm("Are you sure you want to reset all standings?")) {
         const clearedVotes = {};
         presentations.forEach(p => {
-          clearedVotes[p.id] = 0;
+          clearedVotes[p.id] = [];
         });
         saveVotes(clearedVotes);
         updateUI();
