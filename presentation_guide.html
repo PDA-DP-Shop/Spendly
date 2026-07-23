@@ -89,7 +89,7 @@
           <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">3. Additional Instructions</span>
           <button onclick="copyText('gamma-instructions')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
         </div>
-        <textarea id="gamma-instructions" readonly class="w-full h-16 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Enforce a strict premium dark monochrome aesthetic. Background color must be deep pitch black (#0b0b0b) with container cards in clean dark gray (#121212). Use stark white (#ffffff) for all main headers and light gray (#e4e4e7) for body text. Typography must be a clean, modern sans-serif font (like Inter or system-ui). Avoid any bright colors or generic slide themes. Keep layouts structured with subtle borders and glassmorphism cards. All generated images, diagrams, icons, and visual mockups must be strictly black-and-white (grayscale) with no accents.</textarea>
+        <textarea id="gamma-instructions" readonly class="w-full h-20 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Enforce a strict premium dark monochrome aesthetic. Background color must be deep pitch black (#0b0b0b) with container cards in clean dark gray (#121212). Use stark white (#ffffff) for all main headers and light gray (#e4e4e7) for body text. Typography must be a clean, modern sans-serif font (like Inter or system-ui). Avoid any bright colors or generic slide themes. Keep layouts structured with subtle borders and glassmorphism cards. All illustrations and visuals must be strictly black-and-white (grayscale) line-art mockups inside clean iPhone device frames. Avoid stock photos.</textarea>
       </div>
 
       <!-- Field 4: Outline Content -->
@@ -98,19 +98,50 @@
           <span class="text-[10px] text-zinc-500 font-mono uppercase font-bold">4. Content Prompt Outline</span>
           <button onclick="copyText('gamma-outline')" class="px-2 py-1 text-[10px] rounded copy-btn">Copy</button>
         </div>
-        <textarea id="gamma-outline" readonly class="w-full h-64 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Create a highly professional, visually stunning 10-slide presentation deck for an Information Technology academic project called "Spendly". Use simple and direct language.
+        <textarea id="gamma-outline" readonly class="w-full h-80 bg-zinc-900 text-zinc-300 text-xs font-mono p-2 border border-zinc-800 rounded focus:outline-none resize-none">Create a premium 10-slide presentation deck for our IT project "Spendly". Use simple, direct language so it is easy to read.
 
-Slide Outline:
-Slide 1: Title Slide (Spendly - Zero-Knowledge, Offline-First P2P Billing Ecosystem. Developed by Patel Devansh, Udit, Meet, and Rudra. B.Tech in Information Technology).
-Slide 2: The Core Problem (Explain how modern finance apps scan user notifications and upload sensitive consumer data to central cloud databases, causing massive privacy leaks).
-Slide 3: Our Solution & Concept (Introduce Spendly's serverless architecture. All customer files, cash wallets, and merchant catalogs are stored inside sandboxed client-side IndexedDB databases, ensuring $0 hosting costs and 100% data ownership).
-Slide 4: Spendly User App - Shopper Wallet (Detail fingerprint biometric logins via WebAuthn API, physical note-counting cash multipliers, and receiving bills offline via Air Share. Note: No NFC or Shagun registry used).
-Slide 5: Spendly Shop App - POS Register (Detail merchant cash register features, camera-based barcode scanning, real-time pricing queries, tax CGST/SGST splitting calculations, printing physical D-Mart style bills, and entering customer name and mobile to share bills via WhatsApp Web links).
-Slide 6: Spendly Radar App - Analytical Market Hub (Detail central stock directory management databases, discount campaign engines, claim codes PIN validation flow, and sales charts).
-Slide 7: Direct Peer-to-Peer Synchronization (Explain how the three apps sync over direct WebRTC DataChannels using public ntfy.sh WebSocket signaling topics to broker connections without backend server overhead).
-Slide 8: The Air Share Billing Pipeline (Demonstrate invoice sharing methods: physical Web NFC beams on device taps, direct WebRTC encrypted channels, or dynamic QR code screen scans).
-Slide 9: Privacy-Preserving Area Analytics (Explain how customer devices coordinate geocodes locally (e.g. Powai, Mumbai) and send anonymous totals to display charts using Recharts on Radar).
-Slide 10: Conclusion & Main Highlights (Key outcomes: $0 hosting costs, complete offline capability, zero cloud database risk, and user biometric security).</textarea>
+Slide Outline & Visual Directives:
+
+Slide 1: Title Slide
+- Title: Spendly - Zero-Knowledge, Offline-First P2P Billing Ecosystem
+- Subtitle: Developed by Patel Devansh, Udit, Meet, and Rudra (Department of Information Technology)
+- Visual: Minimalist monochrome icon of a wallet and wireless signal.
+
+Slide 2: The Core Problem (Privacy Risks)
+- Text: Modern fintech apps scan private bank alerts, log spending habits, and upload transactions to cloud servers, leading to database leaks.
+- Visual: Monochrome graphic of cloud databases under surveillance.
+
+Slide 3: Our Concept (Local Sandbox)
+- Text: Spendly holds all cash folders, catalogs, and transaction lists in sandboxed IndexedDB storage inside the user's browser folder. $0 server costs, 100% user data control.
+- Visual: Monochrome schematic showing sandboxed database storage blocks inside a browser.
+
+Slide 4: Spendly User App (Shopper Wallet)
+- Text: Shoppers use biometric unlock (WebAuthn), a physical paper note cash counter wallet, and local P2P Air Share billing receipts (No SMS alerts read, no Shagun gifts tracked).
+- Visual: Monochrome mockup of an iPhone screen displaying biometric fingerprint verification.
+
+Slide 5: Spendly Shop POS (Cashier Register)
+- Text: Cashier register app scans barcodes via camera, calculates CGST/SGST splits, sends invoices over Air Share, formats printable slips (D-Mart style), and creates quick WhatsApp Web invoice share redirects.
+- Visual: Monochrome mockup of an iPhone POS app scanning barcodes and displaying tax invoice tables.
+
+Slide 6: Spendly Radar App (Store Hub)
+- Text: Manager terminal database to manage stock prices, schedule campaign discounts, validate coupon PIN inputs over WebRTC, and display charts.
+- Visual: Monochrome mockup of an iPhone screen displaying analytics charts.
+
+Slide 7: Direct Peer-to-Peer Synchronization
+- Text: Phones sync directly using WebRTC DataChannels. Connection keys are paired using public ntfy.sh WebSocket signal boxes. No central backend server.
+- Visual: Flowchart detailing three iPhones connected peer-to-peer over WebRTC.
+
+Slide 8: The Air Share Billing Pipeline
+- Text: Cashiers beam invoices offline over WebRTC DataChannels, print physical receipt slips, or share dynamic screen QR codes to scan.
+- Visual: Monochrome graphic illustrating invoice transfer between two iPhones.
+
+Slide 9: Privacy-Preserving Area Analytics
+- Text: Shopper phones geocode location coordinates locally (e.g. Mumbai, Powai), strip all name details, and share anonymous total sums to plot Recharts diagrams.
+- Visual: Monochrome local area map showing anonymous spending shards.
+
+Slide 10: Project Outcomes
+- Text: Zero server hosting costs, full offline execution, zero cloud database leak risk, and biometric chip-level security.
+- Visual: Simple monochrome summary checkmarks card.</textarea>
       </div>
     </section>
 
