@@ -396,7 +396,7 @@ graph LR
           <pre class="mermaid">
 sequenceDiagram
     autonumber
-    actor Shopper as Spendly User
+    actor Shopper as Spendly
     actor Retailer as Spendly Shop
     actor Hub as Spendly Radar
     participant Ntfy as WebSocket Bridge
@@ -699,7 +699,7 @@ graph TD
           <pre class="mermaid">
 graph TD
     subgraph Client Device Layer
-        subgraph Spendly User Client
+        subgraph Spendly Client (Personal Wallet)
             UI1["User Interface (Monochrome Flat)"]
             Service1["Service Worker (Cache-first offline)"]
             Dexie1[("IndexedDB: Local Storage")]
@@ -711,7 +711,7 @@ graph TD
             Service2["Service Worker (Cache-first offline)"]
             Dexie2[("IndexedDB: POS Storage")]
             WebAuthn2["WebAuthn Vault Locker"]
-            NFC["Web NFC API (Tap-to-Beam)"]
+            AirShare["Air Share (Local P2P WebRTC)"]
         end
 
         subgraph Spendly Radar Client

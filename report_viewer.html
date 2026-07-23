@@ -148,7 +148,7 @@
 *Hey friends! If you want to run and test all three Spendly applications together on your browser, just follow these simple steps:*
 
 ### Step 1: Open all three apps
-*   Open the **Spendly Radar** app, **Spendly Shop** app, and **Spendly User** app in different tabs of your browser.
+*   Open the **Spendly Radar** app, **Spendly Shop** app, and **Spendly** personal wallet app in different tabs of your browser.
 
 ### Step 2: Connect the Shop Register to the Radar Hub
 *   Look at the **Spendly Radar** screen. You will see a 6-character Pairing Code (for example: `K4N9X3`).
@@ -162,7 +162,7 @@
 
 ### Step 4: Beam the bill to your User Wallet
 *   On the **Shop** bill screen, click **Beam Bill**. It will display a dynamic QR code on the screen.
-*   Open your **Spendly User** app on your phone, click **Receive Invoice**, and scan that QR code.
+*   Open your **Spendly** personal wallet app on your phone, click **Receive Invoice**, and scan that QR code.
 *   *Boom!* The invoice payload is sent directly over the local network and saved inside your consumer expense manager.
 
 ---
@@ -197,8 +197,8 @@ The ecosystem is split into three main client PWAs (Progressive Web Apps) and a 
 
 ```
                   ┌─────────────────────────────────┐
-                  │          SPENDLY USER           │
-                  │   (Consumer Expense Tracker)    │
+                  │             SPENDLY             │
+                  │     (Personal User Wallet)      │
                   └────────┬───────────────┬────────┘
                            │               │
       LocalStorage Bridge  │               │ WebRTC Direct Connection
@@ -302,7 +302,7 @@ Shoppers can discover active merchant discount campaigns and redeem them securel
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Spendly User
+    actor User as Spendly
     actor Radar as Spendly Radar
     actor Shop as Spendly Shop
 
@@ -350,7 +350,7 @@ Spendly compiles area-level spending trends (like "Average grocery spend in Area
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Spendly User
+    actor User as Spendly
     actor Radar as Spendly Radar
 
     User->>User: User completes transaction
@@ -370,7 +370,7 @@ sequenceDiagram
 ## 4. 🌟 Key Innovations & Local Features
 
 ### 4.1 Same-Device LocalStorage Bridge
-For testing and single-device users, if you open both Spendly User and Spendly Shop in different tabs on the same browser, they don't use network bandwidth. They communicate using a custom listener bound to browser **StorageEvents**:
+For testing and single-device users, if you open both Spendly and Spendly Shop in different tabs on the same browser, they don't use network bandwidth. They communicate using a custom listener bound to browser **StorageEvents**:
 ```javascript
 export const sendLocalMessage = (type, data) => {
   localStorage.setItem('spendly_bridge_msg', JSON.stringify({
@@ -397,7 +397,7 @@ If the merchant enters the customer's name and mobile number during checkout, th
 
 Spendly structures its local database schemas inside client-side IndexedDB files. Here is the relational setup:
 
-### 5.1 Spendly User Database
+### 5.1 Spendly Database
 *   **`expenses`**: `++id, category, amount, date, shopName, isSoftDeleted`
 *   **`wallets`**: `++id, name, type, balance`
 *   **`emiAlerts`**: `++id, title, amount, dueDate, isPaid`
@@ -433,7 +433,7 @@ For team alignment and academic evaluation, here are the granular programming de
 
 ### 6.3 💾 Storage Specifications & Physical Locations
 *   **Local Storage Engine**: Browser-native **IndexedDB** wrapped in **Dexie.js** for handling transactional records.
-*   **Sandbox Security**: Origin isolation prevents `spendly-shop` from accessing `spendly-user` tables.
+*   **Sandbox Security**: Origin isolation prevents `spendly-shop` from accessing `spendly` tables.
 *   **Disk Storage Paths**:
     *   **macOS (Chrome)**: `~/Library/Application Support/Google/Chrome/Default/IndexedDB/`
     *   **Windows (Chrome)**: `%LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB\`
@@ -441,7 +441,7 @@ For team alignment and academic evaluation, here are the granular programming de
 *   **Cloud KV Namespaces**: **Cloudflare Workers KV** (`SPENDLY_STOCK` and `SPENDLY_DATA`) for storing pairing codes and encrypted stock backups.
 
 ### 6.4 🔤 Application Languages & Formats
-*   **Spendly User (Consumer App)**: Built using **JavaScript (React / ES6+)**, **HTML5**, and **CSS3 (Tailwind CSS)**.
+*   **Spendly (Personal User Wallet App)**: Built using **JavaScript (React / ES6+)**, **HTML5**, and **CSS3 (Tailwind CSS)**.
 *   **Spendly Shop (Merchant POS App)**: Built using **JavaScript (React / ES6+)**, **HTML5**, and **CSS3 (Tailwind CSS)**.
 *   **Spendly Radar (Local Catalog App)**: Built using **JavaScript (React / ES6+)**, **HTML5**, and **CSS3 (Tailwind CSS)**.
 *   **Spendly Worker (Matchmaker API)**: Built using **JavaScript (V8 ES Modules)** running on serverless V8 runtimes.

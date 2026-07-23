@@ -67,19 +67,19 @@ SECTION 1: SYSTEM INTRODUCTION, MOTIVATIONS & ZERO-KNOWLEDGE CONCEPTS
 ================================================================================
 Spendly is an offline-first, zero-knowledge, hardware-secured peer-to-peer billing and finance tracking ecosystem. In modern consumer finance, standard utility applications actively scan user notifications, parse transactional SMS bank alerts, and catalog receipt records, transmitting this granular information to centralized company databases. This centralized structure poses significant risks to user privacy, increases exposure to third-party data breaches, and forces merchants to pay ongoing database synchronization fees to sustain POS infrastructure.
 
-To address these concerns, Spendly eliminates centralized database nodes completely. Instead, it relies on browser-native storage enclaves and peer-to-peer networking channels. All sensitive consumer transactions, wallets, and merchant catalogs are stored inside sandboxed, origin-isolated storage on the physical client hardware. The ecosystem consists of three Progressive Web Applications (PWAs): Spendly User (the consumer wallet tracker), Spendly Shop (the merchant point-of-sale register), and Spendly Radar (the analytical local market hub). By deploying serverless API routers for pairing matchmaking, the ecosystem runs with zero ongoing server maintenance costs.
+To address these concerns, Spendly eliminates centralized database nodes completely. Instead, it relies on browser-native storage enclaves and peer-to-peer networking channels. All sensitive consumer transactions, wallets, and merchant catalogs are stored inside sandboxed, origin-isolated storage on the physical client hardware. The ecosystem consists of three Progressive Web Applications (PWAs): Spendly (the personal user wallet/finance tracker), Spendly Shop (the merchant point-of-sale register), and Spendly Radar (the analytical local market hub). By deploying serverless API routers for pairing matchmaking, the ecosystem runs with zero ongoing server maintenance costs.
 
 The zero-knowledge design pattern ensures that no central authority or developer can access the database objects. All transaction values, account profiles, stock counts, and campaign histories remain isolated within the origin-sandbox folder in the browser profile directory of the local device. Data exchanges between peer applications are executed over WebRTC tunnels encrypted with AES-256-GCM. 
 
 The target audience for Spendly is split into:
-1. Individual Shoppers who want complete privacy over their transaction history, cash ledger records, and personal budget metrics.
+1. Individual Users who want complete privacy over their transaction history, cash ledger records, and personal budget metrics.
 2. Independent Merchants/Cashiers who need a free, lightweight checkout POS billing solution that operates without monthly cloud hosting subscriptions.
 3. Retail Stores that require local offers catalogs and inventory tracking systems that work reliably when internet access is unavailable.
 
 ================================================================================
-SECTION 2: SPENDLY USER - CONSUMER MODULE SPECIFICATION
+SECTION 2: SPENDLY - PERSONAL USER WALLET MODULE SPECIFICATION
 ================================================================================
-The Spendly User application serves as the consumer interface for expense tracking and personal cash ledger operations.
+The Spendly application serves as the personal user interface for expense tracking and cash ledger operations.
 - Local Storage Layer: Integrates browser-native IndexedDB wrapped inside the Dexie.js library to execute fast, asynchronous transaction queries on the main execution thread.
 - Database Schema and Relational Layout:
   * db.expenses: Schema structure is "++id, category, amount, date, shopName, isSoftDeleted". This table indexes every transaction. The isSoftDeleted flag enables temporary trash storage, allowing users to restore mistakenly deleted items without server backups.
@@ -87,7 +87,7 @@ The Spendly User application serves as the consumer interface for expense tracki
   * db.emiAlerts: Schema structure is "++id, title, amount, dueDate, isPaid", used for tracking and scheduling monthly payments.
 - Cash Wallet Logic: Tracks physical currency notes manually. Users enter individual counts of ₹500, ₹200, ₹100, and ₹50 notes in the cash note counter. The app computes total balance in memory using a simple multipliers algorithm: Balance = (500 * count500) + (200 * count200) + (100 * count100) + (50 * count50).
 - Air Share P2P Receive: Receives encrypted invoices directly over a paired WebRTC DataChannel connection and saves them locally to the expenses database.
-- WebAuthn Cryptography: Secures IndexedDB files. Rather than using vulnerable local passwords, Spendly User registers biometric passkeys using the WebAuthn API. Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code), ensuring the database remains encrypted on the device when the app is locked.
+- WebAuthn Cryptography: Secures IndexedDB files. Rather than using vulnerable local passwords, Spendly registers biometric passkeys using the WebAuthn API. Decryption keys are bound directly to the hardware Secure Enclave (Touch ID / Face ID / PIN code), ensuring the database remains encrypted on the device when the app is locked.
 - EMI Alerts: Schedules upcoming payments and triggers calendar notifications when payments are due.
 
 ================================================================================
@@ -174,8 +174,8 @@ All Spendly client apps run as offline-first Progressive Web Apps (PWAs) deploye
 SECTION 9: IN-DEPTH STEP-BY-STEP TRANSACTIONS PATHWAY
 ================================================================================
 A transaction within the Spendly ecosystem proceeds through the following sequential phases:
-1. Shopper queries discount catalogs: Shopper selects "Discover Offers" in Spendly User.
-2. WebRTC Offers Request: Spendly User sends a WebRTC packet containing an OFFERS_QUERY to the paired Spendly Radar hub.
+1. User queries discount catalogs: User selects "Discover Offers" in Spendly.
+2. WebRTC Offers Request: Spendly sends a WebRTC packet containing an OFFERS_QUERY to the paired Spendly Radar hub.
 3. Offers Catalog Response: Radar loads entries from db.radarOffers and returns the catalog details.
 4. Offer Claim: Shopper clicks "Claim" on their device, generating a 6-digit verification pin saved in the Radar claims database.
 5. Scans Item Barcode: Retailer scans an item barcode on Spendly Shop.
