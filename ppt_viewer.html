@@ -58,9 +58,19 @@
       </a>
     </header>
 
+    <!-- Mobile Tab Navigation Selector -->
+    <div class="flex lg:hidden border border-zinc-800 bg-zinc-950 rounded-lg p-1 mb-6">
+      <button id="tab-viewer-btn" onclick="switchMobileTab('viewer')" class="flex-1 text-center py-2 text-xs font-bold rounded-md bg-zinc-800 text-white transition">
+        📁 Slides View
+      </button>
+      <button id="tab-leaderboard-btn" onclick="switchMobileTab('leaderboard')" class="flex-1 text-center py-2 text-xs font-bold rounded-md text-zinc-400 hover:text-white transition">
+        🏆 Standings & Directory
+      </button>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Left Panel: Lists & Rank Leaderboard (4 Cols) -->
-      <div class="lg:col-span-4 space-y-6">
+      <div id="leaderboard-container" class="hidden lg:block lg:col-span-4 space-y-6">
         <!-- Live Leaderboard -->
         <div class="panel-card rounded-xl p-5">
           <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
@@ -82,7 +92,7 @@
       </div>
 
       <!-- Right Panel: Viewport & Details (8 Cols) -->
-      <div class="lg:col-span-8 space-y-6">
+      <div id="viewer-container" class="block lg:col-span-8 space-y-6">
         <!-- Active presentation card details -->
         <div class="panel-card rounded-xl p-6">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -93,7 +103,7 @@
             </div>
             
             <div class="flex items-center gap-3">
-              <div class="flex flex-col text-left">
+              <div class="flex flex-col text-right">
                 <label for="voter-name" class="text-[9px] text-zinc-500 font-mono uppercase font-bold mb-1">Voter Name</label>
                 <select id="voter-name" class="bg-zinc-950 border border-zinc-800 text-white text-xs rounded p-2 focus:outline-none font-bold">
                   <option value="Devansh">Devansh</option>
@@ -108,6 +118,11 @@
             </div>
           </div>
           <div id="active-votes-count-label" class="text-zinc-500 text-[10px] font-mono mt-1 mb-4">Voted by: No one yet</div>
+
+          <!-- Mobile helper note -->
+          <div class="block lg:hidden bg-zinc-950 border border-zinc-850 p-3 rounded mb-6 text-[10px] text-zinc-400 leading-relaxed">
+            💡 <strong>Mobile Notice:</strong> If your mobile device cannot render inline PDF previews, click the <strong>Download PDF</strong> link below or the <strong>Open Google Drive Folder</strong> button at the top to read.
+          </div>
 
           <div class="flex flex-wrap items-center gap-3 mb-6 bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs">
             <span class="text-zinc-500">Downloads:</span>
@@ -292,6 +307,11 @@
       frame.src = active.pdf;
 
       updateUI();
+
+      // Auto-switch to slides view on mobile screen widths
+      if (window.innerWidth < 1024) {
+        switchMobileTab('viewer');
+      }
     }
 
     function castVote() {
@@ -324,6 +344,31 @@
         });
         saveVotes(clearedVotes);
         updateUI();
+      }
+    }
+
+    function switchMobileTab(tab) {
+      const viewerContainer = document.getElementById('viewer-container');
+      const leaderboardContainer = document.getElementById('leaderboard-container');
+      const viewerBtn = document.getElementById('tab-viewer-btn');
+      const leaderboardBtn = document.getElementById('tab-leaderboard-btn');
+      
+      if (tab === 'viewer') {
+        viewerContainer.classList.remove('hidden');
+        viewerContainer.classList.add('block');
+        leaderboardContainer.classList.remove('block');
+        leaderboardContainer.classList.add('hidden');
+        
+        viewerBtn.className = "flex-1 text-center py-2 text-xs font-bold rounded-md bg-zinc-800 text-white transition";
+        leaderboardBtn.className = "flex-1 text-center py-2 text-xs font-bold rounded-md text-zinc-400 hover:text-white transition";
+      } else {
+        viewerContainer.classList.remove('block');
+        viewerContainer.classList.add('hidden');
+        leaderboardContainer.classList.remove('hidden');
+        leaderboardContainer.classList.add('block');
+        
+        viewerBtn.className = "flex-1 text-center py-2 text-xs font-bold rounded-md text-zinc-400 hover:text-white transition";
+        leaderboardBtn.className = "flex-1 text-center py-2 text-xs font-bold rounded-md bg-zinc-800 text-white transition";
       }
     }
 
