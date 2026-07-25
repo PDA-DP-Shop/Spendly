@@ -305,10 +305,10 @@ classDiagram
         +parseSMS(text)
     }
 
-    DatabaseService <--> StockSyncService
-    PeerService <--> StockSyncService
-    PeerService <--> DataSharingService
-    DatabaseService <--> DataSharingService
+    DatabaseService -- StockSyncService
+    PeerService -- StockSyncService
+    PeerService -- DataSharingService
+    DatabaseService -- DataSharingService
     BiometricAuth --> DatabaseService
     SMSParser --> DatabaseService
           </pre>
@@ -611,8 +611,8 @@ graph TD
     D3 -->|Fuzzy match stock lists| P3
 
     P4 -->|Exchange pairing handshakes| Worker
-    P2 <-->|STOCK_REDUCE / PRODUCT_REQUEST| P4
-    P3 <-->|STOCK_UPDATE / OFFER_VALIDATE| P4
+    P2 ---|STOCK_REDUCE / PRODUCT_REQUEST| P4
+    P3 ---|STOCK_UPDATE / OFFER_VALIDATE| P4
     P4 -->|Push anonymous trends| P3
           </pre>
         </div>
@@ -713,6 +713,7 @@ graph TD
             Dexie2[("IndexedDB: POS Storage")]
             WebAuthn2["WebAuthn Vault Locker"]
             AirShare["Air Share (Local P2P WebRTC)"]
+            NFC["Web NFC (Mobile Beam)"]
         end
 
         subgraph Spendly Radar Client
@@ -728,29 +729,29 @@ graph TD
         CFKV[("Cloudflare KV Backup Store")]
     end
 
-    UI1 <--> Dexie1
-    Service1 <--> Dexie1
+    UI1 --- Dexie1
+    Service1 --- Dexie1
     WebAuthn1 --> UI1
     
-    UI2 <--> Dexie2
-    Service2 <--> Dexie2
+    UI2 --- Dexie2
+    Service2 --- Dexie2
     WebAuthn2 --> UI2
-    UI2 <--> NFC
+    UI2 --- NFC
 
-    UI3 <--> Dexie3
-    Service3 <--> Dexie3
+    UI3 --- Dexie3
+    Service3 --- Dexie3
 
-    Dexie1 <-->|P2P WebRTC / Local Bridge| Dexie2
-    Dexie2 <-->|P2P WebRTC / Local Bridge| Dexie3
-    Dexie1 <-->|P2P WebRTC| Dexie3
+    Dexie1 ---|P2P WebRTC / Local Bridge| Dexie2
+    Dexie2 ---|P2P WebRTC / Local Bridge| Dexie3
+    Dexie1 ---|P2P WebRTC| Dexie3
 
-    Dexie1 <-->|SDP signaling exchange| NtfyWS
-    Dexie2 <-->|SDP signaling exchange| NtfyWS
-    Dexie3 <-->|SDP signaling exchange| NtfyWS
+    Dexie1 ---|SDP signaling exchange| NtfyWS
+    Dexie2 ---|SDP signaling exchange| NtfyWS
+    Dexie3 ---|SDP signaling exchange| NtfyWS
 
-    Dexie2 <-->|Lightweight pairing keys| CFWorker
-    Dexie3 <-->|Lightweight pairing keys| CFWorker
-    CFWorker <--> CFKV
+    Dexie2 ---|Lightweight pairing keys| CFWorker
+    Dexie3 ---|Lightweight pairing keys| CFWorker
+    CFWorker --- CFKV
     Dexie3 -->|Encrypted backup push| CFWorker
           </pre>
         </div>
