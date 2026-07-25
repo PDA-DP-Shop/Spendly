@@ -805,24 +805,37 @@ graph TD
 
     // 💾 PNG EXPORTER (3x Scale for ultra-crisp resolution)
     function downloadPNG(containerId, fileName) {
-    const container = document.getElementById(containerId);
-    const svg = container.querySelector("svg");
+      const container = document.getElementById(containerId);
+      const svg = container.querySelector("svg");
 
-    if (!svg) {
-        alert("Diagram is still rendering.");
+      if (!svg) {
+        alert("Wait a second, diagram is still rendering! Try again in a moment.");
         return;
-    }
+      }
 
-    const serializer = new XMLSerializer();
-    const source = serializer.serializeToString(svg);
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      
+      // Strip any cross-origin font/css @import url(...) statements to prevent canvas tainting (security error)
+      source = source.replace(/@import\s+url\([^)]+\);?/gi, '');
 
-    const img = new Image();
+      const img = new Image();
 
-    img.onload = function () {
+      img.onload = function () {
         const canvas = document.createElement("canvas");
 
-        const width = svg.viewBox.baseVal.width || svg.clientWidth;
-        const height = svg.viewBox.baseVal.height || svg.clientHeight;
+        let width = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal.width : 0;
+        let height = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal.height : 0;
+
+        if (!width || !height) {
+          width = svg.clientWidth || svg.getBoundingClientRect().width;
+          height = svg.clientHeight || svg.getBoundingClientRect().height;
+        }
+
+        if (!width || !height) {
+          width = 960;
+          height = 600;
+        }
 
         const scale = 3;
 
@@ -837,20 +850,25 @@ graph TD
         ctx.scale(scale, scale);
         ctx.drawImage(img, 0, 0, width, height);
 
-        const link = document.createElement("a");
-        link.download = fileName + ".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    };
+        try {
+          const link = document.createElement("a");
+          link.download = fileName + ".png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          console.error("Canvas export security taint error:", err);
+          alert("Your browser blocks direct PNG downloads due to SVG security policies. Please use the 'Download SVG' button right next to it, which works perfectly!");
+        }
+      };
 
-    img.onerror = function () {
-        alert("PNG export failed.");
-    };
+      img.onerror = function () {
+        alert("PNG export failed. Please use the 'Download SVG' button instead.");
+      };
 
-    img.src =
+      img.src =
         "data:image/svg+xml;charset=utf-8," +
         encodeURIComponent(source);
-}
+    }
   </script>
 </body>
 </html>
