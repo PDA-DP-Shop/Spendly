@@ -708,10 +708,10 @@ graph TD
         end
 
         subgraph Spendly Shop Client
-            UI2["POS Billing UI (30s invoice)"]
+            UI2["POS Billing UI - 30 Second Invoice"]
             Service2["Service Worker (Cache-first offline)"]
             Dexie2[("IndexedDB: POS Storage")]
-            WebAuthn2["WebAuthn Vault Locker"]
+            WebAuthn2["WebAuthn Secure Vault"]
             AirShare["Air Share (Local P2P WebRTC)"]
             NFC["Web NFC (Mobile Beam)"]
         end
@@ -725,7 +725,7 @@ graph TD
 
     subgraph Public Infrastructure Layer
         NtfyWS["ntfy.sh WebSocket broker"]
-        CFWorker["Cloudflare Worker (Verification API)"]
+        CFWorker["Cloudflare Worker - Verification API"]
         CFKV[("Cloudflare KV Backup Store")]
     end
 
@@ -741,9 +741,9 @@ graph TD
     UI3 --- Dexie3
     Service3 --- Dexie3
 
-    Dexie1 ---|P2P WebRTC / Local Bridge| Dexie2
-    Dexie2 ---|P2P WebRTC / Local Bridge| Dexie3
-    Dexie1 ---|P2P WebRTC| Dexie3
+    Dexie1 -->|P2P WebRTC / Local Bridge| Dexie2
+    Dexie2 -->|P2P WebRTC / Local Bridge| Dexie3
+    Dexie1 -->|P2P WebRTC| Dexie3
 
     Dexie1 ---|SDP signaling exchange| NtfyWS
     Dexie2 ---|SDP signaling exchange| NtfyWS
