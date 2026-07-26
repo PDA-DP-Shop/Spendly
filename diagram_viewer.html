@@ -699,15 +699,15 @@ graph TD
         <div id="container-arch" class="min-w-[950px] w-full flex justify-center py-2">
           <pre class="mermaid">
 graph TD
-    subgraph Client Device Layer
-        subgraph Spendly Client (Personal Wallet)
+    subgraph "Client Device Layer"
+        subgraph "Spendly Client - Personal Wallet"
             UI1["User Interface (Monochrome Flat)"]
             Service1["Service Worker (Cache-first offline)"]
             Dexie1[("IndexedDB: Local Storage")]
             WebAuthn1["WebAuthn Lock Enclave"]
         end
 
-        subgraph Spendly Shop Client
+        subgraph "Spendly Shop Client"
             UI2["POS Billing UI - 30 Second Invoice"]
             Service2["Service Worker (Cache-first offline)"]
             Dexie2[("IndexedDB: POS Storage")]
@@ -716,14 +716,14 @@ graph TD
             NFC["Web NFC (Mobile Beam)"]
         end
 
-        subgraph Spendly Radar Client
+        subgraph "Spendly Radar Client"
             UI3["Radar Hub Dashboard"]
             Service3["Service Worker (Cache-first offline)"]
             Dexie3[("IndexedDB: Stock & Offers")]
         end
     end
 
-    subgraph Public Infrastructure Layer
+    subgraph "Public Infrastructure Layer"
         NtfyWS["ntfy.sh WebSocket broker"]
         CFWorker["Cloudflare Worker - Verification API"]
         CFKV[("Cloudflare KV Backup Store")]
